@@ -1,0 +1,35 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="MekalingusServer"
+run/main_scene="uid://bhgt3rn4bd6v0"
+config/features=PackedStringArray("4.4", "Forward Plus")
+config/icon="uid://chs7bwm5g4t03"
+
+[autoload]
+
+GameServer="*res://scripts/core/game_server.gd"
+RPCHandler="*res://scripts/core/rpc_handler.gd"
+TemplateManager="*res://scripts/templates/template_manager.gd"
+DataManager="*res://scripts/data/data_manager.gd"
+UIColor="*res://scripts/utils/ui_color.gd"
+LoadoutGenerator="*res://scripts/data/map/loadout_generator.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=1024
+window/size/mode=2
+
+[gui]
+
+theme/custom="uid://damg00jgxkpv0"

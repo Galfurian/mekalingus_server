@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://cid4owatwb65x"]
+
+[ext_resource type="Script" uid="uid://f2pdhv3l0v0p" path="res://scripts/scenes/gameplay/grid_container.gd" id="2_05c1y"]
+[ext_resource type="Script" uid="uid://c7nrdyng82yw6" path="res://scripts/scenes/gameplay/scroll_view.gd" id="2_74cwi"]
+[ext_resource type="Script" uid="uid://uohgpyd6papp" path="res://scripts/scenes/gameplay/grid_drawer.gd" id="4_168ta"]
+[ext_resource type="Script" uid="uid://i02h4m7ulf5k" path="res://scripts/scenes/gameplay/mek_drawer.gd" id="5_74cwi"]
+
+[node name="GridMap" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScrollView" type="ScrollContainer" parent="."]
+layout_mode = 2
+script = ExtResource("2_74cwi")
+
+[node name="GridContainer" type="Control" parent="ScrollView"]
+layout_mode = 2
+script = ExtResource("2_05c1y")
+
+[node name="GridDrawer" type="Node2D" parent="ScrollView/GridContainer"]
+script = ExtResource("4_168ta")
+
+[node name="MekDrawer" type="Node2D" parent="ScrollView/GridContainer"]
+script = ExtResource("5_74cwi")

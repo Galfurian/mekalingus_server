@@ -1,0 +1,97 @@
+{
+    "cmek001": {
+        "name": "Atlas Dominator",
+        "description": "A towering war machine, designed to withstand entire armies and unleash devastating long-range bombardments.",
+        "size": "Colossal",
+        "health": 500,
+        "armor": 300,
+        "shield": 150,
+        "shield_generation": 10,
+        "power": 624,
+        "power_generation": 120,
+        "speed": 1,
+        "slots": [
+            0,
+            2,
+            5,
+            3
+        ],
+        "icon": "meks/mek031"
+    },
+    "cmek002": {
+        "name": "Leviathan Warlord",
+        "description": "A battlefield colossus, armed with experimental energy weapons and a fortress-grade armor chassis.",
+        "size": "Colossal",
+        "health": 550,
+        "armor": 350,
+        "shield": 180,
+        "shield_generation": 12,
+        "power": 624,
+        "power_generation": 120,
+        "speed": 1,
+        "slots": [
+            0,
+            3,
+            4,
+            4
+        ],
+        "icon": "meks/mek032"
+    },
+    "cmek003": {
+        "name": "Titanus Annihilator",
+        "description": "A slow-moving harbinger of destruction, wielding unstoppable firepower and impervious shielding.",
+        "size": "Colossal",
+        "health": 600,
+        "armor": 380,
+        "shield": 200,
+        "shield_generation": 15,
+        "power": 666,
+        "power_generation": 128,
+        "speed": 1,
+        "slots": [
+            0,
+            2,
+            5,
+            4
+        ],
+        "icon": "meks/mek033"
+    },
+    "cmek004": {
+        "name": "Oblivion Sentinel",
+        "description": "A legendary defensive platform, built to control entire battlefields with overwhelming resilience.",
+        "size": "Colossal",
+        "health": 700,
+        "armor": 400,
+        "shield": 170,
+        "shield_generation": 11,
+        "power": 582,
+        "power_generation": 112,
+        "speed": 1,
+        "slots": [
+            0,
+            3,
+            4,
+            3
+        ],
+        "icon": "meks/mek034"
+    },
+    "cmek005": {
+        "name": "Doom Bringer",
+        "description": "A slow-moving titan of war, designed to break enemy lines with unrelenting force and unmatched endurance.",
+        "size": "Colossal",
+        "health": 650,
+        "armor": 420,
+        "shield": 190,
+        "shield_generation": 14,
+        "power": 707,
+        "power_generation": 136,
+        "speed": 1,
+        "slots": [
+            0,
+            2,
+            6,
+            3
+        ],
+        "icon": "meks/mek035"
+    }
+}

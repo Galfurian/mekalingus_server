@@ -1,0 +1,192 @@
+{
+    "mmek001": {
+        "name": "Storm Striker",
+        "description": "A well-balanced assault unit, combining agility with reliable defenses, perfect for leading rapid engagements.",
+        "size": "Medium",
+        "health": 120,
+        "armor": 40,
+        "shield": 60,
+        "shield_generation": 6,
+        "power": 187,
+        "power_generation": 36,
+        "speed": 6,
+        "slots": [
+            3,
+            1,
+            0,
+            2
+        ],
+        "icon": "meks/mek012"
+    },
+    "mmek002": {
+        "name": "Titan Vanguard",
+        "description": "A heavily armored frontline warrior, built to soak up enemy fire while delivering devastating counterattacks.",
+        "size": "Medium",
+        "health": 150,
+        "armor": 80,
+        "shield": 80,
+        "shield_generation": 4,
+        "power": 208,
+        "power_generation": 40,
+        "speed": 4,
+        "slots": [
+            2,
+            2,
+            0,
+            2
+        ],
+        "icon": "meks/mek012"
+    },
+    "mmek003": {
+        "name": "Iron Reaver",
+        "description": "A relentless brawler equipped with reinforced plating and heavy-hitting firepower.",
+        "size": "Medium",
+        "health": 160,
+        "armor": 90,
+        "shield": 50,
+        "shield_generation": 5,
+        "power": 291,
+        "power_generation": 56,
+        "speed": 5,
+        "slots": [
+            2,
+            2,
+            1,
+            2
+        ],
+        "icon": "meks/mek013"
+    },
+    "mmek004": {
+        "name": "Phantom Breaker",
+        "description": "A tactical disruptor, using energy-based attacks to weaken enemy defenses before striking hard.",
+        "size": "Medium",
+        "health": 140,
+        "armor": 60,
+        "shield": 80,
+        "shield_generation": 6,
+        "power": 229,
+        "power_generation": 44,
+        "speed": 6,
+        "slots": [
+            3,
+            1,
+            1,
+            1
+        ],
+        "icon": "meks/mek014"
+    },
+    "mmek005": {
+        "name": "Thunder Sentinel",
+        "description": "A steadfast defender designed for prolonged engagements, featuring adaptive shielding and high endurance.",
+        "size": "Medium",
+        "health": 170,
+        "armor": 75,
+        "shield": 70,
+        "shield_generation": 7,
+        "power": 208,
+        "power_generation": 40,
+        "speed": 4,
+        "slots": [
+            2,
+            2,
+            0,
+            2
+        ],
+        "icon": "meks/mek015"
+    },
+    "mmek006": {
+        "name": "Ember Warden",
+        "description": "A siege specialist armed with incendiary weaponry, ideal for sustained area denial.",
+        "size": "Medium",
+        "health": 130,
+        "armor": 50,
+        "shield": 90,
+        "shield_generation": 6,
+        "power": 187,
+        "power_generation": 36,
+        "speed": 5,
+        "slots": [
+            3,
+            1,
+            0,
+            2
+        ],
+        "icon": "meks/mek016"
+    },
+    "mmek007": {
+        "name": "Shadow Bastion",
+        "description": "A versatile combat platform capable of adapting to multiple roles with advanced energy defenses.",
+        "size": "Medium",
+        "health": 150,
+        "armor": 70,
+        "shield": 85,
+        "shield_generation": 5,
+        "power": 229,
+        "power_generation": 44,
+        "speed": 6,
+        "slots": [
+            3,
+            1,
+            1,
+            1
+        ],
+        "icon": "meks/mek017"
+    },
+    "mmek008": {
+        "name": "Cyclone Hunter",
+        "description": "A high-speed interceptor that excels at chasing down vulnerable targets and evading counterattacks.",
+        "size": "Medium",
+        "health": 120,
+        "armor": 40,
+        "shield": 70,
+        "shield_generation": 8,
+        "power": 250,
+        "power_generation": 48,
+        "speed": 7,
+        "slots": [
+            4,
+            0,
+            1,
+            2
+        ],
+        "icon": "meks/mek018"
+    },
+    "mmek009": {
+        "name": "Avalanche Titan",
+        "description": "A mid-weight powerhouse capable of weathering storms of firepower and striking back with force.",
+        "size": "Medium",
+        "health": 180,
+        "armor": 100,
+        "shield": 50,
+        "shield_generation": 4,
+        "power": 250,
+        "power_generation": 48,
+        "speed": 4,
+        "slots": [
+            2,
+            3,
+            0,
+            2
+        ],
+        "icon": "meks/mek019"
+    },
+    "mmek010": {
+        "name": "Nova Lancer",
+        "description": "A cutting-edge energy-based Mek with powerful shield regeneration and precision-strike weaponry.",
+        "size": "Medium",
+        "health": 140,
+        "armor": 50,
+        "shield": 100,
+        "shield_generation": 9,
+        "power": 187,
+        "power_generation": 36,
+        "speed": 5,
+        "slots": [
+            3,
+            2,
+            0,
+            1
+        ],
+        "icon": "meks/mek020"
+    }
+}

@@ -1,0 +1,50 @@
+[gd_scene load_steps=2 format=3 uid="uid://cosbr482fkmyp"]
+
+[ext_resource type="Script" uid="uid://cee5sft6hja7g" path="res://scripts/scenes/gameplay/info_panel.gd" id="1_x2cik"]
+
+[node name="InfoPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_x2cik")
+
+[node name="EntityInspector" type="VSplitContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="EntityInspector"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="EntityInfo" type="RichTextLabel" parent="EntityInspector/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ItemInspector" type="VSplitContainer" parent="EntityInspector"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemList" type="ItemList" parent="EntityInspector/ItemInspector"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="EntityInspector/ItemInspector"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemInfo" type="RichTextLabel" parent="EntityInspector/ItemInspector/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3

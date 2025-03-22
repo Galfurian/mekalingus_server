@@ -1,0 +1,580 @@
+{
+	"swpn001": {
+		"name": "Railgun",
+		"description": "A high-velocity kinetic weapon that penetrates armor with pinpoint accuracy.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Rail Shot",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 4,
+				"cooldown": 0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 50
+					}
+				]
+			}
+		]
+	},
+	"swpn002": {
+		"name": "Plasma Blaster",
+		"description": "Fires a concentrated plasma shot that burns through shields and causes lingering damage.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Plasma Shot",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 2,
+				"cooldown": 0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "PLASMA",
+						"amount": 35
+					},
+					{
+						"type": "DAMAGE_OVER_TIME",
+						"target": "ENEMY",
+						"damage_type": "PLASMA",
+						"amount": 5,
+						"duration": 3
+					}
+				]
+			}
+		]
+	},
+	"swpn003": {
+		"name": "Thermal Lance",
+		"description": "A focused plasma beam that melts through enemy armor.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Thermal Beam",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 3,
+				"cooldown": 0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 40
+					}
+				]
+			}
+		]
+	},
+	"swpn004": {
+		"name": "Needle Gun",
+		"description": "A rapid-fire kinetic weapon designed to pierce armor with high-speed projectiles.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Needle Burst",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 3,
+				"cooldown": 0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 30
+					}
+				]
+			}
+		]
+	},
+	"swpn005": {
+		"name": "Arc Blaster",
+		"description": "A compact energy weapon that fires controlled arcs of electricity, effective against shields.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Arc Shot",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 2,
+				"cooldown": 0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 35
+					},
+					{
+						"type": "DAMAGE_OVER_TIME",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 5,
+						"duration": 2
+					}
+				]
+			}
+		]
+	},
+	"swpn006": {
+		"name": "Micro-Missile Pod",
+		"description": "A small missile launcher that deals moderate explosive damage in a small area.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Micro Missile",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 4,
+				"cooldown": 1,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "EXPLOSIVE",
+						"amount": 40
+					},
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "EXPLOSIVE",
+						"amount": 20,
+						"radius": 1
+					}
+				]
+			}
+		]
+	},
+	"swpn007": {
+		"name": "Acid Sprayer",
+		"description": "A short-range weapon that coats enemies in corrosive acid, weakening armor over time.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Corrosive Spray",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 1,
+				"cooldown": 0,
+				"effects": [
+					{
+						"type": "DAMAGE_OVER_TIME",
+						"target": "ENEMY",
+						"damage_type": "CORROSIVE",
+						"amount": 8,
+						"duration": 3
+					},
+					{
+						"type": "ARMOR_MODIFIER",
+						"target": "ENEMY",
+						"amount": -10,
+						"duration": 3
+					}
+				]
+			}
+		]
+	},
+	"swpn008": {
+		"name": "Shock Dagger",
+		"description": "A close-quarters melee weapon that discharges an electric shock on impact.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Electro Slash",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 1,
+				"cooldown": 0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 30
+					},
+					{
+						"type": "DAMAGE_OVER_TIME",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 5,
+						"duration": 2
+					}
+				]
+			}
+		]
+	},
+	"swpn009": {
+		"name": "Inferno Spitter",
+		"description": "A flamethrower-style weapon that engulfs enemies in fire, dealing sustained plasma damage.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Flame Burst",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 2,
+				"cooldown": 1,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "PLASMA",
+						"amount": 25
+					},
+					{
+						"type": "DAMAGE_OVER_TIME",
+						"target": "ENEMY",
+						"damage_type": "PLASMA",
+						"amount": 10,
+						"duration": 3
+					}
+				]
+			}
+		]
+	},
+	"swpn010": {
+		"name": "Venom Launcher",
+		"description": "A toxin-based projectile weapon that deals lingering corrosive damage.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Venom Bolt",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 3,
+				"cooldown": 0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "CORROSIVE",
+						"amount": 20
+					},
+					{
+						"type": "DAMAGE_OVER_TIME",
+						"target": "ENEMY",
+						"damage_type": "CORROSIVE",
+						"amount": 7,
+						"duration": 4
+					}
+				]
+			}
+		]
+	},
+	"swpn011": {
+		"name": "Shrapnel Launcher",
+		"description": "A rapid-fire launcher that scatters explosive shrapnel across a wide area.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Shrapnel Burst",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 3,
+				"cooldown": 1,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 15
+					},
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "EXPLOSIVE",
+						"amount": 25,
+						"radius": 2
+					}
+				]
+			}
+		]
+	},
+	"swpn012": {
+		"name": "Cluster Grenade",
+		"description": "A small grenade launcher that scatters multiple mini-grenades, causing chain explosions.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Cluster Detonation",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 3,
+				"cooldown": 1,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 15,
+						"radius": 1
+					},
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "EXPLOSIVE",
+						"amount": 30,
+						"radius": 2
+					}
+				]
+			}
+		]
+	},
+	"swpn013": {
+		"name": "Concussion Missile",
+		"description": "A specialized missile that detonates mid-air, causing shockwaves that disorient enemies.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Shockwave Impact",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 4,
+				"cooldown": 1,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "EXPLOSIVE",
+						"amount": 35
+					},
+					{
+						"type": "SPEED_MODIFIER",
+						"target": "ENEMY",
+						"amount": -2,
+						"duration": 2
+					}
+				]
+			}
+		]
+	},
+	"swpn014": {
+		"name": "Inferno Mortar",
+		"description": "Launches incendiary explosives that create lingering fire zones.",
+		"slot": "small",
+		"base_power_usage": 2,
+		"modules": [
+			{
+				"name": "Flame Barrage",
+				"type": "active",
+				"power_on_use": 8,
+				"module_range": 3,
+				"cooldown": 2,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "PLASMA",
+						"amount": 25,
+						"radius": 2
+					},
+					{
+						"type": "DAMAGE_OVER_TIME",
+						"target": "AREA",
+						"damage_type": "PLASMA",
+						"amount": 10,
+						"duration": 3,
+						"radius": 2
+					}
+				]
+			}
+		]
+	},
+	"swpn015": {
+		"name": "Shockwave Charges",
+		"description": "Deploys timed charges that explode after a delay, creating a powerful shockwave.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Delayed Detonation",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 2,
+				"cooldown": 1,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "EXPLOSIVE",
+						"amount": 40,
+						"radius": 1
+					},
+					{
+						"type": "DAMAGE_REDUCTION_ALL",
+						"target": "ENEMY",
+						"amount": -10,
+						"duration": 2
+					}
+				]
+			}
+		]
+	},
+	"swpn016": {
+		"name": "Magnetic Gauntlet",
+		"description": "A high-impact melee gauntlet that delivers a kinetic shockwave, briefly slowing enemies.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Magnet Strike",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 1,
+				"cooldown": 0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 40
+					},
+					{
+						"type": "SPEED_MODIFIER",
+						"target": "ENEMY",
+						"amount": -2,
+						"duration": 2
+					}
+				]
+			}
+		]
+	},
+	"swpn017": {
+		"name": "Ricochet Gun",
+		"description": "A specialized pistol that fires kinetic rounds designed to ricochet off surfaces, striking multiple targets.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Rebound Shot",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 3,
+				"cooldown": 0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 30
+					},
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "KINETIC",
+						"amount": 15,
+						"radius": 1
+					}
+				]
+			}
+		]
+	},
+	"swpn018": {
+		"name": "Vortex Grenade",
+		"description": "A gravity-based explosive that destabilizes enemy armor before delivering a powerful blast.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Singularity Detonation",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 3,
+				"cooldown": 1,
+				"effects": [
+					{
+						"type": "DAMAGE_REDUCTION_ALL",
+						"target": "ENEMY",
+						"amount": -10,
+						"duration": 2
+					},
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "EXPLOSIVE",
+						"amount": 40,
+						"radius": 2
+					}
+				]
+			}
+		]
+	},
+	"swpn019": {
+		"name": "Sonic Blaster",
+		"description": "A directional energy wave emitter that slows enemies while damaging shields.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Sonic Pulse",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 2,
+				"cooldown": 0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 30
+					},
+					{
+						"type": "SPEED_MODIFIER",
+						"target": "ENEMY",
+						"amount": -3,
+						"duration": 2
+					}
+				]
+			}
+		]
+	},
+	"swpn020": {
+		"name": "EMP Dart Gun",
+		"description": "A silent, high-precision dart launcher that disables enemy power regeneration for a short duration.",
+		"slot": "small",
+		"base_power_usage": 1,
+		"modules": [
+			{
+				"name": "Disruptive Shot",
+				"type": "active",
+				"power_on_use": 4,
+				"module_range": 3,
+				"cooldown": 0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 20
+					},
+					{
+						"type": "POWER_REGEN",
+						"target": "ENEMY",
+						"amount": -10,
+						"duration": 3
+					}
+				]
+			}
+		]
+	}
+}

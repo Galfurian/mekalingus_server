@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=3 uid="uid://dyh3xjp4f2j5c"]
+
+[ext_resource type="Script" uid="uid://cio5gwfi51oxh" path="res://scripts/scenes/ui/server_panel.gd" id="1_ulw3n"]
+
+[node name="ServerPanel" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ulw3n")
+
+[node name="ServerLog" type="ScrollContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+metadata/_tab_index = 0
+
+[node name="ServerLogContent" type="RichTextLabel" parent="ServerLog"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 2
+scroll_following = true
+selection_enabled = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="ServerStatus" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Server Status"
+
+[node name="ServerStartStop" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.1
+text = "Start"
+
+[node name="ServerQuit" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.1
+text = "Quit
+"

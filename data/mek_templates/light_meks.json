@@ -1,0 +1,192 @@
+{
+    "lmek001": {
+        "name": "Iron Striker",
+        "description": "A durable frontline skirmisher, designed to withstand heavy fire while delivering precise counterattacks.",
+        "size": "Light",
+        "health": 100,
+        "armor": 60,
+        "shield": 20,
+        "shield_generation": 5,
+        "power": 166,
+        "power_generation": 32,
+        "speed": 6,
+        "slots": [
+            2,
+            1,
+            0,
+            2
+        ],
+        "icon": "meks/mek001"
+    },
+    "lmek002": {
+        "name": "Shadow Phantom",
+        "description": "A nimble infiltrator, utilizing high mobility and evasive tactics to strike from the shadows and disappear.",
+        "size": "Light",
+        "health": 80,
+        "armor": 20,
+        "shield": 20,
+        "shield_generation": 8,
+        "power": 146,
+        "power_generation": 28,
+        "speed": 6,
+        "slots": [
+            3,
+            0,
+            0,
+            2
+        ],
+        "icon": "meks/mek002"
+    },
+    "lmek003": {
+        "name": "Specter Shadow",
+        "description": "A stealth-oriented combat unit with enhanced shielding, excelling in rapid ambushes and energy-based assaults.",
+        "size": "Light",
+        "health": 80,
+        "armor": 40,
+        "shield": 80,
+        "shield_generation": 10,
+        "power": 166,
+        "power_generation": 32,
+        "speed": 8,
+        "slots": [
+            4,
+            0,
+            0,
+            2
+        ],
+        "icon": "meks/mek003"
+    },
+    "lmek004": {
+        "name": "Storm Dancer",
+        "description": "A lightning-fast skirmisher designed for hit-and-run tactics.",
+        "size": "Light",
+        "health": 90,
+        "armor": 30,
+        "shield": 50,
+        "shield_generation": 7,
+        "power": 187,
+        "power_generation": 36,
+        "speed": 7,
+        "slots": [
+            3,
+            1,
+            0,
+            2
+        ],
+        "icon": "meks/mek004"
+    },
+    "lmek005": {
+        "name": "Blitz Warden",
+        "description": "A rapid assault unit with reinforced kinetic shielding for fast engagements.",
+        "size": "Light",
+        "health": 85,
+        "armor": 20,
+        "shield": 70,
+        "shield_generation": 9,
+        "power": 187,
+        "power_generation": 36,
+        "speed": 6,
+        "slots": [
+            3,
+            1,
+            0,
+            2
+        ],
+        "icon": "meks/mek005"
+    },
+    "lmek006": {
+        "name": "Striker Talon",
+        "description": "A high-mobility scout mech equipped with precision strike capabilities.",
+        "size": "Light",
+        "health": 95,
+        "armor": 25,
+        "shield": 40,
+        "shield_generation": 6,
+        "power": 208,
+        "power_generation": 40,
+        "speed": 7,
+        "slots": [
+            2,
+            2,
+            0,
+            2
+        ],
+        "icon": "meks/mek006"
+    },
+    "lmek007": {
+        "name": "Falcon Edge",
+        "description": "A lightweight recon unit with superior speed and evasion capabilities.",
+        "size": "Light",
+        "health": 75,
+        "armor": 20,
+        "shield": 30,
+        "shield_generation": 8,
+        "power": 146,
+        "power_generation": 28,
+        "speed": 9,
+        "slots": [
+            3,
+            0,
+            0,
+            2
+        ],
+        "icon": "meks/mek007"
+    },
+    "lmek008": {
+        "name": "Viper Stride",
+        "description": "An aggressive interceptor equipped with reactive plating and short-range weaponry.",
+        "size": "Light",
+        "health": 100,
+        "armor": 35,
+        "shield": 40,
+        "shield_generation": 5,
+        "power": 187,
+        "power_generation": 36,
+        "speed": 6,
+        "slots": [
+            3,
+            1,
+            0,
+            2
+        ],
+        "icon": "meks/mek008"
+    },
+    "lmek009": {
+        "name": "Ghost Mirage",
+        "description": "A stealthy hunter capable of slipping past enemy defenses unnoticed.",
+        "size": "Light",
+        "health": 85,
+        "armor": 25,
+        "shield": 60,
+        "shield_generation": 10,
+        "power": 166,
+        "power_generation": 32,
+        "speed": 8,
+        "slots": [
+            4,
+            0,
+            0,
+            2
+        ],
+        "icon": "meks/mek009"
+    },
+    "lmek010": {
+        "name": "Raptor Fang",
+        "description": "A fast-moving combat unit specialized in precision flanking maneuvers.",
+        "size": "Light",
+        "health": 90,
+        "armor": 30,
+        "shield": 50,
+        "shield_generation": 7,
+        "power": 166,
+        "power_generation": 32,
+        "speed": 7,
+        "slots": [
+            2,
+            1,
+            0,
+            2
+        ],
+        "icon": "meks/mek010"
+    }
+}

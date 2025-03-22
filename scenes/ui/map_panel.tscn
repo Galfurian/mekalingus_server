@@ -1,0 +1,85 @@
+[gd_scene load_steps=3 format=3 uid="uid://dkiovd48dvjqd"]
+
+[ext_resource type="Script" uid="uid://cdq2vi0mayy4s" path="res://scripts/scenes/ui/map_panel.gd" id="1_54ar7"]
+[ext_resource type="PackedScene" uid="uid://bic16d6uw0g6y" path="res://scenes/gameplay/map_hud.tscn" id="2_5xqg1"]
+
+[node name="MapPanel" type="HSplitContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_54ar7")
+
+[node name="MapSelector" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.2
+
+[node name="Label2" type="Label" parent="MapSelector"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Map Manager"
+horizontal_alignment = 1
+
+[node name="AdvanceTurn" type="Button" parent="MapSelector"]
+layout_mode = 2
+text = "Advance Turn"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="MapSelector"]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="MapSelector"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MapSelector"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Map Generator"
+horizontal_alignment = 1
+
+[node name="HBoxContainer1" type="HBoxContainer" parent="MapSelector"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MapSelector/HBoxContainer1"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Size"
+
+[node name="MapSize" type="SpinBox" parent="MapSelector/HBoxContainer1"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 10.0
+max_value = 300.0
+step = 10.0
+value = 50.0
+rounded = true
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MapSelector"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MapSelector/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Difficulty"
+
+[node name="Difficulty" type="OptionButton" parent="MapSelector/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Generate" type="Button" parent="MapSelector"]
+layout_mode = 2
+text = "Generate"
+
+[node name="Delete" type="Button" parent="MapSelector"]
+layout_mode = 2
+text = "Delete"
+
+[node name="MapList" type="ItemList" parent="MapSelector"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MapHud" parent="." instance=ExtResource("2_5xqg1")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3

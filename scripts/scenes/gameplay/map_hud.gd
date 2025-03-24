@@ -159,6 +159,13 @@ func _on_cell_selected(cell_position: Vector2i):
 		center_on(entity.position)
 		info_panel.set_entity(entity)
 		grid_drawer.set_selected_entity(entity)
+	game_map.add_log(Enums.LogType.SYSTEM,
+		"Cell(position: %s, %s, walkable: %s)" % [
+			str(cell_position),
+			str(game_map.map_biome.get_level(game_map.get_tile_id(cell_position))),
+			str(game_map.is_walkable(cell_position))
+		]
+	)
 
 
 func _input(_event):

@@ -27,7 +27,7 @@ func set_selected_entity(entity: MapEntity):
 	"""Adds a highlighted cell at the given position."""
 	selected_entity = entity
 	queue_redraw()
-	
+
 func deselect_entity():
 	if selected_entity:
 		selected_entity = null
@@ -73,7 +73,6 @@ func _draw():
 			var tile_pos  = Vector2(x * grid_size, y * grid_size) + offset
 			var tile_size = Vector2(grid_size, grid_size)
 			draw_rect(Rect2(tile_pos, tile_size), game_map.get_tile_color(x, y), true)
-#
 	# Draw grid overlay (including extended grid lines).
 	for x in range(game_map.map_width + sector_size + sector_size):
 		var start = Vector2(x * grid_size, 0)
@@ -82,7 +81,6 @@ func _draw():
 			draw_line(start, end, major_grid_color, major_grid_size)
 		else:
 			draw_line(start, end, minor_grid_color, minor_grid_size)
-#
 	for y in range(game_map.map_height + sector_size + sector_size):
 		var start = Vector2(0, y * grid_size)
 		var end   = Vector2((game_map.map_width + sector_size * 2) * grid_size, y * grid_size)
@@ -90,14 +88,12 @@ func _draw():
 			draw_line(start, end, major_grid_color, major_grid_size)
 		else:
 			draw_line(start, end, minor_grid_color, minor_grid_size)
-#
 	# Draw highlight boxes around selected cells (with offset)
 	for cell_position in selected_cells.keys():
 		var box_color = selected_cells[cell_position]
 		var tile_pos  = Vector2(cell_position.x * grid_size, cell_position.y * grid_size) + offset
 		var tile_size = Vector2(grid_size, grid_size)
 		draw_rect(Rect2(tile_pos, tile_size), box_color, true)
-		
 	if selected_entity and is_instance_of(selected_entity.entity, Mek):
 		var detection_range = game_map.DEFAULT_DETECTION_RANGE
 		var center = selected_entity.position

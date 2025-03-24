@@ -85,6 +85,10 @@ func _init(
 	ai_controller = AIController.new(self)
 	# Instantiate the AStar2D graph.
 	astar = AStar2D.new()
+
+
+func generate_map() -> void:
+	"""Generates a new map with random terrain data."""
 	# Instantiate the map generator.
 	var map_generator = MapGenerator.new(map_width, map_height, map_biome)
 	# Generate the terrain data.
@@ -130,9 +134,9 @@ func get_tile_color(arg1, arg2 = null) -> Color:
 	return map_biome.get_color(get_tile_id(arg1, arg2))
 
 
-func get_movement_cost(position: Vector2i) -> int:
+func get_movement_cost(arg1, arg2 = null) -> int:
 	"""Check if the height is walkable."""
-	return map_biome.get_movement_cost(get_tile_height(position))
+	return map_biome.get_movement_cost(get_tile_id(arg1, arg2))
 
 
 func is_occupied(position: Vector2i) -> bool:
@@ -339,9 +343,13 @@ func get_path(start: Vector2i, end: Vector2i, movement_budget: int = -1) -> Arra
 	"""
 	var start_id = _position_to_astar_id(start)
 	var end_id = _position_to_astar_id(end)
-	if not astar.has_point(start_id) or not astar.has_point(end_id):
+	if not astar.has_point(start_id):
+		GameServer.log_message("AStar does not have starting point %s, %d" % [str(start), start_id])
 		return []
-	var path: PackedVector2Array = astar.get_point_path(start_id, end_id)
+	if not astar.has_point(end_id):
+		GameServer.log_message("AStar does not have ending point %s, %d" % [str(end), end_id])
+		return []
+	var path: PackedVector2Array = astar.get_point_path(start_id, end_id, true)
 	var result: Array[Vector2i] = []
 	var total_cost = 0
 	for i in range(path.size()):

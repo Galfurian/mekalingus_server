@@ -1,9 +1,10 @@
 extends Node
 
 const PLAYER_TEMPLATE_FILE = "res://data/player_template.json"
+
 const MEKS_FOLDER = "res://data/meks"
 const ITEMS_FOLDER = "res://data/items"
-const BIOMES_FILE = "res://data/biomes.json"
+const BIOMES_FOLDER = "res://data/biomes"
 
 # =============================================================================
 # PROPERTIES
@@ -222,25 +223,42 @@ func load_biomes() -> bool:
 	"""
 	Load biome data from a JSON file.
 	"""
-	var file := FileAccess.open(BIOMES_FILE, FileAccess.READ)
-	# Check if the file was opened.
-	if not file:
-		log_message("Error: Failed to open file '" + BIOMES_FILE + "'.")
+	if not DirAccess.dir_exists_absolute(BIOMES_FOLDER):
+		log_message("Error: Bioms folder missing: " + BIOMES_FOLDER)
 		return false
-	var counter = 0
-	# Get the file content.
-	var content = file.get_as_text()
-	# Parse the data.
-	var data = JSON.parse_string(content)
-	# Check the data.
-	if not data:
-		log_message("Failed to parse data file '" + BIOMES_FILE + "'.")
+	var dir = DirAccess.open(BIOMES_FOLDER)
+	if not dir:
+		log_message("Error: Unable to open biomes folder.")
 		return false
-	# Now we can close the file.
-	file.close()
-	# Load the data.
-	for biome_name in data:
-		biomes[biome_name.to_lower()] = Biome.new(data[biome_name])
-		counter += 1
-	log_message("    Loaded " + str(counter) + ' biomes from "' + BIOMES_FILE + '".')
-	return true
+	log_message("Loading biomes...")
+	dir.list_dir_begin()
+	biomes.clear()
+	var file_name = dir.get_next()
+	while not file_name.is_empty():
+		if not file_name.ends_with(".json"):
+			continue
+		var file_path = BIOMES_FOLDER + "/" + file_name
+		# Open the file.
+		var file = FileAccess.open(file_path, FileAccess.READ)
+		if not file:
+			log_message("Error: Failed to open file '" + file_path + "'.")
+			return false
+		# Get the file content.
+		var content = file.get_as_text()
+		# Parse the data.
+		var data = JSON.parse_string(content)
+		if not data:
+			log_message("Failed to parse data file '" + file_path + "'.")
+			return false
+		# Now we can close the file.
+		file.close()
+		# Load the data.
+		var counter = 0
+		for biome_name in data:
+			biomes[biome_name.to_lower()] = Biome.new(data[biome_name])
+			counter += 1
+		log_message("    Loaded " + str(counter) + ' biomes from "' + file_path + '".')
+		# Move to the next file.
+		file_name = dir.get_next()
+	log_message("Loaded " + str(biomes.size()) + " biomes from multiple files.")
+	return !biomes.is_empty()

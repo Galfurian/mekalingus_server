@@ -52,23 +52,11 @@ func _generate_random_loadout(mek: Mek):
 
 func generate_random_enemy(difficulty: int) -> Mek:
 	"""Generates a randomized enemy Mek based on difficulty."""
-	
 	var available_meks = _get_available_meks(difficulty)
 	if available_meks.is_empty():
 		push_error("No available Meks for difficulty: " + str(difficulty))
 		return null
-
 	var mek_template = available_meks.pick_random()
 	var mek: Mek = mek_template.build_mek()
-	
-	#print("=====")
-	#print(str(mek))
-	
 	_generate_random_loadout(mek)
-	
-	#print("-----")
-	#print("Items:")
-	#for item in mek.items:
-		#print("    " + str(item))
-	#print("=====")
 	return mek

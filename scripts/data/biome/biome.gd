@@ -68,7 +68,6 @@ func _to_string() -> String:
 
 func from_dict(data: Dictionary):
 	"""Loads data from a dictionary."""
-	print(data)
 	biome_name = data["name"]
 	biome_levels.clear()
 	for level_data in data["levels"]:

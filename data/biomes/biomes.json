@@ -5,7 +5,7 @@
 			{
 				"index": 0.0,
 				"height": 1.0,
-				"movement_cost": -1.0,
+				"movement_cost": 3.0,
 				"color": [
 					0.0,
 					102.0,
@@ -15,7 +15,7 @@
 			{
 				"index": 1.0,
 				"height": 3.0,
-				"movement_cost": 3.0,
+				"movement_cost": 2.0,
 				"color": [
 					51.0,
 					187.0,
@@ -35,7 +35,7 @@
 			{
 				"index": 3.0,
 				"height": 7.0,
-				"movement_cost": 2.0,
+				"movement_cost": 1.0,
 				"color": [
 					34.0,
 					136.0,
@@ -60,7 +60,7 @@
 			{
 				"index": 0.0,
 				"height": 1.0,
-				"movement_cost": -1.0,
+				"movement_cost": 3.0,
 				"color": [
 					51.0,
 					0.0,
@@ -70,7 +70,7 @@
 			{
 				"index": 1.0,
 				"height": 3.0,
-				"movement_cost": 3.0,
+				"movement_cost": 2.0,
 				"color": [
 					85.0,
 					34.0,
@@ -115,7 +115,7 @@
 			{
 				"index": 0.0,
 				"height": 1.0,
-				"movement_cost": -1.0,
+				"movement_cost": 1.0,
 				"color": [
 					34.0,
 					68.0,
@@ -125,7 +125,7 @@
 			{
 				"index": 1.0,
 				"height": 3.0,
-				"movement_cost": 2.0,
+				"movement_cost": 1.0,
 				"color": [
 					85.0,
 					119.0,
@@ -135,7 +135,7 @@
 			{
 				"index": 2.0,
 				"height": 5.0,
-				"movement_cost": 1.0,
+				"movement_cost": 2.0,
 				"color": [
 					136.0,
 					204.0,
@@ -170,7 +170,7 @@
 			{
 				"index": 0.0,
 				"height": 1.0,
-				"movement_cost": -1.0,
+				"movement_cost": 2.0,
 				"color": [
 					26.0,
 					51.0,

@@ -39,17 +39,18 @@ func generate(p_biome: Biome) -> Array:
 
 	match biome.biome_name.to_lower():
 		"archipelago":
+			_generate_mountains(0.1, 0.05, 0.15)
 			_generate_islands()
 			_apply_noise(5.0)
 		"volcanic":
-			_generate_volcano_core()
-			_apply_noise(10.0)
+			_generate_mountains(0.6, 0.05, 0.10)
+			_generate_volcano_core(1.6, 0.2, 60.0, -20.0, 2.0)
 		"grassland":
-			_generate_mountains()
+			_generate_mountains(0.05, 0.05, 0.10)
 			_apply_noise(22.5)
 			_flatten_grassland_terrain(2)
 		"mountain":
-			_generate_mountains()
+			_generate_mountains(0.1, 0.05, 0.15)
 			_apply_noise(12.0)
 		_:
 			_generate_mountains()
@@ -75,22 +76,56 @@ func _generate_islands():
 						height_map[y][x] += int((radius - dist) * 1.5)
 
 
-func _generate_volcano_core():
-	var cx = width / 2.0
-	var cy = height / 2.0
-	var peak_radius = int(min(width, height) * 0.15)
-	for y in range(cy - peak_radius, cy + peak_radius):
-		for x in range(cx - peak_radius, cx + peak_radius):
-			if x >= 0 and x < width and y >= 0 and y < height:
-				var dist = Vector2(cx, cy).distance_to(Vector2(x, y))
-				if dist < peak_radius:
-					height_map[y][x] += int(pow(peak_radius - dist, 1.5))
+func _generate_volcano_core(
+	peak_radius_control: float = 0.15,
+	inner_crater_ratio: float = 0.3,
+	peak_height: float = 50.0,
+	crater_depth: float = -20.0,
+	slope_exponent: float = 1.5
+):
+	# Random center near the middle of the map
+	var x_min = int(width * 0.3)
+	var x_max = int(width * 0.7)
+	var y_min = int(height * 0.3)
+	var y_max = int(height * 0.7)
+	var core_x = x_min + randi() % (x_max - x_min + 1)
+	var core_y = y_min + randi() % (y_max - y_min + 1)
+
+	var peak_radius = max(5, int(min(width, height) * peak_radius_control))
+	var crater_radius = int(peak_radius * inner_crater_ratio)
+
+	for y in range(core_y - peak_radius, core_y + peak_radius):
+		for x in range(core_x - peak_radius, core_x + peak_radius):
+			if x < 0 or x >= width or y < 0 or y >= height:
+				continue
+
+			var dist = Vector2(core_x, core_y).distance_to(Vector2(x, y))
+			if dist >= peak_radius:
+				continue
+
+			var height_value := 0.0
+
+			if dist < crater_radius:
+				# Inner crater: deeper near center
+				height_value = crater_depth * (1.0 - dist / crater_radius)
+			else:
+				# Outer slope: tapering up to peak
+				var slope_dist = dist - crater_radius
+				var slope_range = peak_radius - crater_radius
+				var normalized_slope = slope_dist / slope_range
+				height_value = peak_height * pow(1.0 - normalized_slope, slope_exponent)
+
+			height_map[y][x] += int(height_value)
 
 
-func _generate_mountains():
-	var num_mountains = max(5, int((width * height) * 0.05))
-	var radius_min = max(3, int(min(width, height) * 0.05))
-	var radius_max = max(6, int(min(width, height) * 0.10))
+func _generate_mountains(
+	num_mountains_control: float = 0.05,
+	min_radius_control: float = 0.05,
+	max_radius_control: float = 0.10,
+):
+	var num_mountains = max(5, int((width * height) * num_mountains_control))
+	var radius_min = max(3, int(min(width, height) * min_radius_control))
+	var radius_max = max(6, int(min(width, height) * max_radius_control))
 	for i in range(num_mountains):
 		var radius = randi() % (radius_max - radius_min + 1) + radius_min
 		var x_center = randi() % (width + radius) - (radius / 2)

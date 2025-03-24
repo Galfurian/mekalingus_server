@@ -63,6 +63,8 @@ func _on_generate():
 			map_size.get_value(),
 			map_difficulty.get_selected_id()
 		)
+		# Generate the map.
+		game_map.generate_map()
 		# Save the map to the data manager.
 		DataManager.save_map(game_map)
 		# Add the map to the map list.

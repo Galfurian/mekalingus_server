@@ -8,9 +8,9 @@ extends Resource
 # =============================================================================
 
 # Default Mek templates assigned to new players.
-var meks: Array[String]
+var meks: Array
 # Default item templates assigned to new players.
-var items: Array[String]
+var items: Array
 
 # =============================================================================
 # GENERAL

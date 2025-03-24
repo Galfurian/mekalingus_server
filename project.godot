@@ -13,7 +13,7 @@ config_version=5
 config/name="MekalingusServer"
 run/main_scene="uid://bhgt3rn4bd6v0"
 config/features=PackedStringArray("4.4", "Forward Plus")
-config/icon="uid://chs7bwm5g4t03"
+config/icon="uid://ddhr6bo5l00nr"
 
 [autoload]
 
@@ -28,7 +28,6 @@ LoadoutGenerator="*res://scripts/data/map/loadout_generator.gd"
 
 window/size/viewport_width=1280
 window/size/viewport_height=1024
-window/size/mode=2
 
 [gui]
 

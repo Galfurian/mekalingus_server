@@ -120,6 +120,7 @@ const COLORS = {
 # UTILITY FUNCTION
 # =============================================================================
 
+
 func apply(key: String, value: Variant) -> String:
 	"""Applies the appropriate color formatting to a given value based on the key."""
 	return "[color=" + COLORS.get(key, DEFAULT) + "]" + str(value) + "[/color]"

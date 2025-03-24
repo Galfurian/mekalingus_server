@@ -571,7 +571,7 @@ func _find_best_tile_to_attack_target(
 		# Compute how far the unit must move to reach this tile
 		var move_cost = game_map.get_path_cost(game_map.get_path(start_pos, tile))
 		# Calculate the elevation difference (positive = tile is above the target)
-		var height_diff = game_map.get_height_at(tile) - game_map.get_height_at(target_pos)
+		var height_diff = game_map.get_tile_height(tile) - game_map.get_tile_height(target_pos)
 		# Determine how close we are to the ideal range (middle of min/max)
 		var ideal_range = (min_range + max_range) / 2.0
 		var range_penalty = abs(dist - ideal_range)
@@ -582,7 +582,7 @@ func _find_best_tile_to_attack_target(
 		var score = -move_cost - range_penalty + height_diff * 2.0
 		game_map.add_log(
 			Enums.LogType.AI,
-			"- Tile %s: move_cost=%d, dist=%d, height_diff=%d → score=%.2f" % [
+			"- Tile %s: move_cost=%d, dist=%d, height_diff=%d -> score=%.2f" % [
 				format_pos_tag(tile), move_cost, dist, height_diff, score
 			]
 		)

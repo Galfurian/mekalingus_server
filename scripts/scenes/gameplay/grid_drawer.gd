@@ -72,7 +72,7 @@ func _draw():
 		for x in range(game_map.map_width):
 			var tile_pos  = Vector2(x * grid_size, y * grid_size) + offset
 			var tile_size = Vector2(grid_size, grid_size)
-			draw_rect(Rect2(tile_pos, tile_size), game_map.get_color_at(x, y), true)
+			draw_rect(Rect2(tile_pos, tile_size), game_map.get_tile_color(x, y), true)
 #
 	# Draw grid overlay (including extended grid lines).
 	for x in range(game_map.map_width + sector_size + sector_size):

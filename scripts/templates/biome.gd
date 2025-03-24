@@ -68,9 +68,10 @@ func _to_string() -> String:
 
 func from_dict(data: Dictionary):
 	"""Loads data from a dictionary."""
-	biome_name = data.get("biome_name", "")
-	biome_levels = []
-	for level_data in data.get("biome_levels", []):
+	print(data)
+	biome_name = data["name"]
+	biome_levels.clear()
+	for level_data in data["levels"]:
 		biome_levels.append(BiomeLevel.new(level_data))
 
 
@@ -79,4 +80,4 @@ func to_dict() -> Dictionary:
 	var levels = []
 	for level in biome_levels:
 		levels.append(level.to_dict())
-	return {"biome_name": biome_name, "biome_levels": levels}
+	return {"name": biome_name, "levels": levels}

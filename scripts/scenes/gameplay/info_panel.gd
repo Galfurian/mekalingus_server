@@ -185,7 +185,7 @@ func _load_item_details(item: Item):
 		# Process effects within the module
 		for effect in module.effects:
 			var effect_line = "|"
-			effect_line += "[" + UIColor.apply("effect_type", Enums.EffectType.keys()[effect.type]) + "] → "
+			effect_line += "[" + UIColor.apply("effect_type", Enums.EffectType.keys()[effect.type]) + "] -> "
 			effect_line += UIColor.apply("effect_target_type", Enums.TargetType.keys()[effect.target])
 			effect_line += " | " + UIColor.apply("effect_amount", str(effect.amount))
 			# Add damage type details with tooltip hint.

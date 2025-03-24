@@ -35,17 +35,22 @@ func _to_string() -> String:
 		+ str(height)
 		+ ", "
 		+ str(movement_cost)
+		+ ", ["
+		+ str(color.r8)
 		+ ", "
-		+ str(color)
+		+ str(color.g8)
+		+ ", "
+		+ str(color.b8)
+		+ "]"
 	)
 
 
 func from_dict(data: Dictionary):
 	"""Loads data from a dictionary."""
-	index = data.get("index", 0)
-	height = data.get("height", 0)
-	movement_cost = data.get("movement_cost", 0)
-	color = data.get("color", Color.GRAY)
+	index = data["index"]
+	height = data["height"]
+	movement_cost = data["movement_cost"]
+	color = Color(data["color"][0] / 255.0, data["color"][1] / 255.0, data["color"][2] / 255.0, 1.0)
 
 
 func to_dict() -> Dictionary:

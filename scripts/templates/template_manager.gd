@@ -16,7 +16,7 @@ var mek_templates: Dictionary
 # Dictionary to store loaded item templates.
 var item_templates: Dictionary
 # List of biome data.
-var biomes: Dictionary
+var biomes: Dictionary[String, Biome]
 
 # =============================================================================
 # GENERAL
@@ -64,9 +64,9 @@ func get_item_template(item_id: String) -> ItemTemplate:
 	return item_templates.get(item_id, null)
 
 
-func get_biome(biome: String) -> Dictionary:
+func get_biome(biome_name: String) -> Biome:
 	"""Returns the data for a biome."""
-	return biomes.get(biome.to_lower(), null)
+	return biomes.get(biome_name.to_lower(), null)
 
 
 # =============================================================================
@@ -220,7 +220,7 @@ func load_biomes() -> bool:
 	file.close()
 	# Load the data.
 	for biome_name in data:
-		biomes[biome_name.to_lower()] = data[biome_name]
+		biomes[biome_name.to_lower()] = Biome.new(data[biome_name])
 		counter += 1
 	log_message("    Loaded " + str(counter) + ' biomes from "' + BIOMES_FILE + '".')
 	return true

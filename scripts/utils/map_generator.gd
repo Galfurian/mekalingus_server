@@ -1,17 +1,27 @@
+# MapGenerator.gd
+# Generates a height map for a given biome.
 class_name MapGenerator
-
 extends Node
 
+# The width of the map.
 var width: int
+# The height of the map.
 var height: int
+# The current biome.
+var biome: Biome
+
+# The height map.
 var height_map: Array
-var noise = FastNoiseLite.new()
+# The noise generator.
+var noise: FastNoiseLite
 
 
-func _init(p_width: int, p_height: int):
+func _init(p_width: int, p_height: int, p_biome: Biome):
 	width = p_width
 	height = p_height
+	biome = p_biome
 	height_map = []
+	noise = FastNoiseLite.new()
 	_initialize_maps()
 
 
@@ -23,13 +33,11 @@ func _initialize_maps():
 			height_map[y].append(0)
 
 
-func generate(biome: String = "default") -> Array:
+func generate(p_biome: Biome) -> Array:
 	_initialize_maps()
-	biome = biome.to_lower()
+	biome = p_biome
 
-	var height_levels = get_height_levels_for_biome(biome)
-
-	match biome:
+	match biome.biome_name.to_lower():
 		"archipelago":
 			_generate_islands()
 			_apply_noise(5.0)
@@ -48,7 +56,7 @@ func generate(biome: String = "default") -> Array:
 			_apply_noise(7.5)
 
 	_normalize_heights()
-	return _flatten_to_height_levels(height_levels)
+	return _flatten_to_biome_levels()
 
 
 # --- Biome-specific generation functions ---
@@ -157,99 +165,24 @@ func _normalize_heights():
 			height_map[y][x] = int(remap(height_map[y][x], min_height, max_height, 1, 9))
 
 
-func _flatten_to_height_levels(height_levels: Array) -> Array:
-	var terrain_map = []
+func _flatten_to_biome_levels() -> Array:
+	var terrain_map := []
 	for y in range(height):
 		terrain_map.append([])
 		for x in range(width):
-			terrain_map[y].append(_get_closest_height(height_levels, height_map[y][x]))
+			terrain_map[y].append(_get_closest_level_index(height_map[y][x]))
 	return terrain_map
 
 
-func _get_closest_height(height_levels: Array, value: int) -> int:
-	var closest = height_levels[0]
+func _get_closest_level_index(value: int) -> int:
+	var closest_index = 0
 	var min_diff = INF
-	for level in height_levels:
-		var diff = abs(level - value)
-		if diff < min_diff or (diff == min_diff and level > closest):
-			closest = level
+	for i in biome.biome_levels.size():
+		var level = biome.get_level(i)
+		if level == null:
+			continue
+		var diff = abs(level.height - value)
+		if diff < min_diff or (diff == min_diff and i > closest_index):
+			closest_index = i
 			min_diff = diff
-	return closest
-
-
-static func get_height_levels_for_biome(biome: String) -> Array:
-	match biome.to_lower():
-		"archipelago":
-			return [1, 2, 3, 4, 5]
-		"volcanic":
-			return [1, 3, 5, 7, 9]
-		"grassland":
-			return [1, 3, 5, 7, 9]
-		"mountain":
-			return [1, 3, 5, 7, 9]
-		_:
-			return [1, 3, 5, 7, 9]
-
-
-static func get_movement_cost_for_tile(tile_height: int, biome: String) -> int:
-	match biome.to_lower():
-		"archipelago":
-			return {1: -1, 3: 3, 5: 1, 7: 2, 9: 3}.get(tile_height, -1)
-		"volcanic":
-			return {1: -1, 3: 3, 5: 2, 7: 3, 9: 4}.get(tile_height, -1)
-		"grassland":
-			return {1: -1, 3: 2, 5: 1, 7: 2, 9: 3}.get(tile_height, -1)
-		"mountain":
-			return {1: -1, 3: 2, 5: 1, 7: 2, 9: 4}.get(tile_height, -1)
-		_:
-			return -1  # Default: impassable
-
-
-static func get_color_for_tile(tile_height: int, biome: String) -> Color:
-	match biome.to_lower():
-		"archipelago":
-			return (
-				{
-					1: Color8(0, 102, 170),  # Deep ocean
-					3: Color8(51, 187, 170),  # Shallow water
-					5: Color8(255, 221, 136),  # Beach
-					7: Color8(34, 136, 34),  # Jungle
-					9: Color8(85, 68, 51)  # Highlands
-				}
-				. get(tile_height, Color.BLACK)
-			)
-		"volcanic":
-			return (
-				{
-					1: Color8(51, 0, 0),  # Lava lake
-					3: Color8(85, 34, 0),  # Cooled lava
-					5: Color8(136, 136, 136),  # Ash plain
-					7: Color8(68, 68, 68),  # Rocky field
-					9: Color8(30, 30, 30)  # Peak
-				}
-				. get(tile_height, Color.BLACK)
-			)
-		"grassland":
-			return (
-				{
-					1: Color8(34, 68, 136),  # River/lake
-					3: Color8(85, 119, 85),  # Swamp
-					5: Color8(136, 204, 68),  # Grass
-					7: Color8(102, 153, 51),  # Hill
-					9: Color8(51, 102, 34)  # Ridge
-				}
-				. get(tile_height, Color.BLACK)
-			)
-		"mountain":
-			return (
-				{
-					1: Color8(26, 51, 102),  # Lake
-					3: Color8(119, 153, 119),  # Meadow
-					5: Color8(204, 204, 170),  # Flat highland
-					7: Color8(170, 170, 170),  # Scree
-					9: Color8(238, 238, 238)  # Snowy peak
-				}
-				. get(tile_height, Color.BLACK)
-			)
-		_:
-			return Color.GRAY
+	return closest_index

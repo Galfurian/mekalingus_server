@@ -3,53 +3,53 @@
 		"name": "Archipelago",
 		"levels": [
 			{
-				"index": 0,
-				"height": 1,
-				"movement_cost": -1,
+				"index": 0.0,
+				"height": 1.0,
+				"movement_cost": -1.0,
 				"color": [
-					0,
-					102,
-					170
+					0.0,
+					102.0,
+					170.0
 				]
 			},
 			{
-				"index": 1,
-				"height": 3,
-				"movement_cost": 3,
+				"index": 1.0,
+				"height": 3.0,
+				"movement_cost": 3.0,
 				"color": [
-					51,
-					187,
-					170
+					51.0,
+					187.0,
+					170.0
 				]
 			},
 			{
-				"index": 2,
-				"height": 5,
-				"movement_cost": 1,
+				"index": 2.0,
+				"height": 5.0,
+				"movement_cost": 1.0,
 				"color": [
-					255,
-					221,
-					136
+					255.0,
+					221.0,
+					136.0
 				]
 			},
 			{
-				"index": 3,
-				"height": 7,
-				"movement_cost": 2,
+				"index": 3.0,
+				"height": 7.0,
+				"movement_cost": 2.0,
 				"color": [
-					34,
-					136,
-					34
+					34.0,
+					136.0,
+					34.0
 				]
 			},
 			{
-				"index": 4,
-				"height": 9,
-				"movement_cost": 3,
+				"index": 4.0,
+				"height": 9.0,
+				"movement_cost": 3.0,
 				"color": [
-					85,
-					68,
-					51
+					85.0,
+					68.0,
+					51.0
 				]
 			}
 		]
@@ -58,53 +58,53 @@
 		"name": "Volcanic",
 		"levels": [
 			{
-				"index": 0,
-				"height": 1,
-				"movement_cost": -1,
+				"index": 0.0,
+				"height": 1.0,
+				"movement_cost": -1.0,
 				"color": [
-					51,
-					0,
-					0
+					51.0,
+					0.0,
+					0.0
 				]
 			},
 			{
-				"index": 1,
-				"height": 3,
-				"movement_cost": 3,
+				"index": 1.0,
+				"height": 3.0,
+				"movement_cost": 3.0,
 				"color": [
-					85,
-					34,
-					0
+					85.0,
+					34.0,
+					0.0
 				]
 			},
 			{
-				"index": 2,
-				"height": 5,
-				"movement_cost": 2,
+				"index": 2.0,
+				"height": 5.0,
+				"movement_cost": 2.0,
 				"color": [
-					136,
-					136,
-					136
+					136.0,
+					136.0,
+					136.0
 				]
 			},
 			{
-				"index": 3,
-				"height": 7,
-				"movement_cost": 3,
+				"index": 3.0,
+				"height": 7.0,
+				"movement_cost": 3.0,
 				"color": [
-					68,
-					68,
-					68
+					68.0,
+					68.0,
+					68.0
 				]
 			},
 			{
-				"index": 4,
-				"height": 9,
-				"movement_cost": 4,
+				"index": 4.0,
+				"height": 9.0,
+				"movement_cost": 4.0,
 				"color": [
-					30,
-					30,
-					30
+					30.0,
+					30.0,
+					30.0
 				]
 			}
 		]
@@ -113,53 +113,53 @@
 		"name": "Grassland",
 		"levels": [
 			{
-				"index": 0,
-				"height": 1,
-				"movement_cost": -1,
+				"index": 0.0,
+				"height": 1.0,
+				"movement_cost": -1.0,
 				"color": [
-					34,
-					68,
-					136
+					34.0,
+					68.0,
+					136.0
 				]
 			},
 			{
-				"index": 1,
-				"height": 3,
-				"movement_cost": 2,
+				"index": 1.0,
+				"height": 3.0,
+				"movement_cost": 2.0,
 				"color": [
-					85,
-					119,
-					85
+					85.0,
+					119.0,
+					85.0
 				]
 			},
 			{
-				"index": 2,
-				"height": 5,
-				"movement_cost": 1,
+				"index": 2.0,
+				"height": 5.0,
+				"movement_cost": 1.0,
 				"color": [
-					136,
-					204,
-					68
+					136.0,
+					204.0,
+					68.0
 				]
 			},
 			{
-				"index": 3,
-				"height": 7,
-				"movement_cost": 2,
+				"index": 3.0,
+				"height": 7.0,
+				"movement_cost": 2.0,
 				"color": [
-					102,
-					153,
-					51
+					102.0,
+					153.0,
+					51.0
 				]
 			},
 			{
-				"index": 4,
-				"height": 9,
-				"movement_cost": 3,
+				"index": 4.0,
+				"height": 9.0,
+				"movement_cost": 3.0,
 				"color": [
-					51,
-					102,
-					34
+					51.0,
+					102.0,
+					34.0
 				]
 			}
 		]
@@ -168,53 +168,53 @@
 		"name": "Mountain",
 		"levels": [
 			{
-				"index": 0,
-				"height": 1,
-				"movement_cost": -1,
+				"index": 0.0,
+				"height": 1.0,
+				"movement_cost": -1.0,
 				"color": [
-					26,
-					51,
-					102
+					26.0,
+					51.0,
+					102.0
 				]
 			},
 			{
-				"index": 1,
-				"height": 3,
-				"movement_cost": 2,
+				"index": 1.0,
+				"height": 3.0,
+				"movement_cost": 2.0,
 				"color": [
-					119,
-					153,
-					119
+					119.0,
+					153.0,
+					119.0
 				]
 			},
 			{
-				"index": 2,
-				"height": 5,
-				"movement_cost": 1,
+				"index": 2.0,
+				"height": 5.0,
+				"movement_cost": 1.0,
 				"color": [
-					204,
-					204,
-					170
+					204.0,
+					204.0,
+					170.0
 				]
 			},
 			{
-				"index": 3,
-				"height": 7,
-				"movement_cost": 2,
+				"index": 3.0,
+				"height": 7.0,
+				"movement_cost": 2.0,
 				"color": [
-					170,
-					170,
-					170
+					170.0,
+					170.0,
+					170.0
 				]
 			},
 			{
-				"index": 4,
-				"height": 9,
-				"movement_cost": 4,
+				"index": 4.0,
+				"height": 9.0,
+				"movement_cost": 4.0,
 				"color": [
-					238,
-					238,
-					238
+					238.0,
+					238.0,
+					238.0
 				]
 			}
 		]

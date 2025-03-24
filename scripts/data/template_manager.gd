@@ -1,8 +1,8 @@
 extends Node
 
 const PLAYER_TEMPLATE_FILE = "res://data/player_template.json"
-const MEK_TEMPLATES_FOLDER = "res://data/mek_templates"
-const ITEM_TEMPLATES_FOLDER = "res://data/item_templates"
+const MEKS_FOLDER = "res://data/meks"
+const ITEMS_FOLDER = "res://data/items"
 const BIOMES_FILE = "res://data/biomes.json"
 
 # =============================================================================
@@ -103,12 +103,12 @@ func load_player_template() -> bool:
 
 
 func load_mek_templates():
-	"""Loads mek templates from multiple JSON files in the MEK_TEMPLATES_FOLDER."""
-	if not DirAccess.dir_exists_absolute(MEK_TEMPLATES_FOLDER):
-		log_message("Error: Mek templates folder missing: " + MEK_TEMPLATES_FOLDER)
+	"""Loads mek templates from multiple JSON files in the MEKS_FOLDER."""
+	if not DirAccess.dir_exists_absolute(MEKS_FOLDER):
+		log_message("Error: Mek templates folder missing: " + MEKS_FOLDER)
 		return false
 	# Open the directory.
-	var dir = DirAccess.open(MEK_TEMPLATES_FOLDER)
+	var dir = DirAccess.open(MEKS_FOLDER)
 	if not dir:
 		log_message("Error: Failed to access mek templates folder.")
 		return false
@@ -120,7 +120,7 @@ func load_mek_templates():
 	while not file_name.is_empty():
 		if not file_name.ends_with(".json"):
 			continue
-		var file_path = MEK_TEMPLATES_FOLDER + "/" + file_name
+		var file_path = MEKS_FOLDER + "/" + file_name
 		# Open the file.
 		var file = FileAccess.open(file_path, FileAccess.READ)
 		if not file:
@@ -153,11 +153,11 @@ func load_mek_templates():
 
 
 func load_item_templates():
-	"""Loads all item templates from multiple JSON files in ITEM_TEMPLATES_FOLDER."""
-	if not DirAccess.dir_exists_absolute(ITEM_TEMPLATES_FOLDER):
-		log_message("Error: Item templates folder missing: " + ITEM_TEMPLATES_FOLDER)
+	"""Loads all item templates from multiple JSON files in ITEMS_FOLDER."""
+	if not DirAccess.dir_exists_absolute(ITEMS_FOLDER):
+		log_message("Error: Item templates folder missing: " + ITEMS_FOLDER)
 		return false
-	var dir = DirAccess.open(ITEM_TEMPLATES_FOLDER)
+	var dir = DirAccess.open(ITEMS_FOLDER)
 	if not dir:
 		log_message("Error: Unable to open item templates folder.")
 		return false
@@ -168,7 +168,7 @@ func load_item_templates():
 	while not file_name.is_empty():
 		if not file_name.ends_with(".json"):
 			continue
-		var file_path = ITEM_TEMPLATES_FOLDER + "/" + file_name
+		var file_path = ITEMS_FOLDER + "/" + file_name
 		# Open the file.
 		var file = FileAccess.open(file_path, FileAccess.READ)
 		if not file:

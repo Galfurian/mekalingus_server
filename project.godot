@@ -19,7 +19,7 @@ config/icon="uid://ddhr6bo5l00nr"
 
 GameServer="*res://scripts/core/game_server.gd"
 RPCHandler="*res://scripts/core/rpc_handler.gd"
-TemplateManager="*res://scripts/templates/template_manager.gd"
+TemplateManager="*res://scripts/data/template_manager.gd"
 DataManager="*res://scripts/data/data_manager.gd"
 UIColor="*res://scripts/utils/ui_color.gd"
 LoadoutGenerator="*res://scripts/data/map/loadout_generator.gd"

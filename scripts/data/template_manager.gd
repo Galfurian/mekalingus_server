@@ -24,12 +24,16 @@ var biomes: Dictionary[String, Biome]
 
 
 func log_message(msg: String):
-	"""Logs a message to the game server."""
+	"""
+	Logs a message to the game server.
+	"""
 	GameServer.log_message(msg)
 
 
 func load_all() -> bool:
-	"""Loads all templates and data."""
+	"""
+	Loads all templates and data.
+	"""
 	if not load_player_template():
 		return false
 	if not load_mek_templates():
@@ -42,7 +46,9 @@ func load_all() -> bool:
 
 
 func clear_all():
-	"""Clears all templates and data."""
+	"""
+	Clears all templates and data.
+	"""
 	player_template.clear()
 	mek_templates.clear()
 	item_templates.clear()
@@ -55,17 +61,23 @@ func clear_all():
 
 
 func get_mek_template(mek_id: String) -> MekTemplate:
-	"""Retrieves a mek template by ID."""
+	"""
+	Retrieves a mek template by ID.
+	"""
 	return mek_templates.get(mek_id, null)
 
 
 func get_item_template(item_id: String) -> ItemTemplate:
-	"""Retrieves an item template by ID."""
+	"""
+	Retrieves an item template by ID.
+	"""
 	return item_templates.get(item_id, null)
 
 
 func get_biome(biome_name: String) -> Biome:
-	"""Returns the data for a biome."""
+	"""
+	Returns the data for a biome.
+	"""
 	return biomes.get(biome_name.to_lower(), null)
 
 
@@ -75,7 +87,9 @@ func get_biome(biome_name: String) -> Biome:
 
 
 func load_player_template() -> bool:
-	"""Loads the default player."""
+	"""
+	Loads the default player.
+	"""
 	if not FileAccess.file_exists(PLAYER_TEMPLATE_FILE):
 		log_message("Error: Player template file missing: " + PLAYER_TEMPLATE_FILE)
 		return false
@@ -103,7 +117,9 @@ func load_player_template() -> bool:
 
 
 func load_mek_templates():
-	"""Loads mek templates from multiple JSON files in the MEKS_FOLDER."""
+	"""
+	Loads mek templates from multiple JSON files in the MEKS_FOLDER.
+	"""
 	if not DirAccess.dir_exists_absolute(MEKS_FOLDER):
 		log_message("Error: Mek templates folder missing: " + MEKS_FOLDER)
 		return false
@@ -153,7 +169,9 @@ func load_mek_templates():
 
 
 func load_item_templates():
-	"""Loads all item templates from multiple JSON files in ITEMS_FOLDER."""
+	"""
+	Loads all item templates from multiple JSON files in ITEMS_FOLDER.
+	"""
 	if not DirAccess.dir_exists_absolute(ITEMS_FOLDER):
 		log_message("Error: Item templates folder missing: " + ITEMS_FOLDER)
 		return false
@@ -201,7 +219,9 @@ func load_item_templates():
 
 
 func load_biomes() -> bool:
-	"""Load biome data from a JSON file."""
+	"""
+	Load biome data from a JSON file.
+	"""
 	var file := FileAccess.open(BIOMES_FILE, FileAccess.READ)
 	# Check if the file was opened.
 	if not file:

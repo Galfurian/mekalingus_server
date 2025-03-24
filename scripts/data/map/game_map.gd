@@ -6,7 +6,7 @@ class_name GameMap
 # PROPERTIES
 # =============================================================================
 
-const DEFAULT_DETECTION_RANGE := 10
+const DEFAULT_DETECTION_RANGE = 10
 
 # =====================================
 # STATIC INFORMATION
@@ -20,6 +20,8 @@ var map_width: int
 var map_height: int
 # Map terrain data, an array of integers that identify the type of terrain.
 var terrain_data : Array
+# Map biome.
+var map_biome: String
 
 # =====================================
 # DYNAMIC INFORMATION
@@ -59,10 +61,11 @@ signal on_round_end()
 # GENERIC FUNCTIONS
 # =============================================================================
 
-func _init(p_map_uuid: String, p_map_width: int = 50, p_map_height: int = 50) -> void:
+func _init(p_map_uuid: String, p_map_biome: String, p_map_width: int = 50, p_map_height: int = 50) -> void:
 	map_uuid      = p_map_uuid
 	map_width     = p_map_width
 	map_height    = p_map_height
+	map_biome     = p_map_biome
 	ai_controller = AIController.new(self)
 	astar         = AStar2D.new()
 
@@ -88,28 +91,57 @@ func get_height_at(arg1, arg2 = null) -> int:
 			return int(terrain_data[arg1][arg2])
 	return -1
 
+func get_movement_cost(position: Vector2i) -> int:
+	"""Check if the height is walkable."""
+	return MapGenerator.get_movement_cost_for_tile(get_height_at(position), map_biome)
+
 func is_occupied(position: Vector2i) -> bool:
 	"""Check if the place is occupied."""
 	return get_entity_at(position) != null
 
 func is_walkable(position: Vector2i) -> bool:
 	"""Check if the height is walkable."""
-	var walkable_heights = _get_walkable_heights()
-	return walkable_heights.has(get_height_at(position))
+	return get_movement_cost(position) >= 0
 
 func can_move_to(position: Vector2i) -> bool:
 	"""Check if the height is walkable."""
 	return is_walkable(position) and not is_occupied(position)
 
-func get_visible_tiles(position: Vector2i) -> Array[Vector2i]:
+func get_tiles_in_range(position: Vector2i, max_range: int) -> Array[Vector2i]:
 	var visible: Array[Vector2i] = []
-	for dx in range(-DEFAULT_DETECTION_RANGE, DEFAULT_DETECTION_RANGE + 1):
-		for dy in range(-DEFAULT_DETECTION_RANGE, DEFAULT_DETECTION_RANGE + 1):
+	for dx in range(-max_range, max_range + 1):
+		for dy in range(-max_range, max_range + 1):
 			var tile = position + Vector2i(dx, dy)
 			if in_bounds(tile):
-				if position.distance_to(tile) <= DEFAULT_DETECTION_RANGE:
+				if position.distance_to(tile) <= max_range:
 					visible.append(tile)
 	return visible
+
+func get_path_cost(path: PackedVector2Array) -> float:
+	var cost = 0.0
+	for i in range(1, path.size()):
+		cost += get_movement_cost(Vector2i(path[i]))
+	return cost
+
+func get_reachable_tiles(start: Vector2i, max_cost: int) -> Array[Vector2i]:
+	var reachable: Array[Vector2i] = []
+	if not astar.has_point(_position_to_astar_id(start)):
+		return reachable
+	var candidate_tiles = get_tiles_in_range(start, max_cost + 2)
+	var start_id = _position_to_astar_id(start)
+	for tile in candidate_tiles:
+		if tile == start:
+			continue
+		var id = _position_to_astar_id(tile)
+		if not astar.has_point(id):
+			continue
+		var path = astar.get_point_path(start_id, id, true)
+		if path.size() < 2:
+			continue
+		var cost = get_path_cost(path)
+		if cost <= max_cost:
+			reachable.append(tile)
+	return reachable
 
 # =============================================================================
 # ENTITIES FUNCTIONS
@@ -180,53 +212,93 @@ func get_units_in_range(
 			units_in_range.append(entity)
 	return units_in_range
 
+func get_entity(uuid: String) -> MapEntity:
+	"""
+	Returns the MapEntity for a given UUID.
+	"""
+	if player_units.has(uuid):
+		return player_units[uuid]
+	if npc_units.has(uuid):
+		return npc_units[uuid]
+	if destroyed_units.has(uuid):
+		return destroyed_units[uuid]
+	return null
+
 # =============================================================================
 # PATH FINDING
 # =============================================================================
 
-func update_astar() -> void:
-	# Step 1: Build the graph.
-	for x in range(map_width):
-		for y in range(map_height):
-			var id = y * map_width + x
-			var pos = Vector2(x, y)
-			if is_walkable(Vector2i(x, y)):
-				astar.add_point(id, pos)
-	# Step 2: Connect neighbors.
-	for x in range(map_width):
-		for y in range(map_height):
-			var id = y * map_width + x
-			if not astar.has_point(id):
-				continue
-			for offset in [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]:
-				var neighbor = Vector2(x, y) + offset
-				var neighbor_id = int(neighbor.y) * map_width + int(neighbor.x)
-				if astar.has_point(neighbor_id):
-					astar.connect_points(id, neighbor_id)
-
 func _position_to_astar_id(pos: Vector2i) -> int:
-	# Example: use y * width + x as unique ID (or your own scheme)
-	return pos.y * map_width + pos.x
+	"""
+	Converts a 2D position to a unique AStar2D ID using a row-major formula.
+	"""
+	return int(pos.y) * int(map_width) + int(pos.x)
 
-func get_path(start: Vector2i, end: Vector2i) -> Array[Vector2i]:
-	# Convert positions to point IDs
+func _astar_id_to_position(id: int) -> Vector2i:
+	"""
+	Converts an AStar2D ID back to its corresponding 2D tile position.
+	"""
+	var x: int = int(id % map_width)
+	var y: int = int(id / map_width)
+	return Vector2i(x, y)
+
+func update_astar() -> void:
+	"""
+	Rebuilds the AStar2D graph based on current walkable map tiles.
+	"""
+	astar.clear()
+	# Step 1: Add all walkable tiles as AStar points.
+	for y in range(map_height):
+		for x in range(map_width):
+			var pos = Vector2i(x, y)
+			if is_walkable(pos):
+				var id = _position_to_astar_id(pos)
+				astar.add_point(id, pos)
+	# Step 2: Connect neighboring walkable tiles (4-directional).
+	for y in range(map_height):
+		for x in range(map_width):
+			var current_pos = Vector2i(x, y)
+			var current_id = _position_to_astar_id(current_pos)
+			if not astar.has_point(current_id):
+				continue
+			for dir in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				var neighbor = current_pos + dir
+				# Skip if out of bounds or not walkable
+				if not in_bounds(neighbor):
+					continue
+				var neighbor_id = _position_to_astar_id(neighbor)
+				if astar.has_point(neighbor_id) and not astar.are_points_connected(current_id, neighbor_id):
+					var cost = float(get_movement_cost(neighbor))
+					astar.connect_points(current_id, neighbor_id)
+					astar.set_point_weight_scale(neighbor_id, cost)
+
+func get_path(start: Vector2i, end: Vector2i, movement_budget: int = -1) -> Array[Vector2i]:
+	"""
+	Returns the shortest path between two tiles using AStar2D.
+	If movement_budget >= 0, truncates path to fit within the given cost.
+	"""
 	var start_id = _position_to_astar_id(start)
 	var end_id   = _position_to_astar_id(end)
-	# If either point is not in the graph, return empty path
 	if not astar.has_point(start_id) or not astar.has_point(end_id):
 		return []
-	var path: Array = astar.get_point_path(start_id, end_id)
-	# Convert Vector2s back to Vector2i
+	var path: PackedVector2Array = astar.get_point_path(start_id, end_id)
 	var result: Array[Vector2i] = []
-	for p in path:
-		result.append(Vector2i(p))
+	var total_cost = 0
+	for i in range(path.size()):
+		var pos = Vector2i(path[i])
+		if i > 0:
+			total_cost += get_movement_cost(pos)
+			if movement_budget >= 0 and total_cost > movement_budget:
+				break
+		result.append(pos)
 	return result
+
 
 # =============================================================================
 # LOGS
 # =============================================================================
 
-var log_indent_level := 0
+var log_indent_level = 0
 
 func increase_indent() -> void:
 	log_indent_level += 1
@@ -241,8 +313,6 @@ func get_indent() -> String:
 	return indentation
 
 func add_log(log_type: Enums.LogType, message: String, sender: String = "") -> void:
-	if log_type == Enums.LogType.AI:
-		return
 	var log_entry = LogEntry.new(log_type, get_indent() + message, sender)
 	logs.append(log_entry)
 	on_log_added.emit(log_entry)
@@ -260,32 +330,14 @@ func get_formatted_logs() -> Array[String]:
 # MAP GENERATION
 # =============================================================================
 
-func _get_height_map() -> Array:
-	"""Returns predefined height values for terrain generation."""
-	return [1, 3, 5, 7, 9]
-
-func _get_walkable_heights() -> Array:
-	"""Returns the terrain heights considered walkable."""
-	return [3, 5, 7]
-
 func get_color_at(x: int, y: int) -> Color:
 	"""Returns the colors associated with the height map."""
-	return get_height_color(get_height_at(x, y))
-
-func get_height_color(height: int) -> Color:
-	"""Returns the colors associated with the height map."""
-	if height == 1: return Color(0.0, 0.0, 0.5)  # Deep Sea (Dark Blue)
-	if height == 3: return Color(0.1, 0.1, 0.8)  # Deep Sea (Dark Blue)
-	if height == 5: return Color(0.0, 1.0, 0.0)  # Deep Sea (Dark Blue)
-	if height == 7: return Color(0.5, 0.3, 0.0)  # Deep Sea (Dark Blue)
-	if height == 9: return Color(0.5, 0.5, 0.5)  # Deep Sea (Dark Blue)
-	return Color(1.0, 1.0, 1.0)
+	return MapGenerator.get_color_for_tile(get_height_at(x, y), map_biome)
 
 func generate_terrain():
 	"""Generates procedural terrain and stores it."""
 	var map_generator = MapGenerator.new(map_width, map_height)
-	var height_map = _get_height_map()
-	terrain_data = map_generator.generate(height_map)
+	terrain_data = map_generator.generate(map_biome)
 	# Update the AStar graph.
 	update_astar()
 
@@ -496,6 +548,9 @@ func _execute_utility_module_order(order: UseModuleOrder) -> void:
 	var target_mek: Mek = order.target.entity
 	if source_mek.is_dead() or target_mek.is_dead():
 		return
+	# Check if the Mek has enough power.
+	if source_mek.power < order.module.power_on_use:
+		return
 	# Deduct power.
 	source_mek.power -= order.module.power_on_use
 	# Start cooldown if necessary.
@@ -503,8 +558,10 @@ func _execute_utility_module_order(order: UseModuleOrder) -> void:
 		source_mek.cooldown_manager.start_cooldown(order.item, order.module)
 	add_log(
 		Enums.LogType.SYSTEM,
-		"%s used %s (power left: %d%s)" % [
+		"[url=mek:%s]%s[/url] used [url=item:%s:%s]%s[/url] (power left: %d%s)" % [
+			source_mek.uuid,
 			source_mek.template.name,
+			source_mek.uuid, order.item.uuid,
 			order.module.name,
 			source_mek.power,
 			", cooldown: " + str(order.module.cooldown) if order.module.cooldown else ""
@@ -535,7 +592,10 @@ func _execute_offensive_module_order(order: UseModuleOrder) -> void:
 	var target_mek: Mek = order.target.entity
 	if source_mek.is_dead() or target_mek.is_dead():
 		return
-	# Deduct power
+	# Check if the Mek has enough power.
+	if source_mek.power < order.module.power_on_use:
+		return
+	# Deduct power.
 	source_mek.power -= order.module.power_on_use
 	# Start cooldown if necessary
 	if order.module.cooldown > 0:
@@ -557,8 +617,10 @@ func _execute_offensive_module_order(order: UseModuleOrder) -> void:
 	var hit_success = roll < final_accuracy
 	add_log(
 		Enums.LogType.SYSTEM,
-		"%s attacking %s with %s: base=%d, move=%d, dodge=%d, height=%d → accuracy=%d%% (roll=%d): %s %s" % [
+		"[url=mek:%s]%s[/url] attacking [url=mek:%s]%s[/url] with %s: base=%d, move=%d, dodge=%d, height=%d → accuracy=%d%% (roll=%d): %s %s" % [
+			source_mek.uuid,
 			source_mek.template.name,
+			target_mek.uuid,
 			target_mek.template.name,
 			order.module.name,
 			base_accuracy,
@@ -568,9 +630,13 @@ func _execute_offensive_module_order(order: UseModuleOrder) -> void:
 			final_accuracy,
 			roll,
 			"HIT" if hit_success else "MISS",
-			"(cooldown: " + str(order.module.cooldown) +")" if order.module.cooldown else ""
+			"(cooldown: " + str(order.module.cooldown) + ")" if order.module.cooldown else ""
 		]
 	)
+	
+	if not hit_success:
+		return
+
 	increase_indent()
 	for effect in order.module.effects:
 		if effect.is_damage():
@@ -591,7 +657,6 @@ func _execute_offensive_module_order(order: UseModuleOrder) -> void:
 			break
 	decrease_indent()
 
-
 func _execute_move_order(order: MoveOrder):
 	var mek = order.source.entity
 	var start = order.source.position
@@ -600,9 +665,16 @@ func _execute_move_order(order: MoveOrder):
 		return
 	# Track movement distance for accuracy/dodge purposes.
 	mek.tiles_moved_last_turn = start.distance_to(end)
-	add_log(Enums.LogType.MOVEMENT, "%s moved from %s to %s (%d tiles)" % [
-		mek.template.name, start, end, mek.tiles_moved_last_turn
-	])
+	add_log(
+		Enums.LogType.MOVEMENT,
+		"[url=mek:%s]%s[/url] moved from [url=pos:%d,%d]%s[/url] to [url=pos:%d,%d]%s[/url] (%d tiles)" % [
+			mek.uuid,
+			mek.template.name,
+			start.x, start.y, str(start),
+			end.x, end.y, str(end),
+			mek.tiles_moved_last_turn
+		]
+	)
 	order.source.position = order.destination
 
 # =============================================================================
@@ -813,6 +885,7 @@ static func from_dict(data: Dictionary) -> GameMap:
 		return null
 	var map = GameMap.new(
 		data["map_uuid"],
+		data["map_biome"],
 		data["map_width"],
 		data["map_height"]
 	)
@@ -831,6 +904,7 @@ func to_dict() -> Dictionary:
 		"map_uuid": map_uuid,
 		"map_width": map_width,
 		"map_height": map_height,
+		"map_biome": map_biome,
 		"terrain_data": terrain_data.duplicate(),
 		"npc_units": _serialize_npc_units(npc_units),
 	}

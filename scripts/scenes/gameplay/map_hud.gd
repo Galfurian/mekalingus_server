@@ -1,7 +1,6 @@
 extends Node
 
 @onready var info_panel  = $VBoxContainer/HBoxContainer/InfoPanel
-@onready var log_panel   = $VBoxContainer/LogPanel
 @onready var action_menu = $ActionMenu
 
 @onready var grid_drawer      = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/GridDrawer
@@ -9,12 +8,17 @@ extends Node
 @onready var grid_container   = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer
 @onready var scroll_view      = $VBoxContainer/HBoxContainer/GridMap/ScrollView
 
+@onready var log_panel  = $VBoxContainer/LogPanel
+@onready var combat_log = $VBoxContainer/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
+
 var game_map: GameMap
 var grid_size: int
 var sector_size: int
+var selected_entity: MapEntity
 
 func _ready():
 	grid_container.on_cell_selected.connect(_on_cell_selected)
+	combat_log.meta_clicked.connect(_on_log_meta_clicked)
 	scroll_view.scrolled.connect(_on_map_scrolled)
 
 func clear():
@@ -23,6 +27,11 @@ func clear():
 	mek_drawer.clear()
 	info_panel.clear()
 	log_panel.clear()
+	game_map.on_round_end.disconnect(_on_round_end)
+	game_map    = null
+	grid_size   = 50
+	sector_size = 10
+	selected_entity = null
 
 func setup(p_game_map: GameMap, p_grid_size: int = 50, p_sector_size: int = 10):
 	game_map    = p_game_map
@@ -33,26 +42,106 @@ func setup(p_game_map: GameMap, p_grid_size: int = 50, p_sector_size: int = 10):
 	mek_drawer.setup(p_game_map, p_grid_size, p_sector_size)
 	info_panel.setup(p_game_map)
 	log_panel.setup(p_game_map)
+	if not game_map.on_round_end.is_connected(_on_round_end):
+		game_map.on_round_end.connect(_on_round_end)
+
+func center_on(position: Vector2i) -> void:
+	if not scroll_view or not game_map:
+		return
+	# Convert tile coordinates to pixel coordinates.
+	var tile_pixel_pos = (position + Vector2i(sector_size, sector_size)) * grid_size
+	# Get the size of the scroll viewport (i.e., the visible area).
+	var viewport_size = scroll_view.get_size()
+	# Center position = move the scroll so the position is in the center of the screen
+	var scroll_x = tile_pixel_pos.x - (viewport_size.x / 2.) + (grid_size / 2.)
+	var scroll_y = tile_pixel_pos.y - (viewport_size.y / 2.) + (grid_size / 2.)
+	# Clamp scrolling within map bounds
+	var max_scroll_x = game_map.map_width  * grid_size + sector_size * 2 * grid_size - viewport_size.x
+	var max_scroll_y = game_map.map_height * grid_size + sector_size * 2 * grid_size - viewport_size.y
+	scroll_view.scroll_horizontal = clamp(scroll_x, 0, max_scroll_x)
+	scroll_view.scroll_vertical = clamp(scroll_y, 0, max_scroll_y)
+
+func zoom_out():
+	if not game_map or not scroll_view:
+		return
+	var visible_size = scroll_view.get_size()
+	var total_tiles_x = game_map.map_width
+	var total_tiles_y = game_map.map_height
+	# Compute the minimum grid size to fit the whole map.
+	var min_grid_size_x = visible_size.x / total_tiles_x
+	var min_grid_size_y = visible_size.y / total_tiles_y
+	var min_grid_size = max(4, min(min_grid_size_x, min_grid_size_y))
+	# Round to an even number for consistency.
+	grid_size = int(floor(min_grid_size / 2.0)) * 2
+	setup(game_map, grid_size)
+	
+	var center_tile = Vector2i(game_map.map_width / 2, game_map.map_height / 2)
+	center_on(center_tile)
+
+func _on_round_end() -> void:
+	if selected_entity:
+		center_on(selected_entity.position)
+
+func _on_log_meta_clicked(meta: String) -> void:
+	# Handle item link: item:<mek_uuid>:<item_uuid>
+	if meta.begins_with("item:"):
+		var parts = meta.substr(5).split(":")
+		if parts.size() != 2:
+			printerr("Invalid item meta format: ", meta)
+			return
+		var mek_uuid = parts[0]
+		var item_uuid = parts[1]
+		var entity = game_map.get_entity(mek_uuid)
+		if entity and is_instance_of(entity.entity, Mek):
+			selected_entity = entity
+			center_on(entity.position)
+			info_panel.set_entity(entity)
+			info_panel.select_item_by_uuid(item_uuid)
+			grid_drawer.set_selected_entity(entity)
+		else:
+			printerr("Could not find valid Mek entity for item link: ", meta)
+	# Handle Mek link: mek:<mek_uuid>
+	elif meta.begins_with("mek:"):
+		var mek_uuid = meta.substr(4)
+		var entity = game_map.get_entity(mek_uuid)
+		if entity and is_instance_of(entity.entity, Mek):
+			selected_entity = entity
+			center_on(entity.position)
+			info_panel.set_entity(entity)
+			grid_drawer.set_selected_entity(entity)
+		else:
+			printerr("Could not find valid Mek entity for mek link: ", meta)
+	elif meta.begins_with("pos:"):
+		var coord_text = meta.substr(4)
+		var coords = coord_text.split(",")
+		if coords.size() != 2:
+			printerr("Invalid position meta format: ", meta)
+			return
+		var x = int(coords[0])
+		var y = int(coords[1])
+		var target_pos = Vector2i(x, y)
+		if game_map.in_bounds(target_pos):
+			center_on(target_pos)
+		else:
+			printerr("Position out of bounds: ", target_pos)
+	else:
+		printerr("Unknown meta clicked: ", meta)
 
 func _on_cell_selected(cell_position: Vector2i):
 	"""Handles cell selection and updates the UnitInfoPanel."""
 	# Get the entity at the given position.
 	var entity = game_map.get_entity_at(cell_position)
 	if entity:
-		# Send the entity to the info panel.
+		selected_entity = entity
+		center_on(entity.position)
 		info_panel.set_entity(entity)
-		# Get the visible cells.
-		if is_instance_of(entity.entity, Mek):
-			grid_drawer.clear_selected_cells()
-			var visible_cells = game_map.get_visible_tiles(cell_position)
-			for visible_cell in visible_cells:
-				grid_drawer.select_cell(visible_cell)
+		grid_drawer.set_selected_entity(entity)
 
 func _input(_event):
 	if Input.is_key_pressed(KEY_ESCAPE):
+		selected_entity = null
 		info_panel.clear()
-		grid_drawer.clear_selected_cells()
-
+		grid_drawer.deselect_entity()
 
 func _on_map_scrolled(scroll_up: bool):
 	if not game_map:

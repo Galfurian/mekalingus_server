@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dyh3xjp4f2j5c"]
 
-[ext_resource type="Script" uid="uid://cio5gwfi51oxh" path="res://scripts/scenes/ui/server_panel.gd" id="1_ulw3n"]
+[ext_resource type="Script" uid="uid://delp80flsuhy7" path="res://scripts/scenes/ui/server_panel.gd" id="1_ulw3n"]
 
 [node name="ServerPanel" type="VBoxContainer"]
 anchors_preset = 15

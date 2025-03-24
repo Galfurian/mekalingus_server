@@ -47,26 +47,54 @@ static func get_modifier(damage_type: Enums.DamageType, target_type: String) -> 
 	# Default modifier if the type is not found (shouldn't happen)
 	return 1.0
 
-static func apply_damage(damage_type: Enums.DamageType, base_damage: int, target: Mek):
-	"""Applies damage to a target Mek using the correct modifiers."""
-	var remaining_damage = base_damage
-	
-	# Apply damage to shields first
+static func apply_effect_damage(effect: ItemEffect, target: Mek) -> Dictionary:
+	"""Applies damage from an effect to a Mek, with resistances and layer modifiers."""
+	var result = {
+		"shield": 0,
+		"armor": 0,
+		"health": 0,
+		"total": 0,
+		"raw": effect.amount,
+		"reduced": 0,
+		"type": effect.damage_type
+	}
+
+	# Base damage reduction
+	var reduction = target.damage_reduction_all
+	match effect.damage_type:
+		Enums.DamageType.KINETIC:   reduction += target.damage_reduction_kinetic
+		Enums.DamageType.ENERGY:    reduction += target.damage_reduction_energy
+		Enums.DamageType.EXPLOSIVE: reduction += target.damage_reduction_explosive
+		Enums.DamageType.PLASMA:    reduction += target.damage_reduction_plasma
+		Enums.DamageType.CORROSIVE: reduction += target.damage_reduction_corrosive
+
+	# Final clamped damage
+	var final_damage = max(effect.amount - reduction, 0)
+	result.reduced = effect.amount - final_damage
+	var remaining = final_damage
+
+	# Shield
 	if target.shield > 0:
-		var shield_damage = remaining_damage * get_modifier(damage_type, "shield")
-		target.shield -= shield_damage
-		remaining_damage -= shield_damage
-		if remaining_damage <= 0:
-			return  # Shield absorbed all damage
+		var mod = get_modifier(effect.damage_type, "shield")
+		var applied = min(remaining * mod, target.shield)
+		target.shield -= applied
+		remaining -= applied / mod
+		result.shield = applied
 
-	# Apply damage to armor next
-	if target.armor > 0:
-		var armor_damage = remaining_damage * get_modifier(damage_type, "armor")
-		target.armor -= armor_damage
-		remaining_damage -= armor_damage
-		if remaining_damage <= 0:
-			return  # Armor absorbed all damage
+	# Armor
+	if target.armor > 0 and remaining > 0:
+		var mod = get_modifier(effect.damage_type, "armor")
+		var applied = min(remaining * mod, target.armor)
+		target.armor -= applied
+		remaining -= applied / mod
+		result.armor = applied
 
-	# Finally, apply remaining damage to health
-	var health_damage = remaining_damage * get_modifier(damage_type, "health")
-	target.health -= health_damage
+	# Health
+	if remaining > 0:
+		var mod = get_modifier(effect.damage_type, "health")
+		var applied = remaining * mod
+		target.health -= applied
+		result.health = applied
+
+	result.total = result.shield + result.armor + result.health
+	return result

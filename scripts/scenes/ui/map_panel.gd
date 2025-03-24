@@ -8,6 +8,7 @@ extends Node
 
 @onready var map_size       = $MapSelector/HBoxContainer1/MapSize
 @onready var map_difficulty = $MapSelector/HBoxContainer2/Difficulty
+@onready var map_biome      = $MapSelector/HBoxContainer3/Biome
 
 @onready var map_hud  = $MapHud
 
@@ -39,7 +40,12 @@ func _on_server_stop():
 	map_hud.clear()
 
 func _on_generate():
-	var game_map = GameMap.new(GameServer.generate_uuid(), map_size.get_value(), map_size.get_value())
+	var game_map = GameMap.new(
+		GameServer.generate_uuid(),
+		map_biome.get_item_text(map_biome.get_selected_id()),
+		map_size.get_value(),
+		map_size.get_value()
+	)
 	game_map.generate_terrain()
 	game_map.spawn_enemies_on_map(map_difficulty.get_selected_id())
 	DataManager.save_map(game_map)
@@ -59,6 +65,7 @@ func _on_map_selected(index: int):
 	var game_map: GameMap = map_list.get_item_metadata(index)
 	if game_map:
 		map_hud.setup(game_map, grid_size)
+		map_hud.zoom_out()
 
 func _get_current_selected_map_index() -> int:
 	"""Retrieves the currently selected GameMap index."""
@@ -78,3 +85,13 @@ func _on_advance_turn():
 	var game_map: GameMap = _get_current_selected_map()
 	if game_map:
 		game_map.process_round()
+
+func _input(_event):
+	if Input.is_key_pressed(KEY_DELETE):
+		var index = _get_current_selected_map_index()
+		if index >= 0:
+			var game_map: GameMap = map_list.get_item_metadata(index)
+			if game_map:
+				DataManager.delete_map(game_map.map_uuid)
+				map_list.remove_item(index)
+				map_hud.clear()

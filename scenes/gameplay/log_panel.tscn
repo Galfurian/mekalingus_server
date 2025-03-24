@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cdsk2ml3347yf"]
 
-[ext_resource type="Script" uid="uid://bejlhlv3a5awk" path="res://scripts/scenes/gameplay/log_panel.gd" id="1_lv157"]
+[ext_resource type="Script" uid="uid://ct4lrv55fhwk" path="res://scripts/scenes/gameplay/log_panel.gd" id="1_lv157"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d761l"]
 bg_color = Color(0.21, 0.456, 0.354, 0.5)
@@ -34,6 +34,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 focus_mode = 2
+bbcode_enabled = true
 scroll_following = true
 selection_enabled = true
 
@@ -51,6 +52,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 focus_mode = 2
+bbcode_enabled = true
 scroll_following = true
 selection_enabled = true
 

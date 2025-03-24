@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dkiovd48dvjqd"]
 
-[ext_resource type="Script" uid="uid://cdq2vi0mayy4s" path="res://scripts/scenes/ui/map_panel.gd" id="1_54ar7"]
+[ext_resource type="Script" uid="uid://wb8h76c3hfb5" path="res://scripts/scenes/ui/map_panel.gd" id="1_54ar7"]
 [ext_resource type="PackedScene" uid="uid://bic16d6uw0g6y" path="res://scenes/gameplay/map_hud.tscn" id="2_5xqg1"]
 
 [node name="MapPanel" type="HSplitContainer"]
@@ -25,9 +25,6 @@ horizontal_alignment = 1
 [node name="AdvanceTurn" type="Button" parent="MapSelector"]
 layout_mode = 2
 text = "Advance Turn"
-
-[node name="HBoxContainer3" type="HBoxContainer" parent="MapSelector"]
-layout_mode = 2
 
 [node name="HSeparator" type="HSeparator" parent="MapSelector"]
 layout_mode = 2
@@ -66,6 +63,28 @@ text = "Difficulty"
 [node name="Difficulty" type="OptionButton" parent="MapSelector/HBoxContainer2"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="MapSelector"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MapSelector/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Biome"
+
+[node name="Biome" type="OptionButton" parent="MapSelector/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 0
+item_count = 4
+popup/item_0/text = "Archipelago"
+popup/item_0/id = 0
+popup/item_1/text = "Volcanic"
+popup/item_1/id = 1
+popup/item_2/text = "Grassland"
+popup/item_2/id = 2
+popup/item_3/text = "Mountain"
+popup/item_3/id = 3
 
 [node name="Generate" type="Button" parent="MapSelector"]
 layout_mode = 2

@@ -89,8 +89,13 @@ func is_dead() -> bool:
 	"""Returns true if the Mek has 0 or less health."""
 	return health <= 0
 
-func get_max_usable_weapon_range() -> int:
-	var max_range = 0
+func get_usable_weapon_range() -> Dictionary:
+	"""
+	Returns the minimum and maximum usable weapon range for the Mek,
+	excluding passive or unavailable modules.
+	"""
+	var min_range = null
+	var max_range = null
 	for item in items:
 		# Skip utility items.
 		if item.template.slot == Enums.SlotType.UTILITY:
@@ -102,8 +107,14 @@ func get_max_usable_weapon_range() -> int:
 				continue
 			if power < module.power_on_use:
 				continue
-			max_range = max(max_range, module.module_range)
-	return max_range
+			if min_range == null or module.module_range < min_range:
+				min_range = module.module_range
+			if max_range == null or module.module_range > max_range:
+				max_range = module.module_range
+	return {
+		"min": min_range if min_range != null else 0,
+		"max": max_range if max_range != null else 0
+	}
 
 func restore_health(amount: int) -> int:
 	var before = health
@@ -133,7 +144,7 @@ func regenerate():
 	restore_power(power_generation)
 
 func take_damage_from_effect(effect: ItemEffect) -> Dictionary:
-	"""Applies damage from a given effect, taking into account resistances."""
+	"""Applies damage from a given effect, using resistances and damage-type-specific strengths/weaknesses."""
 	var result = {
 		"shield": 0,
 		"armor": 0,
@@ -143,40 +154,60 @@ func take_damage_from_effect(effect: ItemEffect) -> Dictionary:
 		"reduced": 0,
 		"type": effect.damage_type
 	}
-	# Apply resistance if applicable.
-	var reduction = 0
+	# =========================================================================
+	# 1. DAMAGE MODIFIERS BY DAMAGE TYPE (strengths/weaknesses per layer)
+	# =========================================================================
+	var type_modifiers = {
+		Enums.DamageType.KINETIC:   { "armor": 0.8, "shield": 0.6, "health": 1.0 },
+		Enums.DamageType.ENERGY:    { "armor": 0.6, "shield": 1.5, "health": 1.0 },
+		Enums.DamageType.PLASMA:    { "armor": 1.2, "shield": 1.2, "health": 0.9 },
+		Enums.DamageType.EXPLOSIVE: { "armor": 1.3, "shield": 0.7, "health": 1.3 },
+		Enums.DamageType.CORROSIVE: { "armor": 1.3, "shield": 0.6, "health": 1.2 }
+	}
+	var modifiers = type_modifiers.get(effect.damage_type, {
+		"shield": 1.0, "armor": 1.0, "health": 1.0
+	})
+	# =========================================================================
+	# 2. APPLY FLAT DAMAGE REDUCTION
+	# =========================================================================
+	var reduction = damage_reduction_all
 	match effect.damage_type:
-		Enums.DamageType.KINETIC:
-			reduction = damage_reduction_kinetic
-		Enums.DamageType.ENERGY:
-			reduction = damage_reduction_energy
-		Enums.DamageType.EXPLOSIVE:
-			reduction = damage_reduction_explosive
-		Enums.DamageType.PLASMA:
-			reduction = damage_reduction_plasma
-		Enums.DamageType.CORROSIVE:
-			reduction = damage_reduction_corrosive
-		_:
-			reduction = 0
-	# Universal damage reduction
-	reduction += damage_reduction_all
-	# Clamp to avoid negative damage
-	var final_damage = max(effect.amount - reduction, 0)
-	result.reduced = effect.amount - final_damage
-	var amount = final_damage
+		Enums.DamageType.KINETIC:   reduction += damage_reduction_kinetic
+		Enums.DamageType.ENERGY:    reduction += damage_reduction_energy
+		Enums.DamageType.EXPLOSIVE: reduction += damage_reduction_explosive
+		Enums.DamageType.PLASMA:    reduction += damage_reduction_plasma
+		Enums.DamageType.CORROSIVE: reduction += damage_reduction_corrosive
+	var adjusted = max(effect.amount - reduction, 0)
+	result.reduced = effect.amount - adjusted
+	var remaining = adjusted
+	# =========================================================================
+	# 3. APPLY DAMAGE TO SHIELD
+	# =========================================================================
 	if shield > 0:
-		var absorbed = min(amount, shield)
-		shield -= absorbed
-		amount -= absorbed
-		result.shield = absorbed
-	if armor > 0 and amount > 0:
-		var absorbed = min(amount, armor)
-		armor -= absorbed
-		amount -= absorbed
-		result.armor = absorbed
-	if amount > 0:
-		health -= amount
-		result.health = amount
+		var raw = min(remaining, shield / modifiers.shield)
+		var scaled = int(round(raw * modifiers.shield))
+		shield = max(0, shield - scaled)
+		remaining -= raw
+		result.shield = scaled
+	# =========================================================================
+	# 4. APPLY DAMAGE TO ARMOR
+	# =========================================================================
+	if armor > 0 and remaining > 0:
+		var raw = min(remaining, armor / modifiers.armor)
+		var scaled = int(round(raw * modifiers.armor))
+		armor = max(0, armor - scaled)
+		remaining -= raw
+		result.armor = scaled
+	# =========================================================================
+	# 5. APPLY DAMAGE TO HEALTH
+	# =========================================================================
+	if remaining > 0:
+		var scaled = int(round(remaining * modifiers.health))
+		health = max(0, health - scaled)
+		result.health = scaled
+	# =========================================================================
+	# 6. FINAL TALLY
+	# =========================================================================
 	result.total = result.shield + result.armor + result.health
 	return result
 
@@ -189,17 +220,17 @@ func take_dot_damage() -> Dictionary:
 		"total": 0
 	}
 	for dot in active_effect_manager.get_dot_effects():
-		var dmg = take_damage_from_effect(dot.effect)
-		total_damage.shield += dmg.shield
-		total_damage.armor  += dmg.armor
-		total_damage.health += dmg.health
-		total_damage.total  += dmg.total
+		var damage = take_damage_from_effect(dot.effect)
+		total_damage.shield += damage.shield
+		total_damage.armor  += damage.armor
+		total_damage.health += damage.health
+		total_damage.total  += damage.total
 	return total_damage
 
 func repair_from_effect(effect: ItemEffect) -> Dictionary:
 	"""Applies a repair effect and returns a dictionary with the type and amount restored."""
-	var restored := 0
-	var stat := ""
+	var restored = 0
+	var stat = ""
 	match effect.type:
 		Enums.EffectType.HEALTH_REPAIR:
 			restored = restore_health(effect.amount)

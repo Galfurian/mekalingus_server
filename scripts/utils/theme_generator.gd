@@ -8,13 +8,13 @@ const FONT_ITALIC      = "res://themes/fonts/SpaceMono-Italic.ttf"
 const FONT_BOLD_ITALIC = "res://themes/fonts/SpaceMono-BoldItalic.ttf"
 
 # Color Palette
-const COLOR_BRIGHT  := Color("#ebebeb") # Text color for labels
-const COLOR_SHADOW  := Color("#9cafb3") # Secondary text color
-const COLOR_HOVER   := Color("#324a5f") # Button hover color
-const COLOR_PRESSED := Color("#9ca0a3") # Button pressed color
-const COLOR_MID     := Color("#889ca1") # Middle tone (text)
-const COLOR_DARK    := Color("#565a5d") # Dark elements (borders)
-const COLOR_BLACK   := Color("#242430") # Background color
+const COLOR_BRIGHT  = Color("#ebebeb") # Text color for labels
+const COLOR_SHADOW  = Color("#9cafb3") # Secondary text color
+const COLOR_HOVER   = Color("#324a5f") # Button hover color
+const COLOR_PRESSED = Color("#9ca0a3") # Button pressed color
+const COLOR_MID     = Color("#889ca1") # Middle tone (text)
+const COLOR_DARK    = Color("#565a5d") # Dark elements (borders)
+const COLOR_BLACK   = Color("#242430") # Background color
 
 # Theme Setup
 func setup() -> void:

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cosbr482fkmyp"]
 
-[ext_resource type="Script" uid="uid://cee5sft6hja7g" path="res://scripts/scenes/gameplay/info_panel.gd" id="1_x2cik"]
+[ext_resource type="Script" uid="uid://da0moyydvk0t1" path="res://scripts/scenes/gameplay/info_panel.gd" id="1_x2cik"]
 
 [node name="InfoPanel" type="Control"]
 layout_mode = 3

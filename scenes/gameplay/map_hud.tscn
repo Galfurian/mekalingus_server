@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bic16d6uw0g6y"]
 
-[ext_resource type="Script" uid="uid://btywg3o86itnx" path="res://scripts/scenes/gameplay/map_hud.gd" id="1_daorq"]
+[ext_resource type="Script" uid="uid://ba00licdu1mkt" path="res://scripts/scenes/gameplay/map_hud.gd" id="1_daorq"]
 [ext_resource type="PackedScene" uid="uid://cdsk2ml3347yf" path="res://scenes/gameplay/log_panel.tscn" id="3_7afkc"]
 [ext_resource type="PackedScene" uid="uid://cosbr482fkmyp" path="res://scenes/gameplay/InfoPanel.tscn" id="3_0206q"]
 [ext_resource type="PackedScene" uid="uid://cid4owatwb65x" path="res://scenes/gameplay/grid_map.tscn" id="3_vm2jc"]
@@ -37,6 +37,6 @@ size_flags_horizontal = 3
 [node name="LogPanel" parent="VBoxContainer" instance=ExtResource("3_7afkc")]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.3
+size_flags_stretch_ratio = 0.75
 
 [node name="ActionMenu" type="PopupMenu" parent="."]

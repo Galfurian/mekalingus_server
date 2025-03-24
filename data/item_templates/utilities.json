@@ -1,390 +1,390 @@
 {
-	"utl001": {
-		"name": "Jump Thrusters",
-		"description": "Grants a temporary speed boost and allows short-distance movement ignoring terrain.",
-		"slot": "utility",
-		"base_power_usage": 1,
-		"modules": [
-			{
-				"name": "Jump Boost",
-				"type": "active",
-				"power_on_use": 6,
-				"cooldown": 3,
-				"effects": [
-					{
-						"type": "SPEED_MODIFIER",
-						"target": "SELF",
-						"amount": 3,
-						"duration": 1
-					}
-				]
-			}
-		]
-	},
-	"utl002": {
-		"name": "Vector Stabilizers",
-		"description": "Increases turn speed and reduces movement penalties on rough terrain.",
-		"slot": "utility",
-		"base_power_usage": 3,
-		"modules": [
-			{
-				"name": "Adaptive Stabilization",
-				"passive": true,
-				"effects": [
-					{
-						"type": "SPEED_MODIFIER",
-						"target": "SELF",
-						"amount": 1
-					}
-				]
-			}
-		]
-	},
-	"utl003": {
-		"name": "Advanced Servo Motors",
-		"description": "Passively increases movement speed by a small amount.",
-		"slot": "utility",
-		"base_power_usage": 2,
-		"modules": [
-			{
-				"name": "Enhanced Motor Drive",
-				"passive": true,
-				"effects": [
-					{
-						"type": "SPEED_MODIFIER",
-						"target": "SELF",
-						"amount": 2
-					}
-				]
-			}
-		]
-	},
-	"utl004": {
-		"name": "Reactive Plating",
-		"description": "Passively increases armor durability, improving survivability in prolonged engagements.",
-		"slot": "utility",
-		"base_power_usage": 5,
-		"modules": [
-			{
-				"name": "Reinforced Armor",
-				"passive": true,
-				"effects": [
-					{
-						"type": "ARMOR_MODIFIER",
-						"target": "SELF",
-						"amount": 15
-					}
-				]
-			}
-		]
-	},
-	"utl005": {
-		"name": "Shield Booster",
-		"description": "Temporarily boosts shield capacity beyond its maximum limit.",
-		"slot": "utility",
-		"base_power_usage": 1,
-		"modules": [
-			{
-				"name": "Overcharge Shields",
-				"type": "active",
-				"power_on_use": 6,
-				"cooldown": 3,
-				"effects": [
-					{
-						"type": "SHIELD_MODIFIER",
-						"target": "SELF",
-						"amount": 25,
-						"duration": 2
-					}
-				]
-			}
-		]
-	},
-	"utl006": {
-		"name": "Energy Dissipator",
-		"description": "Reduces incoming energy-based damage by dispersing excess charge.",
-		"slot": "utility",
-		"base_power_usage": 4,
-		"modules": [
-			{
-				"name": "Energy Resistance",
-				"passive": true,
-				"effects": [
-					{
-						"type": "DAMAGE_REDUCTION_ENERGY",
-						"target": "SELF",
-						"amount": 10
-					}
-				]
-			}
-		]
-	},
-	"utl007": {
-		"name": "Kinetic Dampeners",
-		"description": "Absorbs and distributes kinetic force, reducing impact damage.",
-		"slot": "utility",
-		"base_power_usage": 4,
-		"modules": [
-			{
-				"name": "Kinetic Resistance",
-				"passive": true,
-				"effects": [
-					{
-						"type": "DAMAGE_REDUCTION_KINETIC",
-						"target": "SELF",
-						"amount": 10
-					}
-				]
-			}
-		]
-	},
-	"utl008": {
-		"name": "Blast Diffuser",
-		"description": "Specialized plating disperses explosive force, reducing area damage effects.",
-		"slot": "utility",
-		"base_power_usage": 4,
-		"modules": [
-			{
-				"name": "Explosive Resistance",
-				"passive": true,
-				"effects": [
-					{
-						"type": "DAMAGE_REDUCTION_EXPLOSIVE",
-						"target": "SELF",
-						"amount": 10
-					}
-				]
-			}
-		]
-	},
-	"utl009": {
-		"name": "Fortified Core",
-		"description": "Reinforces internal structure, increasing overall health capacity.",
-		"slot": "utility",
-		"base_power_usage": 5,
-		"modules": [
-			{
-				"name": "Structural Reinforcement",
-				"passive": true,
-				"effects": [
-					{
-						"type": "HEALTH_MODIFIER",
-						"target": "SELF",
-						"amount": 20
-					}
-				]
-			}
-		]
-	},
-	"utl010": {
-		"name": "Damage Control Unit",
-		"description": "An automated system that repairs minor structural damage in emergencies.",
-		"slot": "utility",
-		"base_power_usage": 1,
-		"modules": [
-			{
-				"name": "Self-Repair Protocol",
-				"type": "active",
-				"power_on_use": 6,
-				"cooldown": 3,
-				"effects": [
-					{
-						"type": "HEALTH_REPAIR",
-						"target": "SELF",
-						"amount": 20
-					}
-				]
-			}
-		]
-	},
-	"utl011": {
-		"name": "Plasma Deflector",
-		"description": "Advanced shielding minimizes the impact of plasma-based attacks.",
-		"slot": "utility",
-		"base_power_usage": 5,
-		"modules": [
-			{
-				"name": "Plasma Resistance",
-				"passive": true,
-				"effects": [
-					{
-						"type": "DAMAGE_REDUCTION_PLASMA",
-						"target": "SELF",
-						"amount": 10
-					}
-				]
-			}
-		]
-	},
-	"utl012": {
-		"name": "Corrosion Neutralizer",
-		"description": "A specialized coating reduces the effectiveness of corrosive attacks.",
-		"slot": "utility",
-		"base_power_usage": 5,
-		"modules": [
-			{
-				"name": "Corrosive Resistance",
-				"passive": true,
-				"effects": [
-					{
-						"type": "DAMAGE_REDUCTION_CORROSIVE",
-						"target": "SELF",
-						"amount": 10
-					}
-				]
-			}
-		]
-	},
-	"utl013": {
-		"name": "Multi-Layered Shielding",
-		"description": "An advanced defensive system that provides moderate resistance against all damage types by distributing energy absorption across multiple protective layers.",
-		"slot": "utility",
-		"base_power_usage": 6,
-		"modules": [
-			{
-				"name": "Universal Resistance",
-				"passive": true,
-				"effects": [
-					{
-						"type": "DAMAGE_REDUCTION_ALL",
-						"target": "SELF",
-						"amount": 5
-					}
-				]
-			}
-		]
-	},
-	"utl014": {
-		"name": "Targeting Computer",
-		"description": "A precision-targeting system that enhances weapon accuracy.",
-		"slot": "utility",
-		"base_power_usage": 4,
-		"modules": [
-			{
-				"name": "Precision Targeting",
-				"passive": true,
-				"effects": [
-					{
-						"type": "ACCURACY_MODIFIER",
-						"target": "SELF",
-						"amount": 10
-					}
-				]
-			}
-		]
-	},
-	"utl015": {
-		"name": "Advanced Optics",
-		"description": "High-resolution targeting optics that extend weapon range.",
-		"slot": "utility",
-		"base_power_usage": 5,
-		"modules": [
-			{
-				"name": "Enhanced Zoom",
-				"passive": true,
-				"effects": [
-					{
-						"type": "RANGE_MODIFIER",
-						"target": "SELF",
-						"amount": 1
-					}
-				]
-			}
-		]
-	},
-	"utl016": {
-		"name": "Sensor Disruptor",
-		"description": "Jams enemy targeting systems, reducing their accuracy.",
-		"slot": "utility",
-		"base_power_usage": 6,
-		"modules": [
-			{
-				"name": "Disruptive Signal",
-				"passive": false,
-				"power_on_use": 12,
-				"cooldown": 3,
-				"effects": [
-					{
-						"type": "ACCURACY_MODIFIER",
-						"target": "ENEMY",
-						"amount": -10
-					}
-				]
-			}
-		]
-	},
-	"utl017": {
-		"name": "Power Capacitor",
-		"description": "Stores excess energy and releases it when needed for an instant power surge.",
-		"slot": "utility",
-		"base_power_usage": 1,
-		"modules": [
-			{
-				"name": "Energy Release",
-				"type": "active",
-				"power_on_use": 6,
-				"cooldown": 3,
-				"effects": [
-					{
-						"type": "POWER_REGEN",
-						"target": "SELF",
-						"amount": 30
-					}
-				]
-			}
-		]
-	},
-	"utl018": {
-		"name": "Cooldown Optimizer",
-		"description": "Advanced system reduces cooldown times of all equipped modules.",
-		"slot": "utility",
-		"base_power_usage": 6,
-		"modules": [
-			{
-				"name": "System Acceleration",
-				"passive": true,
-				"effects": [
-					{
-						"type": "COOLDOWN_MODIFIER",
-						"target": "SELF",
-						"amount": 2
-					}
-				]
-			}
-		]
-	},
-	"utl019": {
-		"name": "Overdrive Core",
-		"description": "Temporarily boosts all combat stats at the cost of disabling shields.",
-		"slot": "utility",
-		"base_power_usage": 2,
-		"modules": [
-			{
-				"name": "Overdrive Mode",
-				"type": "active",
-				"power_on_use": 8,
-				"cooldown": 4,
-				"effects": [
-					{
-						"type": "SPEED_MODIFIER",
-						"target": "SELF",
-						"amount": 3,
-						"duration": 2
-					},
-					{
-						"type": "HEALTH_MODIFIER",
-						"target": "SELF",
-						"amount": 50,
-						"duration": 2
-					},
-					{
-						"type": "SHIELD_MODIFIER",
-						"target": "SELF",
-						"amount": -75,
-						"duration": 2
-					}
-				]
-			}
-		]
-	}
+    "utl001": {
+        "name": "Jump Thrusters",
+        "description": "Grants a temporary speed boost and allows short-distance movement ignoring terrain.",
+        "slot": "utility",
+        "base_power_usage": 23,
+        "modules": [
+            {
+                "name": "Jump Boost",
+                "passive": false,
+                "power_on_use": 11,
+                "cooldown": 3,
+                "effects": [
+                    {
+                        "type": "SPEED_MODIFIER",
+                        "target": "SELF",
+                        "amount": 3,
+                        "duration": 1
+                    }
+                ]
+            }
+        ]
+    },
+    "utl002": {
+        "name": "Vector Stabilizers",
+        "description": "Increases turn speed and reduces movement penalties on rough terrain.",
+        "slot": "utility",
+        "base_power_usage": 22,
+        "modules": [
+            {
+                "name": "Adaptive Stabilization",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "SPEED_MODIFIER",
+                        "target": "SELF",
+                        "amount": 1
+                    }
+                ]
+            }
+        ]
+    },
+    "utl003": {
+        "name": "Advanced Servo Motors",
+        "description": "Passively increases movement speed by a small amount.",
+        "slot": "utility",
+        "base_power_usage": 24,
+        "modules": [
+            {
+                "name": "Enhanced Motor Drive",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "SPEED_MODIFIER",
+                        "target": "SELF",
+                        "amount": 2
+                    }
+                ]
+            }
+        ]
+    },
+    "utl004": {
+        "name": "Reactive Plating",
+        "description": "Passively increases armor durability, improving survivability in prolonged engagements.",
+        "slot": "utility",
+        "base_power_usage": 28,
+        "modules": [
+            {
+                "name": "Reinforced Armor",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "ARMOR_MODIFIER",
+                        "target": "SELF",
+                        "amount": 15
+                    }
+                ]
+            }
+        ]
+    },
+    "utl005": {
+        "name": "Shield Booster",
+        "description": "Temporarily boosts shield capacity beyond its maximum limit.",
+        "slot": "utility",
+        "base_power_usage": 34,
+        "modules": [
+            {
+                "name": "Overcharge Shields",
+                "passive": false,
+                "power_on_use": 16,
+                "cooldown": 3,
+                "effects": [
+                    {
+                        "type": "SHIELD_MODIFIER",
+                        "target": "SELF",
+                        "amount": 25,
+                        "duration": 2
+                    }
+                ]
+            }
+        ]
+    },
+    "utl006": {
+        "name": "Energy Dissipator",
+        "description": "Reduces incoming energy-based damage by dispersing excess charge.",
+        "slot": "utility",
+        "base_power_usage": 28,
+        "modules": [
+            {
+                "name": "Energy Resistance",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "DAMAGE_REDUCTION_ENERGY",
+                        "target": "SELF",
+                        "amount": 10
+                    }
+                ]
+            }
+        ]
+    },
+    "utl007": {
+        "name": "Kinetic Dampeners",
+        "description": "Absorbs and distributes kinetic force, reducing impact damage.",
+        "slot": "utility",
+        "base_power_usage": 27,
+        "modules": [
+            {
+                "name": "Kinetic Resistance",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "DAMAGE_REDUCTION_KINETIC",
+                        "target": "SELF",
+                        "amount": 10
+                    }
+                ]
+            }
+        ]
+    },
+    "utl008": {
+        "name": "Blast Diffuser",
+        "description": "Specialized plating disperses explosive force, reducing area damage effects.",
+        "slot": "utility",
+        "base_power_usage": 27,
+        "modules": [
+            {
+                "name": "Explosive Resistance",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "DAMAGE_REDUCTION_EXPLOSIVE",
+                        "target": "SELF",
+                        "amount": 10
+                    }
+                ]
+            }
+        ]
+    },
+    "utl009": {
+        "name": "Fortified Core",
+        "description": "Reinforces internal structure, increasing overall health capacity.",
+        "slot": "utility",
+        "base_power_usage": 32,
+        "modules": [
+            {
+                "name": "Structural Reinforcement",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "HEALTH_MODIFIER",
+                        "target": "SELF",
+                        "amount": 20
+                    }
+                ]
+            }
+        ]
+    },
+    "utl010": {
+        "name": "Damage Control Unit",
+        "description": "An automated system that repairs minor structural damage in emergencies.",
+        "slot": "utility",
+        "base_power_usage": 30,
+        "modules": [
+            {
+                "name": "Self-Repair Protocol",
+                "passive": false,
+                "power_on_use": 16,
+                "cooldown": 3,
+                "effects": [
+                    {
+                        "type": "HEALTH_REPAIR",
+                        "target": "SELF",
+                        "amount": 20
+                    }
+                ]
+            }
+        ]
+    },
+    "utl011": {
+        "name": "Plasma Deflector",
+        "description": "Advanced shielding minimizes the impact of plasma-based attacks.",
+        "slot": "utility",
+        "base_power_usage": 26,
+        "modules": [
+            {
+                "name": "Plasma Resistance",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "DAMAGE_REDUCTION_PLASMA",
+                        "target": "SELF",
+                        "amount": 10
+                    }
+                ]
+            }
+        ]
+    },
+    "utl012": {
+        "name": "Corrosion Neutralizer",
+        "description": "A specialized coating reduces the effectiveness of corrosive attacks.",
+        "slot": "utility",
+        "base_power_usage": 27,
+        "modules": [
+            {
+                "name": "Corrosive Resistance",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "DAMAGE_REDUCTION_CORROSIVE",
+                        "target": "SELF",
+                        "amount": 10
+                    }
+                ]
+            }
+        ]
+    },
+    "utl013": {
+        "name": "Multi-Layered Shielding",
+        "description": "An advanced defensive system that provides moderate resistance against all damage types by distributing energy absorption across multiple protective layers.",
+        "slot": "utility",
+        "base_power_usage": 23,
+        "modules": [
+            {
+                "name": "Universal Resistance",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "DAMAGE_REDUCTION_ALL",
+                        "target": "SELF",
+                        "amount": 5
+                    }
+                ]
+            }
+        ]
+    },
+    "utl014": {
+        "name": "Targeting Computer",
+        "description": "A precision-targeting system that enhances weapon accuracy.",
+        "slot": "utility",
+        "base_power_usage": 27,
+        "modules": [
+            {
+                "name": "Precision Targeting",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "ACCURACY_MODIFIER",
+                        "target": "SELF",
+                        "amount": 10
+                    }
+                ]
+            }
+        ]
+    },
+    "utl015": {
+        "name": "Advanced Optics",
+        "description": "High-resolution targeting optics that extend weapon range.",
+        "slot": "utility",
+        "base_power_usage": 23,
+        "modules": [
+            {
+                "name": "Enhanced Zoom",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "RANGE_MODIFIER",
+                        "target": "SELF",
+                        "amount": 1
+                    }
+                ]
+            }
+        ]
+    },
+    "utl016": {
+        "name": "Sensor Disruptor",
+        "description": "Jams enemy targeting systems, reducing their accuracy.",
+        "slot": "utility",
+        "base_power_usage": 18,
+        "modules": [
+            {
+                "name": "Disruptive Signal",
+                "passive": false,
+                "power_on_use": 9,
+                "cooldown": 3,
+                "effects": [
+                    {
+                        "type": "ACCURACY_MODIFIER",
+                        "target": "ENEMY",
+                        "amount": -10
+                    }
+                ]
+            }
+        ]
+    },
+    "utl017": {
+        "name": "Power Capacitor",
+        "description": "Stores excess energy and releases it when needed for an instant power surge.",
+        "slot": "utility",
+        "base_power_usage": 38,
+        "modules": [
+            {
+                "name": "Energy Release",
+                "passive": false,
+                "power_on_use": 18,
+                "cooldown": 3,
+                "effects": [
+                    {
+                        "type": "POWER_REGEN",
+                        "target": "SELF",
+                        "amount": 30
+                    }
+                ]
+            }
+        ]
+    },
+    "utl018": {
+        "name": "Cooldown Optimizer",
+        "description": "Advanced system reduces cooldown times of all equipped modules.",
+        "slot": "utility",
+        "base_power_usage": 23,
+        "modules": [
+            {
+                "name": "System Acceleration",
+                "passive": true,
+                "effects": [
+                    {
+                        "type": "COOLDOWN_MODIFIER",
+                        "target": "SELF",
+                        "amount": 2
+                    }
+                ]
+            }
+        ]
+    },
+    "utl019": {
+        "name": "Overdrive Core",
+        "description": "Temporarily boosts all combat stats at the cost of disabling shields.",
+        "slot": "utility",
+        "base_power_usage": 11,
+        "modules": [
+            {
+                "name": "Overdrive Mode",
+                "passive": false,
+                "power_on_use": 6,
+                "cooldown": 4,
+                "effects": [
+                    {
+                        "type": "SPEED_MODIFIER",
+                        "target": "SELF",
+                        "amount": 3,
+                        "duration": 2
+                    },
+                    {
+                        "type": "HEALTH_MODIFIER",
+                        "target": "SELF",
+                        "amount": 50,
+                        "duration": 2
+                    },
+                    {
+                        "type": "SHIELD_MODIFIER",
+                        "target": "SELF",
+                        "amount": -75,
+                        "duration": 2
+                    }
+                ]
+            }
+        ]
+    }
 }

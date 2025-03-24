@@ -1,191 +1,191 @@
 {
-    "lwpn001": {
-        "name": "Titan Railcannon",
-        "description": "A devastating kinetic weapon that fires hypervelocity rounds, piercing armor with extreme force.",
-        "slot": "large",
-        "base_power_usage": 3,
-        "modules": [
-            {
-                "name": "Titan Shot",
-                "type": "active",
-                "power_on_use": 13,
-                "module_range": 6,
-                "cooldown": 2,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "KINETIC",
-                        "amount": 90
-                    },
-                    {
-                        "type": "DAMAGE_REDUCTION_ALL",
-                        "target": "ENEMY",
-                        "amount": -10,
-                        "duration": 3
-                    }
-                ]
-            }
-        ]
-    },
-    "lwpn002": {
-        "name": "Shockwave Gauss Cannon",
-        "description": "A kinetic impact cannon that creates a powerful shockwave, pushing back enemies.",
-        "slot": "large",
-        "base_power_usage": 3,
-        "modules": [
-            {
-                "name": "Gauss Shockwave",
-                "type": "active",
-                "power_on_use": 13,
-                "module_range": 5,
-                "cooldown": 2,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "AREA",
-                        "damage_type": "KINETIC",
-                        "amount": 60,
-                        "radius": 2
-                    },
-                    {
-                        "type": "SPEED_MODIFIER",
-                        "target": "ENEMY",
-                        "amount": -3,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "lwpn003": {
-        "name": "Nova Lance",
-        "description": "A high-intensity energy beam weapon that charges up before firing a concentrated blast.",
-        "slot": "large",
-        "base_power_usage": 4,
-        "modules": [
-            {
-                "name": "Nova Charge",
-                "type": "active",
-                "power_on_use": 20,
-                "module_range": 6,
-                "cooldown": 3,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "ENERGY",
-                        "amount": 100
-                    }
-                ]
-            }
-        ]
-    },
-    "lwpn004": {
-        "name": "Singularity Disruptor",
-        "description": "Fires an energy pulse that destabilizes shields and drains enemy power systems.",
-        "slot": "large",
-        "base_power_usage": 3,
-        "modules": [
-            {
-                "name": "Disruptor Pulse",
-                "type": "active",
-                "power_on_use": 13,
-                "module_range": 5,
-                "cooldown": 2,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "ENERGY",
-                        "amount": 80
-                    },
-                    {
-                        "type": "POWER_REGEN",
-                        "target": "ENEMY",
-                        "amount": -15,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "lwpn005": {
-        "name": "Siege Barrage Launcher",
-        "description": "A long-range explosive launcher that bombards enemy positions with multiple missiles.",
-        "slot": "large",
-        "base_power_usage": 3,
-        "modules": [
-            {
-                "name": "Barrage Strike",
-                "type": "active",
-                "power_on_use": 13,
-                "module_range": 6,
-                "cooldown": 2,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "AREA",
-                        "damage_type": "EXPLOSIVE",
-                        "amount": 70,
-                        "radius": 3
-                    }
-                ]
-            }
-        ]
-    },
-    "lwpn006": {
-        "name": "Devastator Mortar",
-        "description": "Fires massive explosive shells that deal extreme area damage over a large radius.",
-        "slot": "large",
-        "base_power_usage": 4,
-        "modules": [
-            {
-                "name": "Devastator Blast",
-                "type": "active",
-                "power_on_use": 20,
-                "module_range": 6,
-                "cooldown": 3,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "AREA",
-                        "damage_type": "EXPLOSIVE",
-                        "amount": 90,
-                        "radius": 4
-                    }
-                ]
-            }
-        ]
-    },
-    "lwpn007": {
-        "name": "Incinerator Beam",
-        "description": "A high-intensity plasma beam that continuously burns through enemy defenses.",
-        "slot": "large",
-        "base_power_usage": 3,
-        "modules": [
-            {
-                "name": "Burning Stream",
-                "type": "active",
-                "power_on_use": 13,
-                "module_range": 5,
-                "cooldown": 2,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "PLASMA",
-                        "amount": 95
-                    },
-                    {
-                        "type": "DAMAGE_OVER_TIME",
-                        "target": "ENEMY",
-                        "damage_type": "PLASMA",
-                        "amount": 15,
-                        "duration": 3
-                    }
-                ]
-            }
-        ]
-    }
+	"lwpn001": {
+		"name": "Titan Railcannon",
+		"description": "A devastating kinetic weapon that fires hypervelocity rounds, piercing armor with extreme force.",
+		"slot": "large",
+		"base_power_usage": 77.0,
+		"modules": [
+			{
+				"name": "Titan Shot",
+				"passive": false,
+				"power_on_use": 46.0,
+				"module_range": 6.0,
+				"cooldown": 2.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 90.0
+					},
+					{
+						"type": "DAMAGE_REDUCTION_ALL",
+						"target": "ENEMY",
+						"amount": -10.0,
+						"duration": 3.0
+					}
+				]
+			}
+		]
+	},
+	"lwpn002": {
+		"name": "Shockwave Gauss Cannon",
+		"description": "A kinetic impact cannon that creates a powerful shockwave, pushing back enemies.",
+		"slot": "large",
+		"base_power_usage": 41.0,
+		"modules": [
+			{
+				"name": "Gauss Shockwave",
+				"passive": false,
+				"power_on_use": 25.0,
+				"module_range": 5.0,
+				"cooldown": 2.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "KINETIC",
+						"amount": 60.0,
+						"radius": 2.0
+					},
+					{
+						"type": "SPEED_MODIFIER",
+						"target": "ENEMY",
+						"amount": -3.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	},
+	"lwpn003": {
+		"name": "Nova Lance",
+		"description": "A high-intensity energy beam weapon that charges up before firing a concentrated blast.",
+		"slot": "large",
+		"base_power_usage": 109.0,
+		"modules": [
+			{
+				"name": "Nova Charge",
+				"passive": false,
+				"power_on_use": 64.0,
+				"module_range": 6.0,
+				"cooldown": 3.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 100.0
+					}
+				]
+			}
+		]
+	},
+	"lwpn004": {
+		"name": "Singularity Disruptor",
+		"description": "Fires an energy pulse that destabilizes shields and drains enemy power systems.",
+		"slot": "large",
+		"base_power_usage": 53.0,
+		"modules": [
+			{
+				"name": "Disruptor Pulse",
+				"passive": false,
+				"power_on_use": 30.0,
+				"module_range": 5.0,
+				"cooldown": 2.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 80.0
+					},
+					{
+						"type": "POWER_REGEN",
+						"target": "ENEMY",
+						"amount": -15.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	},
+	"lwpn005": {
+		"name": "Siege Barrage Launcher",
+		"description": "A long-range explosive launcher that bombards enemy positions with multiple missiles.",
+		"slot": "large",
+		"base_power_usage": 62.0,
+		"modules": [
+			{
+				"name": "Barrage Strike",
+				"passive": false,
+				"power_on_use": 37.0,
+				"module_range": 6.0,
+				"cooldown": 2.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "EXPLOSIVE",
+						"amount": 70.0,
+						"radius": 3.0
+					}
+				]
+			}
+		]
+	},
+	"lwpn006": {
+		"name": "Devastator Mortar",
+		"description": "Fires massive explosive shells that deal extreme area damage over a large radius.",
+		"slot": "large",
+		"base_power_usage": 93.0,
+		"modules": [
+			{
+				"name": "Devastator Blast",
+				"passive": false,
+				"power_on_use": 54.0,
+				"module_range": 6.0,
+				"cooldown": 3.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "EXPLOSIVE",
+						"amount": 90.0,
+						"radius": 4.0
+					}
+				]
+			}
+		]
+	},
+	"lwpn007": {
+		"name": "Incinerator Beam",
+		"description": "A high-intensity plasma beam that continuously burns through enemy defenses.",
+		"slot": "large",
+		"base_power_usage": 122.0,
+		"modules": [
+			{
+				"name": "Burning Stream",
+				"passive": false,
+				"power_on_use": 74.0,
+				"module_range": 5.0,
+				"cooldown": 2.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "PLASMA",
+						"amount": 95.0
+					},
+					{
+						"type": "DAMAGE_OVER_TIME",
+						"target": "ENEMY",
+						"damage_type": "PLASMA",
+						"amount": 15.0,
+						"duration": 3.0
+					}
+				]
+			}
+		]
+	}
 }

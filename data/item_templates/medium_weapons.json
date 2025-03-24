@@ -1,550 +1,550 @@
 {
-    "mwpn001": {
-        "name": "Rotary Cannon",
-        "description": "A high-speed kinetic gatling cannon, firing a continuous barrage of rounds with moderate damage.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Gatling Burst",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 3,
-                "cooldown": 0,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "KINETIC",
-                        "amount": 20
-                    },
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "KINETIC",
-                        "amount": 20
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn002": {
-        "name": "Impact Driver",
-        "description": "A kinetic-powered rail spike launcher designed to stagger enemies with its high impact force.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Piercing Strike",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 4,
-                "cooldown": 1,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "KINETIC",
-                        "amount": 45
-                    },
-                    {
-                        "type": "SPEED_MODIFIER",
-                        "target": "ENEMY",
-                        "amount": -2,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn003": {
-        "name": "Magnet Accelerator",
-        "description": "A long-range kinetic cannon that increases velocity over distance, dealing greater damage at range.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Accelerated Shot",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 5,
-                "cooldown": 0,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "KINETIC",
-                        "amount": 55
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn004": {
-        "name": "Scatter Chaingun",
-        "description": "A close-range kinetic weapon that fires a burst of shredding rounds, effective against light armor.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Scatter Shot",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 2,
-                "cooldown": 0,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "AREA",
-                        "damage_type": "KINETIC",
-                        "amount": 25,
-                        "radius": 1
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn005": {
-        "name": "Armor-Piercing Shotgun",
-        "description": "A kinetic shotgun designed for devastating close-range damage, ignoring some armor resistance.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Shredder Rounds",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 1,
-                "cooldown": 0,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "KINETIC",
-                        "amount": 50
-                    },
-                    {
-                        "type": "DAMAGE_REDUCTION_ALL",
-                        "target": "ENEMY",
-                        "amount": -10,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn006": {
-        "name": "Fusion Cutter",
-        "description": "A close-range energy beam that melts through armor with sustained exposure.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Thermal Burn",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 1,
-                "cooldown": 0,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "ENERGY",
-                        "amount": 45
-                    },
-                    {
-                        "type": "DAMAGE_OVER_TIME",
-                        "target": "ENEMY",
-                        "damage_type": "PLASMA",
-                        "amount": 10,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn007": {
-        "name": "Overload Beam",
-        "description": "A directed energy beam that grows weaker the longer it is fired, requiring controlled bursts.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Overloaded Shot",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 3,
-                "cooldown": 0,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "ENERGY",
-                        "amount": 60
-                    },
-                    {
-                        "type": "POWER_REGEN",
-                        "target": "SELF",
-                        "amount": -5,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn008": {
-        "name": "Ionic Pulse Cannon",
-        "description": "An energy weapon that disrupts enemy shields, dealing area damage and reducing shield regen.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "EMP Wave",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 3,
-                "cooldown": 1,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "AREA",
-                        "damage_type": "ENERGY",
-                        "amount": 40,
-                        "radius": 2
-                    },
-                    {
-                        "type": "SHIELD_REGEN",
-                        "target": "ENEMY",
-                        "amount": -10,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn009": {
-        "name": "Disruptor Lance",
-        "description": "A precision energy bolt that destabilizes enemy shields, improving hit accuracy.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Precision Disruptor",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 4,
-                "cooldown": 0,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "ENERGY",
-                        "amount": 40
-                    },
-                    {
-                        "type": "ACCURACY_MODIFIER",
-                        "target": "SELF",
-                        "amount": 10,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn010": {
-        "name": "Resonance Emitter",
-        "description": "An energy beam that gains power the longer it remains on the same target.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Focused Resonance",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 3,
-                "cooldown": 0,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "ENERGY",
-                        "amount": 35
-                    },
-                    {
-                        "type": "DAMAGE_OVER_TIME",
-                        "target": "ENEMY",
-                        "damage_type": "ENERGY",
-                        "amount": 10,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn011": {
-        "name": "Guided Smart Missile",
-        "description": "A self-adjusting missile that tracks enemies within range, ensuring impact.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Homing Payload",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 5,
-                "cooldown": 1,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "EXPLOSIVE",
-                        "amount": 50
-                    },
-                    {
-                        "type": "ACCURACY_MODIFIER",
-                        "target": "SELF",
-                        "amount": 15,
-                        "duration": 1
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn012": {
-        "name": "Grenade Launcher",
-        "description": "Launches arcing explosives over cover, ideal for indirect attacks.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Arcing Blast",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 4,
-                "cooldown": 1,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "AREA",
-                        "damage_type": "EXPLOSIVE",
-                        "amount": 40,
-                        "radius": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn013": {
-        "name": "Shockwave Bombard",
-        "description": "Mid-range artillery shells that create concussive shockwaves, slowing enemies.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Concussive Impact",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 3,
-                "cooldown": 1,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "AREA",
-                        "damage_type": "EXPLOSIVE",
-                        "amount": 35,
-                        "radius": 2
-                    },
-                    {
-                        "type": "SPEED_MODIFIER",
-                        "target": "ENEMY",
-                        "amount": -3,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn014": {
-        "name": "HE Cluster Shells",
-        "description": "A fragmentation cannon that scatters multiple explosive rounds over a wide area.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Cluster Barrage",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 4,
-                "cooldown": 1,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "AREA",
-                        "damage_type": "EXPLOSIVE",
-                        "amount": 45,
-                        "radius": 3
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn015": {
-        "name": "Siege Mortar",
-        "description": "A slow-firing but devastating long-range mortar, useful for prolonged engagements.",
-        "slot": "medium",
-        "base_power_usage": 2,
-        "modules": [
-            {
-                "name": "Area Suppression",
-                "type": "active",
-                "power_on_use": 11,
-                "module_range": 5,
-                "cooldown": 2,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "AREA",
-                        "damage_type": "EXPLOSIVE",
-                        "amount": 60,
-                        "radius": 3
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn016": {
-        "name": "Thermal Lance Cannon",
-        "description": "A high-heat plasma weapon that rapidly burns through enemy shields.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Focused Plasma Beam",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 3,
-                "cooldown": 0,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "PLASMA",
-                        "amount": 50
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn017": {
-        "name": "Plasma Arc Launcher",
-        "description": "A plasma projectile launcher that bounces off surfaces before exploding.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Arc Plasma",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 4,
-                "cooldown": 1,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "AREA",
-                        "damage_type": "PLASMA",
-                        "amount": 55,
-                        "radius": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn018": {
-        "name": "Volatile Plasma Repeater",
-        "description": "A rapid-fire plasma weapon that risks overheating with prolonged use.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Overheat Burst",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 3,
-                "cooldown": 0,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "PLASMA",
-                        "amount": 40
-                    },
-                    {
-                        "type": "POWER_REGEN",
-                        "target": "SELF",
-                        "amount": -5,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn019": {
-        "name": "Overcharged Plasma Blaster",
-        "description": "A slow-firing but highly powerful plasma cannon that overheats if used too often.",
-        "slot": "medium",
-        "base_power_usage": 2,
-        "modules": [
-            {
-                "name": "Overcharge Blast",
-                "type": "active",
-                "power_on_use": 11,
-                "module_range": 4,
-                "cooldown": 2,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "PLASMA",
-                        "amount": 70
-                    },
-                    {
-                        "type": "POWER_REGEN",
-                        "target": "SELF",
-                        "amount": -10,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    },
-    "mwpn020": {
-        "name": "Heatwave Generator",
-        "description": "A close-range plasma spray weapon that applies a burning effect to enemies.",
-        "slot": "medium",
-        "base_power_usage": 1,
-        "modules": [
-            {
-                "name": "Heatwave Pulse",
-                "type": "active",
-                "power_on_use": 6,
-                "module_range": 2,
-                "cooldown": 0,
-                "effects": [
-                    {
-                        "type": "DAMAGE",
-                        "target": "ENEMY",
-                        "damage_type": "PLASMA",
-                        "amount": 35
-                    },
-                    {
-                        "type": "DAMAGE_OVER_TIME",
-                        "target": "ENEMY",
-                        "damage_type": "PLASMA",
-                        "amount": 10,
-                        "duration": 2
-                    }
-                ]
-            }
-        ]
-    }
+	"mwpn001": {
+		"name": "Rotary Cannon",
+		"description": "A high-speed kinetic gatling cannon, firing a continuous barrage of rounds with moderate damage.",
+		"slot": "medium",
+		"base_power_usage": 41.0,
+		"modules": [
+			{
+				"name": "Gatling Burst",
+				"passive": false,
+				"power_on_use": 21.0,
+				"module_range": 3.0,
+				"cooldown": 0.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 20.0
+					},
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 20.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn002": {
+		"name": "Impact Driver",
+		"description": "A kinetic-powered rail spike launcher designed to stagger enemies with its high impact force.",
+		"slot": "medium",
+		"base_power_usage": 46.0,
+		"modules": [
+			{
+				"name": "Piercing Strike",
+				"passive": false,
+				"power_on_use": 24.0,
+				"module_range": 4.0,
+				"cooldown": 1.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 45.0
+					},
+					{
+						"type": "SPEED_MODIFIER",
+						"target": "ENEMY",
+						"amount": -2.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn003": {
+		"name": "Magnet Accelerator",
+		"description": "A long-range kinetic cannon that increases velocity over distance, dealing greater damage at range.",
+		"slot": "medium",
+		"base_power_usage": 63.0,
+		"modules": [
+			{
+				"name": "Accelerated Shot",
+				"passive": false,
+				"power_on_use": 31.0,
+				"module_range": 5.0,
+				"cooldown": 0.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 55.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn004": {
+		"name": "Scatter Chaingun",
+		"description": "A close-range kinetic weapon that fires a burst of shredding rounds, effective against light armor.",
+		"slot": "medium",
+		"base_power_usage": 24.0,
+		"modules": [
+			{
+				"name": "Scatter Shot",
+				"passive": false,
+				"power_on_use": 12.0,
+				"module_range": 2.0,
+				"cooldown": 0.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "KINETIC",
+						"amount": 25.0,
+						"radius": 1.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn005": {
+		"name": "Armor-Piercing Shotgun",
+		"description": "A kinetic shotgun designed for devastating close-range damage, ignoring some armor resistance.",
+		"slot": "medium",
+		"base_power_usage": 41.0,
+		"modules": [
+			{
+				"name": "Shredder Rounds",
+				"passive": false,
+				"power_on_use": 21.0,
+				"module_range": 1.0,
+				"cooldown": 0.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 50.0
+					},
+					{
+						"type": "DAMAGE_REDUCTION_ALL",
+						"target": "ENEMY",
+						"amount": -10.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn006": {
+		"name": "Fusion Cutter",
+		"description": "A close-range energy beam that melts through armor with sustained exposure.",
+		"slot": "medium",
+		"base_power_usage": 60.0,
+		"modules": [
+			{
+				"name": "Thermal Burn",
+				"passive": false,
+				"power_on_use": 30.0,
+				"module_range": 1.0,
+				"cooldown": 0.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 45.0
+					},
+					{
+						"type": "DAMAGE_OVER_TIME",
+						"target": "ENEMY",
+						"damage_type": "PLASMA",
+						"amount": 10.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn007": {
+		"name": "Overload Beam",
+		"description": "A directed energy beam that grows weaker the longer it is fired, requiring controlled bursts.",
+		"slot": "medium",
+		"base_power_usage": 59.0,
+		"modules": [
+			{
+				"name": "Overloaded Shot",
+				"passive": false,
+				"power_on_use": 31.0,
+				"module_range": 3.0,
+				"cooldown": 0.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 60.0
+					},
+					{
+						"type": "POWER_REGEN",
+						"target": "SELF",
+						"amount": -5.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn008": {
+		"name": "Ionic Pulse Cannon",
+		"description": "An energy weapon that disrupts enemy shields, dealing area damage and reducing shield regen.",
+		"slot": "medium",
+		"base_power_usage": 31.0,
+		"modules": [
+			{
+				"name": "EMP Wave",
+				"passive": false,
+				"power_on_use": 15.0,
+				"module_range": 3.0,
+				"cooldown": 1.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "ENERGY",
+						"amount": 40.0,
+						"radius": 2.0
+					},
+					{
+						"type": "SHIELD_REGEN",
+						"target": "ENEMY",
+						"amount": -10.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn009": {
+		"name": "Disruptor Lance",
+		"description": "A precision energy bolt that destabilizes enemy shields, improving hit accuracy.",
+		"slot": "medium",
+		"base_power_usage": 52.0,
+		"modules": [
+			{
+				"name": "Precision Disruptor",
+				"passive": false,
+				"power_on_use": 27.0,
+				"module_range": 4.0,
+				"cooldown": 0.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 40.0
+					},
+					{
+						"type": "ACCURACY_MODIFIER",
+						"target": "SELF",
+						"amount": 10.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn010": {
+		"name": "Resonance Emitter",
+		"description": "An energy beam that gains power the longer it remains on the same target.",
+		"slot": "medium",
+		"base_power_usage": 48.0,
+		"modules": [
+			{
+				"name": "Focused Resonance",
+				"passive": false,
+				"power_on_use": 24.0,
+				"module_range": 3.0,
+				"cooldown": 0.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 35.0
+					},
+					{
+						"type": "DAMAGE_OVER_TIME",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 10.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn011": {
+		"name": "Guided Smart Missile",
+		"description": "A self-adjusting missile that tracks enemies within range, ensuring impact.",
+		"slot": "medium",
+		"base_power_usage": 71.0,
+		"modules": [
+			{
+				"name": "Homing Payload",
+				"passive": false,
+				"power_on_use": 34.0,
+				"module_range": 5.0,
+				"cooldown": 1.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "EXPLOSIVE",
+						"amount": 50.0
+					},
+					{
+						"type": "ACCURACY_MODIFIER",
+						"target": "SELF",
+						"amount": 15.0,
+						"duration": 1.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn012": {
+		"name": "Grenade Launcher",
+		"description": "Launches arcing explosives over cover, ideal for indirect attacks.",
+		"slot": "medium",
+		"base_power_usage": 43.0,
+		"modules": [
+			{
+				"name": "Arcing Blast",
+				"passive": false,
+				"power_on_use": 22.0,
+				"module_range": 4.0,
+				"cooldown": 1.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "EXPLOSIVE",
+						"amount": 40.0,
+						"radius": 2.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn013": {
+		"name": "Shockwave Bombard",
+		"description": "Mid-range artillery shells that create concussive shockwaves, slowing enemies.",
+		"slot": "medium",
+		"base_power_usage": 34.0,
+		"modules": [
+			{
+				"name": "Concussive Impact",
+				"passive": false,
+				"power_on_use": 16.0,
+				"module_range": 3.0,
+				"cooldown": 1.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "EXPLOSIVE",
+						"amount": 35.0,
+						"radius": 2.0
+					},
+					{
+						"type": "SPEED_MODIFIER",
+						"target": "ENEMY",
+						"amount": -3.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn014": {
+		"name": "HE Cluster Shells",
+		"description": "A fragmentation cannon that scatters multiple explosive rounds over a wide area.",
+		"slot": "medium",
+		"base_power_usage": 46.0,
+		"modules": [
+			{
+				"name": "Cluster Barrage",
+				"passive": false,
+				"power_on_use": 25.0,
+				"module_range": 4.0,
+				"cooldown": 1.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "EXPLOSIVE",
+						"amount": 45.0,
+						"radius": 3.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn015": {
+		"name": "Siege Mortar",
+		"description": "A slow-firing but devastating long-range mortar, useful for prolonged engagements.",
+		"slot": "medium",
+		"base_power_usage": 68.0,
+		"modules": [
+			{
+				"name": "Area Suppression",
+				"passive": false,
+				"power_on_use": 34.0,
+				"module_range": 5.0,
+				"cooldown": 2.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "EXPLOSIVE",
+						"amount": 60.0,
+						"radius": 3.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn016": {
+		"name": "Thermal Lance Cannon",
+		"description": "A high-heat plasma weapon that rapidly burns through enemy shields.",
+		"slot": "medium",
+		"base_power_usage": 56.0,
+		"modules": [
+			{
+				"name": "Focused Plasma Beam",
+				"passive": false,
+				"power_on_use": 27.0,
+				"module_range": 3.0,
+				"cooldown": 0.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "PLASMA",
+						"amount": 50.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn017": {
+		"name": "Plasma Arc Launcher",
+		"description": "A plasma projectile launcher that bounces off surfaces before exploding.",
+		"slot": "medium",
+		"base_power_usage": 59.0,
+		"modules": [
+			{
+				"name": "Arc Plasma",
+				"passive": false,
+				"power_on_use": 31.0,
+				"module_range": 4.0,
+				"cooldown": 1.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "AREA",
+						"damage_type": "PLASMA",
+						"amount": 55.0,
+						"radius": 2.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn018": {
+		"name": "Volatile Plasma Repeater",
+		"description": "A rapid-fire plasma weapon that risks overheating with prolonged use.",
+		"slot": "medium",
+		"base_power_usage": 35.0,
+		"modules": [
+			{
+				"name": "Overheat Burst",
+				"passive": false,
+				"power_on_use": 19.0,
+				"module_range": 3.0,
+				"cooldown": 0.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "PLASMA",
+						"amount": 40.0
+					},
+					{
+						"type": "POWER_REGEN",
+						"target": "SELF",
+						"amount": -5.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn019": {
+		"name": "Overcharged Plasma Blaster",
+		"description": "A slow-firing but highly powerful plasma cannon that overheats if used too often.",
+		"slot": "medium",
+		"base_power_usage": 65.0,
+		"modules": [
+			{
+				"name": "Overcharge Blast",
+				"passive": false,
+				"power_on_use": 34.0,
+				"module_range": 4.0,
+				"cooldown": 2.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "PLASMA",
+						"amount": 70.0
+					},
+					{
+						"type": "POWER_REGEN",
+						"target": "SELF",
+						"amount": -10.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	},
+	"mwpn020": {
+		"name": "Heatwave Generator",
+		"description": "A close-range plasma spray weapon that applies a burning effect to enemies.",
+		"slot": "medium",
+		"base_power_usage": 51.0,
+		"modules": [
+			{
+				"name": "Heatwave Pulse",
+				"passive": false,
+				"power_on_use": 23.0,
+				"module_range": 2.0,
+				"cooldown": 0.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "PLASMA",
+						"amount": 35.0
+					},
+					{
+						"type": "DAMAGE_OVER_TIME",
+						"target": "ENEMY",
+						"damage_type": "PLASMA",
+						"amount": 10.0,
+						"duration": 2.0
+					}
+				]
+			}
+		]
+	}
 }

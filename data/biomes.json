@@ -1,0 +1,222 @@
+{
+	"archipelago": {
+		"name": "Archipelago",
+		"levels": [
+			{
+				"index": 0,
+				"height": 1,
+				"movement_cost": -1,
+				"color": [
+					0,
+					102,
+					170
+				]
+			},
+			{
+				"index": 1,
+				"height": 3,
+				"movement_cost": 3,
+				"color": [
+					51,
+					187,
+					170
+				]
+			},
+			{
+				"index": 2,
+				"height": 5,
+				"movement_cost": 1,
+				"color": [
+					255,
+					221,
+					136
+				]
+			},
+			{
+				"index": 3,
+				"height": 7,
+				"movement_cost": 2,
+				"color": [
+					34,
+					136,
+					34
+				]
+			},
+			{
+				"index": 4,
+				"height": 9,
+				"movement_cost": 3,
+				"color": [
+					85,
+					68,
+					51
+				]
+			}
+		]
+	},
+	"volcanic": {
+		"name": "Volcanic",
+		"levels": [
+			{
+				"index": 0,
+				"height": 1,
+				"movement_cost": -1,
+				"color": [
+					51,
+					0,
+					0
+				]
+			},
+			{
+				"index": 1,
+				"height": 3,
+				"movement_cost": 3,
+				"color": [
+					85,
+					34,
+					0
+				]
+			},
+			{
+				"index": 2,
+				"height": 5,
+				"movement_cost": 2,
+				"color": [
+					136,
+					136,
+					136
+				]
+			},
+			{
+				"index": 3,
+				"height": 7,
+				"movement_cost": 3,
+				"color": [
+					68,
+					68,
+					68
+				]
+			},
+			{
+				"index": 4,
+				"height": 9,
+				"movement_cost": 4,
+				"color": [
+					30,
+					30,
+					30
+				]
+			}
+		]
+	},
+	"grassland": {
+		"name": "Grassland",
+		"levels": [
+			{
+				"index": 0,
+				"height": 1,
+				"movement_cost": -1,
+				"color": [
+					34,
+					68,
+					136
+				]
+			},
+			{
+				"index": 1,
+				"height": 3,
+				"movement_cost": 2,
+				"color": [
+					85,
+					119,
+					85
+				]
+			},
+			{
+				"index": 2,
+				"height": 5,
+				"movement_cost": 1,
+				"color": [
+					136,
+					204,
+					68
+				]
+			},
+			{
+				"index": 3,
+				"height": 7,
+				"movement_cost": 2,
+				"color": [
+					102,
+					153,
+					51
+				]
+			},
+			{
+				"index": 4,
+				"height": 9,
+				"movement_cost": 3,
+				"color": [
+					51,
+					102,
+					34
+				]
+			}
+		]
+	},
+	"mountain": {
+		"name": "Mountain",
+		"levels": [
+			{
+				"index": 0,
+				"height": 1,
+				"movement_cost": -1,
+				"color": [
+					26,
+					51,
+					102
+				]
+			},
+			{
+				"index": 1,
+				"height": 3,
+				"movement_cost": 2,
+				"color": [
+					119,
+					153,
+					119
+				]
+			},
+			{
+				"index": 2,
+				"height": 5,
+				"movement_cost": 1,
+				"color": [
+					204,
+					204,
+					170
+				]
+			},
+			{
+				"index": 3,
+				"height": 7,
+				"movement_cost": 2,
+				"color": [
+					170,
+					170,
+					170
+				]
+			},
+			{
+				"index": 4,
+				"height": 9,
+				"movement_cost": 4,
+				"color": [
+					238,
+					238,
+					238
+				]
+			}
+		]
+	}
+}

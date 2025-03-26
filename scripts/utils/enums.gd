@@ -2,6 +2,13 @@
 class_name Enums
 extends Node
 
+# The type of game mode.
+enum GameMode {
+	FFA, # Free-for-all, every player/NPC for themselves.
+	COOP, # Players versus AI-controlled enemies.
+	TEAM, # Teams of NPCs and Players versus each other.
+}
+
 # Game difficulty levels.
 enum MapDifficulty {
 	NOVICE = 0,  # Entry-level, forgiving challenges.

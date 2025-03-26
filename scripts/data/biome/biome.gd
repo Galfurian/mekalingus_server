@@ -11,6 +11,10 @@ extends RefCounted
 var biome_name: String
 # The levels of the biome.
 var biome_levels: Array[BiomeLevel]
+# The minimum height of the biome.
+var min_height: int
+# The maximum height of the biome.
+var max_height: int
 
 # =============================================================================
 # GENERAL
@@ -72,6 +76,9 @@ func from_dict(data: Dictionary):
 	biome_levels.clear()
 	for level_data in data["levels"]:
 		biome_levels.append(BiomeLevel.new(level_data))
+	# Update the height range.
+	min_height = biome_levels[0].height
+	max_height = biome_levels[biome_levels.size() - 1].height
 
 
 func to_dict() -> Dictionary:

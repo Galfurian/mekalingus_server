@@ -30,20 +30,23 @@ func _ready():
 
 func clear():
 	"""Clears the map HUD."""
+	if game_map:
+		game_map.on_round_end.disconnect(_on_round_end)
+	game_map = null
+	grid_size = 50
+	sector_size = 10
+	selected_entity = null
+	# Clear the sub-components.
 	grid_container.clear()
 	grid_drawer.clear()
 	mek_drawer.clear()
 	info_panel.clear()
 	log_panel.clear()
-	game_map.on_round_end.disconnect(_on_round_end)
-	game_map = null
-	grid_size = 50
-	sector_size = 10
-	selected_entity = null
 
 
 func setup(p_game_map: GameMap, p_grid_size: int = 50, p_sector_size: int = 10):
 	"""Sets up the map HUD with the given game map and grid size."""
+	clear()
 	# Initialize the new state.
 	game_map = p_game_map
 	grid_size = p_grid_size
@@ -159,21 +162,17 @@ func _on_cell_selected(cell_position: Vector2i):
 		center_on(entity.position)
 		info_panel.set_entity(entity)
 		grid_drawer.set_selected_entity(entity)
-	game_map.add_log(Enums.LogType.SYSTEM,
-		"Cell(position: %s, %s, walkable: %s)" % [
-			str(cell_position),
-			str(game_map.map_biome.get_level(game_map.get_tile_id(cell_position))),
-			str(game_map.is_walkable(cell_position))
-		]
+	game_map.add_log(
+		Enums.LogType.SYSTEM,
+		(
+			"Cell(position: %s, %s, walkable: %s)"
+			% [
+				str(cell_position),
+				str(game_map.map_biome.get_level(game_map.get_tile_id(cell_position))),
+				str(game_map.is_walkable(cell_position))
+			]
+		)
 	)
-
-
-func _input(_event):
-	"""Handles input events."""
-	if Input.is_key_pressed(KEY_ESCAPE):
-		selected_entity = null
-		info_panel.clear()
-		grid_drawer.deselect_entity()
 
 
 func _on_map_scrolled(scroll_up: bool):

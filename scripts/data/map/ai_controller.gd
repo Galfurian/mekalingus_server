@@ -1,6 +1,5 @@
-extends RefCounted
-
 class_name AIController
+extends RefCounted
 
 # =============================================================================
 # PROPERTIES
@@ -12,31 +11,45 @@ var game_map: GameMap
 # GENERIC FUNCTIONS
 # =============================================================================
 
+
 func _init(p_game_map: GameMap) -> void:
 	game_map = p_game_map
+
 
 func log_message(msg: String):
 	GameServer.log_message(msg)
 
+
 static func format_mek_tag(mek: Mek) -> String:
-	if not mek: return "<mek-null>"
+	if not mek:
+		return "<mek-null>"
 	return "[url=mek:%s]%s[/url]" % [mek.uuid, mek.template.name]
 
+
 static func format_item_tag(mek: Mek, item: Item, module: ItemModule) -> String:
-	if not mek:  return "<mek-null>"
-	if not item: return "<item-null>"
-	if not item: return "<module-null>"
+	if not mek:
+		return "<mek-null>"
+	if not item:
+		return "<item-null>"
+	if not item:
+		return "<module-null>"
 	return "[url=item:%s:%s]%s[/url]" % [mek.uuid, item.uuid, module.name]
 
+
 static func format_item_pair_tag(mek: Mek, item_module_pair: Dictionary) -> String:
-	return format_item_tag(mek, item_module_pair.get("item", null), item_module_pair.get("module", null))
+	return format_item_tag(
+		mek, item_module_pair.get("item", null), item_module_pair.get("module", null)
+	)
+
 
 static func format_pos_tag(pos: Vector2i) -> String:
 	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
 
+
 # =============================================================================
 # SCHEDULE UTILITY ORDER
 # =============================================================================
+
 
 func _evaluate_utility_effect_priority(target: MapEntity, effect: ItemEffect) -> int:
 	"""Calculates a priority score for a specific effect on a specific target."""
@@ -101,7 +114,10 @@ func _evaluate_utility_effect_priority(target: MapEntity, effect: ItemEffect) ->
 			priority += 6
 	return priority
 
-func _get_utility_effect_targets(effect: ItemEffect, source: MapEntity, module_range: int) -> Array[MapEntity]:
+
+func _get_utility_effect_targets(
+	effect: ItemEffect, source: MapEntity, module_range: int
+) -> Array[MapEntity]:
 	"""
 	Returns a list of valid potential targets for the given effect,
 	based on target type and range, for AI decision-making.
@@ -119,6 +135,7 @@ func _get_utility_effect_targets(effect: ItemEffect, source: MapEntity, module_r
 			# So return all potential units it could center on.
 			return game_map.get_units_in_range(source, source.position, module_range, true, true)
 	return []
+
 
 func _find_usable_utility_modules(mek: Mek) -> Array[Dictionary]:
 	"""Finds all utility modules that can be used by the Mek."""
@@ -141,18 +158,25 @@ func _find_usable_utility_modules(mek: Mek) -> Array[Dictionary]:
 			usable_modules.append({"item": item, "module": module})
 	return usable_modules
 
-func _determine_best_utility_module_target(source: MapEntity, item_module_pair: Dictionary) -> Dictionary:
+
+func _determine_best_utility_module_target(
+	source: MapEntity, item_module_pair: Dictionary
+) -> Dictionary:
 	"""Determines the best target and priority for the given utility module."""
 	var best_target: MapEntity = null
 	var highest_priority: int = 0
-	game_map.add_log(Enums.LogType.AI,
-		"%s is determining the best target for module %s..." % [
-			format_mek_tag(source.entity), format_item_pair_tag(source.entity, item_module_pair)
-		]
+	game_map.add_log(
+		Enums.LogType.AI,
+		(
+			"%s is determining the best target for module %s..."
+			% [format_mek_tag(source.entity), format_item_pair_tag(source.entity, item_module_pair)]
+		)
 	)
 	game_map.increase_indent()
 	for effect in item_module_pair.module.effects:
-		var candidates = _get_utility_effect_targets(effect, source, item_module_pair.module.module_range)
+		var candidates = _get_utility_effect_targets(
+			effect, source, item_module_pair.module.module_range
+		)
 		for candidate in candidates:
 			# Skip evaluation if the effect is already active on this Mek.
 			if candidate.entity.has_effect_type(effect.type):
@@ -170,44 +194,57 @@ func _determine_best_utility_module_target(source: MapEntity, item_module_pair: 
 				elif remaining_ratio < 0.75:
 					penalty_applied = 1
 				priority = max(priority, priority - penalty_applied)
-			game_map.add_log(Enums.LogType.AI,
-				"%s, evaluated %s on %s: effect=%s, priority=%d" % [
-					format_mek_tag(source.entity),
-					format_item_pair_tag(source.entity, item_module_pair),
-					format_mek_tag(candidate.entity),
-					Enums.EffectType.keys()[effect.type],
-					priority
-				]
+			game_map.add_log(
+				Enums.LogType.AI,
+				(
+					"%s, evaluated %s on %s: effect=%s, priority=%d"
+					% [
+						format_mek_tag(source.entity),
+						format_item_pair_tag(source.entity, item_module_pair),
+						format_mek_tag(candidate.entity),
+						Enums.EffectType.keys()[effect.type],
+						priority
+					]
+				)
 			)
 			if priority > highest_priority:
 				highest_priority = priority
 				best_target = candidate
 	if best_target:
-		game_map.add_log(Enums.LogType.AI,
-			"%s has selected target %s for module %s (priority %d)" % [
-				format_mek_tag(source.entity),
-				format_mek_tag(best_target.entity),
-				format_item_pair_tag(source.entity, item_module_pair),
-				highest_priority
-			]
+		game_map.add_log(
+			Enums.LogType.AI,
+			(
+				"%s has selected target %s for module %s (priority %d)"
+				% [
+					format_mek_tag(source.entity),
+					format_mek_tag(best_target.entity),
+					format_item_pair_tag(source.entity, item_module_pair),
+					highest_priority
+				]
+			)
 		)
 	else:
-		game_map.add_log(Enums.LogType.AI,
-			"%s has no suitable target found for its module %s" % [
-				format_mek_tag(source.entity),
-				format_item_pair_tag(source.entity, item_module_pair)
-			]
+		game_map.add_log(
+			Enums.LogType.AI,
+			(
+				"%s has no suitable target found for its module %s"
+				% [
+					format_mek_tag(source.entity),
+					format_item_pair_tag(source.entity, item_module_pair)
+				]
+			)
 		)
 	game_map.decrease_indent()
 	return {"target": best_target, "priority": highest_priority}
 
+
 func schedule_utility_module_order(source: MapEntity) -> UseModuleOrder:
 	"""Schedules an utility use action for the AI-controlled Mek."""
-	var mek: Mek = source.entity	
+	var mek: Mek = source.entity
 	var best_module: Dictionary = {"item": null, "module": null}
 	var best_target: MapEntity = null
 	var highest_priority: int = 0
-	
+
 	for item_module_pair in _find_usable_utility_modules(mek):
 		var result = _determine_best_utility_module_target(source, item_module_pair)
 		var adjusted_priority = result.priority
@@ -217,23 +254,28 @@ func schedule_utility_module_order(source: MapEntity) -> UseModuleOrder:
 			highest_priority = adjusted_priority
 			best_module = item_module_pair
 			best_target = result.target
-	
+
 	if best_module.item and best_module.module and best_target and highest_priority > 0:
 		game_map.add_log(
 			Enums.LogType.AI,
-			"%s selected utility module %s targeting %s (final priority=%d)" % [
-				format_mek_tag(source.entity),
-				format_item_pair_tag(source.entity, best_module),
-				format_mek_tag(best_target.entity),
-				highest_priority
-			]
+			(
+				"%s selected utility module %s targeting %s (final priority=%d)"
+				% [
+					format_mek_tag(source.entity),
+					format_item_pair_tag(source.entity, best_module),
+					format_mek_tag(best_target.entity),
+					highest_priority
+				]
+			)
 		)
 		return UseModuleOrder.new(source, best_target, best_module.item, best_module.module)
 	return null
 
+
 # =============================================================================
 # SCHEDULE OFFENSIVE ORDER
 # =============================================================================
+
 
 func _evaluate_offensive_effect_priority(target: MapEntity, effect: ItemEffect) -> int:
 	"""Assigns a priority value to an offensive effect targeting a specific entity."""
@@ -271,26 +313,14 @@ func _evaluate_offensive_effect_priority(target: MapEntity, effect: ItemEffect) 
 			var dot_score = (effect.amount * effect.duration) / 5.0
 			priority += clamp(dot_score, 1, 8)
 
-		Enums.EffectType.SPEED_MODIFIER, \
-		Enums.EffectType.ACCURACY_MODIFIER, \
-		Enums.EffectType.RANGE_MODIFIER, \
-		Enums.EffectType.COOLDOWN_MODIFIER, \
-		Enums.EffectType.POWER_MODIFIER, \
-		Enums.EffectType.HEALTH_MODIFIER, \
-		Enums.EffectType.ARMOR_MODIFIER, \
-		Enums.EffectType.SHIELD_MODIFIER:
+		Enums.EffectType.SPEED_MODIFIER, Enums.EffectType.ACCURACY_MODIFIER, Enums.EffectType.RANGE_MODIFIER, Enums.EffectType.COOLDOWN_MODIFIER, Enums.EffectType.POWER_MODIFIER, Enums.EffectType.HEALTH_MODIFIER, Enums.EffectType.ARMOR_MODIFIER, Enums.EffectType.SHIELD_MODIFIER:
 			# Prioritize debuffs (negative values), deprioritize buffs (positive values)
 			if effect.amount < 0:
 				priority += clamp(abs(effect.amount), 1, 8)
 			else:
 				priority += 1
 
-		Enums.EffectType.DAMAGE_REDUCTION_ALL, \
-		Enums.EffectType.DAMAGE_REDUCTION_KINETIC, \
-		Enums.EffectType.DAMAGE_REDUCTION_ENERGY, \
-		Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE, \
-		Enums.EffectType.DAMAGE_REDUCTION_PLASMA, \
-		Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE:
+		Enums.EffectType.DAMAGE_REDUCTION_ALL, Enums.EffectType.DAMAGE_REDUCTION_KINETIC, Enums.EffectType.DAMAGE_REDUCTION_ENERGY, Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE, Enums.EffectType.DAMAGE_REDUCTION_PLASMA, Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE:
 			# These are strong debuffs, especially if applied to enemies
 			if effect.amount < 0:
 				priority += clamp(abs(effect.amount), 2, 6)
@@ -302,55 +332,79 @@ func _evaluate_offensive_effect_priority(target: MapEntity, effect: ItemEffect) 
 	# Cap to prevent over-prioritization.
 	return clamp(priority, 0, 25)
 
-func _determine_best_offensive_module_target(source: MapEntity, item_module_pair: Dictionary) -> Dictionary:
+
+func _determine_best_offensive_module_target(
+	source: MapEntity, item_module_pair: Dictionary
+) -> Dictionary:
 	"""Determines the best target and priority for the given offensive module."""
 	var best_target: MapEntity = null
 	var highest_priority: int = -1
-	var candidates = game_map.get_units_in_range(source, source.position, item_module_pair.module.module_range, false, true)
-	
-	game_map.add_log(Enums.LogType.AI,
-		"%s is determining the best target for module %s (candidates: %d)..." % [
-			format_mek_tag(source.entity), format_item_pair_tag(source.entity, item_module_pair), candidates.size()
-		]
+	var candidates = game_map.get_units_in_range(
+		source, source.position, item_module_pair.module.module_range, false, true
+	)
+
+	game_map.add_log(
+		Enums.LogType.AI,
+		(
+			"%s is determining the best target for module %s (candidates: %d)..."
+			% [
+				format_mek_tag(source.entity),
+				format_item_pair_tag(source.entity, item_module_pair),
+				candidates.size()
+			]
+		)
 	)
 	game_map.increase_indent()
-	
+
 	for target in candidates:
 		if target == source:
 			continue
 		for effect in item_module_pair.module.effects:
 			var priority = _evaluate_offensive_effect_priority(target, effect)
-			game_map.add_log(Enums.LogType.AI,
-				"%s, evaluated %s on %s: effect=%s, priority=%d" % [
-					format_mek_tag(source.entity),
-					format_item_pair_tag(source.entity, item_module_pair),
-					format_mek_tag(target.entity),
-					Enums.EffectType.keys()[effect.type],
-					priority
-				]
+			game_map.add_log(
+				Enums.LogType.AI,
+				(
+					"%s, evaluated %s on %s: effect=%s, priority=%d"
+					% [
+						format_mek_tag(source.entity),
+						format_item_pair_tag(source.entity, item_module_pair),
+						format_mek_tag(target.entity),
+						Enums.EffectType.keys()[effect.type],
+						priority
+					]
+				)
 			)
 			if priority > highest_priority:
 				highest_priority = priority
 				best_target = target
 	if best_target:
-		game_map.add_log(Enums.LogType.AI,
-			"%s has selected target %s for module %s (priority %d)" % [
-				format_mek_tag(source.entity),
-				format_mek_tag(best_target.entity),
-				format_item_pair_tag(source.entity, item_module_pair),
-				highest_priority
-			]
+		game_map.add_log(
+			Enums.LogType.AI,
+			(
+				"%s has selected target %s for module %s (priority %d)"
+				% [
+					format_mek_tag(source.entity),
+					format_mek_tag(best_target.entity),
+					format_item_pair_tag(source.entity, item_module_pair),
+					highest_priority
+				]
+			)
 		)
 	else:
-		game_map.add_log(Enums.LogType.AI,
-			"%s has no suitable target found for its module %s" % [
-				format_mek_tag(source.entity),
-				format_item_pair_tag(source.entity, item_module_pair)
-			]
+		game_map.add_log(
+			Enums.LogType.AI,
+			(
+				"%s has no suitable target found for its module %s"
+				% [
+					format_mek_tag(source.entity),
+					format_item_pair_tag(source.entity, item_module_pair)
+				]
+			)
 		)
-	
+
 	game_map.decrease_indent()
 	return {"target": best_target, "priority": highest_priority}
+
 
 func _find_usable_offensive_modules(mek: Mek) -> Array[Dictionary]:
 	"""Finds all offensive modules that can be used by the Mek."""
@@ -373,17 +427,18 @@ func _find_usable_offensive_modules(mek: Mek) -> Array[Dictionary]:
 			usable_modules.append({"item": item, "module": module})
 	return usable_modules
 
+
 func schedule_offensive_module_order(source: MapEntity):
 	"""Schedules an offensive action for the AI-controlled Mek."""
 	# Find all usable offensive modules.
 	var mek: Mek = source.entity
 	var usable_modules = _find_usable_offensive_modules(mek)
-	
+
 	# Track the best module and target.
 	var best_module: Dictionary = {"item": null, "module": null}
 	var best_target: MapEntity = null
 	var highest_priority: int = -1
-	
+
 	# Determine the best target and priority for each usable module.
 	for item_module_pair in usable_modules:
 		var result = _determine_best_offensive_module_target(source, item_module_pair)
@@ -391,24 +446,29 @@ func schedule_offensive_module_order(source: MapEntity):
 			highest_priority = result.priority
 			best_module = item_module_pair
 			best_target = result.target
-	
+
 	# If a valid module and target were found, queue a use order.
 	if best_module.item and best_module.module and best_target and highest_priority > 0:
 		game_map.add_log(
 			Enums.LogType.AI,
-			"%s selected offensive module %s targeting %s (final priority=%d)" % [
-				format_mek_tag(source.entity),
-				format_item_pair_tag(source.entity, best_module),
-				format_mek_tag(best_target.entity),
-				highest_priority
-			]
+			(
+				"%s selected offensive module %s targeting %s (final priority=%d)"
+				% [
+					format_mek_tag(source.entity),
+					format_item_pair_tag(source.entity, best_module),
+					format_mek_tag(best_target.entity),
+					highest_priority
+				]
+			)
 		)
 		return UseModuleOrder.new(source, best_target, best_module.item, best_module.module)
 	return null
 
+
 # =============================================================================
 # SCHEDULE MOVE ORDER
 # =============================================================================
+
 
 func normalize_position(vector: Vector2i) -> Vector2:
 	"""Returns a normalized Vector2 version of a Vector2i."""
@@ -417,9 +477,11 @@ func normalize_position(vector: Vector2i) -> Vector2:
 		return Vector2(0, 0)  # Avoid division by zero; return zero vector.
 	return Vector2(vector.x / length, vector.y / length)
 
+
 func round_position(vector: Vector2) -> Vector2i:
 	"""Returns a Vector2i with each component rounded to the nearest integer."""
 	return Vector2i(round(vector.x), round(vector.y))
+
 
 func _evaluate_movement_priority(source: MapEntity, target: MapEntity, desired_range: int) -> int:
 	"""Assigns a priority to moving toward the specified target."""
@@ -431,9 +493,8 @@ func _evaluate_movement_priority(source: MapEntity, target: MapEntity, desired_r
 	# If already within or closer than desired range, don't move.
 	if current_distance <= desired_range:
 		return 0
-	# Set he priority to 0,.
+	# Calculate priority based on distance from desired range (closer to desired = higher priority).
 	var priority = abs(current_distance - desired_range)
-	# Calculate priority based on distance from desired range (closer to desired = higher priority)	var priority = abs(current_distance - desired_range)
 	# Adjust priority based on target type.
 	if game_map.is_enemy_of(source, target):
 		priority += 5  # Higher priority if target is an enemy.
@@ -452,14 +513,20 @@ func _evaluate_movement_priority(source: MapEntity, target: MapEntity, desired_r
 	# Ensure the priority is not negative.
 	return max(priority, 0)
 
-func _find_high_priority_targets(source: MapEntity, detection_range: int, desired_range: int) -> Array[Dictionary]:
+
+func _find_high_priority_targets(
+	source: MapEntity, detection_range: int, desired_range: int
+) -> Array[Dictionary]:
 	var targets: Array[Dictionary] = []
-	var nearby_units = game_map.get_units_in_range(source, source.position, detection_range, false, true)
+	var nearby_units = game_map.get_units_in_range(
+		source, source.position, detection_range, false, true
+	)
 	for target in nearby_units:
 		var priority = _evaluate_movement_priority(source, target, desired_range)
 		if priority >= 0:
 			targets.append({"target": target, "priority": priority})
 	return targets
+
 
 func _select_best_target(targets: Array[Dictionary]) -> Dictionary:
 	"""Selects the target with the highest priority."""
@@ -474,58 +541,61 @@ func _select_best_target(targets: Array[Dictionary]) -> Dictionary:
 			best_target_data = target_data
 	return best_target_data
 
-func _select_movement_destination(start_position: Vector2i, target_position: Vector2i, max_movement: int) -> Vector2i:
-	"""Determines the best tile to move closer to the target using A* pathfinding with movement cost."""
-	var path: Array[Vector2i] = game_map.get_path(start_position, target_position)
+
+func _select_movement_destination(
+	start_position: Vector2i, target_position: Vector2i, max_movement: int
+) -> Vector2i:
+	"""
+	Determines the best tile to move closer to the target using A* pathfinding with movement cost.
+	"""
+	var path = game_map.get_path(start_position, target_position)
 	# If there's no path or it's too short, return start.
 	if path.is_empty() or path.size() <= 1:
 		game_map.add_log(
 			Enums.LogType.AI,
-			"No valid path from %s to %s." % [
-				format_pos_tag(start_position),
-				format_pos_tag(target_position)
-			]
+			(
+				"No valid path from %s to %s."
+				% [format_pos_tag(start_position), format_pos_tag(target_position)]
+			)
 		)
 		return start_position
 	var destination = start_position
+	var fallback_tile = start_position
 	var total_cost = 0
-	for i in range(1, path.size()):  # skip start_position
+	# Skip start_position.
+	for i in range(1, path.size()):
+		# Get the tile on the path.
 		var tile = path[i]
+		# Get the cost to the tile.
 		var cost = game_map.get_movement_cost(tile)
+		# If the cost is negative, the tile is impassable.
 		if cost < 0:
-			break  # impassable tile
+			break
+		# If the total cost exceeds the movement limit, stop.
 		if total_cost + cost > max_movement:
-			break  # reached movement limit
+			break
+		# If the tile is reachable, set it as the destination.
 		if game_map.can_move_to(tile):
 			destination = tile
+		else:
+			# Set the destination as the last reachable tile.
+			destination = fallback_tile
+			break
+		# Update the total cost.
 		total_cost += cost
+		# Save the tile as a fallback in case the destination is unreachable.
+		fallback_tile = tile
 	if destination != start_position:
 		return destination
-	# Fallback: try earlier tiles (backtrack)
-	for i in range(path.size() - 2, 0, -1):
-		var fallback_tile = path[i]
-		if game_map.can_move_to(fallback_tile):
-			game_map.add_log(
-				Enums.LogType.AI,
-				"Fallback: using closer reachable tile on path: %s" % [
-					format_pos_tag(fallback_tile)
-				]
-			)
-			return fallback_tile
 	# Nothing found
-	game_map.add_log(Enums.LogType.AI,
-		"No reachable tile on path from: %s" % [
-			format_pos_tag(start_position)
-		]
+	game_map.add_log(
+		Enums.LogType.AI, "No reachable tile on path from: %s" % [format_pos_tag(start_position)]
 	)
 	return start_position
 
+
 func _find_best_tile_to_attack_target(
-	source: MapEntity,
-	target: MapEntity,
-	min_range: int,
-	max_range: int,
-	max_movement: int
+	source: MapEntity, target: MapEntity, min_range: int, max_range: int, max_movement: int
 ) -> Vector2i:
 	"""
 	Finds the best tile within weapon range to attack the target from, considering:
@@ -540,13 +610,16 @@ func _find_best_tile_to_attack_target(
 	# Log the search context
 	game_map.add_log(
 		Enums.LogType.AI,
-		"%s searching best attack tile near %s (range %d–%d, movement=%d)" % [
-			format_mek_tag(source.entity),
-			format_mek_tag(target.entity),
-			min_range,
-			max_range,
-			max_movement
-		]
+		(
+			"%s searching best attack tile near %s (range %dâ€“%d, movement=%d)"
+			% [
+				format_mek_tag(source.entity),
+				format_mek_tag(target.entity),
+				min_range,
+				max_range,
+				max_movement
+			]
+		)
 	)
 	# Get all the tiles this unit can reach given its movement allowance
 	var reachable_tiles = game_map.get_reachable_tiles(start_pos, max_movement)
@@ -554,18 +627,19 @@ func _find_best_tile_to_attack_target(
 		var dist = tile.distance_to(target_pos)
 		# Skip tiles already occupied by other units
 		if game_map.is_occupied(tile):
-			game_map.add_log(Enums.LogType.AI,
-				"- Skipping %s -> %s: occupied" % [
-					format_pos_tag(start_pos), format_pos_tag(tile)
-				]
+			game_map.add_log(
+				Enums.LogType.AI,
+				"- Skipping %s -> %s: occupied" % [format_pos_tag(start_pos), format_pos_tag(tile)]
 			)
 			continue
 		# Skip tiles outside of our weapon's usable range
 		if dist < min_range or dist > max_range:
-			game_map.add_log(Enums.LogType.AI,
-				"- Skipping %s -> %s: out of range (distance=%d)" % [
-					format_pos_tag(start_pos), format_pos_tag(tile), dist
-				]
+			game_map.add_log(
+				Enums.LogType.AI,
+				(
+					"- Skipping %s -> %s: out of range (distance=%d)"
+					% [format_pos_tag(start_pos), format_pos_tag(tile), dist]
+				)
 			)
 			continue
 		# Compute how far the unit must move to reach this tile
@@ -582,9 +656,10 @@ func _find_best_tile_to_attack_target(
 		var score = -move_cost - range_penalty + height_diff * 2.0
 		game_map.add_log(
 			Enums.LogType.AI,
-			"- Tile %s: move_cost=%d, dist=%d, height_diff=%d -> score=%.2f" % [
-				format_pos_tag(tile), move_cost, dist, height_diff, score
-			]
+			(
+				"- Tile %s: move_cost=%d, dist=%d, height_diff=%d -> score=%.2f"
+				% [format_pos_tag(tile), move_cost, dist, height_diff, score]
+			)
 		)
 		# Keep track of the best scoring tile
 		if score > best_score:
@@ -593,14 +668,18 @@ func _find_best_tile_to_attack_target(
 	# Log the final selected destination
 	game_map.add_log(
 		Enums.LogType.AI,
-		"%s selects tile %s (score=%.2f) to attack %s" % [
-			format_mek_tag(source.entity),
-			format_pos_tag(best_tile),
-			best_score,
-			format_mek_tag(target.entity)
-		]
+		(
+			"%s selects tile %s (score=%.2f) to attack %s"
+			% [
+				format_mek_tag(source.entity),
+				format_pos_tag(best_tile),
+				best_score,
+				format_mek_tag(target.entity)
+			]
+		)
 	)
 	return best_tile
+
 
 func _select_random_movement_destination(start_position: Vector2i, max_movement: int) -> Vector2i:
 	"""Selects a random valid destination within max_movement range."""
@@ -616,6 +695,7 @@ func _select_random_movement_destination(start_position: Vector2i, max_movement:
 		max_movement
 	)
 
+
 func schedule_move_order(source: MapEntity) -> MoveOrder:
 	"""Schedules a movement order for the source MapEntity."""
 	var mek: Mek = source.entity
@@ -627,77 +707,79 @@ func schedule_move_order(source: MapEntity) -> MoveOrder:
 	if desired_range.min == 0:
 		game_map.add_log(
 			Enums.LogType.AI,
-			"%s get_usable_weapon_range return 0, fallback to 1" % [
-				format_mek_tag(source.entity)
-			]
+			"%s get_usable_weapon_range return 0, fallback to 1" % [format_mek_tag(source.entity)]
 		)
 		desired_range.min = 1
 		desired_range.max = 1
 	game_map.add_log(
 		Enums.LogType.AI,
-		"%s is scheduling movement (speed=%d, detection=%d, desired_range=[%d, %d])" % [
-			format_mek_tag(source.entity),
-			mek.speed,
-			detection_range,
-			desired_range.min,
-			desired_range.max
-		]
+		(
+			"%s is scheduling movement (speed=%d, detection=%d, desired_range=[%d, %d])"
+			% [
+				format_mek_tag(source.entity),
+				mek.speed,
+				detection_range,
+				desired_range.min,
+				desired_range.max
+			]
+		)
 	)
 	# Find all high-priority targets within the search range.
 	var targets = _find_high_priority_targets(source, detection_range, desired_range.min)
 	game_map.add_log(
 		Enums.LogType.AI,
-		"%s found %d nearby units to evaluate for movement" % [
-			format_mek_tag(source.entity),
-			targets.size()
-		]
+		(
+			"%s found %d nearby units to evaluate for movement"
+			% [format_mek_tag(source.entity), targets.size()]
+		)
 	)
 	# No valid targets to move toward.
 	if targets.is_empty():
 		game_map.add_log(
 			Enums.LogType.AI,
-			"%s found no movement-worthy targets. Choosing random repositioning." % [
-				format_mek_tag(source.entity)
-			]
+			(
+				"%s found no movement-worthy targets. Choosing random repositioning."
+				% [format_mek_tag(source.entity)]
+			)
 		)
 		# No valid targets, consider repositioning.
 		var max_movement = mek.speed
 		var start_position = source.position
-		var destination = _select_random_movement_destination(start_position, max_movement)
-		return MoveOrder.new(source, destination)
-	else:
-		# Select the best target based on priority.
-		var best_target_data = _select_best_target(targets)
-		var best_target = best_target_data.target
-		game_map.add_log(
-			Enums.LogType.AI,
-			"%s selected %s as movement target (priority=%d)" % [
+		var random_destination = _select_random_movement_destination(start_position, max_movement)
+		return MoveOrder.new(source, random_destination)
+
+	# Select the best target based on priority.
+	var best_target_data = _select_best_target(targets)
+	var best_target = best_target_data.target
+	game_map.add_log(
+		Enums.LogType.AI,
+		(
+			"%s selected %s as movement target (priority=%d)"
+			% [
 				format_mek_tag(source.entity),
 				format_mek_tag(best_target.entity),
 				best_target_data.priority
 			]
 		)
-		# If the priority is 0, we already are at range:
-		if best_target_data.priority == 0:
-			game_map.add_log(
-				Enums.LogType.AI,
-				"%s is already at desired range to %s — no movement needed" % [
-					format_mek_tag(source.entity),
-					format_mek_tag(best_target.entity)
-				]
+	)
+	# If the priority is 0, we already are at range:
+	if best_target_data.priority == 0:
+		game_map.add_log(
+			Enums.LogType.AI,
+			(
+				"%s is already at desired range to %s â€” no movement needed"
+				% [format_mek_tag(source.entity), format_mek_tag(best_target.entity)]
 			)
-			return null
-			
-		var destination_tile = best_target.position
-		if source.position.distance_to(best_target.position) <= desired_range.max:
-			# Compute destination tile.
-			destination_tile = _find_best_tile_to_attack_target(
-				source, best_target,
-				desired_range.min, desired_range.max,
-				mek.speed)
-		# Move to the destination.
-		var destination = _select_movement_destination(
-			source.position, destination_tile,
-			mek.speed)
-		# Create and return a new MoveOrder to the determined destination.
-		return MoveOrder.new(source, destination)
+		)
+		return null
+
+	var destination_tile = best_target.position
+	if source.position.distance_to(best_target.position) <= desired_range.max:
+		# Compute destination tile.
+		destination_tile = _find_best_tile_to_attack_target(
+			source, best_target, desired_range.min, desired_range.max, mek.speed
+		)
+	# Move to the destination.
+	var destination = _select_movement_destination(source.position, destination_tile, mek.speed)
+	# Create and return a new MoveOrder to the determined destination.
+	return MoveOrder.new(source, destination)

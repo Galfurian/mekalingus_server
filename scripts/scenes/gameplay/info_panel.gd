@@ -42,10 +42,8 @@ func clear() -> void:
 	"""
 	if game_map and game_map.on_round_end.is_connected(update_panel):
 		game_map.on_round_end.disconnect(update_panel)
-	
 	entity = null
 	game_map = null
-
 	item_list.clear()
 	entity_info.clear()
 	item_inspector.visible = false

@@ -31,15 +31,17 @@ func _ready() -> void:
 
 
 func _on_server_start():
+	var index: int
 	for map_uuid in DataManager.maps:
 		var game_map: GameMap = DataManager.maps[map_uuid]
-		var index = map_list.add_item(game_map.map_uuid)
+		index = map_list.add_item(game_map.map_uuid)
 		map_list.set_item_metadata(index, game_map)
-	var index = 0
+	index = 0
 	for biome in TemplateManager.biomes.values():
 		map_biome.add_item(biome.biome_name, index)
 		index += 1
 	map_biome.select(0)
+
 
 func _on_server_stop():
 	map_list.clear()
@@ -118,6 +120,13 @@ func _input(_event):
 		if index >= 0:
 			var game_map: GameMap = map_list.get_item_metadata(index)
 			if game_map:
-				DataManager.delete_map(game_map.map_uuid)
-				map_list.remove_item(index)
-				map_hud.clear()
+				if map_hud.selected_entity:
+					map_hud.info_panel.clear()
+					map_hud.grid_drawer.deselect_entity()
+					game_map.remove_entity(map_hud.selected_entity.entity.uuid)
+					map_hud.mek_drawer.update_meks()
+					map_hud.selected_entity = null
+	elif Input.is_key_pressed(KEY_ESCAPE):
+		map_hud.selected_entity = null
+		map_hud.info_panel.clear()
+		map_hud.grid_drawer.deselect_entity()

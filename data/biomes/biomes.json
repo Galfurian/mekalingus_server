@@ -3,53 +3,80 @@
 		"name": "Archipelago",
 		"levels": [
 			{
-				"index": 0.0,
-				"height": 1.0,
-				"movement_cost": 3.0,
+				"index": 0,
+				"name": "Deep Water",
+				"height": 1,
+				"movement_cost": 3,
 				"color": [
-					0.0,
-					102.0,
-					170.0
+					0,
+					102,
+					170
 				]
 			},
 			{
-				"index": 1.0,
-				"height": 3.0,
-				"movement_cost": 2.0,
+				"index": 1,
+				"name": "Shallow Water",
+				"height": 3,
+				"movement_cost": 2,
 				"color": [
-					51.0,
-					187.0,
-					170.0
+					51,
+					187,
+					170
 				]
 			},
 			{
-				"index": 2.0,
-				"height": 5.0,
-				"movement_cost": 1.0,
+				"index": 2,
+				"name": "Beach",
+				"height": 5,
+				"movement_cost": 1,
 				"color": [
-					255.0,
-					221.0,
-					136.0
+					255,
+					221,
+					136
 				]
 			},
 			{
-				"index": 3.0,
-				"height": 7.0,
-				"movement_cost": 1.0,
+				"index": 3,
+				"name": "Grassland",
+				"height": 7,
+				"movement_cost": 1,
 				"color": [
-					34.0,
-					136.0,
-					34.0
+					34,
+					136,
+					34
 				]
 			},
 			{
-				"index": 4.0,
-				"height": 9.0,
-				"movement_cost": 3.0,
+				"index": 4,
+				"name": "Rocky Hill",
+				"height": 9,
+				"movement_cost": 3,
 				"color": [
-					85.0,
-					68.0,
-					51.0
+					85,
+					68,
+					51
+				]
+			},
+			{
+				"index": 5,
+				"name": "Cliffside",
+				"height": 11,
+				"movement_cost": 4,
+				"color": [
+					120,
+					110,
+					100
+				]
+			},
+			{
+				"index": 6,
+				"name": "Mountain Peak",
+				"height": 13,
+				"movement_cost": 5,
+				"color": [
+					200,
+					200,
+					210
 				]
 			}
 		]
@@ -57,109 +84,99 @@
 	"volcanic": {
 		"name": "Volcanic",
 		"levels": [
-			{
-				"index": 0.0,
-				"height": 1.0,
-				"movement_cost": 3.0,
-				"color": [
-					51.0,
-					0.0,
-					0.0
-				]
-			},
-			{
-				"index": 1.0,
-				"height": 3.0,
-				"movement_cost": 2.0,
-				"color": [
-					85.0,
-					34.0,
-					0.0
-				]
-			},
-			{
-				"index": 2.0,
-				"height": 5.0,
-				"movement_cost": 2.0,
-				"color": [
-					136.0,
-					136.0,
-					136.0
-				]
-			},
-			{
-				"index": 3.0,
-				"height": 7.0,
-				"movement_cost": 3.0,
-				"color": [
-					68.0,
-					68.0,
-					68.0
-				]
-			},
-			{
-				"index": 4.0,
-				"height": 9.0,
-				"movement_cost": 4.0,
-				"color": [
-					30.0,
-					30.0,
-					30.0
-				]
-			}
+			{ "index": 0, "name": "Molten Core", "height": 1, "movement_cost": 3, "color": [51, 0, 0] },
+			{ "index": 1, "name": "Boiling Lava", "height": 2, "movement_cost": 3, "color": [85, 17, 0] },
+			{ "index": 2, "name": "Lava Flow", "height": 3, "movement_cost": 2, "color": [119, 34, 0] },
+			{ "index": 3, "name": "Cracked Earth", "height": 4, "movement_cost": 2, "color": [136, 68, 34] },
+			{ "index": 4, "name": "Charred Ground", "height": 5, "movement_cost": 2, "color": [136, 136, 136] },
+			{ "index": 5, "name": "Rocky Slopes", "height": 6, "movement_cost": 3, "color": [100, 100, 100] },
+			{ "index": 6, "name": "Basalt Ridge", "height": 7, "movement_cost": 3, "color": [68, 68, 68] },
+			{ "index": 7, "name": "Blackened Plateau", "height": 8, "movement_cost": 3, "color": [50, 50, 50] },
+			{ "index": 8, "name": "Ashen Crag", "height": 9, "movement_cost": 4, "color": [30, 30, 30] },
+			{ "index": 9, "name": "Smoke-Choked Bluff", "height": 10, "movement_cost": 4, "color": [60, 60, 60] },
+			{ "index": 10, "name": "Fumarole Field", "height": 11, "movement_cost": 4, "color": [90, 90, 90] },
+			{ "index": 11, "name": "Cracked Summit", "height": 12, "movement_cost": 5, "color": [140, 140, 140] },
+			{ "index": 12, "name": "Volcanic Summit", "height": 13, "movement_cost": 5, "color": [180, 180, 180] }
 		]
 	},
 	"grassland": {
 		"name": "Grassland",
 		"levels": [
 			{
-				"index": 0.0,
-				"height": 1.0,
-				"movement_cost": 1.0,
+				"index": 0,
+				"name": "Lowland Water",
+				"height": 1,
+				"movement_cost": 1,
 				"color": [
-					34.0,
-					68.0,
-					136.0
+					34,
+					68,
+					136
 				]
 			},
 			{
-				"index": 1.0,
-				"height": 3.0,
-				"movement_cost": 1.0,
+				"index": 1,
+				"name": "Floodplain",
+				"height": 3,
+				"movement_cost": 1,
 				"color": [
-					85.0,
-					119.0,
-					85.0
+					85,
+					119,
+					85
 				]
 			},
 			{
-				"index": 2.0,
-				"height": 5.0,
-				"movement_cost": 2.0,
+				"index": 2,
+				"name": "Open Field",
+				"height": 5,
+				"movement_cost": 2,
 				"color": [
-					136.0,
-					204.0,
-					68.0
+					136,
+					204,
+					68
 				]
 			},
 			{
-				"index": 3.0,
-				"height": 7.0,
-				"movement_cost": 2.0,
+				"index": 3,
+				"name": "Dense Grass",
+				"height": 7,
+				"movement_cost": 2,
 				"color": [
-					102.0,
-					153.0,
-					51.0
+					102,
+					153,
+					51
 				]
 			},
 			{
-				"index": 4.0,
-				"height": 9.0,
-				"movement_cost": 3.0,
+				"index": 4,
+				"name": "Wooded Hill",
+				"height": 9,
+				"movement_cost": 3,
 				"color": [
-					51.0,
-					102.0,
-					34.0
+					51,
+					102,
+					34
+				]
+			},
+			{
+				"index": 5,
+				"name": "Forest Ridge",
+				"height": 11,
+				"movement_cost": 3,
+				"color": [
+					34,
+					85,
+					34
+				]
+			},
+			{
+				"index": 6,
+				"name": "Highland Cliff",
+				"height": 13,
+				"movement_cost": 4,
+				"color": [
+					68,
+					51,
+					34
 				]
 			}
 		]
@@ -167,56 +184,19 @@
 	"mountain": {
 		"name": "Mountain",
 		"levels": [
-			{
-				"index": 0.0,
-				"height": 1.0,
-				"movement_cost": 2.0,
-				"color": [
-					26.0,
-					51.0,
-					102.0
-				]
-			},
-			{
-				"index": 1.0,
-				"height": 3.0,
-				"movement_cost": 2.0,
-				"color": [
-					119.0,
-					153.0,
-					119.0
-				]
-			},
-			{
-				"index": 2.0,
-				"height": 5.0,
-				"movement_cost": 1.0,
-				"color": [
-					204.0,
-					204.0,
-					170.0
-				]
-			},
-			{
-				"index": 3.0,
-				"height": 7.0,
-				"movement_cost": 2.0,
-				"color": [
-					170.0,
-					170.0,
-					170.0
-				]
-			},
-			{
-				"index": 4.0,
-				"height": 9.0,
-				"movement_cost": 4.0,
-				"color": [
-					238.0,
-					238.0,
-					238.0
-				]
-			}
+			{ "index": 0,  "name": "Valley Floor",      "height": 1,  "movement_cost": 1, "color": [34, 85, 34] },
+			{ "index": 1,  "name": "Wooded Foothill",   "height": 2,  "movement_cost": 1, "color": [68, 119, 51] },
+			{ "index": 2,  "name": "Grassy Slope",      "height": 3,  "movement_cost": 2, "color": [119, 170, 68] },
+			{ "index": 3,  "name": "Shrub Ridge",       "height": 4,  "movement_cost": 2, "color": [153, 187, 85] },
+			{ "index": 4,  "name": "Stony Incline",     "height": 5,  "movement_cost": 2, "color": [180, 180, 130] },
+			{ "index": 5,  "name": "Gravel Face",       "height": 6,  "movement_cost": 3, "color": [150, 150, 130] },
+			{ "index": 6,  "name": "Rocky Slope",       "height": 7,  "movement_cost": 3, "color": [130, 130, 130] },
+			{ "index": 7,  "name": "Jagged Cliff",      "height": 8,  "movement_cost": 4, "color": [100, 100, 100] },
+			{ "index": 8,  "name": "Snow Dusted Rock",  "height": 9,  "movement_cost": 4, "color": [180, 180, 180] },
+			{ "index": 9,  "name": "Permanent Snow",    "height": 10, "movement_cost": 5, "color": [220, 220, 220] },
+			{ "index": 10, "name": "Snowfield",         "height": 11, "movement_cost": 5, "color": [240, 240, 240] },
+			{ "index": 11, "name": "Glacier Shelf",     "height": 12, "movement_cost": 6, "color": [255, 255, 255] },
+			{ "index": 12, "name": "Frozen Summit",     "height": 13, "movement_cost": 7, "color": [210, 230, 255] }
 		]
 	}
 }

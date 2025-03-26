@@ -7,6 +7,7 @@ extends RefCounted
 # =============================================================================
 
 var index: int
+var name: String
 var height: int
 var movement_cost: int
 var color: Color
@@ -29,9 +30,11 @@ func _init(data: Dictionary = {}):
 func _to_string() -> String:
 	"""Returns the data as a string."""
 	return (
-		"BiomeLevel: "
+		"[("
 		+ str(index)
-		+ ", "
+		+ ") "
+		+ name
+		+ ": "
 		+ str(height)
 		+ ", "
 		+ str(movement_cost)
@@ -48,6 +51,7 @@ func _to_string() -> String:
 func from_dict(data: Dictionary):
 	"""Loads data from a dictionary."""
 	index = data["index"]
+	name = data["name"]
 	height = data["height"]
 	movement_cost = data["movement_cost"]
 	color = Color(data["color"][0] / 255.0, data["color"][1] / 255.0, data["color"][2] / 255.0, 1.0)
@@ -57,6 +61,7 @@ func to_dict() -> Dictionary:
 	"""Returns the data as a dictionary."""
 	return {
 		"index": index,
+		"name": name,
 		"height": height,
 		"movement_cost": movement_cost,
 		"color": [color.r8, color.g8, color.b8]

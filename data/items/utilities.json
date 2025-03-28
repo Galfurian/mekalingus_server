@@ -8,14 +8,14 @@
             {
                 "name": "Jump Boost",
                 "passive": false,
-                "power_on_use": 11,
-                "cooldown": 3,
+                "power_on_use": 15,
+                "cooldown": 5,
                 "effects": [
                     {
                         "type": "SPEED_MODIFIER",
                         "target": "SELF",
-                        "amount": 3,
-                        "duration": 1
+                        "amount": 4,
+                        "duration": 5
                     }
                 ]
             }
@@ -25,7 +25,7 @@
         "name": "Vector Stabilizers",
         "description": "Increases turn speed and reduces movement penalties on rough terrain.",
         "slot": "utility",
-        "base_power_usage": 22,
+        "base_power_usage": 41,
         "modules": [
             {
                 "name": "Adaptive Stabilization",
@@ -34,7 +34,7 @@
                     {
                         "type": "SPEED_MODIFIER",
                         "target": "SELF",
-                        "amount": 1
+                        "amount": 6
                     }
                 ]
             }
@@ -44,7 +44,7 @@
         "name": "Advanced Servo Motors",
         "description": "Passively increases movement speed by a small amount.",
         "slot": "utility",
-        "base_power_usage": 24,
+        "base_power_usage": 32,
         "modules": [
             {
                 "name": "Enhanced Motor Drive",
@@ -53,7 +53,7 @@
                     {
                         "type": "SPEED_MODIFIER",
                         "target": "SELF",
-                        "amount": 2
+                        "amount": 4
                     }
                 ]
             }
@@ -82,19 +82,19 @@
         "name": "Shield Booster",
         "description": "Temporarily boosts shield capacity beyond its maximum limit.",
         "slot": "utility",
-        "base_power_usage": 34,
+        "base_power_usage": 17,
         "modules": [
             {
                 "name": "Overcharge Shields",
                 "passive": false,
-                "power_on_use": 16,
-                "cooldown": 3,
+                "power_on_use": 32,
+                "cooldown": 5,
                 "effects": [
                     {
                         "type": "SHIELD_MODIFIER",
                         "target": "SELF",
-                        "amount": 25,
-                        "duration": 2
+                        "amount": 16,
+                        "duration": 4
                     }
                 ]
             }
@@ -286,7 +286,7 @@
                     {
                         "type": "RANGE_MODIFIER",
                         "target": "SELF",
-                        "amount": 1
+                        "amount": 2
                     }
                 ]
             }
@@ -355,33 +355,43 @@
     },
     "utl019": {
         "name": "Overdrive Core",
-        "description": "Temporarily boosts all combat stats at the cost of disabling shields.",
+        "description": "Temporarily boosts all combat stats at the cost of weakening shields.",
         "slot": "utility",
-        "base_power_usage": 11,
+        "base_power_usage": 19,
         "modules": [
             {
                 "name": "Overdrive Mode",
                 "passive": false,
-                "power_on_use": 6,
+                "power_on_use": 21,
                 "cooldown": 4,
                 "effects": [
                     {
                         "type": "SPEED_MODIFIER",
                         "target": "SELF",
-                        "amount": 3,
-                        "duration": 2
+                        "amount": 9,
+                        "duration": 4
                     },
                     {
-                        "type": "HEALTH_MODIFIER",
+                        "type": "ACCURACY_MODIFIER",
                         "target": "SELF",
-                        "amount": 50,
-                        "duration": 2
+                        "amount": 6
+                    },
+                    {
+                        "type": "COOLDOWN_MODIFIER",
+                        "target": "SELF",
+                        "amount": 2
+                    },
+                    {
+                        "type": "POWER_REGEN",
+                        "target": "SELF",
+                        "amount": 12,
+                        "duration": 3
                     },
                     {
                         "type": "SHIELD_MODIFIER",
                         "target": "SELF",
-                        "amount": -75,
-                        "duration": 2
+                        "amount": -28,
+                        "duration": 3
                     }
                 ]
             }

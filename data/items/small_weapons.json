@@ -8,30 +8,30 @@
 			{
 				"name": "Rail Shot",
 				"passive": false,
-				"power_on_use": 18.0,
-				"module_range": 4.0,
+				"power_on_use": 23.0,
+				"module_range": 3.0,
 				"cooldown": 0.0,
 				"effects": [
 					{
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 50.0
+						"amount": 23.0
 					}
 				]
 			},
 			{
 				"name": "Precision Shot",
 				"passive": false,
-				"power_on_use": 19.0,
+				"power_on_use": 36.0,
 				"module_range": 6.0,
-				"cooldown": 2.0,
+				"cooldown": 3.0,
 				"effects": [
 					{
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 30.0
+						"amount": 41.0
 					}
 				]
 			}
@@ -48,19 +48,19 @@
 				"passive": false,
 				"power_on_use": 12.0,
 				"module_range": 2.0,
-				"cooldown": 0.0,
+				"cooldown": 3.0,
 				"effects": [
 					{
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
-						"amount": 35.0
+						"amount": 34.0
 					},
 					{
 						"type": "DAMAGE_OVER_TIME",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
-						"amount": 5.0,
+						"amount": 15.0,
 						"duration": 3.0
 					}
 				]
@@ -99,15 +99,16 @@
 			{
 				"name": "Needle Burst",
 				"passive": false,
-				"power_on_use": 10.0,
+				"power_on_use": 27.0,
 				"module_range": 3.0,
 				"cooldown": 0.0,
+				"repeats": 3,
 				"effects": [
 					{
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 30.0
+						"amount": 14.0
 					}
 				]
 			}
@@ -130,7 +131,7 @@
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
-						"amount": 35.0
+						"amount": 32.0
 					},
 					{
 						"type": "DAMAGE_OVER_TIME",
@@ -152,7 +153,7 @@
 			{
 				"name": "Micro Missile",
 				"passive": false,
-				"power_on_use": 15.0,
+				"power_on_use": 25.0,
 				"module_range": 4.0,
 				"cooldown": 1.0,
 				"effects": [
@@ -160,13 +161,13 @@
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "EXPLOSIVE",
-						"amount": 40.0
+						"amount": 32.0
 					},
 					{
 						"type": "DAMAGE",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
-						"amount": 20.0,
+						"amount": 16.0,
 						"radius": 1.0
 					}
 				]
@@ -184,13 +185,13 @@
 				"passive": false,
 				"power_on_use": 6.0,
 				"module_range": 1.0,
-				"cooldown": 0.0,
+				"cooldown": 4.0,
 				"effects": [
 					{
 						"type": "DAMAGE_OVER_TIME",
 						"target": "ENEMY",
 						"damage_type": "CORROSIVE",
-						"amount": 8.0,
+						"amount": 16.0,
 						"duration": 3.0
 					},
 					{
@@ -274,7 +275,7 @@
 				"passive": false,
 				"power_on_use": 11.0,
 				"module_range": 3.0,
-				"cooldown": 0.0,
+				"cooldown": 3.0,
 				"effects": [
 					{
 						"type": "DAMAGE",
@@ -286,8 +287,8 @@
 						"type": "DAMAGE_OVER_TIME",
 						"target": "ENEMY",
 						"damage_type": "CORROSIVE",
-						"amount": 7.0,
-						"duration": 4.0
+						"amount": 13.0,
+						"duration": 3.0
 					}
 				]
 			}
@@ -302,9 +303,9 @@
 			{
 				"name": "Shrapnel Burst",
 				"passive": false,
-				"power_on_use": 12.0,
+				"power_on_use": 22.0,
 				"module_range": 3.0,
-				"cooldown": 1.0,
+				"cooldown": 2.0,
 				"effects": [
 					{
 						"type": "DAMAGE",
@@ -316,7 +317,7 @@
 						"type": "DAMAGE",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
-						"amount": 25.0,
+						"amount": 22.0,
 						"radius": 2.0
 					}
 				]
@@ -332,23 +333,23 @@
 			{
 				"name": "Cluster Detonation",
 				"passive": false,
-				"power_on_use": 13.0,
-				"module_range": 3.0,
+				"power_on_use": 28.0,
+				"module_range": 4.0,
 				"cooldown": 1.0,
 				"effects": [
 					{
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 15.0,
+						"amount": 19.0,
 						"radius": 1.0
 					},
 					{
 						"type": "DAMAGE",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
-						"amount": 30.0,
-						"radius": 2.0
+						"amount": 25.0,
+						"radius": 1.0
 					}
 				]
 			}
@@ -392,24 +393,24 @@
 			{
 				"name": "Flame Barrage",
 				"passive": false,
-				"power_on_use": 11.0,
-				"module_range": 3.0,
-				"cooldown": 2.0,
+				"power_on_use": 32.0,
+				"module_range": 5.0,
+				"cooldown": 3.0,
 				"effects": [
 					{
 						"type": "DAMAGE",
 						"target": "AREA",
 						"damage_type": "PLASMA",
-						"amount": 25.0,
-						"radius": 2.0
+						"amount": 23.0,
+						"radius": 1.0
 					},
 					{
 						"type": "DAMAGE_OVER_TIME",
 						"target": "AREA",
 						"damage_type": "PLASMA",
-						"amount": 10.0,
-						"duration": 3.0,
-						"radius": 2.0
+						"amount": 11.0,
+						"duration": 2.0,
+						"radius": 1.0
 					}
 				]
 			}
@@ -426,13 +427,13 @@
 				"passive": false,
 				"power_on_use": 11.0,
 				"module_range": 2.0,
-				"cooldown": 1.0,
+				"cooldown": 2.0,
 				"effects": [
 					{
 						"type": "DAMAGE",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
-						"amount": 40.0,
+						"amount": 27.0,
 						"radius": 1.0
 					},
 					{
@@ -462,7 +463,7 @@
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 40.0
+						"amount": 32.0
 					},
 					{
 						"type": "SPEED_MODIFIER",
@@ -491,13 +492,13 @@
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 30.0
+						"amount": 25.0
 					},
 					{
 						"type": "DAMAGE",
 						"target": "AREA",
 						"damage_type": "KINETIC",
-						"amount": 15.0,
+						"amount": 10.0,
 						"radius": 1.0
 					}
 				]
@@ -513,22 +514,22 @@
 			{
 				"name": "Singularity Detonation",
 				"passive": false,
-				"power_on_use": 11.0,
-				"module_range": 3.0,
-				"cooldown": 1.0,
+				"power_on_use": 19.0,
+				"module_range": 2.0,
+				"cooldown": 3.0,
 				"effects": [
 					{
 						"type": "DAMAGE_REDUCTION_ALL",
 						"target": "ENEMY",
 						"amount": -10.0,
-						"duration": 2.0
+						"duration": 1.0
 					},
 					{
 						"type": "DAMAGE",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
-						"amount": 40.0,
-						"radius": 2.0
+						"amount": 48.0,
+						"radius": 1.0
 					}
 				]
 			}
@@ -551,12 +552,12 @@
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
-						"amount": 30.0
+						"amount": 27.0
 					},
 					{
 						"type": "SPEED_MODIFIER",
 						"target": "ENEMY",
-						"amount": -3.0,
+						"amount": -2.0,
 						"duration": 2.0
 					}
 				]
@@ -567,25 +568,25 @@
 		"name": "EMP Dart Gun",
 		"description": "A silent, high-precision dart launcher that disables enemy power regeneration for a short duration.",
 		"slot": "small",
-		"base_power_usage": 10.0,
+		"base_power_usage": 18.0,
 		"modules": [
 			{
 				"name": "Disruptive Shot",
 				"passive": false,
 				"power_on_use": 8.0,
 				"module_range": 3.0,
-				"cooldown": 0.0,
+				"cooldown": 2.0,
 				"effects": [
 					{
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
-						"amount": 20.0
+						"amount": 31.0
 					},
 					{
 						"type": "POWER_REGEN",
 						"target": "ENEMY",
-						"amount": -10.0,
+						"amount": -8.0,
 						"duration": 3.0
 					}
 				]

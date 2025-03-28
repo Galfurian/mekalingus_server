@@ -5,16 +5,16 @@
         "size": "Medium",
         "health": 150,
         "armor": 50,
-        "shield": 75,
-        "shield_generation": 8,
+        "shield": 125,
+        "shield_generation": 14,
         "power": 371,
         "power_generation": 70,
         "speed": 12,
         "slots": [
             3,
-            1,
+            2,
             0,
-            2
+            3
         ],
         "icon": "meks/mek012"
     },
@@ -31,7 +31,7 @@
         "speed": 8,
         "slots": [
             2,
-            2,
+            3,
             0,
             2
         ],
@@ -89,8 +89,8 @@
         "slots": [
             2,
             2,
-            0,
-            2
+            1,
+            3
         ],
         "icon": "meks/mek015"
     },
@@ -100,16 +100,16 @@
         "size": "Medium",
         "health": 162,
         "armor": 62,
-        "shield": 112,
-        "shield_generation": 11,
+        "shield": 151,
+        "shield_generation": 21,
         "power": 390,
         "power_generation": 75,
         "speed": 10,
         "slots": [
-            3,
             1,
-            0,
-            2
+            1,
+            2,
+            3
         ],
         "icon": "meks/mek016"
     },
@@ -176,16 +176,16 @@
         "size": "Medium",
         "health": 175,
         "armor": 62,
-        "shield": 125,
-        "shield_generation": 12,
+        "shield": 325,
+        "shield_generation": 24,
         "power": 414,
         "power_generation": 87,
-        "speed": 10,
+        "speed": 9,
         "slots": [
             3,
             2,
             0,
-            1
+            2
         ],
         "icon": "meks/mek020"
     }

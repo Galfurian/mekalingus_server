@@ -83,13 +83,13 @@
         "armor": 525,
         "shield": 238,
         "shield_generation": 24,
-        "power": 1572,
+        "power": 1472,
         "power_generation": 300,
         "speed": 4,
         "slots": [
             0,
             2,
-            6,
+            5,
             3
         ],
         "icon": "meks/mek035"

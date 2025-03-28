@@ -10,19 +10,34 @@
 				"passive": false,
 				"power_on_use": 46.0,
 				"module_range": 6.0,
-				"cooldown": 2.0,
+				"cooldown": 3.0,
 				"effects": [
 					{
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 90.0
+						"amount": 120.0
 					},
 					{
 						"type": "DAMAGE_REDUCTION_ALL",
 						"target": "ENEMY",
 						"amount": -10.0,
 						"duration": 3.0
+					}
+				]
+			},
+			{
+				"name": "Precision Burst",
+				"passive": false,
+				"power_on_use": 22.0,
+				"module_range": 5.0,
+				"cooldown": 1.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "KINETIC",
+						"amount": 45.0
 					}
 				]
 			}
@@ -60,7 +75,7 @@
 	},
 	"lwpn003": {
 		"name": "Nova Lance",
-		"description": "A high-intensity energy beam weapon that charges up before firing a concentrated blast.",
+		"description": "A high-intensity energy beam weapon that charges up before firing a concentrated blast, disrupting shields and melting through armor.",
 		"slot": "large",
 		"base_power_usage": 109.0,
 		"modules": [
@@ -75,7 +90,34 @@
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
-						"amount": 100.0
+						"amount": 130.0
+					},
+					{
+						"type": "SHIELD_REGEN",
+						"target": "ENEMY",
+						"amount": -10.0,
+						"duration": 2.0
+					},
+					{
+						"type": "POWER_MODIFIER",
+						"target": "ENEMY",
+						"amount": -15.0,
+						"duration": 1.0
+					}
+				]
+			},
+			{
+				"name": "Rapid Pulse",
+				"passive": false,
+				"power_on_use": 20.0,
+				"module_range": 4.0,
+				"cooldown": 1.0,
+				"effects": [
+					{
+						"type": "DAMAGE",
+						"target": "ENEMY",
+						"damage_type": "ENERGY",
+						"amount": 40.0
 					}
 				]
 			}
@@ -98,13 +140,30 @@
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
-						"amount": 80.0
+						"amount": 95.0
 					},
 					{
 						"type": "POWER_REGEN",
 						"target": "ENEMY",
 						"amount": -15.0,
-						"duration": 2.0
+						"duration": 3.0
+					}
+				]
+			},
+			{
+				"name": "EMP Ripple",
+				"passive": false,
+				"power_on_use": 16.0,
+				"module_range": 3.0,
+				"cooldown": 1.0,
+				"effects": [
+					{
+						"type": "POWER_MODIFIER",
+						"target": "AREA",
+						"amount": -10.0,
+						"duration": 1.0,
+						"radius": 1,
+						"center_on_target": true
 					}
 				]
 			}
@@ -119,16 +178,18 @@
 			{
 				"name": "Barrage Strike",
 				"passive": false,
-				"power_on_use": 37.0,
-				"module_range": 6.0,
-				"cooldown": 2.0,
+				"power_on_use": 54.0,
+				"module_range": 5.0,
+				"cooldown": 4.0,
+				"repeats": 4,
 				"effects": [
 					{
 						"type": "DAMAGE",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
-						"amount": 70.0,
-						"radius": 3.0
+						"amount": 24.0,
+						"radius": 2.0,
+						"center_on_target": true
 					}
 				]
 			}
@@ -143,15 +204,15 @@
 			{
 				"name": "Devastator Blast",
 				"passive": false,
-				"power_on_use": 54.0,
+				"power_on_use": 83.0,
 				"module_range": 6.0,
-				"cooldown": 3.0,
+				"cooldown": 4.0,
 				"effects": [
 					{
 						"type": "DAMAGE",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
-						"amount": 90.0,
+						"amount": 56.0,
 						"radius": 4.0
 					}
 				]
@@ -169,20 +230,20 @@
 				"passive": false,
 				"power_on_use": 74.0,
 				"module_range": 5.0,
-				"cooldown": 2.0,
+				"cooldown": 3.0,
 				"effects": [
 					{
 						"type": "DAMAGE",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
-						"amount": 95.0
+						"amount": 106.0
 					},
 					{
 						"type": "DAMAGE_OVER_TIME",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
-						"amount": 15.0,
-						"duration": 3.0
+						"amount": 27.0,
+						"duration": 4.0
 					}
 				]
 			}

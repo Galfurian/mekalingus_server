@@ -1,0 +1,15 @@
+{
+    "id": "standard_player_clan",
+    "name": "Freebooters Union",
+    "description": "A decentralized band of freelance pilots, mercenaries, and scavengers. United only by their will to survive and adapt.",
+    "color": "#B0C4DE",
+    "emblem_path": "clans/freebooters_emblem.png",
+    "preferred_roles": [
+        "BRAWLER",
+        "SNIPER",
+        "SUPPORT",
+        "ARTILLERY"
+    ],
+    "aggressiveness": 1.0,
+    "is_player_joinable": true
+}

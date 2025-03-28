@@ -1,0 +1,13 @@
+{
+    "id": "iron_forge",
+    "name": "Iron Forge",
+    "description": "A heavily industrialized clan that favors brute force and overwhelming firepower.",
+    "color": "#FF4C4C",
+    "emblem_path": "res://assets/emblems/iron_forge.png",
+    "preferred_roles": [
+        "BRAWLER",
+        "ARTILLERY"
+    ],
+    "aggressiveness": 1.5,
+    "is_player_joinable": false
+}

@@ -1,0 +1,13 @@
+{
+    "id": "nova_regents",
+    "name": "Nova Regents",
+    "description": "Advanced tech warriors wielding energy weapons and plasma artillery.",
+    "color": "#9B59B6",
+    "emblem_path": "res://assets/emblems/nova_regents.png",
+    "preferred_roles": [
+        "ARTILLERY",
+        "SNIPER"
+    ],
+    "aggressiveness": 1.2,
+    "is_player_joinable": true
+}

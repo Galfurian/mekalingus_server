@@ -1,0 +1,13 @@
+{
+    "id": "storm_howlers",
+    "name": "Storm Howlers",
+    "description": "Fast-moving, high-impact combatants that bring the storm to their enemies.",
+    "color": "#3498DB",
+    "emblem_path": "res://assets/emblems/storm_howlers.png",
+    "preferred_roles": [
+        "BRAWLER",
+        "SNIPER"
+    ],
+    "aggressiveness": 1.3,
+    "is_player_joinable": true
+}

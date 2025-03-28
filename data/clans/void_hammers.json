@@ -1,0 +1,13 @@
+{
+    "id": "void_hammers",
+    "name": "Void Hammers",
+    "description": "Forged in isolation, they deliver devastating close-range power.",
+    "color": "#1ABC9C",
+    "emblem_path": "res://assets/emblems/void_hammers.png",
+    "preferred_roles": [
+        "BRAWLER",
+        "ARTILLERY"
+    ],
+    "aggressiveness": 1.4,
+    "is_player_joinable": false
+}

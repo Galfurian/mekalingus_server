@@ -1,0 +1,13 @@
+{
+    "id": "phantom_blades",
+    "name": "Phantom Blades",
+    "description": "Stealthy and precise, the Phantom Blades excel at hit-and-run tactics.",
+    "color": "#5D6D7E",
+    "emblem_path": "res://assets/emblems/phantom_blades.png",
+    "preferred_roles": [
+        "SNIPER",
+        "SUPPORT"
+    ],
+    "aggressiveness": 0.8,
+    "is_player_joinable": true
+}

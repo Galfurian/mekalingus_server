@@ -1,0 +1,13 @@
+{
+	"id": "crimson_order",
+	"name": "Crimson Order",
+	"description": "An elite clan of disciplined warmongers with relentless coordination.",
+	"color": "#C0392B",
+	"emblem_path": "res://assets/emblems/crimson_order.png",
+	"preferred_roles": [
+		"BRAWLER",
+		"SUPPORT"
+	],
+	"aggressiveness": 1.1,
+	"is_player_joinable": false
+}

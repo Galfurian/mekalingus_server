@@ -1,0 +1,13 @@
+{
+    "id": "ember_guard",
+    "name": "Ember Guard",
+    "description": "Resilient defenders specializing in heat weapons and support utilities.",
+    "color": "#E67E22",
+    "emblem_path": "res://assets/emblems/ember_guard.png",
+    "preferred_roles": [
+        "SUPPORT",
+        "BRAWLER"
+    ],
+    "aggressiveness": 0.6,
+    "is_player_joinable": true
+}

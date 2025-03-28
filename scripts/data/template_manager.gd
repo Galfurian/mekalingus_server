@@ -1,7 +1,8 @@
 extends Node
 
-const PLAYER_TEMPLATE_FILE = "res://data/player_template.json"
+const PLAYER_TEMPLATE_FILE = "res://data/players/player_template.json"
 
+const CLANS_FOLDER = "res://data/clans/"
 const MEKS_FOLDER = "res://data/meks"
 const ITEMS_FOLDER = "res://data/items"
 const BIOMES_FOLDER = "res://data/biomes"
@@ -118,6 +119,37 @@ func load_player_template() -> bool:
 	file.close()
 	log_message("Loaded default player.")
 	return true
+
+
+# =============================================================================
+# CLAN
+# =============================================================================
+
+
+func load_standard_clans():
+	"""
+	Loads all clan data from multiple JSON files in the CLANS_FOLDER.
+	"""
+	if not DirAccess.dir_exists_absolute(CLANS_FOLDER):
+		log_message("Error: Clans folder missing: " + CLANS_FOLDER)
+		return false
+	var dir = DirAccess.open(CLANS_FOLDER)
+	if not dir:
+		log_message("Error: Unable to open clans folder.")
+		return false
+	log_message("Loading clans...")
+	dir.list_dir_begin()
+	var file_name = dir.get_next()
+	while not file_name.is_empty():
+		if not file_name.ends_with(".json"):
+			continue
+		var file_path = CLANS_FOLDER + "/" + file_name
+		# Load the clan.
+		if not DataManager.load_clan(file_path):
+			log_message("Error: Failed to load clan from file '" + file_path + "'.")
+			return false
+		# Move to the next file.
+		file_name = dir.get_next()
 
 
 # =============================================================================

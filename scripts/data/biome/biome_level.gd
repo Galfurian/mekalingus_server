@@ -39,11 +39,7 @@ func _to_string() -> String:
 		+ ", "
 		+ str(movement_cost)
 		+ ", ["
-		+ str(color.r8)
-		+ ", "
-		+ str(color.g8)
-		+ ", "
-		+ str(color.b8)
+		+ Utils.color_to_hex(color)
 		+ "]"
 	)
 
@@ -54,7 +50,7 @@ func from_dict(data: Dictionary):
 	name = data["name"]
 	height = data["height"]
 	movement_cost = data["movement_cost"]
-	color = Color(data["color"][0] / 255.0, data["color"][1] / 255.0, data["color"][2] / 255.0, 1.0)
+	color = Utils.hex_to_color(data["color"])
 
 
 func to_dict() -> Dictionary:
@@ -64,5 +60,5 @@ func to_dict() -> Dictionary:
 		"name": name,
 		"height": height,
 		"movement_cost": movement_cost,
-		"color": [color.r8, color.g8, color.b8]
+		"color": Utils.color_to_hex(color),
 	}

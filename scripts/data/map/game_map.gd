@@ -1020,7 +1020,7 @@ func spawn_enemies_on_map(difficulty: int) -> void:
 			push_error("We ran out of spawn points.")
 			return
 		# Generate the enemy.
-		var enemy_mek = LoadoutGenerator.generate_balanced_enemy(difficulty, LoadoutGenerator.MekRole.BRAWLER)
+		var enemy_mek = LoadoutGenerator.generate_mek(difficulty, Enums.MekRole.BRAWLER)
 		if not enemy_mek:
 			push_error("Failed to generate an enemy Mek.")
 			continue

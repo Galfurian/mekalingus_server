@@ -52,14 +52,6 @@
 
 extends Node
 
-# Describes different combat roles a Mek can be built for.
-enum MekRole {
-	BRAWLER,
-	SNIPER,
-	ARTILLERY,
-	SUPPORT,
-}
-
 const DIFFICULTY_POWER_RANGES = {
 	Enums.MapDifficulty.NOVICE:      { "min": 250, "max": 750 },
 	Enums.MapDifficulty.CADET:       { "min": 500, "max": 1000 },
@@ -79,7 +71,7 @@ const DIFFICULTY_MEK_SIZE = {
 }
 
 
-func generate_balanced_enemy(difficulty: int, role: MekRole) -> Mek:
+func generate_mek(difficulty: int, role: Enums.MekRole) -> Mek:
 	"""
 	Generates an NPC Mek with a loadout tailored to the specified role and balanced
 	against a difficulty-based power range.
@@ -112,7 +104,7 @@ func generate_balanced_enemy(difficulty: int, role: MekRole) -> Mek:
 	return mek
 
 
-func _assign_role_based_loadout(mek: Mek, role: MekRole, power_range: Dictionary) -> void:
+func _assign_role_based_loadout(mek: Mek, role: Enums.MekRole, power_range: Dictionary) -> void:
 	"""
 	Assigns a loadout to the given Mek based on its role and a desired power range.
 	It scores items by how well they fit the role, then greedily adds them until
@@ -126,10 +118,10 @@ func _assign_role_based_loadout(mek: Mek, role: MekRole, power_range: Dictionary
 
 	# Function map to get role scoring function.
 	var role_scorers = {
-		MekRole.SNIPER: _score_sniper_suitability,
-		MekRole.BRAWLER: _score_brawler_suitability,
-		MekRole.ARTILLERY: _score_artillery_suitability,
-		MekRole.SUPPORT: _score_support_suitability,
+		Enums.MekRole.SNIPER: _score_sniper_suitability,
+		Enums.MekRole.BRAWLER: _score_brawler_suitability,
+		Enums.MekRole.ARTILLERY: _score_artillery_suitability,
+		Enums.MekRole.SUPPORT: _score_support_suitability,
 	}
 
 	# Loop over each slot type.
@@ -173,7 +165,7 @@ func _assign_role_based_loadout(mek: Mek, role: MekRole, power_range: Dictionary
 	else:
 		status = "✅ WITHIN RANGE"
 
-	print("[LOADOUT] Role:", MekRole.keys()[role], "Power:", total_power, status)
+	print("[LOADOUT] Role:", Enums.MekRole.keys()[role], "Power:", total_power, status)
 
 
 # =============================================================================

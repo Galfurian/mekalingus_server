@@ -92,3 +92,11 @@ enum LogType {
 	SYSTEM = 4,  # System messages.
 	AI = 5, # AI messages.
 }
+
+# Describes different combat roles a Mek can be built for.
+enum MekRole {
+	BRAWLER,
+	SNIPER,
+	ARTILLERY,
+	SUPPORT,
+}

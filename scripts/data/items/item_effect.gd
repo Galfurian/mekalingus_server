@@ -156,53 +156,120 @@ func get_effect_type_label() -> String:
 	"""
 	Returns a short label for the effect type, useful for UI or logs.
 	"""
+	var label: String
 	match type:
 		Enums.EffectType.DAMAGE:
-			return "Damage"
+			label = "Damage"
 		Enums.EffectType.DAMAGE_OVER_TIME:
-			return "Damage over Time"
+			label = "Damage over Time"
 		Enums.EffectType.HEALTH_REPAIR:
-			return "Health Repair"
+			label = "Health Repair"
 		Enums.EffectType.SHIELD_REPAIR:
-			return "Shield Repair"
+			label = "Shield Repair"
 		Enums.EffectType.ARMOR_REPAIR:
-			return "Armor Repair"
+			label = "Armor Repair"
 		Enums.EffectType.HEALTH_MODIFIER:
-			return "Health Modifier"
+			label = "Health Modifier"
 		Enums.EffectType.SHIELD_MODIFIER:
-			return "Shield Modifier"
+			label = "Shield Modifier"
 		Enums.EffectType.ARMOR_MODIFIER:
-			return "Armor Modifier"
+			label = "Armor Modifier"
 		Enums.EffectType.POWER_MODIFIER:
-			return "Power Modifier"
+			label = "Power Modifier"
 		Enums.EffectType.SPEED_MODIFIER:
-			return "Speed Modifier"
+			label = "Speed Modifier"
 		Enums.EffectType.ACCURACY_MODIFIER:
-			return "Accuracy Modifier"
+			label = "Accuracy Modifier"
 		Enums.EffectType.RANGE_MODIFIER:
-			return "Range Modifier"
+			label = "Range Modifier"
 		Enums.EffectType.COOLDOWN_MODIFIER:
-			return "Cooldown Modifier"
+			label = "Cooldown Modifier"
 		Enums.EffectType.SHIELD_REGEN:
-			return "Shield Regen"
+			label = "Shield Regen"
 		Enums.EffectType.ARMOR_REGEN:
-			return "Armor Regen"
+			label = "Armor Regen"
 		Enums.EffectType.POWER_REGEN:
-			return "Power Regen"
+			label = "Power Regen"
 		Enums.EffectType.DAMAGE_REDUCTION_ALL:
-			return "All Damage Reduction"
+			label = "All Damage Reduction"
 		Enums.EffectType.DAMAGE_REDUCTION_KINETIC:
-			return "Kinetic Damage Reduction"
+			label = "Kinetic Damage Reduction"
 		Enums.EffectType.DAMAGE_REDUCTION_ENERGY:
-			return "Energy Damage Reduction"
+			label = "Energy Damage Reduction"
 		Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE:
-			return "Explosive Damage Reduction"
+			label = "Explosive Damage Reduction"
 		Enums.EffectType.DAMAGE_REDUCTION_PLASMA:
-			return "Plasma Damage Reduction"
+			label = "Plasma Damage Reduction"
 		Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE:
-			return "Corrosive Damage Reduction"
+			label = "Corrosive Damage Reduction"
 		_:
-			return "Unknown Effect"
+			label = "Unknown Effect"
+	return label
+
+
+# =============================================================================
+# POWER COMPUTATION
+# =============================================================================
+
+
+func evaluate_effect_power(repeats: int) -> float:
+	"""
+	Computes the tactical power of the effect based on its properties.
+	"""
+	# Duration factor: longer-lasting effects are stronger.
+	var duration_factor: float = 1.0 + float(duration)
+
+	# Area factor: AoE effects scale with radius, otherwise flat.
+	var area_factor: float = 1.0 if target != Enums.TargetType.AREA else float(radius)
+
+	# Chance factor: reduces effect if not guaranteed to trigger.
+	var chance_factor: float = float(chance if chance != null else 100) / 100.0
+
+	# Type multiplier: some effect types are more tactically impactful.
+	var type_factors = {
+		Enums.EffectType.DAMAGE: 1.0,
+		Enums.EffectType.DAMAGE_OVER_TIME: 1.0,
+		Enums.EffectType.HEALTH_REPAIR: 1.0,
+		Enums.EffectType.ARMOR_REPAIR: 1.0,
+		Enums.EffectType.SHIELD_REPAIR: 1.0,
+		Enums.EffectType.HEALTH_MODIFIER: 1.0,
+		Enums.EffectType.SHIELD_MODIFIER: 1.0,
+		Enums.EffectType.ARMOR_MODIFIER: 1.0,
+		Enums.EffectType.POWER_MODIFIER: 1.0,
+		Enums.EffectType.SPEED_MODIFIER: 2.5,
+		Enums.EffectType.ACCURACY_MODIFIER: 2.0,
+		Enums.EffectType.RANGE_MODIFIER: 2.5,
+		Enums.EffectType.COOLDOWN_MODIFIER: 3.0,
+		Enums.EffectType.SHIELD_REGEN: 1.0,
+		Enums.EffectType.ARMOR_REGEN: 1.0,
+		Enums.EffectType.POWER_REGEN: 1.0,
+		Enums.EffectType.DAMAGE_REDUCTION_ALL: 1.0,
+		Enums.EffectType.DAMAGE_REDUCTION_KINETIC: 1.0,
+		Enums.EffectType.DAMAGE_REDUCTION_ENERGY: 1.0,
+		Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE: 1.0,
+		Enums.EffectType.DAMAGE_REDUCTION_PLASMA: 1.0,
+		Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE: 1.0,
+	}
+	var type_factor: float = type_factors.get(type, 1.0)
+
+	# Repeat factor: for DAMAGE effects, multiply by number of hits.
+	var repeat_factor: float = float(repeats) if type == Enums.EffectType.DAMAGE else 1.0
+
+	# Target rationale: penalize negative self/ally effects.
+	var target_rationale := 1.0
+	if (target == Enums.TargetType.SELF or target == Enums.TargetType.ALLY) and amount < 0.0:
+		target_rationale = -1.0
+
+	# Final computed power.
+	return (
+		abs(amount)
+		* duration_factor
+		* area_factor
+		* chance_factor
+		* type_factor
+		* repeat_factor
+		* target_rationale
+	)
 
 
 # =============================================================================

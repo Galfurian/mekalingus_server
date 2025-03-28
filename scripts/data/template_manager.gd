@@ -18,6 +18,10 @@ var mek_templates: Dictionary
 var item_templates: Dictionary
 # List of biome data.
 var biomes: Dictionary[String, Biome]
+# Dictionary to store power stats per slot type.
+var slot_power_stats: Dictionary[Enums.SlotType, Dictionary]
+# Dictionary to store power stats per mek size.
+var mek_power_stats: Dictionary[Enums.MekSize, Dictionary]
 
 # =============================================================================
 # GENERAL
@@ -43,6 +47,8 @@ func load_all() -> bool:
 		return false
 	if not load_biomes():
 		return false
+	compute_item_power_stats_per_slot()
+	compute_mek_power_stats_per_size()
 	return true
 
 
@@ -50,6 +56,8 @@ func clear_all():
 	"""
 	Clears all templates and data.
 	"""
+	mek_power_stats.clear()
+	slot_power_stats.clear()
 	player_template.clear()
 	mek_templates.clear()
 	item_templates.clear()
@@ -117,6 +125,36 @@ func load_player_template() -> bool:
 # =============================================================================
 
 
+func compute_mek_power_stats_per_size() -> Dictionary:
+	"""
+	Computes power stats (min, max, avg) for each Mek size.
+	"""
+	mek_power_stats.clear()
+	# Initialize grouping structure.
+	var size_groups := {
+		Enums.MekSize.LIGHT: [],
+		Enums.MekSize.MEDIUM: [],
+		Enums.MekSize.HEAVY: [],
+		Enums.MekSize.COLOSSAL: []
+	}
+	# Gather power values by size.
+	for mek_template in mek_templates.values():
+		size_groups[mek_template.size].append(mek_template.evaluate_mek_template_power())
+	# Compute stats per size group.
+	for size_enum in size_groups.keys():
+		var powers: Array = size_groups[size_enum]
+		if powers.is_empty():
+			continue
+		var count: int = powers.size()
+		var min_val: float = powers.min()
+		var max_val: float = powers.max()
+		var avg_val: float = powers.reduce(func(accum, val): return accum + val) / count
+		mek_power_stats[size_enum] = {
+			"count": count, "min": min_val, "max": max_val, "average": avg_val
+		}
+	return mek_power_stats
+
+
 func load_mek_templates():
 	"""
 	Loads mek templates from multiple JSON files in the MEKS_FOLDER.
@@ -167,6 +205,35 @@ func load_mek_templates():
 # =============================================================================
 # ITEM LOADING
 # =============================================================================
+
+
+func compute_item_power_stats_per_slot():
+	"""
+	Computes power stats for each slot type.
+	"""
+	# Clear the previous stats.
+	slot_power_stats.clear()
+	# Dictionary to accumulate power values for each slot type (using enum as key)
+	var slot_powers := {
+		Enums.SlotType.SMALL: [],
+		Enums.SlotType.MEDIUM: [],
+		Enums.SlotType.LARGE: [],
+		Enums.SlotType.UTILITY: []
+	}
+	# Gather powers grouped by slot type
+	for item_template in item_templates.values():
+		slot_powers[item_template.slot].append(item_template.evaluate_item_template_power())
+	# Compute min, max, avg, count per slot enum value.
+	for slot_enum in slot_powers.keys():
+		var powers: Array = slot_powers[slot_enum]
+		var count: int = powers.size()
+		var min_val: float = powers.min()
+		var max_val: float = powers.max()
+		var avg_val: float = powers.reduce(func(accum, power): return accum + power) / count
+		slot_power_stats[slot_enum] = {
+			"count": count, "min": min_val, "max": max_val, "average": avg_val
+		}
+	return slot_power_stats
 
 
 func load_item_templates():

@@ -1,6 +1,8 @@
-extends RefCounted
-
+# This class represents a template for a Mek, containing all the base stats and
+# configuration for a Mek unit. It is used to create Mek instances with the
+# desired properties.
 class_name MekTemplate
+extends RefCounted
 
 # =============================================================================
 # PROPERTIES
@@ -36,34 +38,62 @@ var icon: String
 # GENERAL
 # =============================================================================
 
+
 func _init(_id: String = "", data: Dictionary = {}):
 	id = _id
 	if data:
 		from_dict(data)
 
+
 func is_valid() -> bool:
 	"""Checks if the Mek template contains valid values."""
 	return id != "" and name != "" and health > 0 and armor >= 0 and shield >= 0
 
+
 func build_mek(uuid: String = GameServer.generate_uuid()) -> Mek:
 	"""Builds a Mek starting from this template."""
-	return Mek.new(
-		{
-			"mek_id" : id,
-			"uuid"   : uuid
-		}
+	return Mek.new({"mek_id": id, "uuid": uuid})
+
+
+# =============================================================================
+# POWER COMPUTATION
+# =============================================================================
+
+
+func evaluate_mek_template_power() -> float:
+	"""
+	Computes the total power level of the Mek based on its stats and equipped items.
+	"""
+	var slot_power := 0.0
+	for i in range(slots.size()):
+		var slot_type := i
+		var slot_count := slots[i]
+		var stats = TemplateManager.slot_power_stats.get(slot_type, null)
+		if stats:
+			slot_power += stats["average"] * slot_count
+	var stat_power := (
+		health * 0.3
+		+ armor * 0.3
+		+ shield * 0.3
+		+ shield_generation * 2.0
+		+ power * 0.15
+		+ power_generation * 1.0
+		+ speed * 15.0
 	)
+	return round(slot_power + stat_power)
+
 
 # =============================================================================
 # SERIALIZATION
 # =============================================================================
+
 
 func from_dict(data: Dictionary):
 	"""Loads Mek template data from a dictionary."""
 	if not data.has("name") or not data.has("size") or not data.has("slots"):
 		push_error("Invalid MekTemplate data: Missing required fields")
 		return
-	
+
 	name = data["name"]
 	size = Utils.string_to_enum(Enums.MekSize, data["size"])
 	health = int(data.get("health", 0))
@@ -75,6 +105,7 @@ func from_dict(data: Dictionary):
 	speed = int(data.get("speed", 0))
 	slots = Utils.to_array_int(data["slots"])
 	icon = data.get("icon", "")
+
 
 func to_dict() -> Dictionary:
 	"""Converts Mek template data to a dictionary."""

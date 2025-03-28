@@ -60,8 +60,6 @@ var accuracy_modifier: int
 var range_modifier: int
 # Allows faster or slower cooldowns.
 var cooldown_modifier: int
-# Bonus to movement speed (possibly applied to speed).
-var speed_modifier: int
 # Available slots for equipment (modified by items if applicable).
 var slots: Array[int]
 # Stores how many tiles this Mek moved in the previous turn.
@@ -71,9 +69,11 @@ var tiles_moved_last_turn: int = 0
 # GENERAL
 # =============================================================================
 
+
 func _init(data: Dictionary = {}):
 	"""Initializes a Mek instance from a dictionary."""
 	from_dict(data)
+
 
 static func compare_meks(a: Mek, b: Mek) -> bool:
 	"""Sorts meks first by size, then by name alphabetically."""
@@ -81,13 +81,16 @@ static func compare_meks(a: Mek, b: Mek) -> bool:
 		return a.template.name.to_lower() > b.template.name.to_lower()
 	return a.template.size < b.template.size
 
+
 # =============================================================================
 # COMBAT-RELATED FUNCTIONS
 # =============================================================================
 
+
 func is_dead() -> bool:
 	"""Returns true if the Mek has 0 or less health."""
 	return health <= 0
+
 
 func get_usable_weapon_range() -> Dictionary:
 	"""
@@ -112,29 +115,33 @@ func get_usable_weapon_range() -> Dictionary:
 			if max_range == null or module.module_range > max_range:
 				max_range = module.module_range
 	return {
-		"min": min_range if min_range != null else 0,
-		"max": max_range if max_range != null else 0
+		"min": min_range if min_range != null else 0, "max": max_range if max_range != null else 0
 	}
+
 
 func restore_health(amount: int) -> int:
 	var before = health
 	health = min(health + amount, max_health)
 	return health - before
 
+
 func restore_armor(amount: int) -> int:
 	var before = armor
 	armor = min(armor + amount, max_armor)
 	return armor - before
+
 
 func restore_shield(amount: int) -> int:
 	var before = shield
 	shield = min(shield + amount, max_shield)
 	return shield - before
 
+
 func restore_power(amount: int) -> int:
 	var before = power
 	power = min(power + amount, max_power)
 	return power - before
+
 
 func regenerate():
 	"""Regenerates power, armor, and shield up to their maximum values."""
@@ -142,6 +149,7 @@ func regenerate():
 	restore_armor(armor_generation)
 	restore_shield(shield_generation)
 	restore_power(power_generation)
+
 
 func take_damage_from_effect(effect: ItemEffect) -> Dictionary:
 	"""Applies damage from a given effect, using resistances and damage-type-specific strengths/weaknesses."""
@@ -158,25 +166,30 @@ func take_damage_from_effect(effect: ItemEffect) -> Dictionary:
 	# 1. DAMAGE MODIFIERS BY DAMAGE TYPE (strengths/weaknesses per layer)
 	# =========================================================================
 	var type_modifiers = {
-		Enums.DamageType.KINETIC:   { "armor": 0.8, "shield": 0.6, "health": 1.0 },
-		Enums.DamageType.ENERGY:    { "armor": 0.6, "shield": 1.5, "health": 1.0 },
-		Enums.DamageType.PLASMA:    { "armor": 1.2, "shield": 1.2, "health": 0.9 },
-		Enums.DamageType.EXPLOSIVE: { "armor": 1.3, "shield": 0.7, "health": 1.3 },
-		Enums.DamageType.CORROSIVE: { "armor": 1.3, "shield": 0.6, "health": 1.2 }
+		Enums.DamageType.KINETIC: {"armor": 0.8, "shield": 0.6, "health": 1.0},
+		Enums.DamageType.ENERGY: {"armor": 0.6, "shield": 1.5, "health": 1.0},
+		Enums.DamageType.PLASMA: {"armor": 1.2, "shield": 1.2, "health": 0.9},
+		Enums.DamageType.EXPLOSIVE: {"armor": 1.3, "shield": 0.7, "health": 1.3},
+		Enums.DamageType.CORROSIVE: {"armor": 1.3, "shield": 0.6, "health": 1.2}
 	}
-	var modifiers = type_modifiers.get(effect.damage_type, {
-		"shield": 1.0, "armor": 1.0, "health": 1.0
-	})
+	var modifiers = type_modifiers.get(
+		effect.damage_type, {"shield": 1.0, "armor": 1.0, "health": 1.0}
+	)
 	# =========================================================================
 	# 2. APPLY FLAT DAMAGE REDUCTION
 	# =========================================================================
 	var reduction = damage_reduction_all
 	match effect.damage_type:
-		Enums.DamageType.KINETIC:   reduction += damage_reduction_kinetic
-		Enums.DamageType.ENERGY:    reduction += damage_reduction_energy
-		Enums.DamageType.EXPLOSIVE: reduction += damage_reduction_explosive
-		Enums.DamageType.PLASMA:    reduction += damage_reduction_plasma
-		Enums.DamageType.CORROSIVE: reduction += damage_reduction_corrosive
+		Enums.DamageType.KINETIC:
+			reduction += damage_reduction_kinetic
+		Enums.DamageType.ENERGY:
+			reduction += damage_reduction_energy
+		Enums.DamageType.EXPLOSIVE:
+			reduction += damage_reduction_explosive
+		Enums.DamageType.PLASMA:
+			reduction += damage_reduction_plasma
+		Enums.DamageType.CORROSIVE:
+			reduction += damage_reduction_corrosive
 	var adjusted = max(effect.amount - reduction, 0)
 	result.reduced = effect.amount - adjusted
 	var remaining = adjusted
@@ -211,21 +224,18 @@ func take_damage_from_effect(effect: ItemEffect) -> Dictionary:
 	result.total = result.shield + result.armor + result.health
 	return result
 
+
 func take_dot_damage() -> Dictionary:
 	"""Applies all active DOT effects using resistances and returns a breakdown."""
-	var total_damage = {
-		"shield": 0,
-		"armor": 0,
-		"health": 0,
-		"total": 0
-	}
+	var total_damage = {"shield": 0, "armor": 0, "health": 0, "total": 0}
 	for dot in active_effect_manager.get_dot_effects():
 		var damage = take_damage_from_effect(dot.effect)
 		total_damage.shield += damage.shield
-		total_damage.armor  += damage.armor
+		total_damage.armor += damage.armor
 		total_damage.health += damage.health
-		total_damage.total  += damage.total
+		total_damage.total += damage.total
 	return total_damage
+
 
 func repair_from_effect(effect: ItemEffect) -> Dictionary:
 	"""Applies a repair effect and returns a dictionary with the type and amount restored."""
@@ -242,8 +252,9 @@ func repair_from_effect(effect: ItemEffect) -> Dictionary:
 			restored = restore_armor(effect.amount)
 			stat = "armor"
 		_:
-			return { "stat": "unknown", "amount": 0 }
-	return { "stat": stat, "amount": restored }
+			return {"stat": "unknown", "amount": 0}
+	return {"stat": stat, "amount": restored}
+
 
 func apply_regen_effects():
 	"""Applies all passive regeneration or buff-over-time effects."""
@@ -256,9 +267,11 @@ func apply_regen_effects():
 			Enums.EffectType.POWER_REGEN:
 				restore_power(effect.effect.amount)
 
+
 # =============================================================================
 # ACTIVE EFFECTS
 # =============================================================================
+
 
 func add_effect(module: ItemModule, effect: ItemEffect, source: MapEntity) -> void:
 	"""
@@ -273,13 +286,16 @@ func has_effect_type(effect_type: Enums.EffectType) -> bool:
 	"""Returns true if this Mek currently has an active effect of the given type."""
 	return active_effect_manager.has_effect_type(effect_type)
 
+
 func clear_active_effects() -> void:
 	"""Clears all ongoing active effects (used at end of combat)."""
 	active_effect_manager.clear()
 
+
 # =============================================================================
 # PASSIVE EFFECTs MANAGEMENT
 # =============================================================================
+
 
 func _toggle_passive_effect_modifier(effect: ItemEffect, enable: bool):
 	"""Applies or removes a passive or active effect's stat modifier."""
@@ -332,32 +348,35 @@ func _toggle_passive_effect_modifier(effect: ItemEffect, enable: bool):
 		Enums.EffectType.COOLDOWN_MODIFIER:
 			cooldown_modifier += delta
 
+
 func _toggle_module_passive_effect_modifiers(module: ItemModule, enable: bool):
 	"""Applies or removes passive or active effects for a module."""
 	if module.passive:
 		for effect in module.effects:
 			_toggle_passive_effect_modifier(effect, enable)
 
+
 func _toggle_item_passive_effect_modifiers(item: Item, enable: bool):
 	"""Applies or removes passive or active effects for an item."""
 	for module in item.template.modules:
 		_toggle_module_passive_effect_modifiers(module, enable)
 
+
 func _update_static_values():
 	"""Recalculates max values, regen rates, and speed. Called only when necessary."""
 	# Reset to template base values
 	health = template.health
-	armor  = template.armor
+	armor = template.armor
 	shield = template.shield
-	power  = template.power
+	power = template.power
 	max_health = template.health
-	max_armor  = template.armor
+	max_armor = template.armor
 	max_shield = template.shield
-	max_power  = template.power
+	max_power = template.power
 	health_generation = 0
-	armor_generation  = 0
+	armor_generation = 0
 	shield_generation = template.shield_generation
-	power_generation  = template.power_generation
+	power_generation = template.power_generation
 	speed = template.speed
 	damage_reduction_all = 0
 	damage_reduction_kinetic = 0
@@ -368,36 +387,40 @@ func _update_static_values():
 	accuracy_modifier = 0
 	range_modifier = 0
 	cooldown_modifier = 0
-	speed_modifier = 0
-	
+
 	# Apply effects from equipped items.
 	for item in items:
 		_enable_item_passive_modifiers(item)
-	
+
 	# Update the slots.
 	slots = template.slots.duplicate()
 	for item in items:
 		slots[item.template.slot] -= 1
 
+
 # =============================================================================
 # ITEMS
 # =============================================================================
 
+
 func _enable_item_passive_modifiers(item: Item):
 	"""Deactivates any passive and non-passive modules modifiers."""
 	_toggle_item_passive_effect_modifiers(item, true)
-	power     -= item.template.base_power_usage
+	power -= item.template.base_power_usage
 	max_power -= item.template.base_power_usage
+
 
 func _disable_item_passive_modifiers(item: Item):
 	"""Deactivates any passive and non-passive modules modifiers."""
 	_toggle_item_passive_effect_modifiers(item, false)
-	power     += item.template.base_power_usage
+	power += item.template.base_power_usage
 	max_power += item.template.base_power_usage
+
 
 func can_equip_item(item: Item) -> bool:
 	"""Checks if the item can be equipped."""
 	return slots[item.template.slot] > 0 and max_power > item.template.base_power_usage
+
 
 func add_item(item: Item) -> bool:
 	"""Attempts to equip an item if a slot is available."""
@@ -409,6 +432,7 @@ func add_item(item: Item) -> bool:
 		return true
 	return false
 
+
 func remove_item(item: Item) -> bool:
 	"""Removes an equipped item, freeing up the slot."""
 	if item in items:
@@ -419,6 +443,7 @@ func remove_item(item: Item) -> bool:
 		return true
 	return false
 
+
 func get_item(item_uuid: String) -> Variant:
 	"""Retrieves an equipped item by UUID."""
 	for entry in items:
@@ -426,36 +451,88 @@ func get_item(item_uuid: String) -> Variant:
 			return entry
 	return null
 
+
+func clear_items() -> void:
+	"""
+	Safely removes and frees all items currently equipped on this Mek.
+	Ensures no memory leaks or dangling references remain.
+	"""
+	for item in items:
+		# Free the UUID if tracked
+		GameServer.free_uuid(item.get(item.uuid))
+	items.clear()
+
+
+# =============================================================================
+# POWER COMPUTATION
+# =============================================================================
+
+
+func evaluate_mek_power() -> float:
+	"""
+	Computes the total power level of the Mek instance based on:
+	- Power contribution of equipped items.
+	- Base stats retrieved from the MekTemplate.
+	"""
+	var item_power := 0.0
+	for item in items:
+		item_power += item.evaluate_item_power()
+	var stat_power := (
+		max_health * 0.3
+		+ max_armor * 0.3
+		+ max_shield * 0.3
+		+ max_power * 0.3
+		+ health_generation * 2.0
+		+ armor_generation * 2.0
+		+ shield_generation * 2.0
+		+ power_generation * 2.0
+		+ speed * 15.0
+		+ damage_reduction_all * 5.0
+		+ damage_reduction_kinetic * 2.5
+		+ damage_reduction_energy * 2.5
+		+ damage_reduction_explosive * 2.5
+		+ damage_reduction_plasma * 2.5
+		+ damage_reduction_corrosive * 2.5
+		+ accuracy_modifier * 5.0
+		+ range_modifier * 5.0
+		+ cooldown_modifier * 5.0
+	)
+	return round(item_power + stat_power)
+
+
 # =============================================================================
 # SERIALIZATION
 # =============================================================================
 
+
 func _to_string() -> String:
 	return "Mek<" + mek_id + ", " + uuid + ">"
 
+
 func from_dict(data: Dictionary = {}) -> bool:
 	"""Loads Mek instance data from a dictionary."""
-	if not data.has("mek_id") or not data.has("uuid") :
+	if not data.has("mek_id") or not data.has("uuid"):
 		push_error("Invalid Mek data: Missing required fields")
 		return false
-	
+
 	mek_id = data["mek_id"]
-	uuid   = data["uuid"]
-	alias  = data.get("alia", "")
+	uuid = data["uuid"]
+	alias = data.get("alia", "")
 	for item_data in data.get("items", []):
 		items.append(Item.new(item_data))
 	items.sort_custom(Item.compare_items)
-		
+
 	# Mark the UUID as used.
 	GameServer.occupy_uuid(uuid)
-	
+
 	# Load the template.
 	template = TemplateManager.get_mek_template(mek_id)
 	assert(template, "Cannot find the template: " + mek_id + "\n")
-	
+
 	_update_static_values()
-	
+
 	return true
+
 
 func to_dict() -> Dictionary:
 	"""Converts Mek instance data to a dictionary."""
@@ -465,6 +542,7 @@ func to_dict() -> Dictionary:
 		"alias": alias,
 		"items": Utils.convert_objects_to_dict(items),
 	}
+
 
 func to_client_dict() -> Dictionary:
 	"""Converts Mek instance data to a dictionary."""

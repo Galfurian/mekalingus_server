@@ -1,6 +1,10 @@
-extends RefCounted
+# This class represents a game entity on the map, such as a Mek or Structure.
+# It contains the position of the entity on the map, a reference to the actual
+# game entity, and other properties related to the entity's state.
 
 class_name MapEntity
+
+extends RefCounted
 
 # =============================================================================
 # PROPERTIES
@@ -17,28 +21,30 @@ var active: bool = true
 # GENERAL FUNCTIONS
 # =============================================================================
 
+
 func _init(p_position: Vector2i, p_entity: Variant) -> void:
 	position = p_position
 	entity = p_entity
 	active = true
 
+
 # =============================================================================
 # SERIALIZATION
 # =============================================================================
+
 
 func from_dict(data: Dictionary):
 	"""Loads item data from a dictionary."""
 	if not data.has("position") or not data.has("entity") or not data.has("active"):
 		push_error("Invalid Item data: Missing required fields")
 		return
-		
+
 	var coordinates = data["position"].split(",")
 	position = Vector2i(int(coordinates[0]), int(coordinates[1]))
+
 
 func to_dict() -> Dictionary:
 	"""Converts item data to a dictionary."""
 	return {
-		"position": ("%d,%d" % [position.x, position.y]),
-		"entity": entity.to_dict(),
-		"active": active
+		"position": "%d,%d" % [position.x, position.y], "entity": entity.to_dict(), "active": active
 	}

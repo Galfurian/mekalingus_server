@@ -11,49 +11,55 @@ var game_map: GameMap
 
 
 func _ready():
-	add_chat_message("========================================")
-	add_chat_message("Booting chat operating system v0.7.6...")
-	add_chat_message("Initializing chat system...")
-	add_chat_message("========================================")
-	add_log_message("========================================")
-	add_log_message("Booting log operating system v0.4.3...")
-	add_log_message("Initializing log system...")
-	add_log_message("========================================")
-
 	chat_input.text_submitted.connect(_on_chat_input_submitted)
 
 
 func setup(p_game_map: GameMap):
-	game_map = p_game_map
-	if not game_map.on_log_added.is_connected(_on_log_added):
+	if p_game_map and game_map != p_game_map:
+		clear()
+		add_chat_message("========================================")
+		add_chat_message("Booting chat operating system v0.7.6...")
+		add_chat_message("Initializing chat system...")
+		add_chat_message("========================================")
+		add_log_message("========================================")
+		add_log_message("Booting log operating system v0.4.3...")
+		add_log_message("Initializing log system...")
+		add_log_message("========================================")
+		game_map = p_game_map
 		game_map.on_log_added.connect(_on_log_added)
+		for log_entry in game_map.combat_logs:
+			add_log_entry(log_entry)
+		for log_entry in game_map.chat_logs:
+			add_chat_entry(log_entry)
 
 
 func clear():
 	if game_map and game_map.on_log_added.is_connected(_on_log_added):
 		game_map.on_log_added.disconnect(_on_log_added)
 	game_map = null
+	combat_log.clear()
+	chat_log.clear()
 
+func add_log_entry(entry: LogEntry):
+	combat_log.append_text("[" + entry.timestamp + "] " + entry.message + "\n")
 
 func add_log_message(entry: String):
 	var timestamp = Time.get_time_string_from_system()
 	combat_log.append_text("[" + timestamp + "] " + entry + "\n")
 
+func add_chat_entry(entry: LogEntry):
+	chat_log.append_text("[" + entry.timestamp + "] " + entry.sender + ": " + entry.message + "\n")
 
 func add_chat_message(message: String):
 	var timestamp = Time.get_time_string_from_system()
 	chat_log.append_text("[" + timestamp + "] " + message + "\n")
 
 
-func send_chat_message(source: String, message: String):
-	add_chat_message(source + ": " + message)
-
-
-func _on_log_added(log_entry: LogEntry):
-	if log_entry.log_type == Enums.LogType.CHAT:
-		chat_log.append_text(log_entry.to_simple_log() + "\n")
+func _on_log_added(entry: LogEntry):
+	if entry.log_type == Enums.LogType.CHAT:
+		add_chat_entry(entry)
 	else:
-		combat_log.append_text(log_entry.to_simple_log() + "\n")
+		add_log_entry(entry)
 
 
 func _on_chat_input_submitted(message: String):
@@ -61,7 +67,8 @@ func _on_chat_input_submitted(message: String):
 		_show_info_error("Message too long! Max 120 characters.")
 		return
 	if not message.strip_edges().is_empty():
-		send_chat_message("You", message)
+		if game_map:
+			game_map.add_log(Enums.LogType.CHAT, message, "System")
 		chat_input.clear()
 
 

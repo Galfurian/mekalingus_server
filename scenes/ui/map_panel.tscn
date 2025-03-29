@@ -26,6 +26,14 @@ horizontal_alignment = 1
 layout_mode = 2
 text = "Advance Turn"
 
+[node name="SaveMap" type="Button" parent="MapSelector"]
+layout_mode = 2
+text = "Save Map"
+
+[node name="LoadMap" type="Button" parent="MapSelector"]
+layout_mode = 2
+text = "Load Map"
+
 [node name="HSeparator" type="HSeparator" parent="MapSelector"]
 layout_mode = 2
 

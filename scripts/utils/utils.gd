@@ -104,3 +104,39 @@ static func enums_to_strings(enum_type: Dictionary, values: Array) -> Array:
 		if str_value != null:
 			result.append(str_value)
 	return result
+
+
+static func serialize_matrix(matrix: Array, width: int, height: int) -> Dictionary:
+	"""
+	Serializes a 2D terrain matrix into a Dictionary with compressed and base64-encoded binary data.
+	Assumes each value in the matrix is an integer from 0 to 255.
+	Returns a dictionary with 'width', 'height', 'original_size', and 'data' fields.
+	"""
+	var flat_data = PackedByteArray()
+	for row in matrix:
+		for value in row:
+			flat_data.append(value)
+	var compressed = flat_data.compress(FileAccess.COMPRESSION_ZSTD)
+	var encoded = Marshalls.raw_to_base64(compressed)
+	return {"width": width, "height": height, "original_size": flat_data.size(), "data": encoded}
+
+
+static func deserialize_matrix(data: Dictionary) -> Array:
+	"""
+	Deserializes a Dictionary containing compressed and
+	base64-encoded terrain data back into a 2D matrix.
+	Expects keys: 'width', 'height', 'original_size', and 'data'.
+	Returns a 2D array of integers.
+	"""
+	var width = data.get("width", 0)
+	var height = data.get("height", 0)
+	var original_size = data.get("original_size", 0)
+	var compressed = Marshalls.base64_to_raw(data.get("data", ""))
+	var raw = compressed.decompress(original_size, FileAccess.COMPRESSION_ZSTD)
+	var matrix = []
+	for y in range(height):
+		var row = []
+		for x in range(width):
+			row.append(raw[y * width + x])
+		matrix.append(row)
+	return matrix

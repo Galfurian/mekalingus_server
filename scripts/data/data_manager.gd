@@ -437,6 +437,19 @@ func load_map(map_uuid: String) -> bool:
 	return true
 
 
+func reload_map(map_uuid: String) -> bool:
+	"""Reloads a map from disk."""
+	# Remove the map from memory.
+	if map_uuid in maps:
+		maps.erase(map_uuid)
+	# Load the map from disk.
+	if load_map(map_uuid):
+		GameServer.log_message("Reloaded map: " + map_uuid)
+		return true
+	GameServer.log_message("Failed to reload map: " + map_uuid)
+	return false
+
+
 func load_maps():
 	"""Loads all maps from the maps directory."""
 	var dir = DirAccess.open(maps_folder)

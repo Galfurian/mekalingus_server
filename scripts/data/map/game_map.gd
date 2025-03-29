@@ -60,7 +60,9 @@ var move_orders: Dictionary[String, MoveOrder]
 # AI controller.
 var ai_controller: AIController
 # The combat log.
-var logs: Array[LogEntry]
+var combat_logs: Array[LogEntry]
+# The chat log.
+var chat_logs: Array[LogEntry]
 # AStar2D graph.
 var astar: AStar2D
 # The current log indentation level.
@@ -101,6 +103,25 @@ func generate_map() -> void:
 	update_astar()
 	# Spawn enemies on the map.
 	spawn_enemies_on_map(map_difficulty)
+
+
+func clear() -> void:
+	"""Clears the map data."""
+	# Clear the map data.
+	terrain_data.clear()
+	# Clear the AStar graph.
+	astar.clear()
+	# Clear the entity lists.
+	npc_units.clear()
+	player_units.clear()
+	destroyed_units.clear()
+	# Clear the logs.
+	combat_logs.clear()
+	chat_logs.clear()
+	# Clear the orders.
+	move_orders.clear()
+	utility_module_orders.clear()
+	offensive_module_orders.clear()
 
 
 # =============================================================================
@@ -444,19 +465,17 @@ func get_indent() -> String:
 
 func add_log(log_type: Enums.LogType, message: String, sender: String = "") -> void:
 	var log_entry = LogEntry.new(log_type, get_indent() + message, sender)
-	logs.append(log_entry)
+	if log_type == Enums.LogType.CHAT:
+		chat_logs.append(log_entry)
+	else:
+		combat_logs.append(log_entry)
 	on_log_added.emit(log_entry)
 
 
 func get_logs_by_type(log_type: Enums.LogType) -> Array[LogEntry]:
-	return logs.filter(func(log_entry): return log_entry.log_type == log_type)
-
-
-func get_formatted_logs() -> Array[String]:
-	var formatted_logs: Array[String] = []
-	for log_entry in logs:
-		formatted_logs.append(str(log_entry))
-	return formatted_logs
+	if log_type == Enums.LogType.CHAT:
+		return chat_logs
+	return combat_logs.filter(func(log_entry): return log_entry.log_type == log_type)
 
 
 # =============================================================================
@@ -1080,8 +1099,10 @@ static func from_dict(data: Dictionary) -> GameMap:
 	var map = GameMap.new(
 		data["map_uuid"], biome, data["map_width"], data["map_height"], data["map_difficulty"]
 	)
-	map.terrain_data = data["terrain_data"]
+	map.terrain_data = Utils.deserialize_matrix(data["terrain_data"])
 	map.npc_units = _deserialize_npc_units(data["npc_units"])
+	map.combat_logs = LogEntry.decompress_logs_from_base64(data.get("combat_logs", {}))
+	map.chat_logs = LogEntry.decompress_logs_from_base64(data.get("chat_logs", {}))
 
 	# Update the AStar graph.
 	map.update_astar()
@@ -1097,6 +1118,8 @@ func to_dict() -> Dictionary:
 		"map_height": map_height,
 		"map_biome": map_biome.biome_name,
 		"map_difficulty": map_difficulty,
-		"terrain_data": terrain_data,
+		"terrain_data": Utils.serialize_matrix(terrain_data, map_width, map_height),
 		"npc_units": _serialize_npc_units(npc_units),
+		"combat_logs": LogEntry.compress_logs_to_base64(combat_logs),
+		"chat_logs": LogEntry.compress_logs_to_base64(chat_logs)
 	}

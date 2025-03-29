@@ -32,13 +32,13 @@ size_flags_vertical = 3
 [node name="TabContainer" type="TabContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-current_tab = 1
+current_tab = 0
 
 [node name="Server" parent="VBoxContainer/TabContainer" instance=ExtResource("2_2ndow")]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
 [node name="Maps" parent="VBoxContainer/TabContainer" instance=ExtResource("3_qeaa5")]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 1

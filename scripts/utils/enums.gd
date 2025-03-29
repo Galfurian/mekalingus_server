@@ -4,9 +4,9 @@ extends Node
 
 # The type of game mode.
 enum GameMode {
-	FFA, # Free-for-all, every player/NPC for themselves.
-	COOP, # Players versus AI-controlled enemies.
-	TEAM, # Teams of NPCs and Players versus each other.
+	FFA,  # Free-for-all, every player/NPC for themselves.
+	COOP,  # Players versus AI-controlled enemies.
+	TEAM,  # Teams of NPCs and Players versus each other.
 }
 
 # Game difficulty levels.
@@ -85,12 +85,13 @@ enum TargetType {
 
 # Types of combat log.
 enum LogType {
-	ATTACK = 0,  # Use attack module
-	SUPPORT = 1,  # Use support module.
-	MOVEMENT = 2,  # Move.
-	CHAT = 3,  # Player or NPC chat.
-	SYSTEM = 4,  # System messages.
-	AI = 5, # AI messages.
+	NONE,
+	ATTACK,  # Use attack module
+	SUPPORT,  # Use support module.
+	MOVEMENT,  # Move.
+	CHAT,  # Player or NPC chat.
+	SYSTEM,  # System messages.
+	AI,  # AI messages.
 }
 
 # Describes different combat roles a Mek can be built for.

@@ -1,6 +1,10 @@
 extends Node
 
+var grid_size: int = 50
+
 @onready var advance_turn = $MapSelector/AdvanceTurn
+@onready var save_map = $MapSelector/SaveMap
+@onready var load_map = $MapSelector/LoadMap
 
 @onready var generate = $MapSelector/Generate
 @onready var delete = $MapSelector/Delete
@@ -12,8 +16,6 @@ extends Node
 
 @onready var map_hud = $MapHud
 
-var grid_size: int = 50
-
 
 func _ready() -> void:
 	GameServer.on_server_start.connect(_on_server_start)
@@ -21,13 +23,15 @@ func _ready() -> void:
 	advance_turn.pressed.connect(_on_advance_turn)
 	generate.pressed.connect(_on_generate)
 	delete.pressed.connect(_on_delete)
+	save_map.pressed.connect(_on_save_map)
+	load_map.pressed.connect(_on_load_map)
 	map_list.item_selected.connect(_on_map_selected)
 	var index = 0
 	for difficulty_name in Enums.MapDifficulty:
 		map_difficulty.add_item(difficulty_name, index)
 		index += 1
 	map_difficulty.select(0)
-	GameServer.start()
+	#GameServer.start()
 
 
 func _on_server_start():
@@ -113,6 +117,38 @@ func _on_advance_turn():
 	if game_map:
 		game_map.process_round()
 
+
+func _on_save_map():
+	var game_map: GameMap = _get_current_selected_map()
+	if game_map:
+		DataManager.save_map(game_map)
+
+
+func _on_load_map():
+	var index = _get_current_selected_map_index()
+	if index >= 0:
+		# Get the map.
+		var game_map: GameMap = map_list.get_item_metadata(index)
+		if game_map:
+			# Get the map uuid.
+			var map_uuid = game_map.map_uuid
+			# Clear the map variable.
+			game_map = null
+			# Remove the reference to the map from the list.
+			map_list.set_item_metadata(index, null)
+			# Reload
+			DataManager.reload_map(map_uuid)
+			# Get the map again.
+			game_map = DataManager.get_map(map_uuid)
+			if game_map:
+				# Set the map metadata.
+				map_list.set_item_metadata(index, game_map)
+				# Setup the map hud.
+				map_hud.setup(game_map, grid_size)
+				map_hud.zoom_out()
+			else:
+				map_list.remove_item(index)
+	return null
 
 func _input(_event):
 	if Input.is_key_pressed(KEY_DELETE):

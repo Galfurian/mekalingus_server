@@ -3,6 +3,27 @@ class_name Utils
 extends Node
 
 
+static func filter(dictionary: Dictionary, predicate: Callable) -> Array:
+	"""
+	This function filters a dictionary based on a predicate function.
+	The predicate function should take a key and value as arguments and return true or false.
+	Returns an array of keys that match the predicate.
+	"""
+	var result: Array = []
+	for key in dictionary:
+		if predicate.call(key, dictionary[key]):
+			result.append(key)
+	return result
+
+
+static func erase(dictionary: Dictionary, keys: Array) -> void:
+	"""
+	This function erases keys from a dictionary.
+	"""
+	for key in keys:
+		dictionary.erase(key)
+
+
 static func to_array_int(array: Array) -> Array[int]:
 	"""Transforms an arbitrary array into an array of integers"""
 	var output: Array[int] = []

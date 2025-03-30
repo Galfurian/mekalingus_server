@@ -162,16 +162,16 @@ func request_equip_item(mek_uuid: String, item_uuid: String):
 		send_generic_failure(peer_id, "Failed to find item (" + item_uuid + ")")
 		return
 	if not player.remove_item(item):
-		send_generic_failure(peer_id, "Failed to remove item " + item.template.name + " from player.")
+		send_generic_failure(peer_id, "Failed to remove item " + item.template.item_name + " from player.")
 		return
 	if not mek.add_item(item):
 		if not player.add_item(item):
-			send_generic_failure(peer_id, "Failed to re-add item " + item.template.name + " to player.")
+			send_generic_failure(peer_id, "Failed to re-add item " + item.template.item_name + " to player.")
 			return
-		send_generic_failure(peer_id, "Failed to equip item " + item.template.name + " to " + mek.template.name )
+		send_generic_failure(peer_id, "Failed to equip item " + item.template.item_name + " to " + mek.template.mek_name )
 		return
 		
-	log_message("Player " + player.player_name + " equipped " + mek.template.name + " with " + item.template.name)
+	log_message("Player " + player.player_name + " equipped " + mek.template.mek_name + " with " + item.template.item_name)
 	
 	# Send the updated player.
 	request_equip_item_success.rpc_id(peer_id, mek_uuid, item_uuid)
@@ -205,15 +205,15 @@ func request_unequip_item(mek_uuid: String, item_uuid: String):
 	
 	item = mek.get_item(item_uuid)
 	if not item:
-		send_generic_failure(peer_id, "Failed to find equipped item " + item_uuid + " in " + mek.template.name)
+		send_generic_failure(peer_id, "Failed to find equipped item " + item_uuid + " in " + mek.template.mek_name)
 		return
 	
 	if not mek.remove_item(item):
-		send_generic_failure(peer_id, "Failed to remove item " + item.template.name + " from " + mek.template.name)
+		send_generic_failure(peer_id, "Failed to remove item " + item.template.item_name + " from " + mek.template.mek_name)
 		return
 	player.add_item(item)
 	
-	log_message("Player " + player.player_name + " unequipped " + item.template.name + " from " + mek.template.name)
+	log_message("Player " + player.player_name + " unequipped " + item.template.item_name + " from " + mek.template.mek_name)
 	
 	# Send the updated player.
 	request_unequip_item_success.rpc_id(peer_id, mek_uuid, item_uuid)
@@ -257,7 +257,7 @@ func request_mek(mek_uuid: String):
 	# Send the Mek data back to the requesting client.
 	receive_mek.rpc_id(peer_id, mek.to_client_dict())
 	
-	log_message("Player " + player.player_name + " requested update for " + mek.template.name + ".")
+	log_message("Player " + player.player_name + " requested update for " + mek.template.mek_name + ".")
 
 @rpc("any_peer", "call_remote", "reliable", 0)
 func set_mek_alias_success(_mek_uuid: String, _alias: String):
@@ -279,4 +279,4 @@ func set_mek_alias(mek_uuid: String, alias: String):
 	mek.alias = alias
 	# Send the updated player.
 	set_mek_alias_success.rpc_id(peer_id, mek_uuid, alias)
-	log_message("Player " + player.player_name + " calls " + mek.template.name + " with the alias " + alias + ".")
+	log_message("Player " + player.player_name + " calls " + mek.template.mek_name + " with the alias " + alias + ".")

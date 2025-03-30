@@ -1,7 +1,7 @@
 # Class that represents a Clan in the game. Clans are used to group players and
 # AI together, and to define their behavior and restrictions.
 class_name Clan
-extends RefCounted
+extends Node
 
 # =============================================================================
 # PROPERTIES
@@ -14,7 +14,7 @@ extends RefCounted
 # Unique identifier for the clan.
 var id: String
 # Name of the clan.
-var name: String
+var clan_name: String
 # Description of the clan.
 var description: String
 # Color of the clan.
@@ -53,6 +53,10 @@ func _init(data: Dictionary = {}) -> void:
 		from_dict(data)
 
 
+func _finalize():
+	print("Clan is being freed.")
+
+
 func generate_clan_starter_meks(count: int = 3) -> Array[Mek]:
 	"""
 	Generates a set of starter Meks for this clan.
@@ -76,14 +80,14 @@ func generate_clan_starter_meks(count: int = 3) -> Array[Mek]:
 
 
 func _to_string() -> String:
-	return "<clan: " + name + " (" + id + ")>"
+	return "<clan: " + clan_name + " (" + id + ")>"
 
 
 static func from_dict(data: Dictionary) -> Clan:
 	"""Loads clan data from a dictionary."""
 	var clan = Clan.new()
 	clan.id = data["id"]
-	clan.name = data["name"]
+	clan.clan_name = data["name"]
 	clan.description = data["description"]
 	clan.color = Utils.hex_to_color(data["color"])
 	clan.emblem_path = data["emblem_path"]
@@ -97,7 +101,7 @@ func to_dict() -> Dictionary:
 	"""Converts item instance data to a dictionary."""
 	return {
 		"id": id,
-		"name": name,
+		"name": clan_name,
 		"description": description,
 		"color": Utils.color_to_hex(color),
 		"emblem_path": emblem_path,

@@ -10,10 +10,30 @@ var is_running = false
 signal log_message_emitted(message: String)
 
 # Signal for when the server starts successfully.
-signal on_server_start()
+signal on_server_start
 
 # Signal for when the server stops successfully.
-signal on_server_stop()
+signal on_server_stop
+
+# =============================================================================
+# PERIODIC UPDATES
+# =============================================================================
+
+
+func _process(delta: float) -> void:
+	if is_running:
+		# Iterate the maps nand call the tick method on the turn manager.
+		for map in DataManager.maps.values():
+			# Check if the map is valid.
+			if map and map.turn_manager:
+				# Call the tick method on the turn manager.
+				map.turn_manager.tick(delta)
+
+
+# =============================================================================
+# SERVER STARTUP AND SHUTDOWN
+# =============================================================================
+
 
 func start():
 	"""Starts the server."""
@@ -42,6 +62,7 @@ func start():
 	log_message("Server ready!")
 	return true
 
+
 func stop():
 	"""Stopes the server."""
 	log_message("Stopping server...")
@@ -69,12 +90,14 @@ func stop():
 	log_message("============================================================")
 	return true
 
+
 # =============================================================================
 # CONNECTION
 # =============================================================================
 
 # Connection.
 var multiplayer_peer = ENetMultiplayerPeer.new()
+
 
 func _start_server() -> bool:
 	multiplayer_peer.create_server(SERVER_PORT, 32)
@@ -85,6 +108,7 @@ func _start_server() -> bool:
 		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	return true
 
+
 func _stop_server() -> bool:
 	for peer_id in multiplayer.get_peers():
 		multiplayer.disconnect_peer(peer_id)
@@ -92,16 +116,20 @@ func _stop_server() -> bool:
 	multiplayer.multiplayer_peer = null
 	return true
 
+
 func restart_server():
 	_stop_server()
 	await get_tree().create_timer(1.0).timeout
 	_start_server()
 
+
 func _on_peer_connected(peer_id):
 	log_message("Client connected: " + str(peer_id))
 
+
 func _on_peer_disconnected(peer_id):
 	log_message("Client disconnected: " + str(peer_id))
+
 
 # =============================================================================
 # UUID
@@ -109,12 +137,15 @@ func _on_peer_disconnected(peer_id):
 
 var used_uuids = {}
 
+
 func occupy_uuid(uuid: String):
 	used_uuids[uuid] = true
+
 
 func free_uuid(uuid: String):
 	if uuid in used_uuids:
 		used_uuids.erase(uuid)
+
 
 func generate_uuid() -> String:
 	var new_uuid = str(Time.get_unix_time_from_system()) + "_" + str(randi() % 100000)
@@ -124,9 +155,11 @@ func generate_uuid() -> String:
 	occupy_uuid(new_uuid)
 	return new_uuid
 
+
 # =============================================================================
 # LOGGING
 # =============================================================================
+
 
 func log_message(msg: String):
 	"""Emits a log message that can be captured by the UI and other scripts."""

@@ -1,5 +1,7 @@
+# This class represents the template of an Item in the game.
 class_name ItemTemplate
-extends RefCounted
+
+extends Node
 
 # =============================================================================
 # PROPERTIES
@@ -8,7 +10,7 @@ extends RefCounted
 # The item's id.
 var id: String
 # The item's name.
-var name: String
+var item_name: String
 # The item's slot type (e.g., SMALL, MEDIUM, LARGE, UTILITY).
 var slot: Enums.SlotType
 # The amount of power passively used while equipped.
@@ -34,7 +36,7 @@ func is_valid() -> bool:
 	"""
 	Returns true if the item has a valid name and modules.
 	"""
-	return name != "" and base_power_usage >= 0 and not modules.is_empty()
+	return item_name != "" and base_power_usage >= 0 and not modules.is_empty()
 
 
 func build_item(uuid: String = GameServer.generate_uuid()) -> Item:
@@ -106,7 +108,7 @@ func from_dict(item_id: String, data: Dictionary):
 		push_error("Invalid Item data: Missing required fields")
 		return
 	id = item_id
-	name = data["name"]
+	item_name = data["name"]
 	slot = Utils.string_to_enum(Enums.SlotType, data["slot"])
 	base_power_usage = int(data.get("base_power_usage", 0))
 	modules.clear()
@@ -118,7 +120,7 @@ func to_dict() -> Dictionary:
 	"""Converts item data to a dictionary."""
 	return {
 		"id": id,
-		"name": name,
+		"name": item_name,
 		"slot": Utils.enum_to_string(Enums.SlotType, slot),
 		"base_power_usage": base_power_usage,
 		"modules": Utils.convert_objects_to_dict(modules)

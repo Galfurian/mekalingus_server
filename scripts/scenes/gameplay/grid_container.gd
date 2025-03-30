@@ -3,26 +3,26 @@ extends Control
 @onready var grid_drawer      = $GridDrawer
 @onready var mek_drawer       = $MekDrawer
 
-var map_data: GameMap
+var game_map: GameMap
 var grid_size: int
 var sector_size: int
 
 # Define a signal for cell selection.
 signal on_cell_selected(cell_position: Vector2i)
 
-func setup(p_map_data: GameMap, p_grid_size: int = 50, p_sector_size: int = 10):
-	map_data = p_map_data
+func setup(p_game_map: GameMap, p_grid_size: int = 50, p_sector_size: int = 10):
+	game_map = p_game_map
 	grid_size = p_grid_size
 	sector_size = p_sector_size
 	
-	var width  = (map_data.map_width + sector_size * 2) * grid_size
-	var height = (map_data.map_height + sector_size * 2) * grid_size
+	var width  = (game_map.map_width + sector_size * 2) * grid_size
+	var height = (game_map.map_height + sector_size * 2) * grid_size
 	
 	# Set custom_minimum_size of GridContainer to match GridDrawer's bounds.
 	custom_minimum_size = Vector2(width, height)
 
 func clear():
-	map_data  = null
+	game_map  = null
 	grid_size = 50
 	sector_size = 10
 
@@ -37,6 +37,6 @@ func _gui_input(event):
 		var selected_cell = Vector2i(cell_x, cell_y)
 		
 		# Ensure the selected cell is within bounds
-		if selected_cell.x >= 0 and selected_cell.x < map_data.map_width and \
-		   selected_cell.y >= 0 and selected_cell.y < map_data.map_height:
+		if selected_cell.x >= 0 and selected_cell.x < game_map.map_width and \
+		   selected_cell.y >= 0 and selected_cell.y < game_map.map_height:
 			on_cell_selected.emit(selected_cell)

@@ -1,4 +1,4 @@
-extends RefCounted
+extends Node
 
 class_name UseModuleOrder
 
@@ -56,8 +56,8 @@ func _to_string() -> String:
 
 	# Determine the target type
 	if source == target:
-		return "%s is using %s on itself" % [str(source.entity.template.name), str(module.name)]
+		return "%s is using %s on itself" % [str(source.entity.template.mek_name), str(module.module_name)]
 	else:
 		return "%s is %s %s on %s" % [
-			str(source.entity.template.name), action_desc, str(module.name), str(target.entity.template.name)
+			str(source.entity.template.mek_name), action_desc, str(module.module_name), str(target.entity.template.mek_name)
 		]

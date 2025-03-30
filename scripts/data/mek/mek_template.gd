@@ -2,7 +2,7 @@
 # configuration for a Mek unit. It is used to create Mek instances with the
 # desired properties.
 class_name MekTemplate
-extends RefCounted
+extends Node
 
 # =============================================================================
 # PROPERTIES
@@ -11,7 +11,7 @@ extends RefCounted
 # Unique identifier for the Mek template.
 var id: String
 # The name of the Mek.
-var name: String
+var mek_name: String
 # The size category of the Mek, affecting mobility and load capacity.
 var size: Enums.MekSize
 # The base health of the Mek, determining its durability.
@@ -47,7 +47,7 @@ func _init(_id: String = "", data: Dictionary = {}):
 
 func is_valid() -> bool:
 	"""Checks if the Mek template contains valid values."""
-	return id != "" and name != "" and health > 0 and armor >= 0 and shield >= 0
+	return id != "" and mek_name != "" and health > 0 and armor >= 0 and shield >= 0
 
 
 func build_mek(uuid: String = GameServer.generate_uuid()) -> Mek:
@@ -94,7 +94,7 @@ func from_dict(data: Dictionary):
 		push_error("Invalid MekTemplate data: Missing required fields")
 		return
 
-	name = data["name"]
+	mek_name = data["name"]
 	size = Utils.string_to_enum(Enums.MekSize, data["size"])
 	health = int(data.get("health", 0))
 	armor = int(data.get("armor", 0))
@@ -111,7 +111,7 @@ func to_dict() -> Dictionary:
 	"""Converts Mek template data to a dictionary."""
 	return {
 		"id": id,
-		"name": name,
+		"name": mek_name,
 		"size": Utils.enum_to_string(Enums.MekSize, size),
 		"health": health,
 		"armor": armor,

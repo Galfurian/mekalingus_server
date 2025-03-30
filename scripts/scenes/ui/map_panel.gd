@@ -2,7 +2,7 @@ extends Node
 
 var grid_size: int = 50
 
-@onready var advance_turn = $MapSelector/AdvanceTurn
+@onready var map_start_stop = $MapSelector/MapStartStop
 @onready var save_map = $MapSelector/SaveMap
 @onready var load_map = $MapSelector/LoadMap
 
@@ -20,7 +20,7 @@ var grid_size: int = 50
 func _ready() -> void:
 	GameServer.on_server_start.connect(_on_server_start)
 	GameServer.on_server_stop.connect(_on_server_stop)
-	advance_turn.pressed.connect(_on_advance_turn)
+	map_start_stop.pressed.connect(_on_map_start_stop)
 	generate.pressed.connect(_on_generate)
 	delete.pressed.connect(_on_delete)
 	save_map.pressed.connect(_on_save_map)
@@ -48,6 +48,7 @@ func _on_server_start():
 
 
 func _on_server_stop():
+	map_biome.clear()
 	map_list.clear()
 	map_hud.clear()
 
@@ -94,6 +95,11 @@ func _on_map_selected(index: int):
 	if game_map:
 		map_hud.setup(game_map, grid_size)
 		map_hud.zoom_out()
+		# Update the label on the map start/stop button.
+		if game_map.turn_manager.is_active():
+			map_start_stop.text = "Stop"
+		else:
+			map_start_stop.text = "Start"
 
 
 func _get_current_selected_map_index() -> int:
@@ -112,10 +118,15 @@ func _get_current_selected_map() -> GameMap:
 	return null
 
 
-func _on_advance_turn():
+func _on_map_start_stop():
 	var game_map: GameMap = _get_current_selected_map()
 	if game_map:
-		game_map.process_round()
+		if game_map.turn_manager.is_active():
+			game_map.turn_manager.stop()
+			map_start_stop.text = "Start"
+		else:
+			game_map.turn_manager.start()
+			map_start_stop.text = "Stop"
 
 
 func _on_save_map():
@@ -149,6 +160,7 @@ func _on_load_map():
 			else:
 				map_list.remove_item(index)
 	return null
+
 
 func _input(_event):
 	if Input.is_key_pressed(KEY_DELETE):

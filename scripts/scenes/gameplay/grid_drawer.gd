@@ -12,14 +12,14 @@ func setup(p_game_map: GameMap, p_grid_size: int = 50, p_sector_size: int = 10):
 	game_map = p_game_map
 	grid_size = p_grid_size
 	sector_size = p_sector_size
-	if not game_map.on_round_end.is_connected(queue_redraw):
-		game_map.on_round_end.connect(queue_redraw)
+	if not game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.turn_ended.connect(_on_turn_ended)
 	queue_redraw()
 
 
 func clear() -> void:
-	if game_map and game_map.on_round_end.is_connected(queue_redraw):
-		game_map.on_round_end.disconnect(queue_redraw)
+	if game_map and game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.turn_ended.disconnect(_on_turn_ended)
 	game_map = null
 	grid_size = 50
 	selected_cells.clear()
@@ -67,6 +67,10 @@ func to_grid_position(map_position: Vector2) -> Vector2:
 	# Offset by one sector in each direction
 	return Vector2(map_position.x * grid_size, map_position.y * grid_size) + get_draw_offset()
 
+
+func _on_turn_ended(_turn_number: int):
+	# Called when the turn ends
+	queue_redraw()
 
 func _draw():
 	if not game_map:

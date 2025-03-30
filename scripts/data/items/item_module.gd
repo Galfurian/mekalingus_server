@@ -2,14 +2,14 @@
 # represents one of its abilities or effects. Modules can be passive or active,
 # and can have a variety of effects.
 class_name ItemModule
-extends RefCounted
+extends Node
 
 # =============================================================================
 # PROPERTIES
 # =============================================================================
 
 # The module's name.
-var name: String
+var module_name: String
 # Whether the module is passive (true) or active (false).
 var passive: bool
 # The power required to activate the module (if active).
@@ -66,7 +66,7 @@ func evaluate_module_power() -> float:
 
 
 func _to_string() -> String:
-	return "Module<" + name + ">"
+	return "Module<" + module_name + ">"
 
 
 func from_dict(data: Dictionary):
@@ -76,7 +76,7 @@ func from_dict(data: Dictionary):
 	if not data.has("name") or not data.has("effects"):
 		push_error("Invalid Module data: Missing required fields")
 		return
-	name = data["name"]
+	module_name = data["name"]
 	passive = bool(data.get("passive", false))
 	power_on_use = int(data.get("power_on_use", 0))
 	cooldown = int(data.get("cooldown", 0))
@@ -92,7 +92,7 @@ func to_dict() -> Dictionary:
 	Converts module data to a dictionary.
 	"""
 	return {
-		"name": name,
+		"name": module_name,
 		"passive": passive,
 		"power_on_use": power_on_use,
 		"cooldown": cooldown,

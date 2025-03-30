@@ -4,7 +4,7 @@
 
 class_name MapEntity
 
-extends RefCounted
+extends Node
 
 # =============================================================================
 # PROPERTIES

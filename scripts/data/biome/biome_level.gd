@@ -1,13 +1,13 @@
 class_name BiomeLevel
 
-extends RefCounted
+extends Node
 
 # =============================================================================
 # PROPERTIES
 # =============================================================================
 
 var index: int
-var name: String
+var biome_name: String
 var height: int
 var movement_cost: int
 var color: Color
@@ -33,7 +33,7 @@ func _to_string() -> String:
 		"[("
 		+ str(index)
 		+ ") "
-		+ name
+		+ biome_name
 		+ ": "
 		+ str(height)
 		+ ", "
@@ -47,7 +47,7 @@ func _to_string() -> String:
 func from_dict(data: Dictionary):
 	"""Loads data from a dictionary."""
 	index = data["index"]
-	name = data["name"]
+	biome_name = data["name"]
 	height = data["height"]
 	movement_cost = data["movement_cost"]
 	color = Utils.hex_to_color(data["color"])
@@ -57,7 +57,7 @@ func to_dict() -> Dictionary:
 	"""Returns the data as a dictionary."""
 	return {
 		"index": index,
-		"name": name,
+		"name": biome_name,
 		"height": height,
 		"movement_cost": movement_cost,
 		"color": Utils.color_to_hex(color),

@@ -1,7 +1,7 @@
 # This script loads biome data from a JSON file and provides methods to access it.
 class_name Biome
 
-extends RefCounted
+extends Node
 
 # =============================================================================
 # PROPERTIES

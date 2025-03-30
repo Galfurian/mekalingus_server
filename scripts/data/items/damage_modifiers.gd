@@ -2,7 +2,8 @@
 # and health. It also provides functions to apply damage to a Mek, taking into
 # account resistances and layer modifiers.
 class_name DamageModifiers
-extends RefCounted
+
+extends Node
 
 # =============================================================================
 # DAMAGE MODIFIER TABLE

@@ -1,4 +1,4 @@
-extends RefCounted
+extends Node
 
 class_name MoveOrder
 
@@ -22,7 +22,7 @@ func _init(p_source: MapEntity, p_destination: Vector2i) -> void:
 func _to_string() -> String:
 	var s = ""
 	if is_instance_of(source.entity, Mek):
-		s += source.entity.template.name
+		s += source.entity.template.mek_name
 	else:
 		s += str(source.entity)
 	s += " is moving"

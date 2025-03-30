@@ -2,13 +2,10 @@
 # It stores terrain data, entities, and provides functions for pathfinding,
 # entity management, and AI control.
 class_name GameMap
-extends RefCounted
+extends Node
 
 # Emits whenever a new log entry is added to the log.
 signal on_log_added(log_entry: LogEntry)
-
-# Emitted whenever we complete a round.
-signal on_round_end
 
 # =============================================================================
 # PROPERTIES
@@ -39,10 +36,6 @@ var map_biome: Biome
 # DYNAMIC INFORMATION
 # =====================================
 
-# Keeps track of turns.
-var round_number: int = 0
-# If true the map is active, and the update function should advance the round.
-var active: bool = false
 # If true the map allows PVP.
 var is_pvp_enabled: bool = false
 # If true the map allows PVP.
@@ -53,12 +46,6 @@ var npc_units: Dictionary[String, MapEntity]
 var player_units: Dictionary[String, MapEntity]
 # Stores all destroyed units by UUID.
 var destroyed_units: Dictionary[String, MapEntity]
-# Stores all active orders in the map.
-var offensive_module_orders: Dictionary[String, UseModuleOrder]
-var utility_module_orders: Dictionary[String, UseModuleOrder]
-var move_orders: Dictionary[String, MoveOrder]
-# AI controller.
-var ai_controller: AIController
 # The combat log.
 var combat_logs: Array[LogEntry]
 # The chat log.
@@ -67,6 +54,8 @@ var chat_logs: Array[LogEntry]
 var astar: AStar2D
 # The current log indentation level.
 var log_indent_level = 0
+# The turn manager.
+var turn_manager: TurnManager
 
 # =============================================================================
 # GENERIC FUNCTIONS
@@ -87,10 +76,18 @@ func _init(
 	map_biome = p_map_biome
 	map_difficulty = p_map_difficulty
 	combat_rules = CombatRules.new(p_game_mode)
-	# Instantiate the AI controller.
-	ai_controller = AIController.new(self)
 	# Instantiate the AStar2D graph.
 	astar = AStar2D.new()
+	# Instantiate the turn manager.
+	turn_manager = TurnManager.new(self)
+
+
+func _finalize():
+	print("GameMap is being freed.")
+
+
+func _exit_tree():
+	print("GameMap is exiting the scene tree.")
 
 
 func generate_map() -> void:
@@ -118,10 +115,9 @@ func clear() -> void:
 	# Clear the logs.
 	combat_logs.clear()
 	chat_logs.clear()
-	# Clear the orders.
-	move_orders.clear()
-	utility_module_orders.clear()
-	offensive_module_orders.clear()
+	# Clear the turn manager.
+	turn_manager.clear()
+	turn_manager.queue_free()
 
 
 # =============================================================================
@@ -262,7 +258,7 @@ func update_astar() -> void:
 					astar.set_point_weight_scale(neighbor_id, cost)
 
 
-func get_path(start: Vector2i, end: Vector2i) -> Array[Vector2i]:
+func get_shortest_path(start: Vector2i, end: Vector2i) -> Array[Vector2i]:
 	"""
 	Returns the shortest path between two tiles using AStar2D.
 	"""
@@ -476,531 +472,6 @@ func get_logs_by_type(log_type: Enums.LogType) -> Array[LogEntry]:
 	if log_type == Enums.LogType.CHAT:
 		return chat_logs
 	return combat_logs.filter(func(log_entry): return log_entry.log_type == log_type)
-
-
-# =============================================================================
-# ENEMY AI
-# =============================================================================
-
-
-func _generate_enemy_orders(map_entity: MapEntity):
-	"""Generates both a utility and offensive action for an enemy unit."""
-	add_log(Enums.LogType.SYSTEM, "-- SCHEDULE UTILITY ----------------------------------------")
-	# 1) Select a utility module (if available)
-	var utility_module_order = ai_controller.schedule_utility_module_order(map_entity)
-	if utility_module_order:
-		utility_module_orders[map_entity.entity.uuid] = utility_module_order
-	add_log(Enums.LogType.SYSTEM, "-- SCHEDULE OFFENSIVE --------------------------------------")
-	# 2) Select an offensive module (if available)
-	var offensive_module_order = ai_controller.schedule_offensive_module_order(map_entity)
-	if offensive_module_order:
-		offensive_module_orders[map_entity.entity.uuid] = offensive_module_order
-	add_log(Enums.LogType.SYSTEM, "-- SCHEDULE MOVEMENT ---------------------------------------")
-	# 3) Select movement
-	if not offensive_module_order:
-		var move_order = ai_controller.schedule_move_order(map_entity)
-		if move_order:
-			move_orders[map_entity.entity.uuid] = move_order
-
-
-# =============================================================================
-# ACTION EXECUTION
-# =============================================================================
-
-
-func _apply_damage_effect(order: UseModuleOrder, effect: ItemEffect) -> void:
-	var source_mek: Mek = order.source.entity
-	var target_mek: Mek = order.target.entity
-	if source_mek.is_dead() or target_mek.is_dead():
-		return
-	# Handle SELF damage.
-	if effect.target_self():
-		var result = source_mek.take_damage_from_effect(effect)
-		add_log(
-			Enums.LogType.ATTACK,
-			(
-				"%s hurts itself with %s -> %d shield, %d armor, %d health (reduced %d %s)"
-				% [
-					source_mek.template.name,
-					order.module.name,
-					result.shield,
-					result.armor,
-					result.health,
-					result.reduced,
-					Enums.DamageType.keys()[effect.damage_type]
-				]
-			)
-		)
-	# Handle AREA damage.
-	elif effect.target_area():
-		var center = order.target if effect.center_on_target else order.source
-		var affected = get_units_in_range(order.source, center.position, effect.radius, true, true)
-		for entity in affected:
-			var mek = entity.entity
-			if mek.is_dead():
-				continue
-			var result = mek.take_damage_from_effect(effect)
-			add_log(
-				Enums.LogType.ATTACK,
-				(
-					"%s hits %s with AoE from %s -> %d shield, %d armor, %d health (reduced %d %s)"
-					% [
-						source_mek.template.name,
-						target_mek.template.name,
-						order.module.name,
-						result.shield,
-						result.armor,
-						result.health,
-						result.reduced,
-						Enums.DamageType.keys()[effect.damage_type]
-					]
-				)
-			)
-	# Handle regular ENEMY / ALLY targeting.
-	else:
-		var result = target_mek.take_damage_from_effect(effect)
-		add_log(
-			Enums.LogType.ATTACK,
-			(
-				"%s hits %s with %s -> %d shield, %d armor, %d health (reduced %d %s)"
-				% [
-					source_mek.template.name,
-					target_mek.template.name,
-					order.module.name,
-					result.shield,
-					result.armor,
-					result.health,
-					result.reduced,
-					Enums.DamageType.keys()[effect.damage_type]
-				]
-			)
-		)
-
-
-func _apply_repair_effect(order: UseModuleOrder, effect: ItemEffect) -> void:
-	var source_mek: Mek = order.source.entity
-	var target_mek: Mek = order.target.entity
-	if source_mek.is_dead() or target_mek.is_dead():
-		return
-	# Handle SELF repair.
-	if effect.target_self():
-		var result = source_mek.repair_from_effect(effect)
-		add_log(
-			Enums.LogType.SUPPORT,
-			(
-				"%s restores %d %s to itself using %s"
-				% [source_mek.template.name, result.amount, result.stat, order.module.name]
-			)
-		)
-	# Handle AREA repair.
-	elif effect.target_area():
-		var center = order.target if effect.center_on_target else order.source
-		var include_allies = effect.target_ally() or effect.target_self()
-		var include_enemies = effect.target_enemy()
-		var affected = get_units_in_range(
-			order.source, center.position, effect.radius, include_allies, include_enemies, []
-		)
-		for entity in affected:
-			var mek = entity.entity
-			if mek.is_dead():
-				continue
-			var result = mek.repair_from_effect(effect)
-			add_log(
-				Enums.LogType.SUPPORT,
-				(
-					"%s restores %d %s to %s using %s (AoE)"
-					% [
-						source_mek.template.name,
-						result.amount,
-						result.stat,
-						mek.template.name,
-						order.module.name
-					]
-				)
-			)
-	# Handle ENEMY / ALLY repair.
-	else:
-		if target_mek.is_dead():
-			return
-		var result = target_mek.repair_from_effect(effect)
-		add_log(
-			Enums.LogType.SUPPORT,
-			(
-				"%s restores %d %s to %s using %s"
-				% [
-					source_mek.template.name,
-					result.amount,
-					result.stat,
-					target_mek.template.name,
-					order.module.name
-				]
-			)
-		)
-
-
-func _apply_modifier_effect(order: UseModuleOrder, effect: ItemEffect) -> void:
-	var source_mek: Mek = order.source.entity
-	var target_mek: Mek = order.target.entity
-	if source_mek.is_dead() or target_mek.is_dead():
-		return
-	# Handle SELF-targeted effects.
-	if effect.target_self():
-		source_mek.add_effect(order.module, effect, order.source)
-		add_log(
-			Enums.LogType.SUPPORT,
-			(
-				"%s applies %s to itself -> %d for %d turns (%s)"
-				% [
-					source_mek.template.name,
-					effect.get_effect_type_label(),
-					effect.amount,
-					effect.duration,
-					order.module.name
-				]
-			)
-		)
-	# Handle AREA-based effects.
-	elif effect.target_area():
-		var center = order.target if effect.center_on_target else order.source
-		var include_allies = effect.target_ally() or effect.target_self()
-		var include_enemies = effect.target_enemy()
-		var affected = get_units_in_range(
-			order.source,
-			center.position,
-			effect.radius,
-			include_allies,
-			include_enemies,
-			[order.source]
-		)
-		for entity in affected:
-			var mek = entity.entity
-			if mek.is_dead():
-				continue
-			mek.add_effect(order.module, effect, order.source)
-			add_log(
-				Enums.LogType.SUPPORT,
-				(
-					"%s applies %s to %s -> %d for %d turns (%s, AoE)"
-					% [
-						source_mek.template.name,
-						effect.get_effect_type_label(),
-						mek.template.name,
-						effect.amount,
-						effect.duration,
-						order.module.name
-					]
-				)
-			)
-
-	# Handle direct ENEMY / ALLY targeting.
-	else:
-		target_mek.add_effect(order.module, effect, order.source)
-		add_log(
-			Enums.LogType.SUPPORT,
-			(
-				"%s applies %s to %s -> %d for %d turns (%s)"
-				% [
-					source_mek.template.name,
-					effect.get_effect_type_label(),
-					target_mek.template.name,
-					effect.amount,
-					effect.duration,
-					order.module.name
-				]
-			)
-		)
-
-
-func _execute_utility_module_order(order: UseModuleOrder) -> void:
-	var source_mek: Mek = order.source.entity
-	var target_mek: Mek = order.target.entity
-	if source_mek.is_dead() or target_mek.is_dead():
-		return
-	# Check if the Mek has enough power.
-	if source_mek.power < order.module.power_on_use:
-		return
-	# Deduct power.
-	source_mek.power -= order.module.power_on_use
-	# Start cooldown if necessary.
-	if order.module.cooldown > 0:
-		source_mek.cooldown_manager.start_cooldown(order.item, order.module)
-	add_log(
-		Enums.LogType.SYSTEM,
-		(
-			"[url=mek:%s]%s[/url] used [url=item:%s:%s]%s[/url] (power left: %d%s)"
-			% [
-				source_mek.uuid,
-				source_mek.template.name,
-				source_mek.uuid,
-				order.item.uuid,
-				order.module.name,
-				source_mek.power,
-				", cooldown: " + str(order.module.cooldown) if order.module.cooldown else ""
-			]
-		)
-	)
-	increase_indent()
-	for effect in order.module.effects:
-		if effect.is_damage():
-			_apply_damage_effect(order, effect)
-		elif effect.is_repair():
-			_apply_repair_effect(order, effect)
-		elif effect.is_dot():
-			_apply_modifier_effect(order, effect)
-		elif effect.is_regen():
-			_apply_modifier_effect(order, effect)
-		elif effect.is_damage_reduction():
-			_apply_modifier_effect(order, effect)
-		elif effect.is_modifier():
-			_apply_modifier_effect(order, effect)
-		else:
-			add_log(
-				Enums.LogType.SYSTEM,
-				"Effect %s not yet implemented" % Enums.EffectType.keys()[effect.type]
-			)
-		if source_mek.is_dead() or target_mek.is_dead():
-			break
-	decrease_indent()
-
-
-func _execute_offensive_module_order(order: UseModuleOrder) -> void:
-	var source_mek: Mek = order.source.entity
-	var target_mek: Mek = order.target.entity
-	if source_mek.is_dead() or target_mek.is_dead():
-		return
-	# Check if the Mek has enough power.
-	if source_mek.power < order.module.power_on_use:
-		return
-	# Deduct power.
-	source_mek.power -= order.module.power_on_use
-	# Start cooldown if necessary
-	if order.module.cooldown > 0:
-		source_mek.cooldown_manager.start_cooldown(order.item, order.module)
-	# Perform accuracy check
-	var base_accuracy = 90 + source_mek.accuracy_modifier
-	# Adjust based on movement.
-	var move_penalty = -min(source_mek.tiles_moved_last_turn * 5, 30)  # -5% per tile, up to -30%
-	# Adjust based on dodge.
-	var dodge_bonus = -min(target_mek.tiles_moved_last_turn * 3, 15)  # -3% dodge per tile, up to -15%
-	# Height-based adjustment
-	var source_height = get_tile_height(order.source.position)
-	var target_height = get_tile_height(order.target.position)
-	var height_diff = source_height - target_height
-	# Rule of thumb: +/-2% accuracy per height difference (capped at +-10%)
-	var height_bonus = clamp(height_diff * 2, -10, 10)
-	var final_accuracy = min(base_accuracy + move_penalty + dodge_bonus + height_bonus, 90)
-	var roll = randi() % 100
-	var hit_success = roll < final_accuracy
-	add_log(
-		Enums.LogType.SYSTEM,
-		(
-			"[url=mek:%s]%s[/url] attacking [url=mek:%s]%s[/url] with %s: base=%d, move=%d, dodge=%d, height=%d -> accuracy=%d%% (roll=%d): %s %s"
-			% [
-				source_mek.uuid,
-				source_mek.template.name,
-				target_mek.uuid,
-				target_mek.template.name,
-				order.module.name,
-				base_accuracy,
-				move_penalty,
-				dodge_bonus,
-				height_bonus,
-				final_accuracy,
-				roll,
-				"HIT" if hit_success else "MISS",
-				"(cooldown: " + str(order.module.cooldown) + ")" if order.module.cooldown else ""
-			]
-		)
-	)
-
-	if not hit_success:
-		return
-
-	increase_indent()
-	for effect in order.module.effects:
-		if effect.is_damage():
-			_apply_damage_effect(order, effect)
-		elif effect.is_repair():
-			_apply_repair_effect(order, effect)
-		elif effect.is_dot():
-			_apply_modifier_effect(order, effect)
-		elif effect.is_regen():
-			_apply_modifier_effect(order, effect)
-		elif effect.is_damage_reduction():
-			_apply_modifier_effect(order, effect)
-		elif effect.is_modifier():
-			_apply_modifier_effect(order, effect)
-		else:
-			add_log(
-				Enums.LogType.SYSTEM,
-				"Effect %s not yet implemented" % Enums.EffectType.keys()[effect.type]
-			)
-		if source_mek.is_dead() or target_mek.is_dead():
-			break
-	decrease_indent()
-
-
-func _execute_move_order(order: MoveOrder):
-	var mek = order.source.entity
-	var start = order.source.position
-	var end = order.destination
-	if mek.is_dead():
-		return
-	# Track movement distance for accuracy/dodge purposes.
-	mek.tiles_moved_last_turn = start.distance_to(end)
-	add_log(
-		Enums.LogType.MOVEMENT,
-		(
-			"[url=mek:%s]%s[/url] moved from [url=pos:%d,%d]%s[/url] to [url=pos:%d,%d]%s[/url] (%d tiles)"
-			% [
-				mek.uuid,
-				mek.template.name,
-				start.x,
-				start.y,
-				str(start),
-				end.x,
-				end.y,
-				str(end),
-				mek.tiles_moved_last_turn
-			]
-		)
-	)
-	order.source.position = order.destination
-
-
-# =============================================================================
-# ORDERS
-# =============================================================================
-
-
-func _destroy_mek(entity: MapEntity) -> void:
-	var mek = entity.entity
-	if player_units.has(mek.uuid):
-		player_units.erase(mek.uuid)
-	elif npc_units.has(mek.uuid):
-		npc_units.erase(mek.uuid)
-	add_log(Enums.LogType.SYSTEM, "%s has been destroyed!" % mek.template.name)
-
-
-func _check_destroyed_units() -> void:
-	var to_remove_player: Array[String] = []
-	var to_remove_enemy: Array[String] = []
-	# Collect dead player units
-	for uuid in player_units:
-		var entity: MapEntity = player_units[uuid]
-		if entity.entity.is_dead():
-			to_remove_player.append(uuid)
-	# Collect dead enemy units
-	for uuid in npc_units:
-		var entity: MapEntity = npc_units[uuid]
-		if entity.entity.is_dead():
-			to_remove_enemy.append(uuid)
-	# Now safely remove and destroy
-	for uuid in to_remove_player:
-		_destroy_mek(player_units[uuid])
-	for uuid in to_remove_enemy:
-		_destroy_mek(npc_units[uuid])
-
-
-func queue_offensive_module_orders(order: UseModuleOrder):
-	"""Queues an offensive module activation order, replacing any existing one for the unit."""
-	offensive_module_orders[order.source.uuid] = order
-
-
-func queue_utility_module_orders(order: UseModuleOrder):
-	"""Queues a module activation order, replacing any existing one for the unit."""
-	utility_module_orders[order.source.uuid] = order
-
-
-func queue_move_order(order: MoveOrder):
-	"""Queues a movement order, replacing any existing one for the unit."""
-	move_orders[order.source.uuid] = order
-
-
-func process_round():
-	add_log(Enums.LogType.SYSTEM, "============================================================")
-	add_log(Enums.LogType.SYSTEM, "============================================================")
-	add_log(Enums.LogType.SYSTEM, "Executing round " + str(round_number) + "...")
-
-	add_log(Enums.LogType.SYSTEM, "== RUN AI ==================================================")
-
-	# 1) Generate AI actions.
-	for unit_uuid in npc_units:
-		_generate_enemy_orders(npc_units[unit_uuid])
-
-	add_log(Enums.LogType.SYSTEM, "== EXECUTE UTILITY =========================================")
-
-	# 2) Process utility module activations.
-	for unit_uuid in utility_module_orders:
-		_execute_utility_module_order(utility_module_orders[unit_uuid])
-	utility_module_orders.clear()
-
-	add_log(Enums.LogType.SYSTEM, "== EXECUTE OFFENSIVE =======================================")
-
-	# 3) Process offensive module activations.
-	for unit_uuid in offensive_module_orders:
-		_execute_offensive_module_order(offensive_module_orders[unit_uuid])
-	offensive_module_orders.clear()
-
-	_check_destroyed_units()
-
-	add_log(Enums.LogType.SYSTEM, "== EXECUTE MOVEMENT ========================================")
-
-	# 4.1) Reset movement tracking for all Meks.
-	for unit_uuid in player_units:
-		player_units[unit_uuid].entity.tiles_moved_last_turn = 0
-
-	for unit_uuid in npc_units:
-		npc_units[unit_uuid].entity.tiles_moved_last_turn = 0
-
-	# 4.2) Process movement orders.
-	for unit_uuid in move_orders:
-		_execute_move_order(move_orders[unit_uuid])
-	move_orders.clear()
-
-	add_log(Enums.LogType.SYSTEM, "== REGENERATE ==============================================")
-
-	# 5) Regenerate all units
-	for unit in player_units.values():
-		unit.entity.regenerate()
-
-	for unit in npc_units.values():
-		unit.entity.regenerate()
-
-	add_log(Enums.LogType.SYSTEM, "== PROCESS TICKS ===========================================")
-
-	# 5) Tick active effects, cooldowns, and durations
-	for unit_dict in [player_units, npc_units]:
-		for unit_uuid in unit_dict:
-			var map_entity = unit_dict[unit_uuid]
-			var mek: Mek = map_entity.entity
-
-			# Process time-based effects like DOT, HOT, buffs
-			var dot_result = mek.take_dot_damage()
-			if dot_result.total > 0:
-				add_log(
-					Enums.LogType.ATTACK,
-					(
-						"%s suffers DOT -> %d shield, %d armor, %d health"
-						% [
-							mek.template.name,
-							dot_result.shield,
-							dot_result.armor,
-							dot_result.health
-						]
-					)
-				)
-			# Decrement durations for active modules.
-			mek.active_effect_manager.decrement_durations()
-			# Decrement cooldowns
-			mek.cooldown_manager.decrement_cooldowns()
-
-	_check_destroyed_units()
-
-	# 6) Round end
-	on_round_end.emit()
-	round_number += 1
-	add_log(Enums.LogType.SYSTEM, "")
 
 
 # =============================================================================

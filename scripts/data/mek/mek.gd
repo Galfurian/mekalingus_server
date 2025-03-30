@@ -1,4 +1,4 @@
-extends RefCounted
+extends Node
 
 class_name Mek
 
@@ -78,7 +78,7 @@ func _init(data: Dictionary = {}):
 static func compare_meks(a: Mek, b: Mek) -> bool:
 	"""Sorts meks first by size, then by name alphabetically."""
 	if a.template.size == b.template.size:
-		return a.template.name.to_lower() > b.template.name.to_lower()
+		return a.template.mek_name.to_lower() > b.template.mek_name.to_lower()
 	return a.template.size < b.template.size
 
 

@@ -1,5 +1,7 @@
+# Keeps track of an instance of an item in the game.
 class_name Item
-extends RefCounted
+
+extends Node
 
 # =============================================================================
 # PROPERTIES
@@ -21,7 +23,8 @@ func _init(data: Dictionary = {}):
 	"""
 	Initializes an Item instance from a dictionary.
 	"""
-	from_dict(data)
+	if data:
+		from_dict(data)
 
 
 func is_valid() -> bool:
@@ -36,8 +39,9 @@ static func compare_items(a: Item, b: Item) -> bool:
 	Sorts items first by slot type (SMALL -> MEDIUM -> LARGE -> UTILITY), then by name alphabetically.
 	"""
 	if a.template.slot == b.template.slot:
-		return a.template.name.to_lower() > b.template.name.to_lower()
+		return a.template.item_name.to_lower() > b.template.item_name.to_lower()
 	return a.template.slot < b.template.slot
+
 
 # =============================================================================
 # POWER COMPUTATION
@@ -49,6 +53,7 @@ func evaluate_item_power() -> float:
 	Computes the total power level of the Item.
 	"""
 	return template.evaluate_item_template_power()
+
 
 # =============================================================================
 # SERIALIZATION

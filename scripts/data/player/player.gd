@@ -1,7 +1,7 @@
 # This script defines the Player class, which represents a player in the game.
 # It contains the player's name, UUID, and collections of Mek and Item instances.
 class_name Player
-extends RefCounted
+extends Node
 
 # =============================================================================
 # PROPERTIES

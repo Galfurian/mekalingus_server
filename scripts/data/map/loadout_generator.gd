@@ -146,12 +146,14 @@ func _assign_role_based_loadout(mek: Mek, role: Enums.MekRole, power_range: Dict
 		for i in range(min(slot_count, scored_candidates.size())):
 			var item_template = scored_candidates[i]["item"]
 			var item_instance = item_template.build_item()
-			mek.add_item(item_instance)
+			if not mek.add_item(item_instance):
+				print("Failed to add item.")
 
 			var mek_total_power :float= mek.evaluate_mek_power()
 			if mek_total_power > max_power:
 				# Undo the item if it breaches max power.
-				mek.remove_item(item_instance)
+				if not mek.remove_item(item_instance):
+					print("Failed to remove item.")
 				GameServer.free_uuid(item_instance.uuid)
 				break
 

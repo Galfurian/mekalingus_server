@@ -1,9 +1,10 @@
 extends Node
 
-@onready var server_log        = $ServerLog/ServerLogContent
-@onready var server_status     = $HBoxContainer/ServerStatus
+@onready var server_log = $ServerLog/ServerLogContent
+@onready var server_status = $HBoxContainer/ServerStatus
 @onready var server_start_stop = $HBoxContainer/ServerStartStop
-@onready var server_quit       = $HBoxContainer/ServerQuit
+@onready var server_quit = $HBoxContainer/ServerQuit
+
 
 func _ready():
 	# Connect the server log.
@@ -17,7 +18,8 @@ func _on_server_quit():
 		get_tree().quit()
 	else:
 		_on_log_message("Failed to stop the server.")
-	
+
+
 func _on_server_start_stop():
 	"""Handles the start/stop button."""
 	if GameServer.is_running:
@@ -26,6 +28,7 @@ func _on_server_start_stop():
 	else:
 		if GameServer.start():
 			server_start_stop.text = "Stop"
+
 
 func _on_log_message(msg: String):
 	"""Handles incoming log messages and updates the UI."""

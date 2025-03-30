@@ -4,7 +4,7 @@
 # Effects can be instantaneous or last for a certain number of turns.
 # Effects can have a chance to trigger, a radius for area effects, and other properties.
 class_name ItemEffect
-extends RefCounted
+extends Node
 
 # =============================================================================
 # PROPERTIES

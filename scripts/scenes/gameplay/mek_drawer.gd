@@ -12,14 +12,14 @@ func setup(p_game_map: GameMap, p_grid_size: int = 50, p_sector_size: int = 10):
 	game_map = p_game_map
 	grid_size = p_grid_size
 	sector_size = p_sector_size
-	if not game_map.on_round_end.is_connected(_on_round_end):
-		game_map.on_round_end.connect(_on_round_end)
+	if not game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.turn_ended.connect(_on_turn_ended)
 	update_meks()
 
 
 func clear() -> void:
-	if game_map and game_map.on_round_end.is_connected(_on_round_end):
-		game_map.on_round_end.disconnect(_on_round_end)
+	if game_map and game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.turn_ended.disconnect(_on_turn_ended)
 	game_map = null
 	grid_size = 50
 	for sprite in mek_sprites.values():
@@ -27,7 +27,8 @@ func clear() -> void:
 	mek_sprites.clear()
 
 
-func _on_round_end():
+func _on_turn_ended(_turn_number: int):
+	# Called when the turn ends
 	update_meks()
 
 

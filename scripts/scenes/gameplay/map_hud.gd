@@ -1,16 +1,5 @@
 extends Node
 
-@onready var info_panel = $VBoxContainer/HBoxContainer/InfoPanel
-@onready var action_menu = $ActionMenu
-
-@onready var grid_drawer = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/GridDrawer
-@onready var mek_drawer = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/MekDrawer
-@onready var grid_container = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer
-@onready var scroll_view = $VBoxContainer/HBoxContainer/GridMap/ScrollView
-
-@onready var log_panel = $VBoxContainer/LogPanel
-@onready var combat_log = $VBoxContainer/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
-
 # The current game map.
 var game_map: GameMap
 # The current grid size (in pixels).
@@ -19,6 +8,15 @@ var grid_size: int
 var sector_size: int
 # The currently selected entity.
 var selected_entity: MapEntity
+
+@onready var info_panel = $VBoxContainer/HBoxContainer/InfoPanel
+@onready var action_menu = $ActionMenu
+@onready var grid_drawer = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/GridDrawer
+@onready var mek_drawer = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/MekDrawer
+@onready var grid_container = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer
+@onready var scroll_view = $VBoxContainer/HBoxContainer/GridMap/ScrollView
+@onready var log_panel = $VBoxContainer/LogPanel
+@onready var combat_log = $VBoxContainer/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
 
 
 func _ready():
@@ -30,8 +28,8 @@ func _ready():
 
 func clear():
 	"""Clears the map HUD."""
-	if game_map:
-		game_map.on_round_end.disconnect(_on_round_end)
+	if game_map and game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.turn_ended.disconnect(_on_turn_ended)
 	game_map = null
 	grid_size = 50
 	sector_size = 10
@@ -39,8 +37,8 @@ func clear():
 	# Clear the sub-components.
 	grid_container.clear()
 	grid_drawer.clear()
-	mek_drawer.clear()
 	info_panel.clear()
+	mek_drawer.clear()
 	log_panel.clear()
 
 
@@ -56,8 +54,8 @@ func setup(p_game_map: GameMap, p_grid_size: int = 50, p_sector_size: int = 10):
 	mek_drawer.setup(p_game_map, p_grid_size, p_sector_size)
 	info_panel.setup(p_game_map)
 	log_panel.setup(p_game_map)
-	if not game_map.on_round_end.is_connected(_on_round_end):
-		game_map.on_round_end.connect(_on_round_end)
+	if not game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.turn_ended.connect(_on_turn_ended)
 
 
 func center_on(position: Vector2i) -> void:
@@ -100,8 +98,8 @@ func zoom_out():
 	center_on(Vector2(game_map.map_width / 2.0, game_map.map_height / 2.0))
 
 
-func _on_round_end() -> void:
-	"""Handles the end of a round."""
+func _on_turn_ended(_turn_number: int):
+	# Called when the turn ends
 	if selected_entity:
 		center_on(selected_entity.position)
 

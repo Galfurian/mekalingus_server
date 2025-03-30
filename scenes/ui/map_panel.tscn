@@ -22,9 +22,9 @@ size_flags_horizontal = 3
 text = "Map Manager"
 horizontal_alignment = 1
 
-[node name="AdvanceTurn" type="Button" parent="MapSelector"]
+[node name="MapStartStop" type="Button" parent="MapSelector"]
 layout_mode = 2
-text = "Advance Turn"
+text = "Start"
 
 [node name="SaveMap" type="Button" parent="MapSelector"]
 layout_mode = 2

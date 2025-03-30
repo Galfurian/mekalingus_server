@@ -1,5 +1,5 @@
 class_name AIController
-extends RefCounted
+extends Node
 
 # =============================================================================
 # PROPERTIES
@@ -20,10 +20,14 @@ func log_message(msg: String):
 	GameServer.log_message(msg)
 
 
+func clear():
+	game_map = null
+
+
 static func format_mek_tag(mek: Mek) -> String:
 	if not mek:
 		return "<mek-null>"
-	return "[url=mek:%s]%s[/url]" % [mek.uuid, mek.template.name]
+	return "[url=mek:%s]%s[/url]" % [mek.uuid, mek.template.mek_name]
 
 
 static func format_item_tag(mek: Mek, item: Item, module: ItemModule) -> String:
@@ -33,7 +37,7 @@ static func format_item_tag(mek: Mek, item: Item, module: ItemModule) -> String:
 		return "<item-null>"
 	if not item:
 		return "<module-null>"
-	return "[url=item:%s:%s]%s[/url]" % [mek.uuid, item.uuid, module.name]
+	return "[url=item:%s:%s]%s[/url]" % [mek.uuid, item.uuid, module.module_name]
 
 
 static func format_item_pair_tag(mek: Mek, item_module_pair: Dictionary) -> String:
@@ -548,7 +552,7 @@ func _select_movement_destination(
 	"""
 	Determines the best tile to move closer to the target using A* pathfinding with movement cost.
 	"""
-	var path = game_map.get_path(start_position, target_position)
+	var path = game_map.get_shortest_path(start_position, target_position)
 	# If there's no path or it's too short, return start.
 	if path.is_empty() or path.size() <= 1:
 		game_map.add_log(
@@ -643,7 +647,7 @@ func _find_best_tile_to_attack_target(
 			)
 			continue
 		# Compute how far the unit must move to reach this tile
-		var move_cost = game_map.get_path_cost(game_map.get_path(start_pos, tile))
+		var move_cost = game_map.get_path_cost(game_map.get_shortest_path(start_pos, tile))
 		# Calculate the elevation difference (positive = tile is above the target)
 		var height_diff = game_map.get_tile_height(tile) - game_map.get_tile_height(target_pos)
 		# Determine how close we are to the ideal range (middle of min/max)

@@ -168,10 +168,10 @@ func _input(_event):
 		if index >= 0:
 			var game_map: GameMap = map_list.get_item_metadata(index)
 			if game_map:
-				if map_hud.selected_entity:
+				if map_hud.selected_entity and is_instance_of(map_hud.selected_entity, MapMek):
 					map_hud.info_panel.clear()
 					map_hud.grid_drawer.deselect_entity()
-					game_map.remove_entity(map_hud.selected_entity.entity.uuid)
+					game_map.remove_entity(map_hud.selected_entity.mek.uuid)
 					map_hud.mek_drawer.update_meks()
 					map_hud.selected_entity = null
 	elif Input.is_key_pressed(KEY_ESCAPE):

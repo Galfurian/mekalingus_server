@@ -155,9 +155,9 @@ func _filter_order_with_dead_mek(_key: String, order) -> bool:
 	Checks if the order is valid and the source and target are not dead.
 	"""
 	if is_instance_of(order, UseModuleOrder):
-		return order.source.entity.is_dead() or order.target.entity.is_dead()
+		return order.source.mek.is_dead() or order.target.mek.is_dead()
 	if is_instance_of(order, MoveOrder):
-		return order.source.entity.is_dead()
+		return order.source.mek.is_dead()
 	return false
 
 
@@ -165,7 +165,7 @@ func _filter_dead_unit(_key: String, unit: MapEntity) -> bool:
 	"""
 	Checks if the unit is dead.
 	"""
-	return unit.entity.is_dead()
+	return unit.mek.is_dead()
 
 
 func _erase_destroyed_units() -> void:
@@ -190,7 +190,7 @@ func queue_offensive_module_orders(order: UseModuleOrder):
 	Queues an offensive module activation order, replacing any existing one for the unit.
 	"""
 	if order:
-		offensive_module_orders[order.source.entity.uuid] = order
+		offensive_module_orders[order.source.mek.uuid] = order
 
 
 func queue_utility_module_order(order: UseModuleOrder):
@@ -198,7 +198,7 @@ func queue_utility_module_order(order: UseModuleOrder):
 	Queues a module activation order, replacing any existing one for the unit.
 	"""
 	if order:
-		utility_module_orders[order.source.entity.uuid] = order
+		utility_module_orders[order.source.mek.uuid] = order
 
 
 func queue_move_order(order: MoveOrder):
@@ -206,7 +206,7 @@ func queue_move_order(order: MoveOrder):
 	Queues a movement order, replacing any existing one for the unit.
 	"""
 	if order:
-		move_orders[order.source.entity.uuid] = order
+		move_orders[order.source.mek.uuid] = order
 
 
 func _execute_offensive_module_orders() -> void:
@@ -236,9 +236,9 @@ func _execute_move_orders() -> void:
 	"""
 	# Reset movement tracking for all Meks.
 	for unit_uuid in game_map.player_units:
-		game_map.player_units[unit_uuid].entity.tiles_moved_last_turn = 0
+		game_map.player_units[unit_uuid].mek.tiles_moved_last_turn = 0
 	for unit_uuid in game_map.npc_units:
-		game_map.npc_units[unit_uuid].entity.tiles_moved_last_turn = 0
+		game_map.npc_units[unit_uuid].mek.tiles_moved_last_turn = 0
 	# Then, execute the orders.
 	for unit_uuid in move_orders:
 		_execute_move_order(move_orders[unit_uuid])
@@ -251,14 +251,14 @@ func _update_time_based_effects():
 	"""
 	# First regenerate the units.
 	for unit in game_map.player_units.values():
-		unit.entity.regenerate()
+		unit.mek.regenerate()
 	for unit in game_map.npc_units.values():
-		unit.entity.regenerate()
+		unit.mek.regenerate()
 	# Then, tick active effects, cooldowns, and durations.
 	for unit_dict in [game_map.player_units, game_map.npc_units]:
 		for unit_uuid in unit_dict:
 			var map_entity = unit_dict[unit_uuid]
-			var mek: Mek = map_entity.entity
+			var mek: Mek = map_entity.mek
 			# Process time-based effects like DOT, HOT, buffs
 			var dot_result = mek.take_dot_damage()
 			if dot_result.total > 0:
@@ -299,8 +299,8 @@ func _generate_enemy_orders(map_entity: MapEntity):
 
 
 func _apply_damage_effect(order: UseModuleOrder, effect: ItemEffect) -> void:
-	var source_mek: Mek = order.source.entity
-	var target_mek: Mek = order.target.entity
+	var source_mek: Mek = order.source.mek
+	var target_mek: Mek = order.target.mek
 	if source_mek.is_dead() or target_mek.is_dead():
 		return
 	# Handle SELF damage.
@@ -328,7 +328,7 @@ func _apply_damage_effect(order: UseModuleOrder, effect: ItemEffect) -> void:
 			order.source, center.position, effect.radius, true, true
 		)
 		for entity in affected:
-			var mek = entity.entity
+			var mek = entity.mek
 			if mek.is_dead():
 				continue
 			var result = mek.take_damage_from_effect(effect)
@@ -370,8 +370,8 @@ func _apply_damage_effect(order: UseModuleOrder, effect: ItemEffect) -> void:
 
 
 func _apply_repair_effect(order: UseModuleOrder, effect: ItemEffect) -> void:
-	var source_mek: Mek = order.source.entity
-	var target_mek: Mek = order.target.entity
+	var source_mek: Mek = order.source.mek
+	var target_mek: Mek = order.target.mek
 	if source_mek.is_dead() or target_mek.is_dead():
 		return
 	# Handle SELF repair.
@@ -398,7 +398,7 @@ func _apply_repair_effect(order: UseModuleOrder, effect: ItemEffect) -> void:
 			order.source, center.position, effect.radius, include_allies, include_enemies, []
 		)
 		for entity in affected:
-			var mek = entity.entity
+			var mek = entity.mek
 			if mek.is_dead():
 				continue
 			var result = mek.repair_from_effect(effect)
@@ -436,8 +436,8 @@ func _apply_repair_effect(order: UseModuleOrder, effect: ItemEffect) -> void:
 
 
 func _apply_modifier_effect(order: UseModuleOrder, effect: ItemEffect) -> void:
-	var source_mek: Mek = order.source.entity
-	var target_mek: Mek = order.target.entity
+	var source_mek: Mek = order.source.mek
+	var target_mek: Mek = order.target.mek
 	if source_mek.is_dead() or target_mek.is_dead():
 		return
 	# Handle SELF-targeted effects.
@@ -470,7 +470,7 @@ func _apply_modifier_effect(order: UseModuleOrder, effect: ItemEffect) -> void:
 			[order.source]
 		)
 		for entity in affected:
-			var mek = entity.entity
+			var mek = entity.mek
 			if mek.is_dead():
 				continue
 			mek.add_effect(order.module, effect, order.source)
@@ -509,8 +509,8 @@ func _apply_modifier_effect(order: UseModuleOrder, effect: ItemEffect) -> void:
 
 
 func _execute_utility_module_order(order: UseModuleOrder) -> void:
-	var source_mek: Mek = order.source.entity
-	var target_mek: Mek = order.target.entity
+	var source_mek: Mek = order.source.mek
+	var target_mek: Mek = order.target.mek
 	if source_mek.is_dead() or target_mek.is_dead():
 		return
 	# Check if the Mek has enough power.
@@ -561,8 +561,8 @@ func _execute_utility_module_order(order: UseModuleOrder) -> void:
 
 
 func _execute_offensive_module_order(order: UseModuleOrder) -> void:
-	var source_mek: Mek = order.source.entity
-	var target_mek: Mek = order.target.entity
+	var source_mek: Mek = order.source.mek
+	var target_mek: Mek = order.target.mek
 	if source_mek.is_dead() or target_mek.is_dead():
 		return
 	# Check if the Mek has enough power.
@@ -638,7 +638,7 @@ func _execute_offensive_module_order(order: UseModuleOrder) -> void:
 
 
 func _execute_move_order(order: MoveOrder):
-	var mek = order.source.entity
+	var mek = order.source.mek
 	if mek.is_dead():
 		return
 	var start_pos = order.source.position

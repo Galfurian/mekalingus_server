@@ -24,6 +24,40 @@ static func erase(dictionary: Dictionary, keys: Array) -> void:
 		dictionary.erase(key)
 
 
+static func serialize_position(position: Vector2i) -> Array:
+	"""
+	Serializes a Vector2i position into an array of integers.
+	"""
+	return [position.x, position.y]
+
+
+static func deserialize_position(array: Array) -> Vector2i:
+	"""
+	Deserializes an array of integers into a Vector2i position.
+	"""
+	if array.size() >= 2:
+		return Vector2i(array[0], array[1])
+	return Vector2i()
+
+
+static func serialize_dict_of_objects(dict: Dictionary) -> Dictionary:
+	var result := {}
+	for key in dict:
+		var obj = dict[key]
+		if obj.has_method("to_dict"):
+			result[key] = obj.to_dict()
+		else:
+			push_error("Object at key '%s' does not implement to_dict()" % key)
+	return result
+
+
+static func deserialize_dict_of_objects(data: Dictionary, constructor: Callable) -> Variant:
+	var result = {}
+	for key in data:
+		result[key] = constructor.call(data[key])
+	return result
+
+
 static func to_array_int(array: Array) -> Array[int]:
 	"""Transforms an arbitrary array into an array of integers"""
 	var output: Array[int] = []

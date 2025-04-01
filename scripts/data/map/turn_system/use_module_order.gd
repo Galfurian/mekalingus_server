@@ -7,9 +7,9 @@ class_name UseModuleOrder
 # =============================================================================
 
 # The unit using the module.
-var source: MapEntity
+var source: MapMek
 # The entity affected (can be `source`, an ally, or an enemy).
-var target: MapEntity
+var target: MapMek
 # The item containing the module.
 var item: Item
 # The specific module being activated.
@@ -19,7 +19,7 @@ var module: ItemModule
 # GENERAL FUNCTIONS
 # =============================================================================
 
-func _init(p_source: MapEntity, p_target: MapEntity, p_item: Item, p_module: ItemModule) -> void:
+func _init(p_source: MapMek, p_target: MapMek, p_item: Item, p_module: ItemModule) -> void:
 	source = p_source
 	target = p_target
 	item   = p_item
@@ -28,7 +28,7 @@ func _init(p_source: MapEntity, p_target: MapEntity, p_item: Item, p_module: Ite
 func _to_string() -> String:
 	if not module or module.effects.is_empty():
 		return "UseModuleOrder<source: %s, item: %s, module: %s, target: %s>" % [
-			str(source.entity), str(item), str(module), str(target.entity)
+			str(source.mek), str(item), str(module), str(target.mek)
 		]
 
 	# Check for offensive effects
@@ -56,8 +56,8 @@ func _to_string() -> String:
 
 	# Determine the target type
 	if source == target:
-		return "%s is using %s on itself" % [str(source.entity.template.mek_name), str(module.module_name)]
+		return "%s is using %s on itself" % [str(source.mek.template.mek_name), str(module.module_name)]
 	else:
 		return "%s is %s %s on %s" % [
-			str(source.entity.template.mek_name), action_desc, str(module.module_name), str(target.entity.template.mek_name)
+			str(source.mek.template.mek_name), action_desc, str(module.module_name), str(target.mek.template.mek_name)
 		]

@@ -11,12 +11,12 @@ enum GameMode {
 
 # Game difficulty levels.
 enum MapDifficulty {
-	NOVICE = 0,  # Entry-level, forgiving challenges.
-	CADET = 1,  # Beginner-friendly with slightly increased difficulty.
-	CHALLENGING = 2,  # Provides a moderate level of challenge.
-	VETERAN = 3,  # A tougher experience for skilled players.
-	ELITE = 4,  # High difficulty with stronger enemies and tactics.
-	LEGENDARY = 5,  # The toughest challenge, only for the most experienced players.
+	NOVICE,  # Entry-level, forgiving challenges.
+	CADET,  # Beginner-friendly with slightly increased difficulty.
+	CHALLENGING,  # Provides a moderate level of challenge.
+	VETERAN,  # A tougher experience for skilled players.
+	ELITE,  # High difficulty with stronger enemies and tactics.
+	LEGENDARY,  # The toughest challenge, only for the most experienced players.
 }
 
 # Defines the mek size classes.

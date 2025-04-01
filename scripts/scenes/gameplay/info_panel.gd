@@ -79,19 +79,19 @@ func update_panel() -> void:
 	"""
 	Refreshes all UI elements to reflect the current entity's state.
 	"""
-	if not entity:
+	if not is_instance_valid(entity):
 		return
 
 	item_list.clear()
 	entity_info.clear()
 	item_inspector.visible = false
 
-	if is_instance_of(entity.entity, Mek):
-		_load_mek_details(entity.entity)
+	if is_instance_of(entity, MapMek):
+		_load_mek_details(entity.mek)
 
 		item_inspector.visible = true
 
-		for item in entity.entity.items:
+		for item in entity.mek.items:
 			var index = item_list.add_item(item.template.item_name)
 			item_list.set_item_metadata(index, item)
 			item_list.set_item_custom_fg_color(index, _get_slot_color(item.template.slot))
@@ -106,7 +106,7 @@ func select_item_by_uuid(uuid: String) -> void:
 	"""
 	Selects an item in the list by its UUID and shows its details.
 	"""
-	if not entity or not is_instance_of(entity.entity, Mek):
+	if not is_instance_valid(entity) or not is_instance_of(entity, MapMek):
 		return
 
 	for i in item_list.item_count:
@@ -135,7 +135,10 @@ func _on_item_selected(index: int) -> void:
 
 
 func _load_mek_details(mek: Mek) -> void:
+	if not is_instance_valid(mek):
+		return
 	var s = "[center][b]" + mek.template.mek_name + "[/b][/center]\n"
+	s += "Power   : " + str(mek.evaluate_mek_power()) + "\n"
 	s += "Size    : " + Utils.enum_to_string(Enums.MekSize, mek.template.size) + "\n"
 	s += "Health  : " + UIColor.apply("health", "%3d" % mek.health) + " / "
 	s += UIColor.apply("health", "%3d" % mek.max_health)
@@ -195,11 +198,12 @@ func _load_mek_details(mek: Mek) -> void:
 
 func _load_item_details(item: Item):
 	"""Load details for a selected Item."""
-	if not item:
+	if not is_instance_valid(item):
 		return
 	var s: String = ""
 	# Header
 	s += "[center][b]" + item.template.item_name + "[/b][/center]\n"
+	s += "Combat Power : " + str(item.evaluate_item_power()) + "\n"
 	s += "Slot         : " + UIColor.apply("slot", Enums.SlotType.keys()[item.template.slot]) + "\n"
 	s += "Power Usage  : " + UIColor.apply("power", item.template.base_power_usage) + "\n"
 	if item.template.modules.is_empty():

@@ -41,11 +41,9 @@ var is_pvp_enabled: bool = false
 # If true the map allows PVP.
 var is_free_for_all_enabled: bool = true
 # Stores all active NPC units by UUID.
-var npc_units: Dictionary[String, MapEntity]
+var npc_units: Dictionary
 # Stores all active Player units by UUID.
-var player_units: Dictionary[String, MapEntity]
-# Stores all destroyed units by UUID.
-var destroyed_units: Dictionary[String, MapEntity]
+var player_units: Dictionary
 # The combat log.
 var combat_logs: Array[LogEntry]
 # The chat log.
@@ -111,7 +109,6 @@ func clear() -> void:
 	# Clear the entity lists.
 	npc_units.clear()
 	player_units.clear()
-	destroyed_units.clear()
 	# Clear the logs.
 	combat_logs.clear()
 	chat_logs.clear()
@@ -330,21 +327,21 @@ func get_reachable_tiles(start: Vector2i, max_cost: int) -> Array[Vector2i]:
 # =============================================================================
 
 
-func is_npc(map_entity: MapEntity) -> bool:
+func is_npc(entity: MapMek) -> bool:
 	"""
 	Returns true if the entity belongs to the npc_units dictionary (i.e., NPC).
 	"""
-	return npc_units.has(map_entity.entity.uuid)
+	return npc_units.has(entity.mek.uuid)
 
 
-func is_player(map_entity: MapEntity) -> bool:
+func is_player(entity: MapMek) -> bool:
 	"""
 	Returns true if the entity belongs to the player_units dictionary (i.e., Player).
 	"""
-	return player_units.has(map_entity.entity.uuid)
+	return player_units.has(entity.mek.uuid)
 
 
-func is_enemy_of(me1: MapEntity, me2: MapEntity) -> bool:
+func is_enemy_of(me1: MapMek, me2: MapMek) -> bool:
 	"""
 	Determines if two entities are enemies based on the current map settings.
 	"""
@@ -370,20 +367,17 @@ func get_entity_at(position: Vector2i) -> MapEntity:
 		for entity in player_units.values():
 			if position == entity.position:
 				return entity
-		for entity in destroyed_units.values():
-			if position == entity.position:
-				return entity
 	return null
 
 
 func get_units_in_range(
-	source: MapEntity,
+	source: MapMek,
 	position: Vector2i,
 	radius: int,
 	include_allies: bool = true,
 	include_enemies: bool = true,
-	exclude_units: Array[MapEntity] = []
-) -> Array[MapEntity]:
+	exclude_units: Array[MapMek] = []
+) -> Array[MapMek]:
 	"""
 	Returns all units within the specified range of a position.
 	Parameters:
@@ -394,7 +388,7 @@ func get_units_in_range(
 	- include_enemies: Whether to include enemy units.
 	- exclude_units: Optional list of units to ignore.
 	"""
-	var units_in_range: Array[MapEntity] = []
+	var units_in_range: Array[MapMek] = []
 	for entity in player_units.values() + npc_units.values():
 		if entity == source:
 			continue
@@ -409,20 +403,18 @@ func get_units_in_range(
 	return units_in_range
 
 
-func get_entity(uuid: String) -> MapEntity:
+func get_entity(uuid: String) -> MapMek:
 	"""
-	Returns the MapEntity for a given UUID.
+	Returns the MapMek for a given UUID.
 	"""
 	if player_units.has(uuid):
 		return player_units[uuid]
 	if npc_units.has(uuid):
 		return npc_units[uuid]
-	if destroyed_units.has(uuid):
-		return destroyed_units[uuid]
 	return null
 
 
-func remove_entity(uuid: String) -> MapEntity:
+func remove_entity(uuid: String) -> MapMek:
 	"""
 	Removes an entity from the map and returns it.
 	"""
@@ -433,9 +425,6 @@ func remove_entity(uuid: String) -> MapEntity:
 	if npc_units.has(uuid):
 		entity = npc_units[uuid]
 		npc_units.erase(uuid)
-	if destroyed_units.has(uuid):
-		entity = destroyed_units[uuid]
-		destroyed_units.erase(uuid)
 	return entity
 
 
@@ -509,47 +498,28 @@ func spawn_enemies_on_map(difficulty: int) -> void:
 		if spawn_points.is_empty():
 			push_error("We ran out of spawn points.")
 			return
+		# Choose a random clan.
+		var clan: Clan = DataManager.clans.values().pick_random()
+		if not clan:
+			push_error("Failed to pick a random clan.")
+			return
+		# Pick the role from the preferred roles of the clan.
+		var role: Enums.MekRole = clan.preferred_roles.pick_random()
 		# Generate the enemy.
-		var enemy_mek = LoadoutGenerator.generate_mek(difficulty, Enums.MekRole.BRAWLER)
-		if not enemy_mek:
-			push_error("Failed to generate an enemy Mek.")
-			continue
+		var mek = LoadoutGenerator.generate_mek(difficulty, role)
+		if not mek:
+			push_error("Failed to generate enemy.")
+			return
 		# Choose a random valid position.
 		var spawn_point = spawn_points.pick_random()
 		spawn_points.erase(spawn_point)
 		# Place the enemy on the map.
-		npc_units[enemy_mek.uuid] = MapEntity.new(spawn_point, enemy_mek)
+		npc_units[mek.uuid] = MapMek.new(spawn_point, NPCOwned.new("Rookie", clan), mek)
 
 
 # =============================================================================
 # SAVE & LOAD
 # =============================================================================
-
-
-static func _serialize_npc_units(units: Dictionary[String, MapEntity]) -> Dictionary:
-	"""Converts enemy units dictionary to a JSON-compatible format."""
-	var serialized = {}
-	for unit_uuid in units:
-		var map_entity = units[unit_uuid]
-		var mek: Mek = map_entity.entity
-		serialized[unit_uuid] = {
-			"position": "%d,%d" % [map_entity.position.x, map_entity.position.y],
-			"entity": mek.to_client_dict(),
-			"active": map_entity.active
-		}
-	return serialized
-
-
-static func _deserialize_npc_units(data: Dictionary) -> Dictionary[String, MapEntity]:
-	"""Reconstructs enemy units dictionary from a JSON-compatible format."""
-	var units: Dictionary[String, MapEntity] = {}
-	for unit_uuid in data:
-		var enemy_unit = data[unit_uuid]
-		var coordinates = enemy_unit["position"].split(",")
-		var position = Vector2i(int(coordinates[0]), int(coordinates[1]))
-		var entity = Mek.new(enemy_unit["entity"])
-		units[unit_uuid] = MapEntity.new(position, entity)
-	return units
 
 
 static func from_dict(data: Dictionary) -> GameMap:
@@ -571,7 +541,9 @@ static func from_dict(data: Dictionary) -> GameMap:
 		data["map_uuid"], biome, data["map_width"], data["map_height"], data["map_difficulty"]
 	)
 	map.terrain_data = Utils.deserialize_matrix(data["terrain_data"])
-	map.npc_units = _deserialize_npc_units(data["npc_units"])
+	map.npc_units = Utils.deserialize_dict_of_objects(
+		data["npc_units"], func(mek_data): return MapMek.from_dict(mek_data)
+	)
 	map.combat_logs = LogEntry.decompress_logs_from_base64(data.get("combat_logs", {}))
 	map.chat_logs = LogEntry.decompress_logs_from_base64(data.get("chat_logs", {}))
 
@@ -590,7 +562,7 @@ func to_dict() -> Dictionary:
 		"map_biome": map_biome.biome_name,
 		"map_difficulty": map_difficulty,
 		"terrain_data": Utils.serialize_matrix(terrain_data, map_width, map_height),
-		"npc_units": _serialize_npc_units(npc_units),
+		"npc_units": Utils.serialize_dict_of_objects(npc_units),
 		"combat_logs": LogEntry.compress_logs_to_base64(combat_logs),
 		"chat_logs": LogEntry.compress_logs_to_base64(chat_logs)
 	}

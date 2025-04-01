@@ -115,7 +115,7 @@ func _on_log_meta_clicked(meta: String) -> void:
 		var mek_uuid = parts[0]
 		var item_uuid = parts[1]
 		var entity = game_map.get_entity(mek_uuid)
-		if entity and is_instance_of(entity.entity, Mek):
+		if entity and is_instance_of(entity, MapMek):
 			selected_entity = entity
 			center_on(entity.position)
 			info_panel.set_entity(entity)
@@ -127,7 +127,7 @@ func _on_log_meta_clicked(meta: String) -> void:
 	elif meta.begins_with("mek:"):
 		var mek_uuid = meta.substr(4)
 		var entity = game_map.get_entity(mek_uuid)
-		if entity and is_instance_of(entity.entity, Mek):
+		if entity and is_instance_of(entity, MapMek):
 			selected_entity = entity
 			center_on(entity.position)
 			info_panel.set_entity(entity)

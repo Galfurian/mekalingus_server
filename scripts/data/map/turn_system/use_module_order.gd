@@ -1,6 +1,6 @@
-extends Node
-
+# This class represents the order to use a module on a target.
 class_name UseModuleOrder
+extends Order
 
 # =============================================================================
 # PROPERTIES
@@ -10,54 +10,244 @@ class_name UseModuleOrder
 var source: MapMek
 # The entity affected (can be `source`, an ally, or an enemy).
 var target: MapMek
-# The item containing the module.
-var item: Item
-# The specific module being activated.
-var module: ItemModule
+# The equipped module being activated.
+var equipped_module: EquippedModule
 
 # =============================================================================
 # GENERAL FUNCTIONS
 # =============================================================================
 
-func _init(p_source: MapMek, p_target: MapMek, p_item: Item, p_module: ItemModule) -> void:
+
+func _init(p_source: MapMek, p_target: MapMek, p_equipped_module: EquippedModule) -> void:
 	source = p_source
 	target = p_target
-	item   = p_item
-	module = p_module
+	equipped_module = p_equipped_module
+
+
+# =============================================================================
+# OVERRIDE FUNCTIONS
+# =============================================================================
+
+
+func execute(_game_map: GameMap) -> bool:
+	push_error("execute() not implemented in subclass: %s" % self)
+	return false
+
+
+func validate() -> bool:
+	push_warning("validate() not implemented in subclass: %s" % self)
+	return false
+
 
 func _to_string() -> String:
-	if not module or module.effects.is_empty():
-		return "UseModuleOrder<source: %s, item: %s, module: %s, target: %s>" % [
-			str(source.mek), str(item), str(module), str(target.mek)
-		]
+	return "<UseModuleOrder base class>"
 
-	# Check for offensive effects
-	var has_damage = false
-	var has_healing = false
-	var has_modifier = false
 
-	for effect in module.effects:
-		match effect.type:
-			Enums.EffectType.DAMAGE, Enums.EffectType.DAMAGE_OVER_TIME:
-				has_damage = true
-			Enums.EffectType.HEALTH_REPAIR, Enums.EffectType.SHIELD_REPAIR, Enums.EffectType.ARMOR_REPAIR:
-				has_healing = true
-			_:
-				has_modifier = true  # Any other effect is a buff/debuff
+# =============================================================================
+# PRIVATE FUNCTIONS
+# =============================================================================
 
-	# Determine the action type
-	var action_desc = "using"
-	if has_damage:
-		action_desc = "attacking with"
-	elif has_healing:
-		action_desc = "supporting with"
-	elif has_modifier:
-		action_desc = "buffing with"
 
-	# Determine the target type
-	if source == target:
-		return "%s is using %s on itself" % [str(source.mek.template.mek_name), str(module.module_name)]
+func _apply_damage_effect(game_map: GameMap, effect: ItemEffect) -> void:
+	var source_mek: Mek = source.mek
+	var target_mek: Mek = target.mek
+	if source_mek.is_dead() or target_mek.is_dead():
+		return
+	# Handle SELF damage.
+	if effect.target_self():
+		var result = source_mek.take_damage_from_effect(effect)
+		game_map.add_log(
+			Enums.LogType.ATTACK,
+			(
+				"%s hurts itself with %s -> %d shield, %d armor, %d health (reduced %d %s)"
+				% [
+					source_mek.template.mek_name,
+					equipped_module.module.module_name,
+					result.shield,
+					result.armor,
+					result.health,
+					result.reduced,
+					Enums.DamageType.keys()[effect.damage_type]
+				]
+			)
+		)
+	# Handle AREA damage.
+	elif effect.target_area():
+		var center = target if effect.center_on_target else source
+		var affected = game_map.get_units_in_range(
+			source, center.position, effect.radius, true, true
+		)
+		for entity in affected:
+			var mek = entity.mek
+			if mek.is_dead():
+				continue
+			var result = mek.take_damage_from_effect(effect)
+			game_map.add_log(
+				Enums.LogType.ATTACK,
+				(
+					"%s hits %s with AoE from %s -> %d shield, %d armor, %d health (reduced %d %s)"
+					% [
+						source_mek.template.mek_name,
+						target_mek.template.mek_name,
+						equipped_module.module.module_name,
+						result.shield,
+						result.armor,
+						result.health,
+						result.reduced,
+						Enums.DamageType.keys()[effect.damage_type]
+					]
+				)
+			)
+	# Handle regular ENEMY / ALLY targeting.
 	else:
-		return "%s is %s %s on %s" % [
-			str(source.mek.template.mek_name), action_desc, str(module.module_name), str(target.mek.template.mek_name)
-		]
+		var result = target_mek.take_damage_from_effect(effect)
+		game_map.add_log(
+			Enums.LogType.ATTACK,
+			(
+				"%s hits %s with %s -> %d shield, %d armor, %d health (reduced %d %s)"
+				% [
+					source_mek.template.mek_name,
+					target_mek.template.mek_name,
+					equipped_module.module.module_name,
+					result.shield,
+					result.armor,
+					result.health,
+					result.reduced,
+					Enums.DamageType.keys()[effect.damage_type]
+				]
+			)
+		)
+
+
+func _apply_repair_effect(game_map: GameMap, effect: ItemEffect) -> void:
+	var source_mek: Mek = source.mek
+	var target_mek: Mek = target.mek
+	if source_mek.is_dead() or target_mek.is_dead():
+		return
+	# Handle SELF repair.
+	if effect.target_self():
+		var result = source_mek.repair_from_effect(effect)
+		game_map.add_log(
+			Enums.LogType.SUPPORT,
+			(
+				"%s restores %d %s to itself using %s"
+				% [
+					source_mek.template.mek_name,
+					result.amount,
+					result.stat,
+					equipped_module.module.module_name
+				]
+			)
+		)
+	# Handle AREA repair.
+	elif effect.target_area():
+		var center = target if effect.center_on_target else source
+		var include_allies = effect.target_ally() or effect.target_self()
+		var include_enemies = effect.target_enemy()
+		var affected = game_map.get_units_in_range(
+			source, center.position, effect.radius, include_allies, include_enemies, []
+		)
+		for entity in affected:
+			var mek = entity.mek
+			if mek.is_dead():
+				continue
+			var result = mek.repair_from_effect(effect)
+			game_map.add_log(
+				Enums.LogType.SUPPORT,
+				(
+					"%s restores %d %s to %s using %s (AoE)"
+					% [
+						source_mek.template.mek_name,
+						result.amount,
+						result.stat,
+						mek.template.mek_name,
+						equipped_module.module.module_name
+					]
+				)
+			)
+	# Handle ENEMY / ALLY repair.
+	else:
+		if target_mek.is_dead():
+			return
+		var result = target_mek.repair_from_effect(effect)
+		game_map.add_log(
+			Enums.LogType.SUPPORT,
+			(
+				"%s restores %d %s to %s using %s"
+				% [
+					source_mek.template.mek_name,
+					result.amount,
+					result.stat,
+					target_mek.template.mek_name,
+					equipped_module.module.module_name
+				]
+			)
+		)
+
+
+func _apply_modifier_effect(game_map: GameMap, effect: ItemEffect) -> void:
+	var source_mek: Mek = source.mek
+	var target_mek: Mek = target.mek
+	if source_mek.is_dead() or target_mek.is_dead():
+		return
+	# Handle SELF-targeted effects.
+	if effect.target_self():
+		source_mek.add_effect(equipped_module.module, effect, source)
+		game_map.add_log(
+			Enums.LogType.SUPPORT,
+			(
+				"%s applies %s to itself -> %d for %d turns (%s)"
+				% [
+					source_mek.template.mek_name,
+					effect.get_effect_type_label(),
+					effect.amount,
+					effect.duration,
+					equipped_module.module.module_name
+				]
+			)
+		)
+	# Handle AREA-based effects.
+	elif effect.target_area():
+		var center = target if effect.center_on_target else source
+		var include_allies = effect.target_ally() or effect.target_self()
+		var include_enemies = effect.target_enemy()
+		var affected = game_map.get_units_in_range(
+			source, center.position, effect.radius, include_allies, include_enemies, [source]
+		)
+		for entity in affected:
+			var mek = entity.mek
+			if mek.is_dead():
+				continue
+			mek.add_effect(equipped_module.module, effect, source)
+			game_map.add_log(
+				Enums.LogType.SUPPORT,
+				(
+					"%s applies %s to %s -> %d for %d turns (%s, AoE)"
+					% [
+						source_mek.template.mek_name,
+						effect.get_effect_type_label(),
+						mek.template.mek_name,
+						effect.amount,
+						effect.duration,
+						equipped_module.module.module_name
+					]
+				)
+			)
+
+	# Handle direct ENEMY / ALLY targeting.
+	else:
+		target_mek.add_effect(equipped_module.module, effect, source)
+		game_map.add_log(
+			Enums.LogType.SUPPORT,
+			(
+				"%s applies %s to %s -> %d for %d turns (%s)"
+				% [
+					source_mek.template.mek_name,
+					effect.get_effect_type_label(),
+					target_mek.template.mek_name,
+					effect.amount,
+					effect.duration,
+					equipped_module.module.module_name
+				]
+			)
+		)

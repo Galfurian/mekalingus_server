@@ -1,5 +1,6 @@
+# This one represents an order to move a unit to a specific position.
 class_name MoveOrder
-extends Node
+extends Order
 
 # =============================================================================
 # PROPERTIES
@@ -18,6 +19,71 @@ var destination: Vector2i
 func _init(p_source: MapEntity, p_destination: Vector2i) -> void:
 	source = p_source
 	destination = p_destination
+
+
+# =============================================================================
+# OVERRIDE FUNCTIONS
+# =============================================================================
+
+
+func execute(game_map: GameMap) -> bool:
+	var mek = source.mek
+	if mek.is_dead():
+		return false
+
+	var start_pos = source.position
+
+	var path = game_map.get_shortest_path(start_pos, destination)
+
+	if path.is_empty() or path.size() <= 1:
+		# No movement possible.
+		game_map.add_log(
+			Enums.LogType.MOVEMENT,
+			(
+				"%s could not move to %s (no valid path)"
+				% [mek.get_chat_tag(), GameMap.format_pos_tag(destination)]
+			)
+		)
+		return false
+
+	var current_tile = start_pos
+	var fallback_tile = start_pos
+	var total_cost = 0
+	var max_movement = mek.speed
+
+	for i in range(1, path.size()):
+		var tile = path[i]
+		var cost = game_map.get_movement_cost(tile)
+		if cost < 0:
+			break
+		if total_cost + cost > max_movement:
+			break
+		if game_map.can_move_to(tile):
+			current_tile = tile
+		else:
+			current_tile = fallback_tile
+			break
+		total_cost += cost
+		fallback_tile = tile
+
+	# Update position.
+	mek.tiles_moved_last_turn = start_pos.distance_to(current_tile)
+
+	game_map.add_log(
+		Enums.LogType.MOVEMENT,
+		(
+			"%s moved from %s to %s (%d tiles)"
+			% [
+				mek.get_chat_tag(),
+				GameMap.format_pos_tag(start_pos),
+				GameMap.format_pos_tag(current_tile),
+				mek.tiles_moved_last_turn
+			]
+		)
+	)
+
+	source.position = current_tile
+	return true
 
 
 func _to_string() -> String:

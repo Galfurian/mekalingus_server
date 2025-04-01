@@ -505,6 +505,15 @@ func evaluate_mek_power() -> float:
 # =============================================================================
 
 
+func get_chat_tag() -> String:
+	"""
+	Returns a chat tag for the Mek.
+	"""
+	if alias.is_empty():
+		return "[url=mek:" + uuid + "]" + template.mek_name + "[/url]"
+	return "[url=mek:" + uuid + "]" + alias + "[/url]"
+
+
 func _to_string() -> String:
 	return "Mek<" + mek_id + ", " + uuid + ">"
 

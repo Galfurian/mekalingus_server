@@ -516,6 +516,29 @@ func spawn_enemies_on_map(difficulty: int) -> void:
 		# Place the enemy on the map.
 		npc_units[mek.uuid] = MapMek.new(spawn_point, NPCOwned.new("Rookie", clan), mek)
 
+# =============================================================================
+# FORMATTING
+# =============================================================================
+
+static func format_item_tag(mek: Mek, item: Item, module: ItemModule) -> String:
+	if not mek:
+		return "<mek-null>"
+	if not item:
+		return "<item-null>"
+	if not item:
+		return "<module-null>"
+	return "[url=item:%s:%s]%s[/url]" % [mek.uuid, item.uuid, module.module_name]
+
+
+static func format_item_pair_tag(mek: Mek, item_module_pair: Dictionary) -> String:
+	return format_item_tag(
+		mek, item_module_pair.get("item", null), item_module_pair.get("module", null)
+	)
+
+
+static func format_pos_tag(pos: Vector2i) -> String:
+	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
+
 
 # =============================================================================
 # SAVE & LOAD

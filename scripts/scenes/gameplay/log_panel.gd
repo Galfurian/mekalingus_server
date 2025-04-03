@@ -25,6 +25,11 @@ func _ready():
 	chat_input.text_submitted.connect(_on_chat_input_submitted)
 
 
+# =============================================================================
+# PUBLIC METHODS
+# =============================================================================
+
+
 func setup(p_game_map: GameMap):
 	clear()
 	game_map = p_game_map
@@ -62,6 +67,11 @@ func add_chat_entry(entry: LogEntry):
 func add_chat_message(message: String):
 	var timestamp = Time.get_time_string_from_system()
 	chat_log.append_text("[" + timestamp + "] " + message + "\n")
+
+
+# =============================================================================
+# PRIVATE METHODS
+# =============================================================================
 
 
 func _on_log_added(entry: LogEntry):

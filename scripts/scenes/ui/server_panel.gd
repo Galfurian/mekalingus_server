@@ -14,6 +14,12 @@ func _ready():
 
 
 func _on_server_quit():
+	if not GameServer.is_running:
+		# If the server is not running, just quit the game.
+		get_tree().quit()
+		return
+	# If the server is running, attempt to stop it before quitting.
+	_on_log_message("Attempting to stop the server before quitting...")
 	if GameServer.stop():
 		get_tree().quit()
 	else:

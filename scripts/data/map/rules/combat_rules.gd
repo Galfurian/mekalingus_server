@@ -3,29 +3,23 @@ class_name CombatRules
 
 # The game mode determines the rules of combat.
 var game_mode: Enums.GameMode
-# Whether players can attack each other.
-var pvp_enabled: bool = false
-# Whether NPCs can attack each other.
-var npc_friendly_fire: bool = false
-# Whether NPCs are hostile to players.
-var player_npc_hostile: bool = true
-
 
 func _init(mode: Enums.GameMode = Enums.GameMode.FFA) -> void:
-	"""
-	Initializes the combat rules with the given game mode.
-	"""
+	# Initialize the game mode.
 	game_mode = mode
-	match game_mode:
-		Enums.GameMode.FFA:
-			pvp_enabled = true
-			npc_friendly_fire = true
-			player_npc_hostile = true
-		Enums.GameMode.COOP:
-			pvp_enabled = false
-			npc_friendly_fire = false
-			player_npc_hostile = true
-		Enums.GameMode.TEAM:
-			pvp_enabled = true
-			npc_friendly_fire = false
-			player_npc_hostile = true
+
+func can_attack(attacker: EntityOwner, defender: EntityOwner) -> bool:
+	# Don’t allow attacking self
+	if attacker == defender:
+		return false
+
+	# Same clan = cannot attack
+	if attacker.clan.id == defender.clan.id:
+		return false
+
+	# Allied clans = cannot attack
+	if attacker.clan.id in defender.clan.allies or defender.clan.id in attacker.clan.allies:
+		return false
+
+	# Otherwise, attack is allowed
+	return true

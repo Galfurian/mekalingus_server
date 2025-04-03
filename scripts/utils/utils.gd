@@ -175,10 +175,13 @@ static func strings_to_enums(enum_type: Dictionary, array: Array) -> Array:
 	var result: Array = []
 	for value in array:
 		var enum_value = string_to_enum(enum_type, str(value))
-		if enum_value:
+		if enum_value != null:
 			result.append(enum_value)
 		else:
 			push_error("Invalid enum string: '%s'" % str(value))
+			push_error("Enum type  : '%s'" % str(enum_type))
+			push_error("Enum keys  : '%s'" % str(enum_type.keys()))
+			push_error("Enum values: '%s'" % str(enum_type.values()))
 	return result
 
 

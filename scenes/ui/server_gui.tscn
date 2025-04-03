@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://bhgt3rn4bd6v0"]
+[gd_scene load_steps=4 format=3 uid="uid://bhgt3rn4bd6v0"]
 
-[ext_resource type="PackedScene" uid="uid://dyh3xjp4f2j5c" path="res://scenes/ui/server_panel.tscn" id="2_2ndow"]
+[ext_resource type="Script" uid="uid://b55vbrxnfx81o" path="res://scripts/scenes/ui/server_gui.gd" id="1_v2it2"]
+[ext_resource type="PackedScene" uid="uid://dyh3xjp4f2j5c" path="res://scenes/ui/server_log_panel.tscn" id="2_2ndow"]
 [ext_resource type="PackedScene" uid="uid://dkiovd48dvjqd" path="res://scenes/ui/map_panel.tscn" id="3_qeaa5"]
 
 [node name="ServerGui" type="Control"]
@@ -10,6 +11,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_v2it2")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1
@@ -32,13 +34,34 @@ size_flags_vertical = 3
 [node name="TabContainer" type="TabContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-current_tab = 0
+current_tab = 1
 
 [node name="Server" parent="VBoxContainer/TabContainer" instance=ExtResource("2_2ndow")]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
 [node name="Maps" parent="VBoxContainer/TabContainer" instance=ExtResource("3_qeaa5")]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="ServerStatus" type="Label" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Server Status"
+
+[node name="ServerStartStop" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.1
+text = "Start"
+
+[node name="ServerQuit" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.1
+text = "Quit
+"

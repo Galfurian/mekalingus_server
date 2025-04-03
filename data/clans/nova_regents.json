@@ -9,5 +9,6 @@
         "SNIPER"
     ],
     "aggressiveness": 1.2,
-    "is_player_joinable": true
+    "is_player_joinable": true,
+    "allies": ["phantom_blades", "storm_howlers"]
 }

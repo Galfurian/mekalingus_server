@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dkiovd48dvjqd"]
 
-[ext_resource type="Script" uid="uid://wb8h76c3hfb5" path="res://scripts/scenes/ui/map_panel.gd" id="1_54ar7"]
+[ext_resource type="Script" uid="uid://i5ni28pfxmft" path="res://scripts/scenes/ui/map_panel.gd" id="1_54ar7"]
 [ext_resource type="PackedScene" uid="uid://bic16d6uw0g6y" path="res://scenes/gameplay/map_hud.tscn" id="2_5xqg1"]
 
 [node name="MapPanel" type="HSplitContainer"]

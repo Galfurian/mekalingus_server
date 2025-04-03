@@ -4,9 +4,10 @@ extends Node
 
 # The type of game mode.
 enum GameMode {
-	FFA,  # Free-for-all, every player/NPC for themselves.
-	COOP,  # Players versus AI-controlled enemies.
-	TEAM,  # Teams of NPCs and Players versus each other.
+	FFA, # Free-for-all, every player/NPC for themselves.
+	COOP, # Players versus AI-controlled enemies.
+	TEAM, # Teams of NPCs and Players versus each other.
+	CLAN_WAR, # Use clan logic exclusively
 }
 
 # Game difficulty levels.

@@ -9,5 +9,6 @@
 		"SUPPORT"
 	],
 	"aggressiveness": 1.1,
-	"is_player_joinable": false
+	"is_player_joinable": false,
+	"allies": ["iron_forge", "void_hammers"]
 }

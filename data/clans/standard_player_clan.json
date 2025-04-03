@@ -11,5 +11,6 @@
         "ARTILLERY"
     ],
     "aggressiveness": 1.0,
-    "is_player_joinable": true
+    "is_player_joinable": true,
+    "allies": ["phantom_blades", "ember_guard", "storm_howlers"]
 }

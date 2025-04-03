@@ -9,5 +9,6 @@
         "SUPPORT"
     ],
     "aggressiveness": 0.8,
-    "is_player_joinable": true
+    "is_player_joinable": true,
+    "allies": ["nova_regents", "ember_guard", "standard_player_clan"]
 }

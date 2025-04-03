@@ -343,19 +343,13 @@ func is_player(entity: MapMek) -> bool:
 
 func is_enemy_of(me1: MapMek, me2: MapMek) -> bool:
 	"""
-	Determines if two entities are enemies based on the current map settings.
+	Determines if two meks are enemies using CombatRules and clan-based ownership.
 	"""
 	if me1 == me2:
 		return false
-	if is_npc(me1) and is_player(me2):
-		return combat_rules.player_npc_hostile
-	if is_player(me1) and is_npc(me2):
-		return combat_rules.player_npc_hostile
-	if is_player(me1) and is_player(me2):
-		return combat_rules.pvp_enabled
-	if is_npc(me1) and is_npc(me2):
-		return combat_rules.npc_friendly_fire
-	return false
+	if not me1.owner or not me2.owner:
+		return false
+	return combat_rules.can_attack(me1.owner, me2.owner)
 
 
 func get_entity_at(position: Vector2i) -> MapEntity:

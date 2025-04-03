@@ -25,7 +25,7 @@ func setup(p_game_map: GameMap, p_grid_size: int, p_sector_size: int):
 
 
 func clear() -> void:
-	if game_map and game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
+	if game_map and game_map.turn_manager and game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
 		game_map.turn_manager.turn_ended.disconnect(_on_turn_ended)
 
 	game_map = null
@@ -33,12 +33,18 @@ func clear() -> void:
 	sector_size = 0
 	for sprite in mek_sprites.values():
 		sprite.queue_free()
+
 	mek_sprites.clear()
 
 
 func _on_turn_ended(_turn_number: int):
 	# Called when the turn ends.
 	update_meks()
+
+func _get_clan_color(entity_owner: EntityOwner) -> Color:
+	if entity_owner and entity_owner.clan:
+		return entity_owner.clan.color
+	return Color(1, 1, 1, 0.4)
 
 
 func update_meks():
@@ -70,8 +76,10 @@ func update_meks():
 			# Create new sprite
 			mek_sprite = Sprite2D.new()
 			mek_sprite.texture = sprite_texture
-			mek_sprites[mek_uuid] = mek_sprite
+			mek_sprite.position = Vector2.ZERO
+			mek_sprite.modulate = _get_clan_color(map_entity.owner)
 			add_child(mek_sprite)
+			mek_sprites[mek_uuid] = mek_sprite
 		# Update position.
 		mek_sprites[mek_uuid].position = center
 		mek_sprites[mek_uuid].scale = Vector2(grid_size / sprite_size.x, grid_size / sprite_size.y)

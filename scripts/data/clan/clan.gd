@@ -21,6 +21,8 @@ var description: String
 var color: Color
 # Path to the emblem of the clan.
 var emblem_path: String
+# List of allied clans.
+var allies: Array
 
 # -------------------------------------
 # IDENTITY
@@ -90,10 +92,11 @@ static func from_dict(data: Dictionary) -> Clan:
 	clan.clan_name = data["name"]
 	clan.description = data["description"]
 	clan.color = Utils.hex_to_color(data["color"])
-	clan.emblem_path = data["emblem_path"]
+	clan.emblem_path = data.get("emblem_path", "")
 	clan.preferred_roles = Utils.strings_to_enums(Enums.MekRole, data["preferred_roles"])
 	clan.aggressiveness = data.get("aggressiveness", 1.0)
 	clan.is_player_joinable = data.get("is_player_joinable", true)
+	clan.allies = data.get("allies", [])
 	return clan
 
 
@@ -108,4 +111,5 @@ func to_dict() -> Dictionary:
 		"preferred_roles": Utils.enums_to_strings(Enums.MekRole, preferred_roles),
 		"aggressiveness": aggressiveness,
 		"is_player_joinable": is_player_joinable,
+		"allies": allies,
 	}

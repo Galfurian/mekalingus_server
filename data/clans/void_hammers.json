@@ -9,5 +9,6 @@
         "ARTILLERY"
     ],
     "aggressiveness": 1.4,
-    "is_player_joinable": false
+    "is_player_joinable": false,
+    "allies": ["iron_forge", "crimson_order"]
 }

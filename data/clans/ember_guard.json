@@ -9,5 +9,6 @@
         "BRAWLER"
     ],
     "aggressiveness": 0.6,
-    "is_player_joinable": true
+    "is_player_joinable": true,
+    "allies": ["phantom_blades", "standard_player_clan"]
 }

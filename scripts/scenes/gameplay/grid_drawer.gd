@@ -4,10 +4,11 @@ extends Node2D
 # CONSTANTS
 # =============================================================================
 
-const MAJOR_GRID_COLOR = Color(0.4, 0.4, 0.4, 0.5)
-const MINOR_GRID_COLOR = Color(0.2, 0.2, 0.2, 0.5)
+const MAJOR_GRID_COLOR = Color(0.2, 0.2, 0.2, 0.5)
 const MAJOR_GRID_SIZE = 3
-const MINOR_GRID_SIZE = 1
+# Constants for border configuration
+const BORDER_WIDTH = 1
+const BORDER_COLOR = Color(0.2, 0.2, 0.2, 1.0)
 
 # =============================================================================
 # VARIABLES
@@ -74,9 +75,7 @@ func _on_turn_ended(_turn_number: int):
 func _draw():
 	if not game_map:
 		return
-
 	var offset = get_draw_offset()
-
 	# Draw actual map tiles (with offset applied).
 	for y in range(game_map.map_height):
 		for x in range(game_map.map_width):
@@ -84,21 +83,22 @@ func _draw():
 			var x_pos = x * grid_size + offset.x
 			var y_pos = y * grid_size + offset.y
 			draw_rect(
-				Rect2(x_pos, y_pos, grid_size, grid_size), game_map.get_tile_color(x, y), true
+				Rect2(
+					x_pos + BORDER_WIDTH,
+					y_pos + BORDER_WIDTH,
+					grid_size - BORDER_WIDTH,
+					grid_size - BORDER_WIDTH
+				),
+				game_map.get_tile_color(x, y),
+				true
 			)
-
+	assert(game_map.map_width == game_map.map_height, "Map is not square!")
 	# Draw grid overlay (including extended grid lines).
-	for x in range(game_map.map_width + sector_size + sector_size):
-		var start = Vector2(x * grid_size, 0)
-		var end = Vector2(x * grid_size, (game_map.map_height + sector_size * 2) * grid_size)
-		if (x % sector_size) == 0:
-			draw_line(start, end, MAJOR_GRID_COLOR, MAJOR_GRID_SIZE)
-		else:
-			draw_line(start, end, MINOR_GRID_COLOR, MINOR_GRID_SIZE)
-	for y in range(game_map.map_height + sector_size + sector_size):
-		var start = Vector2(0, y * grid_size)
-		var end = Vector2((game_map.map_width + sector_size * 2) * grid_size, y * grid_size)
-		if (y % sector_size) == 0:
-			draw_line(start, end, MAJOR_GRID_COLOR, MAJOR_GRID_SIZE)
-		else:
-			draw_line(start, end, MINOR_GRID_COLOR, MINOR_GRID_SIZE)
+	for i in range(game_map.map_width + sector_size + sector_size):
+		if (i % sector_size) == 0:
+			var x_start = Vector2(i * grid_size, 0)
+			var x_end = Vector2(i * grid_size, (game_map.map_height + sector_size * 2) * grid_size)
+			draw_line(x_start, x_end, MAJOR_GRID_COLOR, MAJOR_GRID_SIZE)
+			var y_start = Vector2(0, i * grid_size)
+			var y_end = Vector2((game_map.map_width + sector_size * 2) * grid_size, i * grid_size)
+			draw_line(y_start, y_end, MAJOR_GRID_COLOR, MAJOR_GRID_SIZE)

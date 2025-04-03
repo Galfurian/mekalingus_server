@@ -1,7 +1,5 @@
 extends Node
 
-var grid_size: int = 50
-
 @onready var map_start_stop = $MapSelector/MapStartStop
 @onready var save_map = $MapSelector/SaveMap
 @onready var load_map = $MapSelector/LoadMap
@@ -93,8 +91,7 @@ func _on_delete():
 func _on_map_selected(index: int):
 	var game_map: GameMap = map_list.get_item_metadata(index)
 	if game_map:
-		map_hud.setup(game_map, grid_size)
-		map_hud.zoom_out()
+		map_hud.setup(game_map)
 		# Update the label on the map start/stop button.
 		if game_map.turn_manager.is_active():
 			map_start_stop.text = "Stop"
@@ -155,8 +152,7 @@ func _on_load_map():
 				# Set the map metadata.
 				map_list.set_item_metadata(index, game_map)
 				# Setup the map hud.
-				map_hud.setup(game_map, grid_size)
-				map_hud.zoom_out()
+				map_hud.setup(game_map)
 			else:
 				map_list.remove_item(index)
 	return null

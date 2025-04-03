@@ -1,22 +1,23 @@
 extends Node
 
+# The size of sectors.
+const SECTOR_SIZE: int = 10
+
 # The current game map.
 var game_map: GameMap
 # The current grid size (in pixels).
 var grid_size: int
-# The size of sectors.
-var sector_size: int
 # The currently selected entity.
 var selected_entity: MapEntity
 
-@onready var info_panel = $VBoxContainer/HBoxContainer/InfoPanel
 @onready var action_menu = $ActionMenu
+@onready var scroll_view = $VBoxContainer/HBoxContainer/GridMap/ScrollView
+@onready var grid_container = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer
 @onready var grid_drawer = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/GridDrawer
 @onready var mek_drawer = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/MekDrawer
-@onready var grid_container = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer
-@onready var scroll_view = $VBoxContainer/HBoxContainer/GridMap/ScrollView
-@onready var log_panel = $VBoxContainer/LogPanel
 @onready var combat_log = $VBoxContainer/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
+@onready var info_panel = $VBoxContainer/HBoxContainer/InfoPanel
+@onready var log_panel = $VBoxContainer/LogPanel
 
 
 func _ready():
@@ -26,76 +27,84 @@ func _ready():
 	scroll_view.scrolled.connect(_on_map_scrolled)
 
 
+func setup(p_game_map: GameMap, p_grid_size: int = 50):
+	"""Sets up the map HUD with the given game map and grid size."""
+	clear()
+	# Set the variables.
+	game_map = p_game_map
+	grid_size = p_grid_size
+	# Initialize all components with the chosen grid size
+	grid_container.setup(p_game_map, grid_size, SECTOR_SIZE)
+	grid_drawer.setup(p_game_map, grid_size, SECTOR_SIZE)
+	mek_drawer.setup(p_game_map, grid_size, SECTOR_SIZE)
+	info_panel.setup(p_game_map)
+	log_panel.setup(p_game_map)
+	# Connect signals once.
+	if game_map and not game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.turn_ended.connect(_on_turn_ended)
+	# Center the view on the map.
+	zoom_out()
+
+
 func clear():
 	"""Clears the map HUD."""
 	if game_map and game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
 		game_map.turn_manager.turn_ended.disconnect(_on_turn_ended)
 	game_map = null
-	grid_size = 50
-	sector_size = 10
 	selected_entity = null
 	# Clear the sub-components.
 	grid_container.clear()
 	grid_drawer.clear()
-	info_panel.clear()
 	mek_drawer.clear()
+	info_panel.clear()
 	log_panel.clear()
 
 
-func setup(p_game_map: GameMap, p_grid_size: int = 50, p_sector_size: int = 10):
-	"""Sets up the map HUD with the given game map and grid size."""
-	clear()
-	# Initialize the new state.
-	game_map = p_game_map
+func redraw(p_grid_size: int):
+	"""Redraws the map HUD with a new grid size."""
+	if not game_map:
+		return
+	# Update the grid size.
 	grid_size = p_grid_size
-	sector_size = p_sector_size
-	grid_container.setup(p_game_map, p_grid_size, p_sector_size)
-	grid_drawer.setup(p_game_map, p_grid_size, p_sector_size)
-	mek_drawer.setup(p_game_map, p_grid_size, p_sector_size)
-	info_panel.setup(p_game_map)
-	log_panel.setup(p_game_map)
-	if not game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
-		game_map.turn_manager.turn_ended.connect(_on_turn_ended)
+	# Re-setup all components with the new grid size.
+	grid_container.setup(game_map, grid_size, SECTOR_SIZE)
+	grid_drawer.setup(game_map, grid_size, SECTOR_SIZE)
+	mek_drawer.setup(game_map, grid_size, SECTOR_SIZE)
 
 
 func center_on(position: Vector2i) -> void:
 	"""Centers the scroll view on the given tile position."""
-	if not scroll_view or not game_map:
+	if not game_map:
 		return
 	# Convert tile coordinates to pixel coordinates.
-	var tile_pixel_pos = (position + Vector2i(sector_size, sector_size)) * grid_size
+	var tile_pixel_pos = (position + Vector2i(SECTOR_SIZE, SECTOR_SIZE)) * grid_size
 	# Get the size of the scroll viewport (i.e., the visible area).
-	var viewport_size = scroll_view.get_size()
+	var visible_size = scroll_view.get_size()
 	# Center position = move the scroll so the position is in the center of the screen.
-	var scroll_x = tile_pixel_pos.x - (viewport_size.x / 2.) + (grid_size / 2.)
-	var scroll_y = tile_pixel_pos.y - (viewport_size.y / 2.) + (grid_size / 2.)
-	# Clamp scrolling within map bounds.
-	var max_scroll_x = (
-		game_map.map_width * grid_size + sector_size * 2 * grid_size - viewport_size.x
-	)
-	var max_scroll_y = (
-		game_map.map_height * grid_size + sector_size * 2 * grid_size - viewport_size.y
-	)
+	var scroll_x = tile_pixel_pos.x - (visible_size.x / 2.) + (grid_size / 2.)
+	var scroll_y = tile_pixel_pos.y - (visible_size.y / 2.) + (grid_size / 2.)
+	# Compute the maximum scroll limits to prevent scrolling out of bounds.
+	var max_scroll_x = (game_map.map_width + SECTOR_SIZE * 2) * grid_size - visible_size.x
+	var max_scroll_y = (game_map.map_height + SECTOR_SIZE * 2) * grid_size - visible_size.y
+	# Apply clamped scrolling.
 	scroll_view.scroll_horizontal = clamp(scroll_x, 0, max_scroll_x)
 	scroll_view.scroll_vertical = clamp(scroll_y, 0, max_scroll_y)
 
 
 func zoom_out():
 	"""Zooms out the map view."""
-	if not game_map or not scroll_view:
+	if not game_map:
 		return
+	# Get the size of the scroll viewport (i.e., the visible area).
 	var visible_size = scroll_view.get_size()
-	var total_tiles_x = game_map.map_width
-	var total_tiles_y = game_map.map_height
 	# Compute the minimum grid size to fit the whole map.
-	var min_grid_size_x = visible_size.x / total_tiles_x
-	var min_grid_size_y = visible_size.y / total_tiles_y
+	var min_grid_size_x = visible_size.x / (game_map.map_width + SECTOR_SIZE * 2)
+	var min_grid_size_y = visible_size.y / (game_map.map_height + SECTOR_SIZE * 2)
 	var min_grid_size = max(4, min(min_grid_size_x, min_grid_size_y))
 	# Round to an even number for consistency.
 	grid_size = int(floor(min_grid_size / 2.0)) * 2
-	setup(game_map, grid_size)
-	# Center the view on the map.
-	center_on(Vector2(game_map.map_width / 2.0, game_map.map_height / 2.0))
+	# Redraw the map with the new grid size.
+	redraw(grid_size)
 
 
 func _on_turn_ended(_turn_number: int):
@@ -182,8 +191,8 @@ func _on_map_scrolled(scroll_up: bool):
 	# Get the size of the scroll viewport (i.e., visible area)
 	var visible_size = scroll_view.get_size()
 	# Full number of tiles that need to be visible, including sector borders
-	var total_tiles_x = game_map.map_width + sector_size * 2
-	var total_tiles_y = game_map.map_height + sector_size * 2
+	var total_tiles_x = game_map.map_width + SECTOR_SIZE * 2
+	var total_tiles_y = game_map.map_height + SECTOR_SIZE * 2
 	# Compute the minimum grid size that would fit the entire map (including sectors)
 	var min_grid_size_x = visible_size.x / total_tiles_x
 	var min_grid_size_y = visible_size.y / total_tiles_y
@@ -206,7 +215,7 @@ func _on_map_scrolled(scroll_up: bool):
 	var old_scroll_h = scroll_view.scroll_horizontal
 	var old_scroll_v = scroll_view.scroll_vertical
 	# Apply the new zoom level to the map.
-	setup(game_map, grid_size)
+	redraw(grid_size)
 	# Adjust scrolling to keep the zoom centered on the mouse position.
 	var scale_factor = float(grid_size) / float(old_grid_size)
 	scroll_view.scroll_horizontal = int(

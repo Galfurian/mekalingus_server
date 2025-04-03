@@ -1,6 +1,25 @@
 extends Node
 
 # =============================================================================
+# CONSTANTS
+# =============================================================================
+
+const DAMAGE_TYPE_DESCRIPTIONS = {
+	Enums.DamageType.KINETIC: "Shield  -, Armor  +, Health  =",
+	Enums.DamageType.ENERGY: "Shield ++, Armor  -, Health  =",
+	Enums.DamageType.EXPLOSIVE: "Shield  -, Armor ++, Health ++",
+	Enums.DamageType.PLASMA: "Shield  +, Armor  +, Health  -",
+	Enums.DamageType.CORROSIVE: "Shield --, Armor ++, Health  +"
+}
+
+# =============================================================================
+# VARIABLES
+# =============================================================================
+
+var game_map: GameMap
+var entity: MapEntity
+
+# =============================================================================
 # COMPONENT REFERENCES
 # =============================================================================
 
@@ -10,14 +29,7 @@ extends Node
 @onready var item_info = $EntityInspector/ItemInspector/ScrollContainer/ItemInfo
 
 # =============================================================================
-# STATE
-# =============================================================================
-
-var game_map: GameMap
-var entity: MapEntity
-
-# =============================================================================
-# INITIALIZATION
+# INITIALIZATION and CLEANUP
 # =============================================================================
 
 
@@ -25,23 +37,14 @@ func setup(p_game_map: GameMap) -> void:
 	"""
 	Connects necessary signals and stores a reference to the game map.
 	"""
+	clear()
+	# Set the variables.
 	game_map = p_game_map
-
+	# Connect the signals.
 	if not game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
 		game_map.turn_manager.turn_ended.connect(_on_turn_ended)
-
 	if not item_list.item_selected.is_connected(_on_item_selected):
 		item_list.item_selected.connect(_on_item_selected)
-
-
-func _on_turn_ended(_turn_number: int):
-	# Called when the turn ends.
-	update_panel()
-
-
-# =============================================================================
-# CLEARING / RESETTING
-# =============================================================================
 
 
 func clear() -> void:
@@ -50,11 +53,18 @@ func clear() -> void:
 	"""
 	if game_map and game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
 		game_map.turn_manager.turn_ended.disconnect(_on_turn_ended)
+
 	entity = null
 	game_map = null
+
 	item_list.clear()
 	entity_info.clear()
 	item_inspector.visible = false
+
+
+func _on_turn_ended(_turn_number: int):
+	# Called when the turn ends.
+	update_panel()
 
 
 # =============================================================================
@@ -298,12 +308,3 @@ func _get_slot_color(slot: Enums.SlotType) -> Color:
 		Enums.SlotType.UTILITY: Color(1.0, 1.0, 0.4)  # Yellow
 	}
 	return slot_colors.get(slot, Color.WHITE)
-
-
-const DAMAGE_TYPE_DESCRIPTIONS = {
-	Enums.DamageType.KINETIC: "Shield  -, Armor  +, Health  =",
-	Enums.DamageType.ENERGY: "Shield ++, Armor  -, Health  =",
-	Enums.DamageType.EXPLOSIVE: "Shield  -, Armor ++, Health ++",
-	Enums.DamageType.PLASMA: "Shield  +, Armor  +, Health  -",
-	Enums.DamageType.CORROSIVE: "Shield --, Armor ++, Health  +"
-}

@@ -15,10 +15,12 @@ var selected_entity: MapEntity
 @onready var grid_container = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer
 @onready var grid_drawer = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/GridDrawer
 @onready var mek_drawer = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/MekDrawer
+@onready var time_of_day_overlay = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/TimeOfDayOverlay
 @onready var combat_log = $VBoxContainer/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
 @onready var info_panel = $VBoxContainer/HBoxContainer/InfoPanel
 @onready var log_panel = $VBoxContainer/LogPanel
 
+@onready var time_label = $VBoxContainer/HBoxContainer/GridMap/TimeLabel
 
 func _ready():
 	"""Initializes the map HUD."""
@@ -34,25 +36,29 @@ func setup(p_game_map: GameMap, p_grid_size: int = 50):
 	game_map = p_game_map
 	grid_size = p_grid_size
 	# Initialize all components with the chosen grid size
+	time_of_day_overlay.setup(p_game_map, grid_size, SECTOR_SIZE)
 	grid_container.setup(p_game_map, grid_size, SECTOR_SIZE)
 	grid_drawer.setup(p_game_map, grid_size, SECTOR_SIZE)
 	mek_drawer.setup(p_game_map, grid_size, SECTOR_SIZE)
 	info_panel.setup(p_game_map)
 	log_panel.setup(p_game_map)
 	# Connect signals once.
-	if game_map and not game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
-		game_map.turn_manager.turn_ended.connect(_on_turn_ended)
+	if game_map and not game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.on_turn_ended.connect(_on_turn_ended)
+	# Update the time of day based on the current turn.
+	_update_time_of_day()
 	# Center the view on the map.
 	zoom_out()
 
 
 func clear():
 	"""Clears the map HUD."""
-	if game_map and game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
-		game_map.turn_manager.turn_ended.disconnect(_on_turn_ended)
+	if game_map and game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.on_turn_ended.disconnect(_on_turn_ended)
 	game_map = null
 	selected_entity = null
 	# Clear the sub-components.
+	time_of_day_overlay.clear()
 	grid_container.clear()
 	grid_drawer.clear()
 	mek_drawer.clear()
@@ -67,6 +73,7 @@ func redraw(p_grid_size: int):
 	# Update the grid size.
 	grid_size = p_grid_size
 	# Re-setup all components with the new grid size.
+	time_of_day_overlay.setup(game_map, grid_size, SECTOR_SIZE)
 	grid_container.setup(game_map, grid_size, SECTOR_SIZE)
 	grid_drawer.setup(game_map, grid_size, SECTOR_SIZE)
 	mek_drawer.setup(game_map, grid_size, SECTOR_SIZE)
@@ -111,6 +118,18 @@ func _on_turn_ended(_turn_number: int):
 	# Called when the turn ends
 	if selected_entity:
 		center_on(selected_entity.position)
+	# Update the time of day based on the current turn.
+	_update_time_of_day()
+
+
+func _update_time_of_day() -> void:
+	# Get the current time of day from the game map.
+	var time_of_day = game_map.turn_manager.get_time_of_day()
+	# Convert to HH:MM style time (e.g., 0.25 = 06:00)
+	var hours = int(time_of_day * 24.0)
+	var minutes = int(int(time_of_day * 1440) % 60)
+	# Update the label
+	time_label.text = "%02d:%02d" % [hours, minutes]
 
 
 func _on_log_meta_clicked(meta: String) -> void:
@@ -199,7 +218,7 @@ func _on_map_scrolled(scroll_up: bool):
 	# Prevent grid from being too small.
 	var min_grid_size = max(4, min(min_grid_size_x, min_grid_size_y))
 	# Compute the maximum grid size for deep zoom in
-	var max_grid_size_x = visible_size.x / 5  # e.g., show only ~5 tiles max when zoomed in
+	var max_grid_size_x = visible_size.x / 5 # e.g., show only ~5 tiles max when zoomed in
 	var max_grid_size_y = visible_size.y / 5
 	var max_grid_size = min(max_grid_size_x, max_grid_size_y)
 	# Adjust the grid size within allowed range
@@ -208,7 +227,7 @@ func _on_map_scrolled(scroll_up: bool):
 	elif not scroll_up and grid_size > min_grid_size:
 		grid_size -= 2
 	else:
-		return  # No change needed
+		return # No change needed
 	# Get mouse position inside the ScrollContainer.
 	var mouse_pos = scroll_view.get_local_mouse_position()
 	# Store previous scroll positions.

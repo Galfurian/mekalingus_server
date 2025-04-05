@@ -41,8 +41,8 @@ func setup(p_game_map: GameMap) -> void:
 	# Set the variables.
 	game_map = p_game_map
 	# Connect the signals.
-	if not game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
-		game_map.turn_manager.turn_ended.connect(_on_turn_ended)
+	if not game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.on_turn_ended.connect(_on_turn_ended)
 	if not item_list.item_selected.is_connected(_on_item_selected):
 		item_list.item_selected.connect(_on_item_selected)
 
@@ -51,8 +51,8 @@ func clear() -> void:
 	"""
 	Clears all UI elements and disconnects signals.
 	"""
-	if game_map and game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
-		game_map.turn_manager.turn_ended.disconnect(_on_turn_ended)
+	if game_map and game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.on_turn_ended.disconnect(_on_turn_ended)
 
 	entity = null
 	game_map = null

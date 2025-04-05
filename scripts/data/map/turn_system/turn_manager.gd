@@ -9,9 +9,9 @@ extends Node
 # ====================================================================
 
 # Emitted when the turn is started.
-signal turn_started(turn_number: int)
+signal on_turn_started(turn_number: int)
 # Emitted when the turn is ended.
-signal turn_ended(turn_number: int)
+signal on_turn_ended(turn_number: int)
 
 # ===================================================================
 # PROPERTIES
@@ -58,6 +58,15 @@ func _init(p_game_map: GameMap, p_turn_interval: float = 1.0) -> void:
 	_is_active = false
 	_timer = 0.0
 	_turn_interval = p_turn_interval
+
+func get_time_of_day() -> float:
+	"""
+	Returns the current time of day based on the current turn.
+	"""
+	if not game_map:
+		return 0.0
+	# Calculate the time of day based on the current turn.
+	return (_current_turn % 48) / 48.0
 
 
 func get_current_turn() -> int:
@@ -125,7 +134,7 @@ func tick(delta: float) -> void:
 		# Reset the timer.
 		_timer = 0.0
 		# Emit the turn started signal.
-		turn_started.emit(_current_turn)
+		on_turn_started.emit(_current_turn)
 
 		# 1) Generate the NPCs order for the current turn.
 		_generate_npc_orders()
@@ -147,7 +156,7 @@ func tick(delta: float) -> void:
 		_erase_destroyed_units()
 
 		# Emit the turn ended signal.
-		turn_ended.emit(_current_turn)
+		on_turn_ended.emit(_current_turn)
 		# Increment the current turn.
 		_current_turn += 1
 
@@ -298,7 +307,6 @@ func _generate_npc_orders():
 	Generates both a utility and offensive action for an enemy unit.
 	"""
 	for unit: MapMek in game_map.npc_units.values():
-		print(unit)
 		# 1. Generate the use of utility modules.
 		queue_utility_module_order(ai_controller.schedule_utility_module_order(unit))
 		# 2. Generate the use of offensive modules.

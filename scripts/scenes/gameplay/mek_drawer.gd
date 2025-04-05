@@ -19,14 +19,14 @@ func setup(p_game_map: GameMap, p_grid_size: int, p_sector_size: int):
 	game_map = p_game_map
 	grid_size = p_grid_size
 	sector_size = p_sector_size
-	if not game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
-		game_map.turn_manager.turn_ended.connect(_on_turn_ended)
+	if not game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.on_turn_ended.connect(_on_turn_ended)
 	update_meks()
 
 
 func clear() -> void:
-	if game_map and game_map.turn_manager and game_map.turn_manager.turn_ended.is_connected(_on_turn_ended):
-		game_map.turn_manager.turn_ended.disconnect(_on_turn_ended)
+	if game_map and game_map.turn_manager and game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
+		game_map.turn_manager.on_turn_ended.disconnect(_on_turn_ended)
 
 	game_map = null
 	grid_size = 0

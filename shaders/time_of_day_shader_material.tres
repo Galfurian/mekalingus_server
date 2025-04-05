@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://lnfic5l3g0wf"]
+
+[ext_resource type="Shader" uid="uid://dfe32brqk0j03" path="res://shaders/time_of_day_shader.gdshader" id="1_vo683"]
+
+[resource]
+shader = ExtResource("1_vo683")
+shader_parameter/time_of_day = 0.2

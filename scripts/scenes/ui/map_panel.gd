@@ -19,7 +19,7 @@ func _ready() -> void:
 	GameServer.on_server_start.connect(_on_server_start)
 	GameServer.on_server_stop.connect(_on_server_stop)
 	map_start_stop.pressed.connect(_on_map_start_stop)
-	generate.pressed.connect(_on_generate)
+	generate.pressed.connect(_on_generate_map)
 	delete.pressed.connect(_on_delete)
 	save_map.pressed.connect(_on_save_map)
 	load_map.pressed.connect(_on_load_map)
@@ -49,43 +49,6 @@ func _on_server_stop():
 	map_biome.clear()
 	map_list.clear()
 	map_hud.clear()
-
-
-func _on_generate():
-	# Get the biome name.
-	var biome_name = map_biome.get_item_text(map_biome.get_selected_id())
-	# Get the actual biome object.
-	var biome = TemplateManager.get_biome(biome_name)
-	# Check if the biome is valid.
-	if biome:
-		# Generate a unique map UUID.
-		var map_uuid = GameServer.generate_uuid()
-		# Create a new GameMap object.
-		var game_map = GameMap.new(
-			map_uuid,
-			biome,
-			map_size.get_value(),
-			map_size.get_value(),
-			map_difficulty.get_selected_id()
-		)
-		# Generate the map.
-		game_map.generate_map()
-		# Save the map to the data manager.
-		DataManager.save_map(game_map)
-		# Add the map to the map list.
-		var index = map_list.add_item(game_map.map_uuid)
-		# Set the map metadata.
-		map_list.set_item_metadata(index, game_map)
-
-
-func _on_delete():
-	var index = _get_current_selected_map_index()
-	if index >= 0:
-		var game_map: GameMap = map_list.get_item_metadata(index)
-		if game_map:
-			DataManager.delete_map(game_map.map_uuid)
-			map_list.remove_item(index)
-			map_hud.clear()
 
 
 func _on_map_selected(index: int):
@@ -126,6 +89,35 @@ func _on_map_start_stop():
 			map_start_stop.text = "Stop"
 
 
+func _on_generate_map():
+	# Get the biome name.
+	var biome_name = map_biome.get_item_text(map_biome.get_selected_id())
+	# Get the actual biome object.
+	var biome = TemplateManager.get_biome(biome_name)
+	# Check if the biome is valid.
+	if biome:
+		# Generate a unique map UUID.
+		var map_uuid = GameServer.generate_uuid()
+		# Create a new GameMap object.
+		var game_map = GameMap.new(
+			map_uuid,
+			biome,
+			map_size.get_value(),
+			map_size.get_value(),
+			map_difficulty.get_selected_id()
+		)
+		# Generate the map.
+		game_map.generate_map()
+		# Save the map to the data manager.
+		DataManager.save_map(game_map)
+		# Add the map to the data manager.
+		DataManager.add_map(game_map)
+		# Add the map to the map list.
+		var index = map_list.add_item(game_map.map_uuid)
+		# Set the map metadata.
+		map_list.set_item_metadata(index, game_map)
+
+
 func _on_save_map():
 	var game_map: GameMap = _get_current_selected_map()
 	if game_map:
@@ -156,6 +148,16 @@ func _on_load_map():
 			else:
 				map_list.remove_item(index)
 	return null
+
+
+func _on_delete():
+	var index = _get_current_selected_map_index()
+	if index >= 0:
+		var game_map: GameMap = map_list.get_item_metadata(index)
+		if game_map:
+			DataManager.delete_map(game_map.map_uuid)
+			map_list.remove_item(index)
+			map_hud.clear()
 
 
 func _input(_event):

@@ -10,6 +10,17 @@ func _init(p_source: MapMek, p_target: MapMek, p_equipped_module: EquippedModule
 	super(p_source, p_target, p_equipped_module)
 
 
+func _add_utility_log(game_map: GameMap, message: String) -> void:
+	if is_instance_valid(game_map):
+		game_map.combat_logger.add_log(Enums.LogType.SUPPORT, message)
+		return
+
+
+func _format_pos_tag(pos: Vector2i) -> String:
+	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
+
+
+
 # =============================================================================
 # OVERRIDE FUNCTIONS
 # =============================================================================
@@ -28,11 +39,7 @@ func execute(game_map: GameMap) -> bool:
 	# Start cooldown if necessary.
 	if equipped_module.module.cooldown > 0:
 		source_mek.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
-	game_map.add_log(
-		Enums.LogType.SYSTEM,
-		"%s used %s" % [source_mek.get_chat_tag(), equipped_module.get_chat_tag()]
-	)
-	game_map.increase_indent()
+	_add_utility_log(game_map, "%s used %s" % [source_mek.get_chat_tag(), equipped_module.get_chat_tag()])
 	for effect in equipped_module.module.effects:
 		if effect.is_damage():
 			_apply_damage_effect(game_map, effect)
@@ -47,13 +54,9 @@ func execute(game_map: GameMap) -> bool:
 		elif effect.is_modifier():
 			_apply_modifier_effect(game_map, effect)
 		else:
-			game_map.add_log(
-				Enums.LogType.SYSTEM,
-				"Effect %s not yet implemented" % Enums.EffectType.keys()[effect.type]
-			)
+			_add_utility_log(game_map, "Effect %s not yet implemented" % Enums.EffectType.keys()[effect.type])
 		if source_mek.is_dead() or target_mek.is_dead():
 			break
-	game_map.decrease_indent()
 	return true
 
 

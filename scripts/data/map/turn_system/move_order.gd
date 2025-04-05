@@ -21,6 +21,16 @@ func _init(p_source: MapEntity, p_destination: Vector2i) -> void:
 	destination = p_destination
 
 
+func _add_log(game_map: GameMap, message: String) -> void:
+	if is_instance_valid(game_map):
+		game_map.combat_logger.add_log(Enums.LogType.MOVEMENT, message)
+		return
+
+
+func _format_pos_tag(pos: Vector2i) -> String:
+	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
+
+
 # =============================================================================
 # OVERRIDE FUNCTIONS
 # =============================================================================
@@ -37,13 +47,7 @@ func execute(game_map: GameMap) -> bool:
 
 	if path.is_empty() or path.size() <= 1:
 		# No movement possible.
-		game_map.add_log(
-			Enums.LogType.MOVEMENT,
-			(
-				"%s could not move to %s (no valid path)"
-				% [mek.get_chat_tag(), GameMap.format_pos_tag(destination)]
-			)
-		)
+		_add_log(game_map, "%s could not move to %s (no valid path)" % [mek.get_chat_tag(), _format_pos_tag(destination)])
 		return false
 
 	var current_tile = start_pos
@@ -69,18 +73,11 @@ func execute(game_map: GameMap) -> bool:
 	# Update position.
 	mek.tiles_moved_last_turn = start_pos.distance_to(current_tile)
 
-	game_map.add_log(
-		Enums.LogType.MOVEMENT,
-		(
-			"%s moved from %s to %s (%d tiles)"
-			% [
-				mek.get_chat_tag(),
-				GameMap.format_pos_tag(start_pos),
-				GameMap.format_pos_tag(current_tile),
-				mek.tiles_moved_last_turn
-			]
-		)
-	)
+	_add_log(game_map, "%s moved from %s to %s (%d tiles)" % [
+		mek.get_chat_tag(),
+		_format_pos_tag(start_pos),
+		_format_pos_tag(current_tile),
+		mek.tiles_moved_last_turn])
 
 	source.position = current_tile
 	return true

@@ -4,9 +4,6 @@
 class_name GameMap
 extends Node
 
-# Emits whenever a new log entry is added to the log.
-signal on_log_added(log_entry: LogEntry)
-
 # =============================================================================
 # PROPERTIES
 # =============================================================================
@@ -26,7 +23,7 @@ var map_height: int
 # The map difficulty level.
 var map_difficulty: int
 # The type of game mode.
-var combat_rules: CombatRules
+var combat_rules: CombatRules = CombatRules.new()
 # Map terrain data, an array of integers that identify the type of terrain.
 var terrain_data: Array
 # Map biome.
@@ -45,15 +42,13 @@ var npc_units: Dictionary
 # Stores all active Player units by UUID.
 var player_units: Dictionary
 # The combat log.
-var combat_logs: Array[LogEntry]
+var combat_logger: MapLogger = MapLogger.new()
 # The chat log.
-var chat_logs: Array[LogEntry]
+var chat_logger: MapLogger = MapLogger.new()
 # AStar2D graph.
-var astar: AStar2D
-# The current log indentation level.
-var log_indent_level = 0
+var astar: AStar2D = AStar2D.new()
 # The turn manager.
-var turn_manager: TurnManager
+var turn_manager: TurnManager = TurnManager.new(self)
 
 # =============================================================================
 # GENERIC FUNCTIONS
@@ -73,19 +68,9 @@ func _init(
 	map_height = p_map_height
 	map_biome = p_map_biome
 	map_difficulty = p_map_difficulty
-	combat_rules = CombatRules.new(p_game_mode)
-	# Instantiate the AStar2D graph.
-	astar = AStar2D.new()
-	# Instantiate the turn manager.
-	turn_manager = TurnManager.new(self)
-
-
-func _finalize():
-	print("GameMap is being freed.")
-
-
-func _exit_tree():
-	print("GameMap is exiting the scene tree.")
+	combat_rules.set_game_mode(p_game_mode)
+	combat_logger.set_combat_preset()
+	chat_logger.set_chat_preset()
 
 
 func generate_map() -> void:
@@ -110,11 +95,10 @@ func clear() -> void:
 	npc_units.clear()
 	player_units.clear()
 	# Clear the logs.
-	combat_logs.clear()
-	chat_logs.clear()
+	combat_logger.clear()
+	chat_logger.clear()
 	# Clear the turn manager.
 	turn_manager.clear()
-	turn_manager.queue_free()
 
 
 # =============================================================================
@@ -421,42 +405,6 @@ func remove_entity(uuid: String) -> MapMek:
 		npc_units.erase(uuid)
 	return entity
 
-
-# =============================================================================
-# LOGS
-# =============================================================================
-
-
-func increase_indent() -> void:
-	log_indent_level += 1
-
-
-func decrease_indent() -> void:
-	log_indent_level = max(log_indent_level - 1, 0)
-
-
-func get_indent() -> String:
-	var indentation: String = ""
-	for i in range(log_indent_level):
-		indentation += "    "
-	return indentation
-
-
-func add_log(log_type: Enums.LogType, message: String, sender: String = "") -> void:
-	var log_entry = LogEntry.new(log_type, get_indent() + message, sender)
-	if log_type == Enums.LogType.CHAT:
-		chat_logs.append(log_entry)
-	else:
-		combat_logs.append(log_entry)
-	on_log_added.emit(log_entry)
-
-
-func get_logs_by_type(log_type: Enums.LogType) -> Array[LogEntry]:
-	if log_type == Enums.LogType.CHAT:
-		return chat_logs
-	return combat_logs.filter(func(log_entry): return log_entry.log_type == log_type)
-
-
 # =============================================================================
 # ENEMY SPAWNING
 # =============================================================================
@@ -514,22 +462,6 @@ func spawn_enemies_on_map(difficulty: int) -> void:
 # FORMATTING
 # =============================================================================
 
-static func format_item_tag(mek: Mek, item: Item, module: ItemModule) -> String:
-	if not mek:
-		return "<mek-null>"
-	if not item:
-		return "<item-null>"
-	if not item:
-		return "<module-null>"
-	return "[url=item:%s:%s]%s[/url]" % [mek.uuid, item.uuid, module.module_name]
-
-
-static func format_item_pair_tag(mek: Mek, item_module_pair: Dictionary) -> String:
-	return format_item_tag(
-		mek, item_module_pair.get("item", null), item_module_pair.get("module", null)
-	)
-
-
 static func format_pos_tag(pos: Vector2i) -> String:
 	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
 
@@ -561,8 +493,8 @@ static func from_dict(data: Dictionary) -> GameMap:
 	map.npc_units = Utils.deserialize_dict_of_objects(
 		data["npc_units"], func(mek_data): return MapMek.from_dict(mek_data)
 	)
-	map.combat_logs = LogEntry.decompress_logs_from_base64(data.get("combat_logs", {}))
-	map.chat_logs = LogEntry.decompress_logs_from_base64(data.get("chat_logs", {}))
+	map.combat_logger = MapLogger.from_dict(data.get("combat_logger", {}))
+	map.chat_logger = MapLogger.from_dict(data.get("chat_logger", {}))
 
 	# Update the AStar graph.
 	map.update_astar()
@@ -580,6 +512,6 @@ func to_dict() -> Dictionary:
 		"map_difficulty": map_difficulty,
 		"terrain_data": Utils.serialize_matrix(terrain_data, map_width, map_height),
 		"npc_units": Utils.serialize_dict_of_objects(npc_units),
-		"combat_logs": LogEntry.compress_logs_to_base64(combat_logs),
-		"chat_logs": LogEntry.compress_logs_to_base64(chat_logs)
+		"combat_logger": combat_logger.to_dict(),
+		"chat_logger": chat_logger.to_dict(),
 	}

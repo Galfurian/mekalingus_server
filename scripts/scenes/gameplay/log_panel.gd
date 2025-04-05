@@ -32,26 +32,34 @@ func _ready():
 
 func setup(p_game_map: GameMap):
 	clear()
+	# Set the game_map reference.
 	game_map = p_game_map
-	if game_map and not game_map.on_log_added.is_connected(_on_log_added):
-		game_map.on_log_added.connect(_on_log_added)
-	for log_entry in game_map.combat_logs:
-		add_log_entry(log_entry)
-	for log_entry in game_map.chat_logs:
-		add_chat_entry(log_entry)
+	# Connect signals to log messages.
+	if game_map and not game_map.chat_logger.on_log_added.is_connected(_on_log_added_chat):
+		game_map.chat_logger.on_log_added.connect(_on_log_added_chat)
+	if game_map and not game_map.combat_logger.on_log_added.is_connected(_on_log_added_combat):
+		game_map.combat_logger.on_log_added.connect(_on_log_added_combat)
+	# Load existing logs.
+	for log_entry in game_map.combat_logger.get_logs():
+		add_log_entry_combat(log_entry)
+	for log_entry in game_map.chat_logger.get_logs():
+		add_log_entry_chat(log_entry)
 
 
 func clear():
-	if game_map and game_map.on_log_added.is_connected(_on_log_added):
-		game_map.on_log_added.disconnect(_on_log_added)
-
+	# Disconnect signals to avoid memory leaks.
+	if game_map and game_map.chat_logger.on_log_added.is_connected(_on_log_added_chat):
+		game_map.chat_logger.on_log_added.disconnect(_on_log_added_chat)
+	if game_map and game_map.combat_logger.on_log_added.is_connected(_on_log_added_combat):
+		game_map.combat_logger.on_log_added.disconnect(_on_log_added_combat)
+	# Unset the game_map reference.
 	game_map = null
-
+	# Clear the logs.
 	combat_log.clear()
 	chat_log.clear()
 
 
-func add_log_entry(entry: LogEntry):
+func add_log_entry_combat(entry: LogEntry):
 	combat_log.append_text("[" + entry.timestamp + "] " + entry.message + "\n")
 
 
@@ -60,7 +68,7 @@ func add_log_message(entry: String):
 	combat_log.append_text("[" + timestamp + "] " + entry + "\n")
 
 
-func add_chat_entry(entry: LogEntry):
+func add_log_entry_chat(entry: LogEntry):
 	chat_log.append_text("[" + entry.timestamp + "] " + entry.sender + ": " + entry.message + "\n")
 
 
@@ -74,11 +82,12 @@ func add_chat_message(message: String):
 # =============================================================================
 
 
-func _on_log_added(entry: LogEntry):
-	if entry.log_type == Enums.LogType.CHAT:
-		add_chat_entry(entry)
-	else:
-		add_log_entry(entry)
+func _on_log_added_combat(entry: LogEntry):
+	add_log_entry_combat(entry)
+
+
+func _on_log_added_chat(entry: LogEntry):
+	add_log_entry_chat(entry)
 
 
 func _on_chat_input_submitted(message: String):
@@ -87,7 +96,7 @@ func _on_chat_input_submitted(message: String):
 		return
 	if not message.strip_edges().is_empty():
 		if game_map:
-			game_map.add_log(Enums.LogType.CHAT, message, "System")
+			game_map.chat_logger.add_log(Enums.LogType.CHAT, message, "System")
 		chat_input.clear()
 
 

@@ -123,6 +123,9 @@ func _on_turn_ended(_turn_number: int):
 
 
 func _update_time_of_day() -> void:
+	if not game_map:
+		return
+	print("Update time of day based on map: ", game_map.map_uuid)
 	# Get the current time of day from the game map.
 	var time_of_day = game_map.turn_manager.get_time_of_day()
 	# Convert to HH:MM style time (e.g., 0.25 = 06:00)
@@ -188,17 +191,6 @@ func _on_cell_selected(cell_position: Vector2i):
 		center_on(entity.position)
 		info_panel.set_entity(entity)
 		grid_drawer.set_selected_entity(entity)
-	game_map.add_log(
-		Enums.LogType.SYSTEM,
-		(
-			"Cell(position: %s, %s, walkable: %s)"
-			% [
-				str(cell_position),
-				str(game_map.map_biome.get_level(game_map.get_tile_id(cell_position))),
-				str(game_map.is_walkable(cell_position))
-			]
-		)
-	)
 
 
 func _on_map_scrolled(scroll_up: bool):

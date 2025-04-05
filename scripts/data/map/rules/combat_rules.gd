@@ -8,6 +8,10 @@ func _init(mode: Enums.GameMode = Enums.GameMode.FFA) -> void:
 	# Initialize the game mode.
 	game_mode = mode
 
+func set_game_mode(mode: Enums.GameMode) -> void:
+	# Set the game mode.
+	game_mode = mode
+
 func can_attack(attacker: EntityOwner, defender: EntityOwner) -> bool:
 	# Don’t allow attacking self
 	if attacker == defender:

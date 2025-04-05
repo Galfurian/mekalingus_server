@@ -283,18 +283,11 @@ func _update_time_based_effects():
 		# Process time-based effects like DOT, HOT, buffs.
 		var dot_result = unit.mek.take_dot_damage()
 		if dot_result.total > 0:
-			game_map.add_log(
-				Enums.LogType.ATTACK,
-				(
-					"%s suffers DOT -> %d shield, %d armor, %d health"
-					% [
-						unit.mek.get_chat_tag(),
-						dot_result.shield,
-						dot_result.armor,
-						dot_result.health
-					]
-				)
-			)
+			game_map.combat_logger.add_log(Enums.LogType.ATTACK, "%s suffers DOT -> %d shield, %d armor, %d health" % [
+				unit.mek.get_chat_tag(),
+				dot_result.shield,
+				dot_result.armor,
+				dot_result.health])
 
 
 # =============================================================================

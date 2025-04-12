@@ -5,6 +5,13 @@ class_name TurnManager
 extends Node
 
 # ====================================================================
+# CONSTANTS
+# ====================================================================
+
+# The maximum number of turns in a day.
+const TURNS_PER_DAY: int = 48
+
+# ====================================================================
 # SIGNALS
 # ====================================================================
 
@@ -19,15 +26,13 @@ signal on_turn_ended(turn_number: int)
 
 # The game map associated with this turn manager.
 var game_map: GameMap
-# The orders for offensive modules.
-var offensive_module_orders: Dictionary[String, UseOffensiveModuleOrder]
-# The orders for utility modules.
-var utility_module_orders: Dictionary[String, UseUtilityModuleOrder]
-# The orders for movement.
-var move_orders: Dictionary[String, MoveOrder]
-# The AI controller for managing enemy actions.
-var ai_controller: AIController
 
+# The orders for offensive modules.
+var _offensive_module_orders: Dictionary[String, UseOffensiveModuleOrder]
+# The orders for utility modules.
+var _utility_module_orders: Dictionary[String, UseUtilityModuleOrder]
+# The orders for movement.
+var _move_orders: Dictionary[String, MoveOrder]
 # The current turn number.
 var _current_turn: int
 # Controls the execute of the turn manager.
@@ -46,15 +51,14 @@ func _init(p_game_map: GameMap, p_turn_interval: float = 1.0) -> void:
 	"""
 	Initialize the turn manager with a game map.
 	"""
-	# Initialize the game map and other properties.
+	# Initialize the game map.
 	game_map = p_game_map
-	offensive_module_orders = {}
-	utility_module_orders = {}
-	move_orders = {}
-	ai_controller = AIController.new(game_map)
-
+	
 	# Initialize the internal state.
-	_current_turn = 1
+	_offensive_module_orders = {}
+	_utility_module_orders = {}
+	_move_orders = {}
+	_current_turn = int(TURNS_PER_DAY / 2.0)
 	_is_active = false
 	_timer = 0.0
 	_turn_interval = p_turn_interval
@@ -66,7 +70,7 @@ func get_time_of_day() -> float:
 	if not game_map:
 		return 0.0
 	# Calculate the time of day based on the current turn.
-	return (_current_turn % 48) / 48.0
+	return (_current_turn % TURNS_PER_DAY) / float(TURNS_PER_DAY)
 
 
 func get_current_turn() -> int:
@@ -87,13 +91,9 @@ func clear() -> void:
 	"""
 	Clears the turn manager state.
 	"""
-	offensive_module_orders.clear()
-	utility_module_orders.clear()
-	move_orders.clear()
-	_current_turn = 1
-	if ai_controller:
-		ai_controller.queue_free()
-		ai_controller = null
+	_offensive_module_orders.clear()
+	_utility_module_orders.clear()
+	_move_orders.clear()
 	_current_turn = 1
 	_is_active = false
 	_timer = 0.0
@@ -105,7 +105,6 @@ func start() -> void:
 	Starts the turn manager.
 	"""
 	_is_active = true
-	_current_turn = 1
 	_timer = 0.0
 
 
@@ -114,7 +113,6 @@ func stop() -> void:
 	Stops the turn manager.
 	"""
 	_is_active = false
-	_current_turn = 1
 	_timer = 0.0
 
 
@@ -194,12 +192,12 @@ func _erase_destroyed_units() -> void:
 	"""
 	# Find all the orders that has the dead units and remove them.
 	Utils.erase(
-		offensive_module_orders, Utils.filter(offensive_module_orders, _filter_order_with_dead_mek)
+		_offensive_module_orders, Utils.filter(_offensive_module_orders, _filter_order_with_dead_mek)
 	)
 	Utils.erase(
-		utility_module_orders, Utils.filter(utility_module_orders, _filter_order_with_dead_mek)
+		_utility_module_orders, Utils.filter(_utility_module_orders, _filter_order_with_dead_mek)
 	)
-	Utils.erase(move_orders, Utils.filter(move_orders, _filter_order_with_dead_mek))
+	Utils.erase(_move_orders, Utils.filter(_move_orders, _filter_order_with_dead_mek))
 	# Erase the dead units from the game map.
 	Utils.erase(game_map.player_units, Utils.filter(game_map.player_units, _filter_dead_unit))
 	Utils.erase(game_map.npc_units, Utils.filter(game_map.npc_units, _filter_dead_unit))
@@ -210,7 +208,7 @@ func queue_offensive_module_orders(order: UseOffensiveModuleOrder):
 	Queues an offensive module activation order, replacing any existing one for the unit.
 	"""
 	if order:
-		offensive_module_orders[order.source.mek.uuid] = order
+		_offensive_module_orders[order.source.mek.uuid] = order
 
 
 func queue_utility_module_order(order: UseUtilityModuleOrder):
@@ -218,7 +216,7 @@ func queue_utility_module_order(order: UseUtilityModuleOrder):
 	Queues a module activation order, replacing any existing one for the unit.
 	"""
 	if order:
-		utility_module_orders[order.source.mek.uuid] = order
+		_utility_module_orders[order.source.mek.uuid] = order
 
 
 func queue_move_order(order: MoveOrder):
@@ -226,7 +224,7 @@ func queue_move_order(order: MoveOrder):
 	Queues a movement order, replacing any existing one for the unit.
 	"""
 	if order:
-		move_orders[order.source.mek.uuid] = order
+		_move_orders[order.source.mek.uuid] = order
 
 
 func _execute_offensive_module_orders() -> void:
@@ -234,18 +232,18 @@ func _execute_offensive_module_orders() -> void:
 	Executes all queued offensive module orders.
 	"""
 	# Execute the offensive module orders.
-	for order in offensive_module_orders.values():
+	for order in _offensive_module_orders.values():
 		order.execute(game_map)
-	offensive_module_orders.clear()
+	_offensive_module_orders.clear()
 
 
 func _execute_utility_module_orders() -> void:
 	"""
 	Executes all queued utility module orders.
 	"""
-	for order in utility_module_orders.values():
+	for order in _utility_module_orders.values():
 		order.execute(game_map)
-	utility_module_orders.clear()
+	_utility_module_orders.clear()
 
 
 func _reset_movement_tracking() -> void:
@@ -263,9 +261,9 @@ func _execute_move_orders() -> void:
 	Executes all queued movement orders.
 	"""
 	# Then, execute the orders.
-	for order in move_orders.values():
+	for order in _move_orders.values():
 		order.execute(game_map)
-	move_orders.clear()
+	_move_orders.clear()
 
 
 func _regenerate_units() -> void:
@@ -305,9 +303,9 @@ func _generate_npc_orders():
 	"""
 	for unit: MapMek in game_map.npc_units.values():
 		# Generate or reuse the current plan.
-		ai_controller.plan_for_unit(unit)
+		game_map.ai_controller.plan_for_unit(unit)
 		# Generate the next order based on the current plan.
-		var order: Order = ai_controller.generate_order_for_unit(unit)
+		var order: Order = game_map.ai_controller.generate_order_for_unit(unit)
 		# Add the order to the queue.
 		if is_instance_of(order, UseUtilityModuleOrder):
 			queue_utility_module_order(order)

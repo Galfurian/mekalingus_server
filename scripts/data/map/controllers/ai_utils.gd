@@ -48,6 +48,8 @@ func evaluate_utility_effect_priority(target: MapMek, effect: ItemEffect) -> int
 		Enums.EffectType.COOLDOWN_MODIFIER:
 			priority += 4
 		# Regeneration effects (Lower than direct repair but useful)
+		Enums.EffectType.HEALTH_REGEN:
+			priority += 5 if target.mek.health < target.mek.max_health * 0.3 else 3
 		Enums.EffectType.SHIELD_REGEN:
 			priority += 5 if target.mek.shield < target.mek.max_shield * 0.3 else 3
 		Enums.EffectType.ARMOR_REGEN:
@@ -124,7 +126,7 @@ func evaluate_offensive_effect_priority(target: MapMek, effect: ItemEffect) -> i
 		Enums.EffectType.SPEED_MODIFIER:
 			if effect.amount < 0: priority += clamp(abs(effect.amount), 4, 16)
 
-		Enums.EffectType.SHIELD_REGEN, Enums.EffectType.ARMOR_REGEN, Enums.EffectType.POWER_REGEN:
+		Enums.EffectType.HEALTH_REGEN, Enums.EffectType.SHIELD_REGEN, Enums.EffectType.ARMOR_REGEN, Enums.EffectType.POWER_REGEN:
 			if effect.amount < 0: priority += clamp(abs(effect.amount), 3, 12)
 
 		Enums.EffectType.DAMAGE_REDUCTION_ALL:
@@ -407,10 +409,12 @@ func get_threat_level(
 	var threat_score: float = 0.0
 	# Get all enemy units in range of the tile.
 	for enemy in get_enemies_in_range(game_map, source, 9999):
+		# Get the range modifier for the enemy unit.
+		var range_modifier = enemy.mek.range_modifier
 		# Check if any offensive module can reach this tile.
 		for equipped_module in find_matching_modules(enemy.mek, true, false, false):
 			# Get the module range.
-			var module_range = equipped_module.module.module_range
+			var module_range = equipped_module.module.module_range + range_modifier
 			# Get the distance to the tile.
 			var distance = tile.distance_to(enemy.position)
 			# Check if the tile is within the module range.
@@ -472,6 +476,33 @@ func get_most_vulnerable_enemy(
 	return weakest
 
 
+func find_furthest_progress_along_path(
+	game_map: GameMap,
+	start: Vector2i,
+	target: Vector2i,
+	max_movement: int
+) -> Vector2i:
+	"""
+	Returns the farthest tile along the path toward the target that the unit
+	can safely move to this turn (based on movement cost and occupancy).
+	"""
+	var path = get_shortest_path(game_map, start, target)
+	if path.size() <= 1:
+		return start
+	var total_cost = 0.0
+	var fallback_tile = start
+	for i in range(1, path.size()):
+		var tile = path[i]
+		if game_map.is_occupied(tile):
+			break
+		var cost = game_map.get_movement_cost(tile)
+		if cost < 0 or total_cost + cost > max_movement:
+			break
+		total_cost += cost
+		fallback_tile = tile
+	return fallback_tile
+
+
 func find_closest_reachable_tile(
 	game_map: GameMap,
 	source: MapMek,
@@ -480,32 +511,29 @@ func find_closest_reachable_tile(
 	max_range: int,
 	max_movement: int
 ) -> Vector2i:
-	"""
-	Finds the closest reachable tile from the source's position that is within
-	the specified range [min_range, max_range] of the target position.
-
-	Returns the first valid tile found, or the source's current position if none is valid.
-	"""
+	# This will keep track of the best tile.
 	var best_tile: Vector2i = Vector2i.ZERO
+	# This will keep track of the best distance to the target (lower is better).
 	var shortest_distance: float = INF
-
-	# Get all tiles we can reach this turn.
+	# Check for ideal case: reachable and in range.
 	for tile in get_reachable_tiles(game_map, source.position, max_movement):
+		# Skip occupied tiles.
 		if game_map.is_occupied(tile):
 			continue
-
-		var dist = tile.distance_to(target.position)
-
-		# Must be within module usable range
-		if dist < min_range or dist > max_range:
+		# Get the distance to the target.
+		var distance = tile.distance_to(target.position)
+		# Check if the tile is within the specified range.
+		if distance < min_range or distance > max_range:
 			continue
-
-		# Choose the tile closest to the target
-		if dist < shortest_distance:
+		# Check if the tile is closer than the best one found so far.
+		if distance < shortest_distance:
 			best_tile = tile
-			shortest_distance = dist
-
-	return best_tile
+			shortest_distance = distance
+	# If we found a valid tile in range, use it.
+	if best_tile != Vector2i.ZERO:
+		return best_tile
+	# No valid tile in range — fallback toward the target.
+	return find_furthest_progress_along_path(game_map, source.position, target.position, max_movement)
 
 
 func find_best_attack_tile(
@@ -516,48 +544,40 @@ func find_best_attack_tile(
 	max_range: int,
 	max_movement: int
 ) -> Vector2i:
-	"""
-	Finds the best tile within weapon range to attack the target from, considering:
-	- Movement range
-	- Height advantage
-	- Distance to target
-	"""
-	var start_pos = source.position
-	var target_pos = target.position
+	# This will keep track of the best tile.
 	var best_tile: Vector2i = Vector2i.ZERO
+	# This will keep track of the best score (higher is better).
 	var best_score: float = - INF
-
-	var reachable_tiles: Array[Vector2i] = get_reachable_tiles(game_map, start_pos, max_movement)
-
-	for tile in reachable_tiles:
-		var distance = tile.distance_to(target_pos)
-
+	# Check for the tile.
+	for tile in get_reachable_tiles(game_map, source.position, max_movement):
 		# Skip occupied tiles.
 		if game_map.is_occupied(tile):
 			continue
-
-		# Skip tiles outside weapon range.
+		# Get the distance to the target.
+		var distance = tile.distance_to(target.position)
+		# Check if the tile is within the specified range.
 		if distance < min_range or distance > max_range:
 			continue
-
-		# Compute movement cost.
-		var move_cost = get_path_cost(game_map, get_shortest_path(game_map, start_pos, tile))
-
-		# Elevation difference (favor height advantage).
-		var height_diff = game_map.get_tile_height(tile) - game_map.get_tile_height(target_pos)
-
-		# Ideal range is midpoint between min and max.
+		# Get the movement cost to the tile.
+		var move_cost = get_path_cost(game_map, get_shortest_path(game_map, source.position, tile))
+		# Get the height difference between the tile and the target.
+		var height_difference = game_map.get_tile_height(tile) - game_map.get_tile_height(target.position)
+		# Calculate the ideal range.
 		var ideal_range = (min_range + max_range) / 2.0
+		# Calculate the range penalty.
 		var range_penalty = abs(distance - ideal_range)
-
-		# Score = cheap movement, ideal range, higher elevation.
-		var score = - move_cost - range_penalty + height_diff * 2.0
-
+		# Calculate the score.
+		var score = - move_cost - range_penalty + height_difference * 2.0
+		# Check if the score is better than the best one found so far.
 		if score > best_score:
 			best_score = score
 			best_tile = tile
+	# If we found a valid tile in range, use it.
+	if best_tile != Vector2i.ZERO:
+		return best_tile
+	# No valid tile in range — fallback toward the target.
+	return find_furthest_progress_along_path(game_map, source.position, target.position, max_movement)
 
-	return best_tile
 
 func find_random_reachable_tile(
 	game_map: GameMap,

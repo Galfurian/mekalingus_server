@@ -22,9 +22,9 @@ var template: MekTemplate
 # =====================================
 
 # List of active effects.
-var active_effect_manager: ActiveEffectManager = ActiveEffectManager.new()
+var active_effect_manager: ActiveEffectManager = ActiveEffectManager.new(self)
 # Manages module cooldowns.
-var cooldown_manager: CooldownManager = CooldownManager.new()
+var cooldown_manager: CooldownManager = CooldownManager.new(self)
 
 # =====================================
 # DYNAMIC VALUES
@@ -88,63 +88,59 @@ static func compare_meks(a: Mek, b: Mek) -> bool:
 
 
 func is_dead() -> bool:
-	"""Returns true if the Mek has 0 or less health."""
+	"""
+	Returns true if the Mek has 0 or less health.
+	"""
 	return health <= 0
 
 
-func get_usable_weapon_range() -> Dictionary:
+func is_alive() -> bool:
 	"""
-	Returns the minimum and maximum usable weapon range for the Mek,
-	excluding passive or unavailable modules.
+	Returns true if the Mek has more than 0 health.
 	"""
-	var min_range = null
-	var max_range = null
-	for item in items:
-		# Skip utility items.
-		if item.template.slot == Enums.SlotType.UTILITY:
-			continue
-		for module in item.template.modules:
-			if module.passive:
-				continue
-			if cooldown_manager.is_on_cooldown(item, module):
-				continue
-			if power < module.power_on_use:
-				continue
-			if min_range == null or module.module_range < min_range:
-				min_range = module.module_range
-			if max_range == null or module.module_range > max_range:
-				max_range = module.module_range
-	return {
-		"min": min_range if min_range != null else 0, "max": max_range if max_range != null else 0
-	}
+	return health > 0
 
 
 func restore_health(amount: int) -> int:
+	"""
+	Restores health to the Mek, ensuring it does not exceed the maximum health.
+	"""
 	var before = health
 	health = min(health + amount, max_health)
 	return health - before
 
 
-func restore_armor(amount: int) -> int:
-	var before = armor
-	armor = min(armor + amount, max_armor)
-	return armor - before
-
-
 func restore_shield(amount: int) -> int:
+	"""
+	Restores shield to the Mek, ensuring it does not exceed the maximum shield.
+	"""
 	var before = shield
 	shield = min(shield + amount, max_shield)
 	return shield - before
 
 
+func restore_armor(amount: int) -> int:
+	"""
+	Restores armor to the Mek, ensuring it does not exceed the maximum armor.
+	"""
+	var before = armor
+	armor = min(armor + amount, max_armor)
+	return armor - before
+
+
 func restore_power(amount: int) -> int:
+	"""
+	Restores power to the Mek, ensuring it does not exceed the maximum power.
+	"""
 	var before = power
 	power = min(power + amount, max_power)
 	return power - before
 
 
 func regenerate():
-	"""Regenerates power, armor, and shield up to their maximum values."""
+	"""
+	Regenerates power, armor, and shield up to their maximum values.
+	"""
 	restore_health(health_generation)
 	restore_armor(armor_generation)
 	restore_shield(shield_generation)
@@ -152,7 +148,9 @@ func regenerate():
 
 
 func take_damage_from_effect(effect: ItemEffect) -> Dictionary:
-	"""Applies damage from a given effect, using resistances and damage-type-specific strengths/weaknesses."""
+	"""
+	Applies damage from a given effect, using resistances and damage-type-specific strengths/weaknesses.
+	"""
 	var result = {
 		"shield": 0,
 		"armor": 0,
@@ -226,7 +224,9 @@ func take_damage_from_effect(effect: ItemEffect) -> Dictionary:
 
 
 func take_dot_damage() -> Dictionary:
-	"""Applies all active DOT effects using resistances and returns a breakdown."""
+	"""
+	Applies all active DOT effects using resistances and returns a breakdown.
+	"""
 	var total_damage = {"shield": 0, "armor": 0, "health": 0, "total": 0}
 	for dot in active_effect_manager.get_dot_effects():
 		var damage = take_damage_from_effect(dot.effect)
@@ -238,7 +238,9 @@ func take_dot_damage() -> Dictionary:
 
 
 func repair_from_effect(effect: ItemEffect) -> Dictionary:
-	"""Applies a repair effect and returns a dictionary with the type and amount restored."""
+	"""
+	Applies a repair effect and returns a dictionary with the type and amount restored.
+	"""
 	var restored = 0
 	var stat = ""
 	match effect.type:
@@ -257,9 +259,13 @@ func repair_from_effect(effect: ItemEffect) -> Dictionary:
 
 
 func apply_regen_effects():
-	"""Applies all passive regeneration or buff-over-time effects."""
+	"""
+	Applies all passive regeneration or buff-over-time effects.
+	"""
 	for effect in active_effect_manager.get_regen_effects():
 		match effect.effect.type:
+			Enums.EffectType.HEALTH_REGEN:
+				restore_health(effect.effect.amount)
 			Enums.EffectType.SHIELD_REGEN:
 				restore_shield(effect.effect.amount)
 			Enums.EffectType.ARMOR_REGEN:
@@ -297,63 +303,11 @@ func clear_active_effects() -> void:
 # =============================================================================
 
 
-func _toggle_passive_effect_modifier(effect: ItemEffect, enable: bool):
-	"""Applies or removes a passive or active effect's stat modifier."""
-	var delta = effect.amount if enable else -effect.amount
-	match effect.type:
-		Enums.EffectType.HEALTH_MODIFIER:
-			health += delta
-			max_health += delta
-			health = min(health, max_health)
-		Enums.EffectType.ARMOR_MODIFIER:
-			armor += delta
-			max_armor += delta
-			armor = min(armor, max_armor)
-		Enums.EffectType.SHIELD_MODIFIER:
-			shield += delta
-			max_shield += delta
-			shield = min(shield, max_shield)
-		Enums.EffectType.POWER_MODIFIER:
-			power += delta
-			max_power += delta
-			power = min(power, max_power)
-		# Regen effects
-		Enums.EffectType.ARMOR_REGEN:
-			armor_generation += delta
-		Enums.EffectType.SHIELD_REGEN:
-			shield_generation += delta
-		Enums.EffectType.POWER_REGEN:
-			power_generation += delta
-		# Movement speed
-		Enums.EffectType.SPEED_MODIFIER:
-			speed += delta
-		# Damage reduction types
-		Enums.EffectType.DAMAGE_REDUCTION_ALL:
-			damage_reduction_all += delta
-		Enums.EffectType.DAMAGE_REDUCTION_KINETIC:
-			damage_reduction_kinetic += delta
-		Enums.EffectType.DAMAGE_REDUCTION_ENERGY:
-			damage_reduction_energy += delta
-		Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE:
-			damage_reduction_explosive += delta
-		Enums.EffectType.DAMAGE_REDUCTION_PLASMA:
-			damage_reduction_plasma += delta
-		Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE:
-			damage_reduction_corrosive += delta
-		# Accuracy, range, and cooldown modifiers (NEW)
-		Enums.EffectType.ACCURACY_MODIFIER:
-			accuracy_modifier += delta
-		Enums.EffectType.RANGE_MODIFIER:
-			range_modifier += delta
-		Enums.EffectType.COOLDOWN_MODIFIER:
-			cooldown_modifier += delta
-
-
 func _toggle_module_passive_effect_modifiers(module: ItemModule, enable: bool):
 	"""Applies or removes passive or active effects for a module."""
 	if module.passive:
 		for effect in module.effects:
-			_toggle_passive_effect_modifier(effect, enable)
+			effect.toggle_effect(self, enable)
 
 
 func _toggle_item_passive_effect_modifiers(item: Item, enable: bool):

@@ -64,6 +64,7 @@ enum EffectType {
 	RANGE_MODIFIER,  # Increases/Decreases weapons range.
 	COOLDOWN_MODIFIER,  # Increases/Decreases weapons cooldown.
 	# Regen boosts.
+	HEALTH_REGEN,  # Increases health regen.
 	SHIELD_REGEN,  # Increases shield regen.
 	ARMOR_REGEN,  # Increases armor regen.
 	POWER_REGEN,  # Increases power regen.

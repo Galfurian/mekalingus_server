@@ -98,6 +98,8 @@ func is_complete() -> bool:
 
 
 func generate_order() -> Order:
+	# Get the range modifier for the enemy unit.
+	var range_modifier = source.mek.range_modifier
 	match phase:
 		Phase.ACT_IN_PLACE, Phase.MOVE_THEN_ACT:
 			# Check if we need to move before acting.
@@ -109,7 +111,7 @@ func generate_order() -> Order:
 			# We are in position to act.
 			if target and equipped_module:
 				# Get the module range.
-				var module_range = equipped_module.module.module_range
+				var module_range = equipped_module.module.module_range + range_modifier
 				# Decide the best tile to act from.
 				if target != source:
 					# Compute the distance to the target to determine if we need to move.
@@ -117,11 +119,11 @@ func generate_order() -> Order:
 					# Check if the target is in range of the module.
 					var already_in_range = distance >= 0 and distance <= module_range
 					if not already_in_range:
-						var destination: Vector2i = Vector2i.ZERO
+						var target_tile: Vector2i = Vector2i.ZERO
 						# Check if the target is an enemy of the source.
 						if game_map.is_enemy_of(source, target):
 							# We need to find the best tile to act from.
-							destination = AIUtils.find_best_attack_tile(
+							target_tile = AIUtils.find_best_attack_tile(
 								game_map,
 								source,
 								target,
@@ -130,7 +132,7 @@ func generate_order() -> Order:
 								source.mek.speed
 							)
 						else:
-							destination = AIUtils.find_closest_reachable_tile(
+							target_tile = AIUtils.find_closest_reachable_tile(
 								game_map,
 								source,
 								target,
@@ -139,10 +141,14 @@ func generate_order() -> Order:
 								source.mek.speed
 							)
 						# Move to the best tile to act from.
-						if destination != Vector2i.ZERO and destination != source.position:
-							return MoveOrder.new(source, destination)
-						# No valid tile to move to.
-						return null
+						if target_tile == Vector2i.ZERO:
+							push_error("AIPlan: No valid tile to act from.")
+							return null
+						# Move to the best tile to act from.
+						if target_tile == source.position:
+							push_error("AIPlan: We are already in position to act.")
+							return null
+						return MoveOrder.new(source, target_tile)
 				# Update the phase to complete after the order is generated.
 				phase = Phase.COMPLETE
 				# Check if the target is an enemy of the source.
@@ -161,6 +167,7 @@ func generate_order() -> Order:
 			pass
 
 	# No valid order was generated.
+	push_error("AIPlan: No valid order generated.")
 	return null
 
 func _to_string() -> String:

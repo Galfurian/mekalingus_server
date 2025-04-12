@@ -47,6 +47,8 @@ var combat_logger: MapLogger = MapLogger.new()
 var chat_logger: MapLogger = MapLogger.new()
 # AStar2D graph.
 var astar: AStar2D = AStar2D.new()
+# The AI controller for managing enemy actions.
+var ai_controller: AIController = AIController.new(self)
 # The turn manager.
 var turn_manager: TurnManager = TurnManager.new(self)
 
@@ -295,54 +297,64 @@ func remove_entity(uuid: String) -> MapMek:
 # ENEMY SPAWNING
 # =============================================================================
 
+const MIN_SQUAD_SIZE: int = 1
+const MAX_SQUAD_SIZE: int = 4
+const MAX_SQUADS: int = 6 # Upper limit per map
 
-func _find_valid_spawn_positions() -> Array:
+
+func _get_enemy_squad_count(difficulty: int) -> int:
+	"""Returns the number of enemy squads based on difficulty and map size."""
+	var map_factor = (map_width * map_height) / ((map_width + map_height) * 3.0)
+	var base_squads = 1 + int(((difficulty + 1) * 0.75) + map_factor)
+	return clamp(base_squads, 1, MAX_SQUADS)
+
+
+func _find_valid_spawn_positions() -> Array[Vector2i]:
 	"""Finds valid positions for spawning entities based on the height map."""
-	var valid_positions = []
+	var valid_positions: Array[Vector2i] = []
 	for x in range(map_width):
 		for y in range(map_height):
-			var position = Vector2i(x, y)
-			# Check if the height is walkable.
-			if can_move_to(position):
-				valid_positions.append(position)
+			var pos = Vector2i(x, y)
+			if can_move_to(pos):
+				valid_positions.append(pos)
 	return valid_positions
 
 
-func _get_enemy_count(difficulty: int) -> int:
-	"""Determines the number of enemies to spawn based on difficulty and map size."""
-	var base_count = 1 + int(((difficulty + 1) * (difficulty + 1)) / 3.0)
-	var map_factor = (map_width * map_height) / ((map_width + map_height) * 3.0)
-	return base_count + int(map_factor)
-
-
 func spawn_enemies_on_map(difficulty: int) -> void:
-	"""Places multiple enemies on the map based on difficulty level."""
-	# Determine the number of enemies based on difficulty.
-	var enemy_count = _get_enemy_count(difficulty)
-	# Keep track of valid spawn locations on the map.
-	var spawn_points = _find_valid_spawn_positions()
-	# Spawn and place each enemy.
-	for i in range(enemy_count):
-		if spawn_points.is_empty():
-			push_error("We ran out of spawn points.")
-			return
-		# Choose a random clan.
-		var clan: Clan = DataManager.clans.values().pick_random()
+	var spawn_points: Array[Vector2i] = _find_valid_spawn_positions()
+	if spawn_points.is_empty():
+		push_error("No valid spawn points found.")
+		return
+
+	var squad_count: int = _get_enemy_squad_count(difficulty)
+
+	# Shuffle clans so we don’t end up with the same ones each time
+	var clans = DataManager.clans.values().duplicate()
+	clans.shuffle()
+
+	for i in range(min(squad_count, clans.size())):
+		var clan: Clan = clans[i]
 		if not clan:
-			push_error("Failed to pick a random clan.")
-			return
-		# Pick the role from the preferred roles of the clan.
-		var role: Enums.MekRole = clan.preferred_roles.pick_random()
-		# Generate the enemy.
-		var mek = LoadoutGenerator.generate_mek(difficulty, role)
-		if not mek:
-			push_error("Failed to generate enemy.")
-			return
-		# Choose a random valid position.
-		var spawn_point = spawn_points.pick_random()
-		spawn_points.erase(spawn_point)
-		# Place the enemy on the map.
-		npc_units[mek.uuid] = MapMek.new(spawn_point, NPCOwned.new("Rookie", clan), mek)
+			continue
+
+		var squad_size = randi_range(MIN_SQUAD_SIZE, MAX_SQUAD_SIZE)
+
+		for j in range(squad_size):
+			if spawn_points.is_empty():
+				push_error("Out of spawn points while spawning squad #%d" % i)
+				return
+
+			var role: Enums.MekRole = clan.preferred_roles.pick_random()
+			var mek = LoadoutGenerator.generate_mek(difficulty, role)
+			if not mek:
+				push_error("Failed to generate Mek for clan %s" % clan.clan_name)
+				continue
+
+			var spawn_pos = spawn_points.pick_random()
+			spawn_points.erase(spawn_pos)
+
+			npc_units[mek.uuid] = MapMek.new(spawn_pos, NPCOwned.new("Squad_%d" % i, clan), mek)
+
 
 # =============================================================================
 # FORMATTING

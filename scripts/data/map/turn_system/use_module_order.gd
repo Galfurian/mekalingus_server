@@ -67,7 +67,7 @@ func _apply_damage_effect(game_map: GameMap, effect: ItemEffect) -> void:
 	if effect.target_self():
 		var result = source_mek.take_damage_from_effect(effect)
 		_add_log(game_map, Enums.LogType.ATTACK, "%s hurts itself with %s -> %d shield, %d armor, %d health (reduced %d %s)" % [
-			source_mek.get_mek_name(),
+			source_mek.get_chat_tag(),
 			equipped_module.module.module_name,
 			result.shield,
 			result.armor,
@@ -77,7 +77,7 @@ func _apply_damage_effect(game_map: GameMap, effect: ItemEffect) -> void:
 	# Handle AREA damage.
 	elif effect.target_area():
 		var center = target if effect.center_on_target else source
-		var affected = AIUtils.get_units_in_range(game_map, 
+		var affected = AIUtils.get_units_in_range(game_map,
 			source, center.position, effect.radius, true, true
 		)
 		for entity in affected:
@@ -86,8 +86,8 @@ func _apply_damage_effect(game_map: GameMap, effect: ItemEffect) -> void:
 				continue
 			var result = mek.take_damage_from_effect(effect)
 			_add_log(game_map, Enums.LogType.ATTACK, "%s hits %s with AoE from %s -> %d shield, %d armor, %d health (reduced %d %s)" % [
-				source_mek.get_mek_name(),
-				target_mek.get_mek_name(),
+				source_mek.get_chat_tag(),
+				target_mek.get_chat_tag(),
 				equipped_module.module.module_name,
 				result.shield,
 				result.armor,
@@ -98,8 +98,8 @@ func _apply_damage_effect(game_map: GameMap, effect: ItemEffect) -> void:
 	else:
 		var result = target_mek.take_damage_from_effect(effect)
 		_add_log(game_map, Enums.LogType.ATTACK, "%s hits %s with %s -> %d shield, %d armor, %d health (reduced %d %s)" % [
-			source_mek.get_mek_name(),
-			target_mek.get_mek_name(),
+			source_mek.get_chat_tag(),
+			target_mek.get_chat_tag(),
 			equipped_module.module.module_name,
 			result.shield,
 			result.armor,
@@ -117,7 +117,7 @@ func _apply_repair_effect(game_map: GameMap, effect: ItemEffect) -> void:
 	if effect.target_self():
 		var result = source_mek.repair_from_effect(effect)
 		_add_log(game_map, Enums.LogType.SUPPORT, "%s restores %d %s to itself using %s" % [
-			source_mek.get_mek_name(),
+			source_mek.get_chat_tag(),
 			result.amount,
 			result.stat,
 			equipped_module.module.module_name])
@@ -126,7 +126,7 @@ func _apply_repair_effect(game_map: GameMap, effect: ItemEffect) -> void:
 		var center = target if effect.center_on_target else source
 		var include_allies = effect.target_ally() or effect.target_self()
 		var include_enemies = effect.target_enemy()
-		var affected = AIUtils.get_units_in_range(game_map, 
+		var affected = AIUtils.get_units_in_range(game_map,
 			source, center.position, effect.radius, include_allies, include_enemies, []
 		)
 		for entity in affected:
@@ -135,10 +135,10 @@ func _apply_repair_effect(game_map: GameMap, effect: ItemEffect) -> void:
 				continue
 			var result = mek.repair_from_effect(effect)
 			_add_log(game_map, Enums.LogType.SUPPORT, "%s restores %d %s to %s using %s (AoE)" % [
-					source_mek.get_mek_name(),
+					source_mek.get_chat_tag(),
 					result.amount,
 					result.stat,
-					mek.get_mek_name(),
+					mek.get_chat_tag(),
 					equipped_module.module.module_name
 				]
 			)
@@ -148,10 +148,10 @@ func _apply_repair_effect(game_map: GameMap, effect: ItemEffect) -> void:
 			return
 		var result = target_mek.repair_from_effect(effect)
 		_add_log(game_map, Enums.LogType.SUPPORT, "%s restores %d %s to %s using %s" % [
-			source_mek.get_mek_name(),
+			source_mek.get_chat_tag(),
 			result.amount,
 			result.stat,
-			target_mek.get_mek_name(),
+			target_mek.get_chat_tag(),
 			equipped_module.module.module_name])
 
 
@@ -164,7 +164,7 @@ func _apply_modifier_effect(game_map: GameMap, effect: ItemEffect) -> void:
 	if effect.target_self():
 		source_mek.add_effect(equipped_module.module, effect, source)
 		_add_log(game_map, Enums.LogType.SUPPORT, "%s applies %s to itself -> %d for %d turns (%s)" % [
-			source_mek.get_mek_name(),
+			source_mek.get_chat_tag(),
 			effect.get_effect_type_label(),
 			effect.amount,
 			effect.duration,
@@ -174,7 +174,7 @@ func _apply_modifier_effect(game_map: GameMap, effect: ItemEffect) -> void:
 		var center = target if effect.center_on_target else source
 		var include_allies = effect.target_ally() or effect.target_self()
 		var include_enemies = effect.target_enemy()
-		var affected = AIUtils.get_units_in_range(game_map, 
+		var affected = AIUtils.get_units_in_range(game_map,
 			source, center.position, effect.radius, include_allies, include_enemies, [source]
 		)
 		for entity in affected:
@@ -183,9 +183,9 @@ func _apply_modifier_effect(game_map: GameMap, effect: ItemEffect) -> void:
 				continue
 			mek.add_effect(equipped_module.module, effect, source)
 			_add_log(game_map, Enums.LogType.SUPPORT, "%s applies %s to %s -> %d for %d turns (%s, AoE)" % [
-				source_mek.get_mek_name(),
+				source_mek.get_chat_tag(),
 				effect.get_effect_type_label(),
-				mek.get_mek_name(),
+				mek.get_chat_tag(),
 				effect.amount,
 				effect.duration,
 				equipped_module.module.module_name])
@@ -193,9 +193,9 @@ func _apply_modifier_effect(game_map: GameMap, effect: ItemEffect) -> void:
 	else:
 		target_mek.add_effect(equipped_module.module, effect, source)
 		_add_log(game_map, Enums.LogType.SUPPORT, "%s applies %s to %s -> %d for %d turns (%s)" % [
-			source_mek.get_mek_name(),
+			source_mek.get_chat_tag(),
 			effect.get_effect_type_label(),
-			target_mek.get_mek_name(),
+			target_mek.get_chat_tag(),
 			effect.amount,
 			effect.duration,
 			equipped_module.module.module_name])

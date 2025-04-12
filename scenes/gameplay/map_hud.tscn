@@ -37,6 +37,6 @@ size_flags_horizontal = 3
 [node name="LogPanel" parent="VBoxContainer" instance=ExtResource("3_7afkc")]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.75
+size_flags_stretch_ratio = 0.25
 
 [node name="ActionMenu" type="PopupMenu" parent="."]

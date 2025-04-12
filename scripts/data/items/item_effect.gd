@@ -73,6 +73,7 @@ func is_regen() -> bool:
 	return (
 		type
 		in [
+			Enums.EffectType.HEALTH_REGEN,
 			Enums.EffectType.SHIELD_REGEN,
 			Enums.EffectType.ARMOR_REGEN,
 			Enums.EffectType.POWER_REGEN
@@ -184,6 +185,8 @@ func get_effect_type_label() -> String:
 			label = "Range Modifier"
 		Enums.EffectType.COOLDOWN_MODIFIER:
 			label = "Cooldown Modifier"
+		Enums.EffectType.HEALTH_REGEN:
+			label = "Health Regen"
 		Enums.EffectType.SHIELD_REGEN:
 			label = "Shield Regen"
 		Enums.EffectType.ARMOR_REGEN:
@@ -205,6 +208,63 @@ func get_effect_type_label() -> String:
 		_:
 			label = "Unknown Effect"
 	return label
+
+func toggle_effect(mek: Mek, enable: bool) -> void:
+	var delta := amount if enable else -amount
+
+	match type:
+		Enums.EffectType.HEALTH_MODIFIER:
+			mek.max_health += delta
+			mek.health = min(mek.health, mek.max_health)
+		Enums.EffectType.ARMOR_MODIFIER:
+			mek.max_armor += delta
+			mek.armor = min(mek.armor, mek.max_armor)
+		Enums.EffectType.SHIELD_MODIFIER:
+			mek.max_shield += delta
+			mek.shield = min(mek.shield, mek.max_shield)
+		Enums.EffectType.POWER_MODIFIER:
+			mek.max_power += delta
+			mek.power = min(mek.power, mek.max_power)
+
+		# Regen
+		Enums.EffectType.HEALTH_REGEN:
+			mek.health_generation += delta
+		Enums.EffectType.SHIELD_REGEN:
+			mek.shield_generation += delta
+		Enums.EffectType.ARMOR_REGEN:
+			mek.armor_generation += delta
+		Enums.EffectType.POWER_REGEN:
+			mek.power_generation += delta
+
+		# Movement
+		Enums.EffectType.SPEED_MODIFIER:
+			mek.speed += delta
+
+		# Reductions
+		Enums.EffectType.DAMAGE_REDUCTION_ALL:
+			mek.damage_reduction_all += delta
+		Enums.EffectType.DAMAGE_REDUCTION_KINETIC:
+			mek.damage_reduction_kinetic += delta
+		Enums.EffectType.DAMAGE_REDUCTION_ENERGY:
+			mek.damage_reduction_energy += delta
+		Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE:
+			mek.damage_reduction_explosive += delta
+		Enums.EffectType.DAMAGE_REDUCTION_PLASMA:
+			mek.damage_reduction_plasma += delta
+		Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE:
+			mek.damage_reduction_corrosive += delta
+
+		# Accuracy & range
+		Enums.EffectType.ACCURACY_MODIFIER:
+			mek.accuracy_modifier += delta
+		Enums.EffectType.RANGE_MODIFIER:
+			mek.range_modifier += delta
+		Enums.EffectType.COOLDOWN_MODIFIER:
+			mek.cooldown_modifier += delta
+
+		# Effects without direct stat impact
+		_:
+			pass
 
 
 # =============================================================================
@@ -240,6 +300,7 @@ func evaluate_effect_power(repeats: int) -> float:
 		Enums.EffectType.ACCURACY_MODIFIER: 2.0,
 		Enums.EffectType.RANGE_MODIFIER: 2.5,
 		Enums.EffectType.COOLDOWN_MODIFIER: 3.0,
+		Enums.EffectType.HEALTH_REGEN: 1.0,
 		Enums.EffectType.SHIELD_REGEN: 1.0,
 		Enums.EffectType.ARMOR_REGEN: 1.0,
 		Enums.EffectType.POWER_REGEN: 1.0,
@@ -281,11 +342,11 @@ func _to_string() -> String:
 	return (
 		"Module<"
 		+ Utils.enum_to_string(Enums.EffectType, type)
-		+ ", "
+		+", "
 		+ Utils.enum_to_string(Enums.TargetType, target)
-		+ ", "
+		+", "
 		+ str(amount)
-		+ ">"
+		+">"
 	)
 
 

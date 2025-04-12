@@ -102,15 +102,25 @@ func zoom_out():
 	"""Zooms out the map view."""
 	if not game_map:
 		return
-	# Get the size of the scroll viewport (i.e., the visible area).
+
+	# Get the visible scroll area size.
 	var visible_size = scroll_view.get_size()
-	# Compute the minimum grid size to fit the whole map.
-	var min_grid_size_x = visible_size.x / (game_map.map_width + SECTOR_SIZE * 2)
-	var min_grid_size_y = visible_size.y / (game_map.map_height + SECTOR_SIZE * 2)
-	var min_grid_size = max(4, min(min_grid_size_x, min_grid_size_y))
-	# Round to an even number for consistency.
-	grid_size = int(floor(min_grid_size / 2.0)) * 2
-	# Redraw the map with the new grid size.
+
+	# Compute minimum grid size needed to fit the full map (including padding).
+	var total_tiles_x = game_map.map_width + SECTOR_SIZE
+	var total_tiles_y = game_map.map_height + SECTOR_SIZE
+	var min_grid_size_x = visible_size.x / total_tiles_x
+	var min_grid_size_y = visible_size.y / total_tiles_y
+
+	# Take the smaller of the two to ensure full fit.
+	var min_grid_size = min(min_grid_size_x, min_grid_size_y)
+	grid_size = max(1, floor(min_grid_size))
+
+	# Center the scroll view on the map.
+	scroll_view.scroll_horizontal = (SECTOR_SIZE * grid_size) / 2.0
+	scroll_view.scroll_vertical = (SECTOR_SIZE * grid_size) / 2.0
+	
+	# Redraw with the new grid size.
 	redraw(grid_size)
 
 

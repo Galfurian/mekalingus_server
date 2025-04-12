@@ -2,21 +2,22 @@
 class_name NPCOwned
 extends EntityOwner
 
+# The name of the NPC.
 var npc_name: String
-var clan: Clan
 
 
 func _init(_npc_name: String, _clan: Clan) -> void:
+	"""
+	Initializes the NPCOwned with a clan and NPC name.
+	"""
+	super._init(_clan)
 	npc_name = _npc_name
-	clan = _clan
 
 
-func get_clan() -> Clan:
-	return clan
-
-
-# By default, NPCFaction is not player-controlled.
 func is_player() -> bool:
+	"""
+	By default, NPCs are not players.
+	"""
 	return false
 
 

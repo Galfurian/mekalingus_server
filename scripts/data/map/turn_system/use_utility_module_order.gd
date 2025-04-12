@@ -61,10 +61,10 @@ func execute(game_map: GameMap) -> bool:
 
 
 func _to_string() -> String:
-	var source_name = source.mek.template.mek_name
+	var source_name = source.mek.get_mek_name()
 	var module_name = equipped_module.module.module_name
-	var target_name = target.mek.template.mek_name
+	var target_name = target.mek.get_mek_name()
 
 	if source == target:
-		return "%s is attacking itself with %s" % [source_name, module_name]
-	return "%s is attacking %s with %s" % [source_name, target_name, module_name]
+		return "%s is supporting itself with %s" % [source_name, module_name]
+	return "%s is supporting %s with %s" % [source_name, target_name, module_name]

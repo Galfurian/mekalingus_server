@@ -56,7 +56,7 @@ static func serialize_dict_of_objects(dict: Dictionary) -> Dictionary:
 	return result
 
 
-static func deserialize_dict_of_objects(data: Dictionary, constructor: Callable) -> Variant:
+static func deserialize_dict_of_objects(data: Dictionary, constructor: Callable) -> Dictionary:
 	"""
 	Deserializes a dictionary of dictionaries back into objects of the specified class.
 	"""

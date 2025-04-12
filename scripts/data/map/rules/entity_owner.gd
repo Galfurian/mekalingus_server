@@ -5,11 +5,18 @@
 class_name EntityOwner
 extends RefCounted
 
+# All entities belong to a clan or faction.
+var clan: Clan
+
+func _init(_clan: Clan) -> void:
+	"""
+	Initializes the EntityOwner with a clan.
+	"""
+	clan = _clan
 
 # Returns the clan (or faction) this owner belongs to.
 func get_clan() -> Clan:
-	# Must be overridden by subclasses.
-	return null
+	return clan
 
 
 # Returns whether this owner is controlled by a human player.

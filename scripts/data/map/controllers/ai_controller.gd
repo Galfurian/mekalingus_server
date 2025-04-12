@@ -5,7 +5,11 @@ extends Node
 # PROPERTIES
 # =============================================================================
 
+# A reference to the game map.
 var game_map: GameMap
+# The current plans for the AI.
+var current_plans: Dictionary[String, AIPlan] = {}
+
 
 # =============================================================================
 # GENERIC FUNCTIONS
@@ -33,569 +37,60 @@ func _format_pos_tag(pos: Vector2i) -> String:
 	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
 
 
-# =============================================================================
-# SCHEDULE UTILITY ORDER
-# =============================================================================
-
-
-func _evaluate_utility_effect_priority(target: MapMek, effect: ItemEffect) -> int:
-	"""Calculates a priority score for a specific effect on a specific target."""
-	var priority = 0
-	var target_mek: Mek = target.mek
-	# Check the effect type and assign a score.
-	match effect.type:
-		# Repairs (High priority if the related stat is low)
-		Enums.EffectType.HEALTH_REPAIR:
-			if target_mek.health < target_mek.max_health * 0.4:
-				priority += 10
-			elif target_mek.health < target_mek.max_health * 0.7:
-				priority += 6
-		Enums.EffectType.SHIELD_REPAIR:
-			if target_mek.shield < target_mek.max_shield * 0.4:
-				priority += 8
-			elif target_mek.shield < target_mek.max_shield * 0.7:
-				priority += 4
-		Enums.EffectType.ARMOR_REPAIR:
-			if target_mek.armor < target_mek.max_armor * 0.4:
-				priority += 8
-			elif target_mek.armor < target_mek.max_armor * 0.7:
-				priority += 4
-		# Max stat modifiers (Lower priority than direct repairs)
-		Enums.EffectType.HEALTH_MODIFIER:
-			priority += 4 if target_mek.health < target_mek.max_health * 0.4 else 2
-		Enums.EffectType.SHIELD_MODIFIER:
-			priority += 4 if target_mek.shield < target_mek.max_shield * 0.4 else 2
-		Enums.EffectType.ARMOR_MODIFIER:
-			priority += 4 if target_mek.armor < target_mek.max_armor * 0.4 else 2
-		Enums.EffectType.POWER_MODIFIER:
-			priority += 3 if target_mek.power < target_mek.max_power * 0.4 else 1
-		# Speed modifier (Always useful, moderate priority)
-		Enums.EffectType.SPEED_MODIFIER:
-			priority += 5
-		# Combat performance modifiers (Medium priority)
-		Enums.EffectType.ACCURACY_MODIFIER:
-			priority += 4
-		Enums.EffectType.RANGE_MODIFIER:
-			priority += 4
-		Enums.EffectType.COOLDOWN_MODIFIER:
-			priority += 4
-		# Regeneration effects (Lower than direct repair but useful)
-		Enums.EffectType.SHIELD_REGEN:
-			priority += 5 if target_mek.shield < target_mek.max_shield * 0.3 else 3
-		Enums.EffectType.ARMOR_REGEN:
-			priority += 5 if target_mek.armor < target_mek.max_armor * 0.3 else 3
-		Enums.EffectType.POWER_REGEN:
-			priority += 5 if target_mek.power < target_mek.max_power * 0.3 else 3
-		# Damage Reduction (Always useful, medium priority)
-		Enums.EffectType.DAMAGE_REDUCTION_ALL:
-			priority += 6
-		Enums.EffectType.DAMAGE_REDUCTION_KINETIC:
-			priority += 6
-		Enums.EffectType.DAMAGE_REDUCTION_ENERGY:
-			priority += 6
-		Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE:
-			priority += 6
-		Enums.EffectType.DAMAGE_REDUCTION_PLASMA:
-			priority += 6
-		Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE:
-			priority += 6
-	return priority
-
-
-func _get_utility_effect_targets(
-	effect: ItemEffect, source: MapMek, module_range: int
-) -> Array[MapMek]:
+func plan_for_unit(source: MapMek) -> void:
 	"""
-	Returns a list of valid potential targets for the given effect,
-	based on target type and range, for AI decision-making.
+	Generates a plan for the given unit if the current one is missing or no longer valid.
 	"""
-	match effect.target:
-		Enums.TargetType.SELF:
-			return [source]
-		Enums.TargetType.ENEMY:
-			return game_map.get_units_in_range(source, source.position, module_range, false, true)
-		Enums.TargetType.ALLY:
-			return game_map.get_units_in_range(source, source.position, module_range, true, false)
-		Enums.TargetType.AREA:
-			# Area effects are centered on the target during execution,
-			# but for AI targeting we want to know which targets could be the AoE center.
-			# So return all potential units it could center on.
-			return game_map.get_units_in_range(source, source.position, module_range, true, true)
-	return []
+	# Check if we already have a valid plan.
+	var current_plan = current_plans.get(source.mek.uuid, null)
+	# If the plan is valid, no need to re-plan.
+	if current_plan and current_plan.is_valid():
+		return # No need to re-plan
+	# Get the clan aggressiveness and generate a plan.
+	var aggressiveness = source.owner.clan.aggressiveness
+	# Create a planner instance and generate a plan.
+	var planner = AIPlanner.new()
+	# Generate the plan for the source unit.
+	var new_plan = planner.generate_plan(source, game_map, aggressiveness)
+	# Save the new plan.
+	current_plans[source.mek.uuid] = new_plan
 
 
-func _find_usable_utility_modules(mek: Mek) -> Array[EquippedModule]:
-	"""Finds all utility modules that can be used by the Mek."""
-	var usable_modules: Array[EquippedModule] = []
-	for item in mek.items:
-		# Ensure the item is a utility module.
-		if item.template.slot != Enums.SlotType.UTILITY:
-			continue
-		for module in item.template.modules:
-			# Ignore passive modules.
-			if module.passive:
-				continue
-			# Check if the module is on cooldown.
-			if mek.cooldown_manager.is_on_cooldown(item, module):
-				continue
-			# Check if the Mek lacks power to use it.
-			if mek.power < module.power_on_use:
-				continue
-			# If all checks pass, add the module to the usable list.
-			usable_modules.append(EquippedModule.new(mek, item, module))
-	return usable_modules
+func generate_order_for_unit(source: MapMek) -> Order:
+	"""
+	Generates an order for the given unit based on its current plan.
+	If the plan is invalid or has been completed, re-planning may occur.
+	"""
+	# Ensure the unit has a current plan, or regenerate if needed.
+	plan_for_unit(source)
 
+	# Retrieve the current plan from the cache.
+	var current_plan = current_plans.get(source.mek.uuid, null)
 
-func _determine_best_utility_module_target(
-	source: MapMek, equipped_module: EquippedModule
-) -> Dictionary:
-	"""Determines the best target and priority for the given utility module."""
-	var best_target: MapMek = null
-	var highest_priority: int = 0
-	_add_log("%s is determining the best target for module %s..." % [source.mek.get_chat_tag(), equipped_module.get_chat_tag()])
-	for effect in equipped_module.module.effects:
-		var candidates = _get_utility_effect_targets(effect, source, equipped_module.module.module_range)
-		for candidate in candidates:
-			# Skip evaluation if the effect is already active on this Mek.
-			if candidate.mek.has_effect_type(effect.type):
-				continue
-			var priority = _evaluate_utility_effect_priority(candidate, effect)
-			# Apply power penalty if using this module would drain the Mek
-			if not equipped_module.module.passive and equipped_module.module.power_on_use > 0:
-				var power_after_use = candidate.mek.power - equipped_module.module.power_on_use
-				var remaining_ratio = float(power_after_use) / float(candidate.mek.max_power)
-				var penalty_applied = 0
-				if remaining_ratio < 0.25:
-					penalty_applied = 5
-				elif remaining_ratio < 0.5:
-					penalty_applied = 3
-				elif remaining_ratio < 0.75:
-					penalty_applied = 1
-				priority = max(priority, priority - penalty_applied)
-			_add_log("%s, evaluated %s on %s: effect=%s, priority=%d" % [
+	if current_plan:
+		# If the plan is already complete, there's nothing left to do this turn.
+		if current_plan.is_complete():
+			return null
+
+		# If the plan is still valid, generate the next order.
+		if current_plan.is_valid():
+			var order = current_plan.generate_order()
+			_add_log("%s generated order for plan %s : %s" % [
 				source.mek.get_chat_tag(),
-				equipped_module.get_chat_tag(),
-				candidate.mek.get_chat_tag(),
-				Enums.EffectType.keys()[effect.type],
-				priority])
-			if priority > highest_priority:
-				highest_priority = priority
-				best_target = candidate
-	if best_target:
-		_add_log("%s has selected target %s for module %s (priority %d)" % [
-			source.mek.get_chat_tag(),
-			best_target.mek.get_chat_tag(),
-			equipped_module.get_chat_tag(),
-			highest_priority])
-	else:
-		_add_log("%s has no suitable target found for its module %s" % [source.mek.get_chat_tag(), equipped_module.get_chat_tag()])
-	return {"target": best_target, "priority": highest_priority}
+				str(current_plan),
+				str(order)
+			])
+			return order
 
+		# The plan is not valid but not yet marked complete — regenerate a new one.
+		plan_for_unit(source)
 
-func schedule_utility_module_order(source: MapMek) -> UseUtilityModuleOrder:
-	"""Schedules an utility use action for the AI-controlled Mek."""
-	var mek: Mek = source.mek
-	var best_module: EquippedModule = null
-	var best_target: MapMek = null
-	var highest_priority: int = 0
+		# Retrieve the new plan.
+		current_plan = current_plans.get(source.mek.uuid, null)
 
-	for equipped_module in _find_usable_utility_modules(mek):
-		var result = _determine_best_utility_module_target(source, equipped_module)
-		var adjusted_priority = result.priority
-		if result.priority > 0:
-			adjusted_priority += int(equipped_module.module.cooldown / 2.0)
-		if adjusted_priority > highest_priority:
-			highest_priority = adjusted_priority
-			best_module = equipped_module
-			best_target = result.target
-	if is_instance_valid(best_module) and is_instance_valid(best_target) and highest_priority > 0:
-		_add_log("%s selected utility module %s targeting %s (final priority=%d)" % [
-			source.mek.get_chat_tag(),
-			best_module.get_chat_tag(),
-			best_target.mek.get_chat_tag(),
-			highest_priority])
-		return UseUtilityModuleOrder.new(source, best_target, best_module)
+		# If the new plan is valid and not yet complete, execute it.
+		if current_plan and not current_plan.is_complete() and current_plan.is_valid():
+			return current_plan.generate_order()
+
+	# No valid order could be generated.
 	return null
-
-
-# =============================================================================
-# SCHEDULE OFFENSIVE ORDER
-# =============================================================================
-
-
-func _evaluate_offensive_effect_priority(target: MapMek, effect: ItemEffect) -> int:
-	"""Assigns a priority value to an offensive effect targeting a specific entity."""
-	var priority = 0
-	var mek: Mek = target.mek
-
-	# === Factor 1: Threat level by size (larger = more threatening) ===
-	priority += (mek.template.size + 1) * (mek.template.size + 1)
-
-	# === Factor 2: Target state sensitivity ===
-	if mek.health < mek.max_health * 0.25:
-		priority += 10
-	elif mek.health < mek.max_health * 0.5:
-		priority += 5
-
-	if mek.shield < mek.max_shield * 0.25:
-		priority += 6
-	elif mek.shield < mek.max_shield * 0.5:
-		priority += 3
-
-	if mek.armor < mek.max_armor * 0.25:
-		priority += 4
-	elif mek.armor < mek.max_armor * 0.5:
-		priority += 2
-
-	# === Factor 3: Effect-Specific Logic ===
-	match effect.type:
-		Enums.EffectType.DAMAGE:
-			# Scale based on raw damage
-			priority += clamp(effect.amount / 10.0, 1, 10)
-
-		Enums.EffectType.DAMAGE_OVER_TIME:
-			if mek.has_effect_type(effect.type):
-				return 0
-			var dot_score = (effect.amount * effect.duration) / 5.0
-			priority += clamp(dot_score, 1, 8)
-
-		Enums.EffectType.SPEED_MODIFIER, Enums.EffectType.ACCURACY_MODIFIER, Enums.EffectType.RANGE_MODIFIER, Enums.EffectType.COOLDOWN_MODIFIER, Enums.EffectType.POWER_MODIFIER, Enums.EffectType.HEALTH_MODIFIER, Enums.EffectType.ARMOR_MODIFIER, Enums.EffectType.SHIELD_MODIFIER:
-			# Prioritize debuffs (negative values), deprioritize buffs (positive values)
-			if effect.amount < 0:
-				priority += clamp(abs(effect.amount), 1, 8)
-			else:
-				priority += 1
-
-		Enums.EffectType.DAMAGE_REDUCTION_ALL, Enums.EffectType.DAMAGE_REDUCTION_KINETIC, Enums.EffectType.DAMAGE_REDUCTION_ENERGY, Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE, Enums.EffectType.DAMAGE_REDUCTION_PLASMA, Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE:
-			# These are strong debuffs, especially if applied to enemies
-			if effect.amount < 0:
-				priority += clamp(abs(effect.amount), 2, 6)
-
-		# Ignore healing, regeneration, or buffs (they should never appear here)
-		_:
-			priority += 0
-
-	# Cap to prevent over-prioritization.
-	return clamp(priority, 0, 25)
-
-
-func _determine_best_offensive_module_target(
-	source: MapMek, equipped_module: EquippedModule
-) -> Dictionary:
-	"""Determines the best target and priority for the given offensive module."""
-	var best_target: MapMek = null
-	var highest_priority: int = -1
-	var candidates = game_map.get_units_in_range(
-		source, source.position, equipped_module.module.module_range, false, true
-	)
-	_add_log("%s is determining the best target for module %s (candidates: %d)..." % [
-		source.mek.get_chat_tag(),
-		equipped_module.get_chat_tag(),
-		candidates.size()])
-	for target in candidates:
-		if target == source:
-			continue
-		for effect in equipped_module.module.effects:
-			var priority = _evaluate_offensive_effect_priority(target, effect)
-			_add_log("%s, evaluated %s on %s: effect=%s, priority=%d" % [
-				source.mek.get_chat_tag(),
-				equipped_module.get_chat_tag(),
-				target.mek.get_chat_tag(),
-				Enums.EffectType.keys()[effect.type],
-				priority])
-			if priority > highest_priority:
-				highest_priority = priority
-				best_target = target
-	if best_target:
-		_add_log("%s has selected target %s for module %s (priority %d)" % [
-			source.mek.get_chat_tag(),
-			best_target.mek.get_chat_tag(),
-			equipped_module.get_chat_tag(),
-			highest_priority])
-	else:
-		_add_log("%s has no suitable target found for its module %s" % [source.mek.get_chat_tag(), equipped_module.get_chat_tag()])
-	return {"target": best_target, "priority": highest_priority}
-
-
-func _find_usable_offensive_modules(mek: Mek) -> Array[EquippedModule]:
-	"""Finds all offensive modules that can be used by the Mek."""
-	var usable_modules: Array[EquippedModule] = []
-	for item in mek.items:
-		# Ensure the item is an offensive module (not a utility module).
-		if item.template.slot == Enums.SlotType.UTILITY:
-			continue
-		for module in item.template.modules:
-			# Ignore passive modules.
-			if module.passive:
-				continue
-			# Check if the module is on cooldown.
-			if mek.cooldown_manager.is_on_cooldown(item, module):
-				continue
-			# Check if the Mek lacks power to use it.
-			if mek.power < module.power_on_use:
-				continue
-			# If all checks pass, add the module to the usable list.
-			usable_modules.append(EquippedModule.new(mek, item, module))
-	return usable_modules
-
-
-func schedule_offensive_module_order(source: MapMek) -> UseOffensiveModuleOrder:
-	"""Schedules an offensive action for the AI-controlled Mek."""
-	# Find all usable offensive modules.
-	var mek: Mek = source.mek
-
-	# Track the best module and target.
-	var best_module: EquippedModule = null
-	var best_target: MapMek = null
-	var highest_priority: int = -1
-
-	# Determine the best target and priority for each usable module.
-	for equipped_module in _find_usable_offensive_modules(mek):
-		var result = _determine_best_offensive_module_target(source, equipped_module)
-		if result.priority > highest_priority:
-			highest_priority = result.priority
-			best_module = equipped_module
-			best_target = result.target
-
-	# If a valid module and target were found, queue a use order.
-	if is_instance_valid(best_module) and is_instance_valid(best_target) and highest_priority > 0:
-		_add_log("%s selected offensive module %s targeting %s (final priority=%d)" % [
-			source.mek.get_chat_tag(),
-			best_module.get_chat_tag(),
-			best_target.mek.get_chat_tag(),
-			highest_priority])
-		return UseOffensiveModuleOrder.new(source, best_target, best_module)
-	return null
-
-
-# =============================================================================
-# SCHEDULE MOVE ORDER
-# =============================================================================
-
-
-func normalize_position(vector: Vector2i) -> Vector2:
-	"""Returns a normalized Vector2 version of a Vector2i."""
-	var length = sqrt(vector.x * vector.x + vector.y * vector.y)
-	if length == 0:
-		return Vector2(0, 0) # Avoid division by zero; return zero vector.
-	return Vector2(vector.x / length, vector.y / length)
-
-
-func round_position(vector: Vector2) -> Vector2i:
-	"""Returns a Vector2i with each component rounded to the nearest integer."""
-	return Vector2i(round(vector.x), round(vector.y))
-
-
-func _evaluate_movement_priority(source: MapMek, target: MapMek, desired_range: int) -> int:
-	"""Assigns a priority to moving toward the specified target."""
-	# If the source is the target.
-	if source == target:
-		return -1
-	# Get current distance between source and target.
-	var current_distance = source.position.distance_to(target.position)
-	# If already within or closer than desired range, don't move.
-	if current_distance <= desired_range:
-		return 0
-	# Calculate priority based on distance from desired range (closer to desired = higher priority).
-	var priority = abs(current_distance - desired_range)
-	# Adjust priority based on target type.
-	if game_map.is_enemy_of(source, target):
-		priority += 5 # Higher priority if target is an enemy.
-	else:
-		priority += 2 # Lower priority if target is an ally.
-	_add_log("%s evaluated movement toward %s: distance=%d, is_enemy=%s, priority=%d" % [
-			source.mek.get_chat_tag(),
-			target.mek.get_chat_tag(),
-			int(current_distance),
-			str(game_map.is_enemy_of(source, target)),
-			priority])
-	# Ensure the priority is not negative.
-	return max(priority, 0)
-
-
-func _find_high_priority_targets(
-	source: MapMek, detection_range: int, desired_range: int
-) -> Array[Dictionary]:
-	var targets: Array[Dictionary] = []
-	var nearby_units = game_map.get_units_in_range(source, source.position, detection_range, false, true)
-	for target in nearby_units:
-		var priority = _evaluate_movement_priority(source, target, desired_range)
-		if priority >= 0:
-			targets.append({"target": target, "priority": priority})
-	return targets
-
-
-func _select_best_target(targets: Array[Dictionary]) -> Dictionary:
-	"""Selects the target with the highest priority."""
-	# Return an empty dictionary if no targets exist.
-	if targets.is_empty():
-		return {}
-	# Initialize the best target data.
-	var best_target_data = targets[0]
-	# Iterate through the targets to find the one with the highest priority.
-	for target_data in targets:
-		if target_data.priority > best_target_data.priority:
-			best_target_data = target_data
-	return best_target_data
-
-
-func _select_movement_destination(start_position: Vector2i, target_position: Vector2i, max_movement: int) -> Vector2i:
-	"""
-	Determines the best tile to move closer to the target using A* pathfinding with movement cost.
-	"""
-	var path = game_map.get_shortest_path(start_position, target_position)
-	# If there's no path or it's too short, return start.
-	if path.is_empty() or path.size() <= 1:
-		_add_log("No valid path from %s to %s." % [_format_pos_tag(start_position), _format_pos_tag(target_position)])
-		return start_position
-	var destination = start_position
-	var fallback_tile = start_position
-	var total_cost = 0
-	# Skip start_position.
-	for i in range(1, path.size()):
-		# Get the tile on the path.
-		var tile = path[i]
-		# Get the cost to the tile.
-		var cost = game_map.get_movement_cost(tile)
-		# If the cost is negative, the tile is impassable.
-		if cost < 0:
-			break
-		# If the total cost exceeds the movement limit, stop.
-		if total_cost + cost > max_movement:
-			break
-		# If the tile is reachable, set it as the destination.
-		if game_map.can_move_to(tile):
-			destination = tile
-		else:
-			# Set the destination as the last reachable tile.
-			destination = fallback_tile
-			break
-		# Update the total cost.
-		total_cost += cost
-		# Save the tile as a fallback in case the destination is unreachable.
-		fallback_tile = tile
-	if destination != start_position:
-		return destination
-	# Nothing found
-	_add_log("No reachable tile on path from: %s" % [_format_pos_tag(start_position)])
-	return start_position
-
-
-func _find_best_tile_to_attack_target(
-	source: MapMek, target: MapMek, min_range: int, max_range: int, max_movement: int
-) -> Vector2i:
-	"""
-	Finds the best tile within weapon range to attack the target from, considering:
-	- Movement range
-	- Height advantage
-	- Distance to target
-	"""
-	var start_pos = source.position
-	var target_pos = target.position
-	var best_tile: Vector2i = start_pos
-	var best_score = - INF
-	# Log the search context
-	_add_log("%s searching best attack tile near %s (range %dâ€“%d, movement=%d)" % [
-		source.mek.get_chat_tag(),
-		target.mek.get_chat_tag(),
-		min_range,
-		max_range,
-		max_movement])
-	# Get all the tiles this unit can reach given its movement allowance
-	var reachable_tiles = game_map.get_reachable_tiles(start_pos, max_movement)
-	for tile in reachable_tiles:
-		var dist = tile.distance_to(target_pos)
-		# Skip tiles already occupied by other units
-		if game_map.is_occupied(tile):
-			_add_log("- Skipping %s -> %s: occupied" % [_format_pos_tag(start_pos), _format_pos_tag(tile)])
-			continue
-		# Skip tiles outside of our weapon's usable range
-		if dist < min_range or dist > max_range:
-			_add_log("- Skipping %s -> %s: out of range (distance=%d)" % [_format_pos_tag(start_pos), _format_pos_tag(tile), dist])
-			continue
-		# Compute how far the unit must move to reach this tile
-		var move_cost = game_map.get_path_cost(game_map.get_shortest_path(start_pos, tile))
-		# Calculate the elevation difference (positive = tile is above the target)
-		var height_diff = game_map.get_tile_height(tile) - game_map.get_tile_height(target_pos)
-		# Determine how close we are to the ideal range (middle of min/max)
-		var ideal_range = (min_range + max_range) / 2.0
-		var range_penalty = abs(dist - ideal_range)
-		# Final score:
-		# - Favor low move cost (less effort to reach)
-		# - Favor being close to ideal range
-		# - Favor tiles that are higher than the target (positive height diff)
-		var score = - move_cost - range_penalty + height_diff * 2.0
-		_add_log("- Tile %s: move_cost=%d, dist=%d, height_diff=%d -> score=%.2f" % [_format_pos_tag(tile), move_cost, dist, height_diff, score])
-		# Keep track of the best scoring tile
-		if score > best_score:
-			best_score = score
-			best_tile = tile
-	# Log the final selected destination
-	_add_log("%s selects tile %s (score=%.2f) to attack %s" % [source.mek.get_chat_tag(), _format_pos_tag(best_tile), best_score, target.mek.get_chat_tag()])
-	return best_tile
-
-
-func _select_random_movement_destination(start_position: Vector2i, max_movement: int) -> Vector2i:
-	"""Selects a random valid destination within max_movement range."""
-	# Generate a random offset in both X and Y directions.
-	var offset_x = randi_range(-max_movement, max_movement)
-	var offset_y = randi_range(-max_movement, max_movement)
-	return _select_movement_destination(
-		start_position,
-		Vector2i(
-			min(max(0, start_position.x + offset_x), game_map.map_width - 1),
-			min(max(0, start_position.y + offset_y), game_map.map_height - 1),
-		),
-		max_movement
-	)
-
-
-func schedule_move_order(source: MapMek) -> MoveOrder:
-	"""Schedules a movement order for the source MapMek."""
-	var mek: Mek = source.mek
-	# Adjust this based on the unit's movement capabilities.
-	var detection_range = game_map.map_width + game_map.map_height
-	# Adjust this based on the unit's movement capabilities.
-	var desired_range = mek.get_usable_weapon_range()
-	# Fallback value to prevent standing still.
-	if desired_range.min == 0:
-		_add_log("%s get_usable_weapon_range return 0, fallback to 1" % [source.mek.get_chat_tag()])
-		desired_range.min = 1
-		desired_range.max = 1
-	_add_log("%s is scheduling movement (speed=%d, detection=%d, desired_range=[%d, %d])" % [
-		source.mek.get_chat_tag(),
-		mek.speed,
-		detection_range,
-		desired_range.min,
-		desired_range.max])
-	# Find all high-priority targets within the search range.
-	var targets = _find_high_priority_targets(source, detection_range, desired_range.min)
-	_add_log("%s found %d nearby units to evaluate for movement" % [source.mek.get_chat_tag(), targets.size()])
-	# No valid targets to move toward.
-	if targets.is_empty():
-		_add_log("%s found no movement-worthy targets. Choosing random repositioning." % [source.mek.get_chat_tag()])
-		# No valid targets, consider repositioning.
-		var max_movement = mek.speed
-		var start_position = source.position
-		var random_destination = _select_random_movement_destination(start_position, max_movement)
-		return MoveOrder.new(source, random_destination)
-
-	# Select the best target based on priority.
-	var best_target_data = _select_best_target(targets)
-	var best_target = best_target_data.target
-	_add_log("%s selected %s as movement target (priority=%d)" % [source.mek.get_chat_tag(), best_target.mek.get_chat_tag(), best_target_data.priority])
-	# If the priority is 0, we already are at range:
-	if best_target_data.priority == 0:
-		_add_log("%s is already at desired range to %s â€” no movement needed" % [source.mek.get_chat_tag(), best_target.mek.get_chat_tag()])
-		return null
-
-	var destination_tile = best_target.position
-	if source.position.distance_to(best_target.position) <= desired_range.max:
-		# Compute destination tile.
-		destination_tile = _find_best_tile_to_attack_target(
-			source, best_target, desired_range.min, desired_range.max, mek.speed
-		)
-	# Move to the destination.
-	var destination = _select_movement_destination(source.position, destination_tile, mek.speed)
-	# Create and return a new MoveOrder to the determined destination.
-	return MoveOrder.new(source, destination)

@@ -43,7 +43,7 @@ func execute(game_map: GameMap) -> bool:
 
 	var start_pos = source.position
 
-	var path = game_map.get_shortest_path(start_pos, destination)
+	var path = AIUtils.get_shortest_path(game_map, start_pos, destination)
 
 	if path.is_empty() or path.size() <= 1:
 		# No movement possible.
@@ -86,7 +86,7 @@ func execute(game_map: GameMap) -> bool:
 func _to_string() -> String:
 	var s = ""
 	if is_instance_of(source.mek, Mek):
-		s += source.mek.template.mek_name
+		s += source.mek.get_mek_name()
 	else:
 		s += str(source.mek)
 	s += " is moving"

@@ -125,7 +125,6 @@ func _on_turn_ended(_turn_number: int):
 func _update_time_of_day() -> void:
 	if not game_map:
 		return
-	print("Update time of day based on map: ", game_map.map_uuid)
 	# Get the current time of day from the game map.
 	var time_of_day = game_map.turn_manager.get_time_of_day()
 	# Convert to HH:MM style time (e.g., 0.25 = 06:00)
@@ -174,7 +173,7 @@ func _on_log_meta_clicked(meta: String) -> void:
 		var x = int(coords[0])
 		var y = int(coords[1])
 		var target_pos = Vector2i(x, y)
-		if game_map.in_bounds(target_pos):
+		if game_map.is_in_bounds(target_pos):
 			center_on(target_pos)
 		else:
 			printerr("Position out of bounds: ", target_pos)

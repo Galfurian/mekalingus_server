@@ -3,17 +3,18 @@ class_name PlayerOwned
 extends EntityOwner
 
 var player: Player
-var clan: Clan
 
 
 func _init(_player: Player, _clan: Clan) -> void:
+	"""
+	Initializes the PlayerOwned with a player and clan.
+	"""
+	super._init(_clan)
 	player = _player
-	clan = _clan
-
-
-func get_clan() -> Clan:
-	return clan
 
 
 func is_player() -> bool:
+	"""
+	By default, players are players.
+	"""
 	return true

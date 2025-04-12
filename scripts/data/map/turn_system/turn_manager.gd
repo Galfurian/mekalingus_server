@@ -161,6 +161,10 @@ func tick(delta: float) -> void:
 		_current_turn += 1
 
 
+static func format_pos_tag(pos: Vector2i) -> String:
+	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
+
+
 # =============================================================================
 # ORDERS
 # =============================================================================
@@ -297,12 +301,17 @@ func _update_time_based_effects():
 
 func _generate_npc_orders():
 	"""
-	Generates both a utility and offensive action for an enemy unit.
+	Generates and queues an order for each NPC unit using the AI planner system.
 	"""
 	for unit: MapMek in game_map.npc_units.values():
-		# 1. Generate the use of utility modules.
-		queue_utility_module_order(ai_controller.schedule_utility_module_order(unit))
-		# 2. Generate the use of offensive modules.
-		queue_offensive_module_orders(ai_controller.schedule_offensive_module_order(unit))
-		# 3. Generate the movement order.
-		queue_move_order(ai_controller.schedule_move_order(unit))
+		# Generate or reuse the current plan.
+		ai_controller.plan_for_unit(unit)
+		# Generate the next order based on the current plan.
+		var order: Order = ai_controller.generate_order_for_unit(unit)
+		# Add the order to the queue.
+		if is_instance_of(order, UseUtilityModuleOrder):
+			queue_utility_module_order(order)
+		elif is_instance_of(order, UseOffensiveModuleOrder):
+			queue_offensive_module_orders(order)
+		elif is_instance_of(order, MoveOrder):
+			queue_move_order(order)

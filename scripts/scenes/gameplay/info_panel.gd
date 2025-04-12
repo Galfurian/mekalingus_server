@@ -97,7 +97,7 @@ func update_panel() -> void:
 	item_inspector.visible = false
 
 	if is_instance_of(entity, MapMek):
-		_load_mek_details(entity.mek)
+		_load_mek_details(entity)
 
 		item_inspector.visible = true
 
@@ -144,10 +144,20 @@ func _on_item_selected(index: int) -> void:
 # =============================================================================
 
 
-func _load_mek_details(mek: Mek) -> void:
-	if not is_instance_valid(mek):
+func _load_mek_details(map_mek: MapMek) -> void:
+	if not is_instance_valid(map_mek):
 		return
-	var s = "[center][b]" + mek.template.mek_name + "[/b][/center]\n"
+	# Get the mek.
+	var mek: Mek = map_mek.mek
+	# Add the name.
+	var s = "[center][b]" + mek.get_mek_name() + "[/b][/center]\n"
+	# Add who is controlling the mek.
+	if is_instance_of(map_mek.owner, PlayerOwned):
+		s += "Player  : " + map_mek.owner.player.player_name + "\n"
+	elif is_instance_of(map_mek.owner, NPCOwned):
+		s += "NPC     : " + map_mek.owner.npc_name + "\n"
+	# Add the clan.
+	s += "Clan    : " + map_mek.owner.clan.clan_name + "\n"
 	s += "Power   : " + str(mek.evaluate_mek_power()) + "\n"
 	s += "Size    : " + Utils.enum_to_string(Enums.MekSize, mek.template.size) + "\n"
 	s += "Health  : " + UIColor.apply("health", "%3d" % mek.health) + " / "
@@ -175,32 +185,32 @@ func _load_mek_details(mek: Mek) -> void:
 	s += (
 		"    all       : "
 		+ UIColor.apply("damage_reduction", "%3d" % mek.damage_reduction_all)
-		+ "\n"
+		+"\n"
 	)
 	s += (
 		"    kinetic   : "
 		+ UIColor.apply("damage_reduction", "%3d" % mek.damage_reduction_kinetic)
-		+ "\n"
+		+"\n"
 	)
 	s += (
 		"    energy    : "
 		+ UIColor.apply("damage_reduction", "%3d" % mek.damage_reduction_energy)
-		+ "\n"
+		+"\n"
 	)
 	s += (
 		"    explosive : "
 		+ UIColor.apply("damage_reduction", "%3d" % mek.damage_reduction_explosive)
-		+ "\n"
+		+"\n"
 	)
 	s += (
 		"    plasma    : "
 		+ UIColor.apply("damage_reduction", "%3d" % mek.damage_reduction_plasma)
-		+ "\n"
+		+"\n"
 	)
 	s += (
 		"    corrosive : "
 		+ UIColor.apply("damage_reduction", "%3d" % mek.damage_reduction_corrosive)
-		+ "\n"
+		+"\n"
 	)
 	entity_info.clear()
 	entity_info.append_text(s)
@@ -265,9 +275,9 @@ func _load_item_details(item: Item):
 				effect_line += (
 					" [hint={"
 					+ damage_description
-					+ "}]"
+					+"}]"
 					+ UIColor.apply("effect_damage_type", damage_type_name)
-					+ "[/hint]"
+					+"[/hint]"
 				)
 			# Add duration and chance details
 			if effect.duration > 0:
@@ -302,9 +312,9 @@ func _load_item_details(item: Item):
 func _get_slot_color(slot: Enums.SlotType) -> Color:
 	"""Returns a color for each slot type."""
 	var slot_colors = {
-		Enums.SlotType.SMALL: Color(0.6, 0.6, 1.0),  # Light Blue
-		Enums.SlotType.MEDIUM: Color(0.3, 0.8, 0.3),  # Green
-		Enums.SlotType.LARGE: Color(1.0, 0.5, 0.3),  # Orange
-		Enums.SlotType.UTILITY: Color(1.0, 1.0, 0.4)  # Yellow
+		Enums.SlotType.SMALL: Color(0.6, 0.6, 1.0), # Light Blue
+		Enums.SlotType.MEDIUM: Color(0.3, 0.8, 0.3), # Green
+		Enums.SlotType.LARGE: Color(1.0, 0.5, 0.3), # Orange
+		Enums.SlotType.UTILITY: Color(1.0, 1.0, 0.4) # Yellow
 	}
 	return slot_colors.get(slot, Color.WHITE)

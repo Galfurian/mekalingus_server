@@ -7,7 +7,7 @@ extends UseModuleOrder
 
 
 func _init(p_source: MapMek, p_target: MapMek, p_equipped_module: EquippedModule) -> void:
-	super(p_source, p_target, p_equipped_module)
+	super (p_source, p_target, p_equipped_module)
 
 
 func _add_combat_log(game_map: GameMap, message: String) -> void:
@@ -41,9 +41,9 @@ func execute(game_map: GameMap) -> bool:
 	# Perform accuracy check
 	var base_accuracy = 90 + source_mek.accuracy_modifier
 	# Adjust based on movement.
-	var move_penalty = -min(source_mek.tiles_moved_last_turn * 5, 30)  # -5% per tile, up to -30%
+	var move_penalty = - min(source_mek.tiles_moved_last_turn * 5, 30) # -5% per tile, up to -30%
 	# Adjust based on dodge.
-	var dodge_bonus = -min(target_mek.tiles_moved_last_turn * 3, 15)  # -3% dodge per tile, up to -15%
+	var dodge_bonus = - min(target_mek.tiles_moved_last_turn * 3, 15) # -3% dodge per tile, up to -15%
 	# Height-based adjustment
 	var source_height = game_map.get_tile_height(source.position)
 	var target_height = game_map.get_tile_height(target.position)
@@ -93,9 +93,9 @@ func execute(game_map: GameMap) -> bool:
 
 
 func _to_string() -> String:
-	var source_name = source.mek.template.mek_name
+	var source_name = source.mek.get_mek_name()
 	var module_name = equipped_module.module.module_name
-	var target_name = target.mek.template.mek_name
+	var target_name = target.mek.get_mek_name()
 	if source == target:
 		return "%s is attacking itself with %s" % [source_name, module_name]
 	return "%s is attacking %s with %s" % [source_name, target_name, module_name]

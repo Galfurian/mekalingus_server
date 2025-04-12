@@ -38,9 +38,9 @@ var is_pvp_enabled: bool = false
 # If true the map allows PVP.
 var is_free_for_all_enabled: bool = true
 # Stores all active NPC units by UUID.
-var npc_units: Dictionary
+var npc_units: Dictionary[String, MapMek]
 # Stores all active Player units by UUID.
-var player_units: Dictionary
+var player_units: Dictionary[String, MapMek]
 # The combat log.
 var combat_logger: MapLogger = MapLogger.new()
 # The chat log.
@@ -106,14 +106,14 @@ func clear() -> void:
 # =============================================================================
 
 
-func _position_to_astar_id(pos: Vector2i) -> int:
+func position_to_astar_id(pos: Vector2i) -> int:
 	"""
 	Converts a 2D position to a unique AStar2D ID using a row-major formula.
 	"""
 	return int(pos.y) * int(map_width) + int(pos.x)
 
 
-func _astar_id_to_position(id: int) -> Vector2i:
+func astar_id_to_position(id: int) -> Vector2i:
 	"""
 	Converts an AStar2D ID back to its corresponding 2D tile position.
 	"""
@@ -122,7 +122,7 @@ func _astar_id_to_position(id: int) -> Vector2i:
 	return Vector2i(x, y)
 
 
-func in_bounds(arg1, arg2 = null) -> bool:
+func is_in_bounds(arg1, arg2 = null) -> bool:
 	"""
 	Checks if a given position is within the map bounds.
 	"""
@@ -139,7 +139,7 @@ func get_tile_id(arg1, arg2 = null) -> int:
 	"""
 	Returns the tile ID at the given position.
 	"""
-	if in_bounds(arg1, arg2):
+	if is_in_bounds(arg1, arg2):
 		if typeof(arg1) == TYPE_VECTOR2I:
 			return int(terrain_data[arg1.x][arg1.y])
 		if typeof(arg1) == TYPE_INT and typeof(arg2) == TYPE_INT:
@@ -189,20 +189,6 @@ func can_move_to(position: Vector2i) -> bool:
 	return is_walkable(position) and not is_occupied(position)
 
 
-func get_tiles_in_range(position: Vector2i, max_range: int) -> Array[Vector2i]:
-	"""
-	Returns all tiles within a given range from a starting position.
-	"""
-	var visible: Array[Vector2i] = []
-	for dx in range(-max_range, max_range + 1):
-		for dy in range(-max_range, max_range + 1):
-			var tile = position + Vector2i(dx, dy)
-			if in_bounds(tile):
-				if position.distance_to(tile) <= max_range:
-					visible.append(tile)
-	return visible
-
-
 func update_astar() -> void:
 	"""
 	Rebuilds the AStar2D graph based on current walkable map tiles.
@@ -215,21 +201,21 @@ func update_astar() -> void:
 			# In terms of AStar we only focus on walkable tiles.
 			if is_walkable(pos):
 				# Add the point to the AStar graph.
-				astar.add_point(_position_to_astar_id(pos), pos)
+				astar.add_point(position_to_astar_id(pos), pos)
 	# Step 2: Connect neighboring walkable tiles (4-directional).
 	for y in range(map_height):
 		for x in range(map_width):
 			var current_pos = Vector2i(x, y)
-			var current_id = _position_to_astar_id(current_pos)
+			var current_id = position_to_astar_id(current_pos)
 			if not astar.has_point(current_id):
 				continue
 			for dir in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
 				var neighbor = current_pos + dir
 				# Skip if out of bounds or not walkable
-				if not in_bounds(neighbor):
+				if not is_in_bounds(neighbor):
 					continue
 				# Get the neighbor's AStar ID and check if it's a valid point.
-				var neighbor_id = _position_to_astar_id(neighbor)
+				var neighbor_id = position_to_astar_id(neighbor)
 				if not astar.has_point(neighbor_id):
 					continue
 				# Connect the points if they are not already connected.
@@ -237,73 +223,6 @@ func update_astar() -> void:
 					var cost = float(get_movement_cost(neighbor))
 					astar.connect_points(current_id, neighbor_id)
 					astar.set_point_weight_scale(neighbor_id, cost)
-
-
-func get_shortest_path(start: Vector2i, end: Vector2i) -> Array[Vector2i]:
-	"""
-	Returns the shortest path between two tiles using AStar2D.
-	"""
-	# Get the AStar IDs for the start and end positions.
-	var start_id = _position_to_astar_id(start)
-	var end_id = _position_to_astar_id(end)
-	# Check if the start and end points are valid.
-	if not astar.has_point(start_id):
-		GameServer.log_message("AStar does not have starting point %s, %d" % [str(start), start_id])
-		return []
-	if not astar.has_point(end_id):
-		GameServer.log_message("AStar does not have ending point %s, %d" % [str(end), end_id])
-		return []
-	# Get the path from AStar.
-	var path: PackedVector2Array = astar.get_point_path(start_id, end_id, true)
-	# Convert the path to a regular array.
-	var result: Array[Vector2i] = []
-	for i in range(path.size()):
-		result.append(Vector2i(path[i]))
-	return result
-
-
-func get_path_cost(path: PackedVector2Array) -> float:
-	"""
-	Compute the total cost of a path.
-	"""
-	var cost = 0.0
-	for i in range(1, path.size()):
-		cost += get_movement_cost(Vector2i(path[i]))
-	return cost
-
-
-func get_reachable_tiles(start: Vector2i, max_cost: int) -> Array[Vector2i]:
-	"""
-	Returns all reachable tiles from a starting position within a given cost.
-	"""
-	# Prepare the list of reachable tiles.
-	var reachable: Array[Vector2i] = []
-	# Get the AStar ID for the starting position.
-	var start_id = _position_to_astar_id(start)
-	# Check that the starting position is valid.
-	if not astar.has_point(start_id):
-		return reachable
-	# Get all candidate tiles within the maximum cost + 2.
-	var candidate_tiles = get_tiles_in_range(start, max_cost + 2)
-	# Iterate over the candidate tiles.
-	for tile in candidate_tiles:
-		# Skip the starting tile.
-		if tile != start:
-			# Get the ID of the candidate tile.
-			var id = _position_to_astar_id(tile)
-			# Check that the candidate tile is valid.
-			if astar.has_point(id):
-				# Get the path to the candidate tile.
-				var path = astar.get_point_path(start_id, id, true)
-				# Check that the path is valid.
-				if path.size() < 2:
-					continue
-				# Get the cost of the path.
-				var cost = get_path_cost(path)
-				# If the cost is within the maximum allowed, add the tile to the reachable list.
-				if cost <= max_cost:
-					reachable.append(tile)
-	return reachable
 
 
 # =============================================================================
@@ -338,7 +257,7 @@ func is_enemy_of(me1: MapMek, me2: MapMek) -> bool:
 
 func get_entity_at(position: Vector2i) -> MapEntity:
 	"""Returns the entity in the given position."""
-	if in_bounds(position):
+	if is_in_bounds(position):
 		for entity in npc_units.values():
 			if position == entity.position:
 				return entity
@@ -346,39 +265,6 @@ func get_entity_at(position: Vector2i) -> MapEntity:
 			if position == entity.position:
 				return entity
 	return null
-
-
-func get_units_in_range(
-	source: MapMek,
-	position: Vector2i,
-	radius: int,
-	include_allies: bool = true,
-	include_enemies: bool = true,
-	exclude_units: Array[MapMek] = []
-) -> Array[MapMek]:
-	"""
-	Returns all units within the specified range of a position.
-	Parameters:
-	- source: The unit doing the search (to determine ally/enemy).
-	- position: The origin position for the search.
-	- radius: The radius in tiles.
-	- include_allies: Whether to include units on the same side as source.
-	- include_enemies: Whether to include enemy units.
-	- exclude_units: Optional list of units to ignore.
-	"""
-	var units_in_range: Array[MapMek] = []
-	for entity in player_units.values() + npc_units.values():
-		if entity == source:
-			continue
-		if entity in exclude_units:
-			continue
-		if position.distance_to(entity.position) > radius:
-			continue
-		if include_allies and not is_enemy_of(source, entity):
-			units_in_range.append(entity)
-		elif include_enemies and is_enemy_of(source, entity):
-			units_in_range.append(entity)
-	return units_in_range
 
 
 func get_entity(uuid: String) -> MapMek:
@@ -486,13 +372,24 @@ static func from_dict(data: Dictionary) -> GameMap:
 	if not biome:
 		push_error("Invalid biome: " + biome_name)
 		return null
-	var map = GameMap.new(
-		data["map_uuid"], biome, data["map_width"], data["map_height"], data["map_difficulty"]
-	)
+	
+	# Create the map instance.
+	var map = GameMap.new(data["map_uuid"], biome, data["map_width"], data["map_height"], data["map_difficulty"])
+
+	# Load the map data.
 	map.terrain_data = Utils.deserialize_matrix(data["terrain_data"])
-	map.npc_units = Utils.deserialize_dict_of_objects(
-		data["npc_units"], func(mek_data): return MapMek.from_dict(mek_data)
-	)
+	
+	# Load the NPC units.
+	map.npc_units.clear()
+	for unit_uuid in data["npc_units"]:
+		var unit: MapMek = MapMek.from_dict(data["npc_units"][unit_uuid])
+		if unit:
+			map.npc_units[unit.mek.uuid] = unit
+		else:
+			push_error("Failed to load NPC unit data.")
+			return null
+
+	# Load the loggers.
 	map.combat_logger = MapLogger.from_dict(data.get("combat_logger", {}))
 	map.chat_logger = MapLogger.from_dict(data.get("chat_logger", {}))
 

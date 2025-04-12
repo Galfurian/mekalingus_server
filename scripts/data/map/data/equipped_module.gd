@@ -46,4 +46,4 @@ func _to_string() -> String:
 	"""
 	Returns a string representation of the EquippedModule.
 	"""
-	return "%s: %s (%s)" % [mek.alias, item.name, module.module_name]
+	return "%s: %s (%s)" % [mek.get_mek_name(), item.name, module.module_name]

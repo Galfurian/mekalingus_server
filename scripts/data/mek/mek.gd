@@ -78,7 +78,7 @@ func _init(data: Dictionary = {}):
 static func compare_meks(a: Mek, b: Mek) -> bool:
 	"""Sorts meks first by size, then by name alphabetically."""
 	if a.template.size == b.template.size:
-		return a.template.mek_name.to_lower() > b.template.mek_name.to_lower()
+		return a.get_mek_name().to_lower() > b.get_mek_name().to_lower()
 	return a.template.size < b.template.size
 
 
@@ -505,13 +505,19 @@ func evaluate_mek_power() -> float:
 # =============================================================================
 
 
+func get_mek_name() -> String:
+	"""
+	Returns the Mek's name.
+	"""
+	if alias.is_empty():
+		return template.mek_name
+	return alias
+
 func get_chat_tag() -> String:
 	"""
 	Returns a chat tag for the Mek.
 	"""
-	if alias.is_empty():
-		return "[url=mek:" + uuid + "]" + template.mek_name + "[/url]"
-	return "[url=mek:" + uuid + "]" + alias + "[/url]"
+	return "[url=mek:" + uuid + "]" + get_mek_name() + "[/url]"
 
 
 func _to_string() -> String:

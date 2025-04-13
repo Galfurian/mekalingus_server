@@ -9,23 +9,13 @@ enum Intent {
 	REPOSITION
 }
 
-enum Phase {
-	UNINITIALIZED,
-	MOVE_THEN_ACT,
-	ACT_IN_PLACE,
-	WAIT,
-	COMPLETE
-}
-
-
 # ========== PLAN STATE ==========
 
 
 # Defines the high-level goal of the plan.
 var intent: Intent = Intent.NONE
-# Tracks where we are in the execution (e.g., move first, act now, done).
-var phase: Phase = Phase.UNINITIALIZED
-
+# Check if the plan is complete.
+var completed: bool = false
 
 # ========== PLAN DATA ==========
 
@@ -49,7 +39,7 @@ var score: float = 0.0
 
 func _init(p_source: MapMek, p_game_map: GameMap) -> void:
 	intent = Intent.NONE
-	phase = Phase.UNINITIALIZED
+	completed = false
 
 	game_map = p_game_map
 	
@@ -60,122 +50,110 @@ func _init(p_source: MapMek, p_game_map: GameMap) -> void:
 	score = 0.0
 
 
+func _format_pos_tag(pos: Vector2i) -> String:
+	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
+
+
 func is_valid() -> bool:
-	# Plan requires an active source unit.
 	if source == null or source.mek.is_dead():
 		return false
-
-	# If a target is specified, it must still be valid and active.
-	if target != null and target.mek.is_dead():
-		return false
-
-	# If the plan requires a module, it must still be usable.
-	if equipped_module != null:
-		if not AIUtils.can_module_be_used_now(source.mek, equipped_module.item, equipped_module.module):
+	if intent == Intent.ATTACK or intent == Intent.SUPPORT:
+		if target == null or target.mek.is_dead():
 			return false
-
-	# If the plan is already complete, it's not valid anymore.
+		if equipped_module == null or not AIUtils.can_module_be_used_now(source.mek, equipped_module.item, equipped_module.module):
+			return false
+	if intent == Intent.RETREAT or intent == Intent.REPOSITION:
+		if destination == Vector2i.ZERO:
+			return false
 	if is_complete():
 		return false
-
 	return true
 
 
 func is_complete() -> bool:
-	match phase:
-		Phase.COMPLETE:
+	if intent == Intent.NONE:
+		return true
+	if completed:
+		return true
+	if intent == Intent.ATTACK or intent == Intent.SUPPORT:
+		if equipped_module and source.mek.cooldown_manager.is_on_cooldown(equipped_module.item, equipped_module.module):
 			return true
-		Phase.MOVE_THEN_ACT:
-			# Still moving to desired tile.
-			return false
-		Phase.ACT_IN_PLACE:
-			# Still needs to perform action.
-			return false
-		Phase.WAIT, Phase.UNINITIALIZED:
-			# No action to perform.
+	if intent == Intent.RETREAT or intent == Intent.REPOSITION:
+		if source.position == destination:
 			return true
-	return true
+	return false
 
 
 func generate_order() -> Order:
 	# Get the range modifier for the enemy unit.
 	var range_modifier = source.mek.range_modifier
-	match phase:
-		Phase.ACT_IN_PLACE, Phase.MOVE_THEN_ACT:
-			# Check if we need to move before acting.
-			if phase == Phase.MOVE_THEN_ACT and source.position != destination and destination != Vector2i.ZERO:
-				# Still in the process of reaching the action position.
-				# Phase remains unchanged.
-				return MoveOrder.new(source, destination)
+	
+	# Check if the intent is that to attack or support.
+	if intent == Intent.ATTACK or intent == Intent.SUPPORT:
+		# Check the essential parameters.
+		if not target:
+			return null
+		if not equipped_module:
+			return null
+		# Get the mek speed.
+		var mek_speed = source.mek.speed
+		# Get the module range.
+		var module_range = equipped_module.module.module_range + range_modifier
+		# Compute the distance to the target to determine if we need to move.
+		var distance = source.position.distance_to(target.position)
+		# Check if the target is in range of the module.
+		var target_in_range = (source == target) or (distance >= 0 and distance <= module_range)
+		# If the target is out of range, we need to move to the target.
+		if not target_in_range:
+			# This will keep track of the best tile to act from.
+			var target_tile: Vector2i = Vector2i.ZERO
+			# Check if the target is an enemy of the source.
+			if game_map.is_enemy_of(source, target):
+				# We need to find the best tile to act from.
+				target_tile = AIUtils.find_best_attack_tile(game_map, source, target, 0, module_range, mek_speed)
+			else:
+				target_tile = AIUtils.find_closest_reachable_tile(game_map, source, target, 0, module_range, mek_speed)
+			# If the best tile is the same as the source position, we can't move, so we move randomly.
+			if target_tile == source.position:
+				target_tile = AIUtils.find_random_reachable_tile(game_map, source.position, mek_speed)
+			# Move to the best tile to act from.
+			if target_tile == Vector2i.ZERO:
+				return null
+			return MoveOrder.new(source, target_tile)
+		# Mark the plan as completed.
+		completed = true
+		# Check if the target is an enemy of the source.
+		if game_map.is_enemy_of(source, target):
+			# Generate the order to use the offensive module on the target.
+			return UseOffensiveModuleOrder.new(source, target, equipped_module)
+		# Generate the order to use the utility module on the target.
+		return UseUtilityModuleOrder.new(source, target, equipped_module)
 
-			# We are in position to act.
-			if target and equipped_module:
-				# Get the module range.
-				var module_range = equipped_module.module.module_range + range_modifier
-				# Decide the best tile to act from.
-				if target != source:
-					# Compute the distance to the target to determine if we need to move.
-					var distance = source.position.distance_to(target.position)
-					# Check if the target is in range of the module.
-					var already_in_range = distance >= 0 and distance <= module_range
-					if not already_in_range:
-						var target_tile: Vector2i = Vector2i.ZERO
-						# Check if the target is an enemy of the source.
-						if game_map.is_enemy_of(source, target):
-							# We need to find the best tile to act from.
-							target_tile = AIUtils.find_best_attack_tile(
-								game_map,
-								source,
-								target,
-								0,
-								module_range,
-								source.mek.speed
-							)
-						else:
-							target_tile = AIUtils.find_closest_reachable_tile(
-								game_map,
-								source,
-								target,
-								0,
-								module_range,
-								source.mek.speed
-							)
-						# Move to the best tile to act from.
-						if target_tile == Vector2i.ZERO:
-							push_error("AIPlan: No valid tile to act from.")
-							return null
-						# Move to the best tile to act from.
-						if target_tile == source.position:
-							push_error("AIPlan: We are already in position to act.")
-							return null
-						return MoveOrder.new(source, target_tile)
-				# Update the phase to complete after the order is generated.
-				phase = Phase.COMPLETE
-				# Check if the target is an enemy of the source.
-				if game_map.is_enemy_of(source, target):
-					# Generate the order to use the offensive module on the target.
-					return UseOffensiveModuleOrder.new(source, target, equipped_module)
-				else:
-					# Generate the order to use the utility module on the target.
-					return UseUtilityModuleOrder.new(source, target, equipped_module)
+	if intent == Intent.RETREAT:
+		# Check the essential parameters.
+		if destination == Vector2i.ZERO:
+			return null
+		# Generate the order to move to the destination.
+		return MoveOrder.new(source, destination)
 
-			# No target or equipped module, so we can't act.
-			push_error("AIPlan: No target or equipped module to act with.")
+	if intent == Intent.REPOSITION:
+		# Check the essential parameters.
+		if destination == Vector2i.ZERO:
+			return null
+		# Generate the order to move to the destination.
+		return MoveOrder.new(source, destination)
 
-		Phase.WAIT:
-			# This unit is skipping its turn or waiting intentionally.
-			pass
+	if intent == Intent.NONE:
+		# No intent to act on.
+		push_error("AIPlan: No intent to act on.")
+		return null
 
 	# No valid order was generated.
 	push_error("AIPlan: No valid order generated.")
 	return null
 
 func _to_string() -> String:
-	var s := "AIPlan(intent=%s, phase=%s" % [
-		AIPlan.Intent.keys()[intent],
-		AIPlan.Phase.keys()[phase]
-	]
-
+	var s := "AIPlan(intent=%s, completed=%s" % [AIPlan.Intent.keys()[intent], str(completed)]
 	if source:
 		s += ", source=%s" % source.mek.get_chat_tag()
 	if target:
@@ -183,6 +161,6 @@ func _to_string() -> String:
 	if equipped_module:
 		s += ", module=%s" % equipped_module.get_chat_tag()
 	if destination != Vector2i.ZERO:
-		s += ", tile=%s" % str(destination)
+		s += ", tile=%s" % _format_pos_tag(destination)
 	s += ", score=%.2f)" % score
 	return s

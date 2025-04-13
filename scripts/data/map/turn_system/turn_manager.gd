@@ -27,12 +27,6 @@ signal on_turn_ended(turn_number: int)
 # The game map associated with this turn manager.
 var game_map: GameMap
 
-# The orders for offensive modules.
-var _offensive_module_orders: Dictionary[String, UseOffensiveModuleOrder]
-# The orders for utility modules.
-var _utility_module_orders: Dictionary[String, UseUtilityModuleOrder]
-# The orders for movement.
-var _move_orders: Dictionary[String, MoveOrder]
 # The current turn number.
 var _current_turn: int
 # Controls the execute of the turn manager.
@@ -55,9 +49,6 @@ func _init(p_game_map: GameMap, p_turn_interval: float = 1.0) -> void:
 	game_map = p_game_map
 	
 	# Initialize the internal state.
-	_offensive_module_orders = {}
-	_utility_module_orders = {}
-	_move_orders = {}
 	_current_turn = int(TURNS_PER_DAY / 2.0)
 	_is_active = false
 	_timer = 0.0
@@ -91,9 +82,6 @@ func clear() -> void:
 	"""
 	Clears the turn manager state.
 	"""
-	_offensive_module_orders.clear()
-	_utility_module_orders.clear()
-	_move_orders.clear()
 	_current_turn = 1
 	_is_active = false
 	_timer = 0.0
@@ -135,17 +123,16 @@ func tick(delta: float) -> void:
 		on_turn_started.emit(_current_turn)
 
 		# 1) Generate the NPCs order for the current turn.
-		_generate_npc_orders()
-		# 2) Process utility module activations.
-		_execute_utility_module_orders()
-		# 3.1) Process offensive module activations.
-		_execute_offensive_module_orders()
-		# 3.2) Check if any units are destroyed after executing the orders.
+		game_map.ai_controller.generate_npc_orders()
+		
+		# 3.1) Process use of module activations.
+		game_map.ai_controller.execute_module_orders()
+		# 3.3) Check if any units are destroyed after executing the orders.
 		_erase_destroyed_units()
-		# 4.1) Reset movement tracking.
-		_reset_movement_tracking()
-		# 4.2) Process movement orders.
-		_execute_move_orders()
+
+		# 4) Process movement orders.
+		game_map.ai_controller.execute_move_orders()
+
 		# 5.1) Regenerate all units.
 		_regenerate_units()
 		# 5.2) Update time-based effects.
@@ -168,17 +155,6 @@ static func format_pos_tag(pos: Vector2i) -> String:
 # =============================================================================
 
 
-func _filter_order_with_dead_mek(_key: String, order) -> bool:
-	"""
-	Checks if the order is valid and the source and target are not dead.
-	"""
-	if is_instance_of(order, UseModuleOrder):
-		return order.source.mek.is_dead() or order.target.mek.is_dead()
-	if is_instance_of(order, MoveOrder):
-		return order.source.mek.is_dead()
-	return false
-
-
 func _filter_dead_unit(_key: String, unit: MapEntity) -> bool:
 	"""
 	Checks if the unit is dead.
@@ -190,80 +166,10 @@ func _erase_destroyed_units() -> void:
 	"""
 	Checks for destroyed units and removes them from the game map.
 	"""
-	# Find all the orders that has the dead units and remove them.
-	Utils.erase(
-		_offensive_module_orders, Utils.filter(_offensive_module_orders, _filter_order_with_dead_mek)
-	)
-	Utils.erase(
-		_utility_module_orders, Utils.filter(_utility_module_orders, _filter_order_with_dead_mek)
-	)
-	Utils.erase(_move_orders, Utils.filter(_move_orders, _filter_order_with_dead_mek))
 	# Erase the dead units from the game map.
-	Utils.erase(game_map.player_units, Utils.filter(game_map.player_units, _filter_dead_unit))
-	Utils.erase(game_map.npc_units, Utils.filter(game_map.npc_units, _filter_dead_unit))
-
-
-func queue_offensive_module_orders(order: UseOffensiveModuleOrder):
-	"""
-	Queues an offensive module activation order, replacing any existing one for the unit.
-	"""
-	if order:
-		_offensive_module_orders[order.source.mek.uuid] = order
-
-
-func queue_utility_module_order(order: UseUtilityModuleOrder):
-	"""
-	Queues a module activation order, replacing any existing one for the unit.
-	"""
-	if order:
-		_utility_module_orders[order.source.mek.uuid] = order
-
-
-func queue_move_order(order: MoveOrder):
-	"""
-	Queues a movement order, replacing any existing one for the unit.
-	"""
-	if order:
-		_move_orders[order.source.mek.uuid] = order
-
-
-func _execute_offensive_module_orders() -> void:
-	"""
-	Executes all queued offensive module orders.
-	"""
-	# Execute the offensive module orders.
-	for order in _offensive_module_orders.values():
-		order.execute(game_map)
-	_offensive_module_orders.clear()
-
-
-func _execute_utility_module_orders() -> void:
-	"""
-	Executes all queued utility module orders.
-	"""
-	for order in _utility_module_orders.values():
-		order.execute(game_map)
-	_utility_module_orders.clear()
-
-
-func _reset_movement_tracking() -> void:
-	"""
-	Resets the movement tracking for all Meks.
-	"""
-	for unit_uuid in game_map.player_units:
-		game_map.player_units[unit_uuid].mek.tiles_moved_last_turn = 0
-	for unit_uuid in game_map.npc_units:
-		game_map.npc_units[unit_uuid].mek.tiles_moved_last_turn = 0
-
-
-func _execute_move_orders() -> void:
-	"""
-	Executes all queued movement orders.
-	"""
-	# Then, execute the orders.
-	for order in _move_orders.values():
-		order.execute(game_map)
-	_move_orders.clear()
+	game_map.remove_destroyed_units()
+	# Remove orders for dead units.
+	game_map.ai_controller.remove_orders_of_dead_units()
 
 
 func _regenerate_units() -> void:
@@ -290,26 +196,3 @@ func _update_time_based_effects():
 				dot_result.shield,
 				dot_result.armor,
 				dot_result.health])
-
-
-# =============================================================================
-# ENEMY AI
-# =============================================================================
-
-
-func _generate_npc_orders():
-	"""
-	Generates and queues an order for each NPC unit using the AI planner system.
-	"""
-	for unit: MapMek in game_map.npc_units.values():
-		# Generate or reuse the current plan.
-		game_map.ai_controller.plan_for_unit(unit)
-		# Generate the next order based on the current plan.
-		var order: Order = game_map.ai_controller.generate_order_for_unit(unit)
-		# Add the order to the queue.
-		if is_instance_of(order, UseUtilityModuleOrder):
-			queue_utility_module_order(order)
-		elif is_instance_of(order, UseOffensiveModuleOrder):
-			queue_offensive_module_orders(order)
-		elif is_instance_of(order, MoveOrder):
-			queue_move_order(order)

@@ -15,19 +15,19 @@ func evaluate_utility_effect_priority(target: MapMek, effect: ItemEffect) -> int
 		# Repairs (High priority if the related stat is low)
 		Enums.EffectType.HEALTH_REPAIR:
 			if target.mek.health < target.mek.max_health * 0.4:
-				priority += 10
+				priority += 16
 			elif target.mek.health < target.mek.max_health * 0.7:
-				priority += 6
+				priority += 8
 		Enums.EffectType.SHIELD_REPAIR:
 			if target.mek.shield < target.mek.max_shield * 0.4:
-				priority += 8
+				priority += 16
 			elif target.mek.shield < target.mek.max_shield * 0.7:
-				priority += 4
+				priority += 8
 		Enums.EffectType.ARMOR_REPAIR:
 			if target.mek.armor < target.mek.max_armor * 0.4:
-				priority += 8
+				priority += 16
 			elif target.mek.armor < target.mek.max_armor * 0.7:
-				priority += 4
+				priority += 8
 		# Max stat modifiers (Lower priority than direct repairs)
 		Enums.EffectType.HEALTH_MODIFIER:
 			priority += 4 if target.mek.health < target.mek.max_health * 0.4 else 2
@@ -39,14 +39,14 @@ func evaluate_utility_effect_priority(target: MapMek, effect: ItemEffect) -> int
 			priority += 3 if target.mek.power < target.mek.max_power * 0.4 else 1
 		# Speed modifier (Always useful, moderate priority)
 		Enums.EffectType.SPEED_MODIFIER:
-			priority += 5
+			priority += 8
 		# Combat performance modifiers (Medium priority)
 		Enums.EffectType.ACCURACY_MODIFIER:
-			priority += 4
+			priority += 12
 		Enums.EffectType.RANGE_MODIFIER:
-			priority += 4
+			priority += 12
 		Enums.EffectType.COOLDOWN_MODIFIER:
-			priority += 4
+			priority += 12
 		# Regeneration effects (Lower than direct repair but useful)
 		Enums.EffectType.HEALTH_REGEN:
 			priority += 5 if target.mek.health < target.mek.max_health * 0.3 else 3
@@ -58,7 +58,7 @@ func evaluate_utility_effect_priority(target: MapMek, effect: ItemEffect) -> int
 			priority += 5 if target.mek.power < target.mek.max_power * 0.3 else 3
 		# Damage Reduction (Always useful, medium priority)
 		Enums.EffectType.DAMAGE_REDUCTION_ALL:
-			priority += 6
+			priority += 12
 		Enums.EffectType.DAMAGE_REDUCTION_KINETIC:
 			priority += 6
 		Enums.EffectType.DAMAGE_REDUCTION_ENERGY:
@@ -156,6 +156,8 @@ func score_utility_module_on_target(
 		if effect.target == Enums.TargetType.SELF and target != source:
 			continue
 		if effect.target == Enums.TargetType.ALLY and target == source:
+			continue
+		if effect.target == Enums.TargetType.ENEMY and target == source:
 			continue
 		total += evaluate_utility_effect_priority(target, effect)
 	return total

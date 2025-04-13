@@ -232,6 +232,13 @@ func update_astar() -> void:
 # =============================================================================
 
 
+func _filter_dead_unit(_key: String, unit: MapEntity) -> bool:
+	"""
+	Checks if the unit is dead.
+	"""
+	return unit.mek.is_dead()
+
+
 func is_npc(entity: MapMek) -> bool:
 	"""
 	Returns true if the entity belongs to the npc_units dictionary (i.e., NPC).
@@ -293,6 +300,15 @@ func remove_entity(uuid: String) -> MapMek:
 		npc_units.erase(uuid)
 	return entity
 
+func remove_destroyed_units() -> void:
+	"""
+	Checks for destroyed units and removes them from the game map.
+	"""
+	# Erase the dead units from the game map.
+	Utils.erase(player_units, Utils.filter(player_units, _filter_dead_unit))
+	Utils.erase(npc_units, Utils.filter(npc_units, _filter_dead_unit))
+
+
 # =============================================================================
 # ENEMY SPAWNING
 # =============================================================================
@@ -305,8 +321,17 @@ const MAX_SQUADS: int = 6 # Upper limit per map
 func _get_enemy_squad_count(difficulty: int) -> int:
 	"""Returns the number of enemy squads based on difficulty and map size."""
 	var map_factor = (map_width * map_height) / ((map_width + map_height) * 3.0)
-	var base_squads = 1 + int(((difficulty + 1) * 0.75) + map_factor)
+	var base_squads = 1 + int(((difficulty + 1) * 0.25) + map_factor)
 	return clamp(base_squads, 1, MAX_SQUADS)
+
+
+func _get_squad_size(difficulty: int) -> int:
+	"""
+	Returns the size of each enemy squad based on difficulty.
+	Low difficulty = smaller squads, high difficulty = larger squads.
+	"""
+	var base_size = MIN_SQUAD_SIZE + int((difficulty / 5.0) * (MAX_SQUAD_SIZE - MIN_SQUAD_SIZE))
+	return clamp(base_size, MIN_SQUAD_SIZE, MAX_SQUAD_SIZE)
 
 
 func _find_valid_spawn_positions() -> Array[Vector2i]:
@@ -337,7 +362,9 @@ func spawn_enemies_on_map(difficulty: int) -> void:
 		if not clan:
 			continue
 
-		var squad_size = randi_range(MIN_SQUAD_SIZE, MAX_SQUAD_SIZE)
+		var avg_size = _get_squad_size(difficulty)
+		var squad_size = randi_range(avg_size - 1, avg_size + 1)
+		squad_size = clamp(squad_size, MIN_SQUAD_SIZE, MAX_SQUAD_SIZE)
 
 		for j in range(squad_size):
 			if spawn_points.is_empty():

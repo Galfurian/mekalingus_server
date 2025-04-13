@@ -7,7 +7,7 @@ extends UseModuleOrder
 
 
 func _init(p_source: MapMek, p_target: MapMek, p_equipped_module: EquippedModule) -> void:
-	super(p_source, p_target, p_equipped_module)
+	super (p_source, p_target, p_equipped_module)
 
 
 func _add_utility_log(game_map: GameMap, message: String) -> void:
@@ -18,7 +18,6 @@ func _add_utility_log(game_map: GameMap, message: String) -> void:
 
 func _format_pos_tag(pos: Vector2i) -> String:
 	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
-
 
 
 # =============================================================================

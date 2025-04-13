@@ -101,39 +101,43 @@ func is_alive() -> bool:
 	return health > 0
 
 
-func restore_health(amount: int) -> int:
+func adjust_health(amount: int) -> int:
 	"""
-	Restores health to the Mek, ensuring it does not exceed the maximum health.
+	Adjusts the Mek's health by the given amount.
+	Positive = healing, Negative = damage.
 	"""
 	var before = health
-	health = min(health + amount, max_health)
+	health = clamp(health + amount, 0, max_health)
 	return health - before
 
 
-func restore_shield(amount: int) -> int:
+func adjust_shield(amount: int) -> int:
 	"""
-	Restores shield to the Mek, ensuring it does not exceed the maximum shield.
+	Adjusts the Mek's shield by the given amount.
+	Positive = shield restoration, Negative = shield damage.
 	"""
 	var before = shield
-	shield = min(shield + amount, max_shield)
+	shield = clamp(shield + amount, 0, max_shield)
 	return shield - before
 
 
-func restore_armor(amount: int) -> int:
+func adjust_armor(amount: int) -> int:
 	"""
-	Restores armor to the Mek, ensuring it does not exceed the maximum armor.
+	Adjusts the Mek's armor by the given amount.
+	Positive = armor restoration, Negative = armor damage.
 	"""
 	var before = armor
-	armor = min(armor + amount, max_armor)
+	armor = clamp(armor + amount, 0, max_armor)
 	return armor - before
 
 
-func restore_power(amount: int) -> int:
+func adjust_power(amount: int) -> int:
 	"""
-	Restores power to the Mek, ensuring it does not exceed the maximum power.
+	Adjusts the Mek's power by the given amount.
+	Positive = power gain, Negative = power drain.
 	"""
 	var before = power
-	power = min(power + amount, max_power)
+	power = clamp(power + amount, 0, max_power)
 	return power - before
 
 
@@ -141,10 +145,10 @@ func regenerate():
 	"""
 	Regenerates power, armor, and shield up to their maximum values.
 	"""
-	restore_health(health_generation)
-	restore_armor(armor_generation)
-	restore_shield(shield_generation)
-	restore_power(power_generation)
+	adjust_health(health_generation)
+	adjust_armor(armor_generation)
+	adjust_shield(shield_generation)
+	adjust_power(power_generation)
 
 
 func take_damage_from_effect(effect: ItemEffect) -> Dictionary:
@@ -160,62 +164,69 @@ func take_damage_from_effect(effect: ItemEffect) -> Dictionary:
 		"reduced": 0,
 		"type": effect.damage_type
 	}
+
 	# =========================================================================
 	# 1. DAMAGE MODIFIERS BY DAMAGE TYPE (strengths/weaknesses per layer)
 	# =========================================================================
-	var type_modifiers = {
+	const TYPE_MODIFIERS = {
 		Enums.DamageType.KINETIC: {"armor": 0.8, "shield": 0.6, "health": 1.0},
 		Enums.DamageType.ENERGY: {"armor": 0.6, "shield": 1.5, "health": 1.0},
 		Enums.DamageType.PLASMA: {"armor": 1.2, "shield": 1.2, "health": 0.9},
 		Enums.DamageType.EXPLOSIVE: {"armor": 1.3, "shield": 0.7, "health": 1.3},
 		Enums.DamageType.CORROSIVE: {"armor": 1.3, "shield": 0.6, "health": 1.2}
 	}
-	var modifiers = type_modifiers.get(
+	var modifiers = TYPE_MODIFIERS.get(
 		effect.damage_type, {"shield": 1.0, "armor": 1.0, "health": 1.0}
 	)
+
 	# =========================================================================
 	# 2. APPLY FLAT DAMAGE REDUCTION
 	# =========================================================================
-	var reduction = damage_reduction_all
+	var reduction = max(0, damage_reduction_all)
 	match effect.damage_type:
 		Enums.DamageType.KINETIC:
-			reduction += damage_reduction_kinetic
+			reduction += max(0, damage_reduction_kinetic)
 		Enums.DamageType.ENERGY:
-			reduction += damage_reduction_energy
+			reduction += max(0, damage_reduction_energy)
 		Enums.DamageType.EXPLOSIVE:
-			reduction += damage_reduction_explosive
+			reduction += max(0, damage_reduction_explosive)
 		Enums.DamageType.PLASMA:
-			reduction += damage_reduction_plasma
+			reduction += max(0, damage_reduction_plasma)
 		Enums.DamageType.CORROSIVE:
-			reduction += damage_reduction_corrosive
+			reduction += max(0, damage_reduction_corrosive)
 	var adjusted = max(effect.amount - reduction, 0)
 	result.reduced = effect.amount - adjusted
 	var remaining = adjusted
+
 	# =========================================================================
 	# 3. APPLY DAMAGE TO SHIELD
 	# =========================================================================
 	if shield > 0:
-		var raw = min(remaining, shield / modifiers.shield)
-		var scaled = int(round(raw * modifiers.shield))
-		shield = max(0, shield - scaled)
-		remaining -= raw
+		var scaled = int(round(remaining * modifiers.shield))
+		scaled = min(scaled, shield)
+		adjust_shield(-scaled)
+		remaining -= scaled / modifiers.shield
 		result.shield = scaled
+
 	# =========================================================================
 	# 4. APPLY DAMAGE TO ARMOR
 	# =========================================================================
 	if armor > 0 and remaining > 0:
 		var raw = min(remaining, armor / modifiers.armor)
 		var scaled = int(round(raw * modifiers.armor))
-		armor = max(0, armor - scaled)
+		adjust_armor(-scaled)
 		remaining -= raw
 		result.armor = scaled
+
 	# =========================================================================
 	# 5. APPLY DAMAGE TO HEALTH
 	# =========================================================================
 	if remaining > 0:
 		var scaled = int(round(remaining * modifiers.health))
-		health = max(0, health - scaled)
+		adjust_health(-scaled)
 		result.health = scaled
+
+
 	# =========================================================================
 	# 6. FINAL TALLY
 	# =========================================================================
@@ -245,13 +256,13 @@ func repair_from_effect(effect: ItemEffect) -> Dictionary:
 	var stat = ""
 	match effect.type:
 		Enums.EffectType.HEALTH_REPAIR:
-			restored = restore_health(effect.amount)
+			restored = adjust_health(effect.amount)
 			stat = "health"
 		Enums.EffectType.SHIELD_REPAIR:
-			restored = restore_shield(effect.amount)
+			restored = adjust_shield(effect.amount)
 			stat = "shield"
 		Enums.EffectType.ARMOR_REPAIR:
-			restored = restore_armor(effect.amount)
+			restored = adjust_armor(effect.amount)
 			stat = "armor"
 		_:
 			return {"stat": "unknown", "amount": 0}
@@ -265,13 +276,13 @@ func apply_regen_effects():
 	for effect in active_effect_manager.get_regen_effects():
 		match effect.effect.type:
 			Enums.EffectType.HEALTH_REGEN:
-				restore_health(effect.effect.amount)
+				adjust_health(effect.effect.amount)
 			Enums.EffectType.SHIELD_REGEN:
-				restore_shield(effect.effect.amount)
+				adjust_shield(effect.effect.amount)
 			Enums.EffectType.ARMOR_REGEN:
-				restore_armor(effect.effect.amount)
+				adjust_armor(effect.effect.amount)
 			Enums.EffectType.POWER_REGEN:
-				restore_power(effect.effect.amount)
+				adjust_power(effect.effect.amount)
 
 
 # =============================================================================

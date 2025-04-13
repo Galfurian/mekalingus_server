@@ -531,7 +531,7 @@
 				"name": "Heatwave Pulse",
 				"passive": false,
 				"power_on_use": 23.0,
-				"module_range": 2.0,
+				"module_range": 3.0,
 				"cooldown": 2.0,
 				"effects": [
 					{

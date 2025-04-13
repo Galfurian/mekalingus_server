@@ -293,13 +293,13 @@
 		]
 	},
 	"utl016": {
-		"name": "Sensor Disruptor",
-		"description": "Jams enemy targeting systems, reducing their accuracy.",
+		"name": "Sensor Enhancer",
+		"description": "Boosts allied targeting systems, increasing their accuracy.",
 		"slot": "utility",
 		"base_power_usage": 18,
 		"modules": [
 			{
-				"name": "Disruptive Signal",
+				"name": "Signal Boost",
 				"passive": false,
 				"power_on_use": 9,
 				"module_range": 3.0,
@@ -307,8 +307,8 @@
 				"effects": [
 					{
 						"type": "ACCURACY_MODIFIER",
-						"target": "ENEMY",
-						"amount": -10
+						"target": "ALLY",
+						"amount": 10
 					}
 				]
 			}
@@ -348,7 +348,7 @@
 					{
 						"type": "COOLDOWN_MODIFIER",
 						"target": "SELF",
-						"amount": 2
+						"amount": -2
 					}
 				]
 			}
@@ -380,7 +380,7 @@
 					{
 						"type": "COOLDOWN_MODIFIER",
 						"target": "SELF",
-						"amount": 2
+						"amount": -2
 					},
 					{
 						"type": "POWER_REGEN",
@@ -393,6 +393,114 @@
 						"target": "SELF",
 						"amount": -28,
 						"duration": 3
+					}
+				]
+			}
+		]
+	},
+	"utl020": {
+		"name": "Field Medical Drone",
+		"description": "Deploys a drone to assist nearby allies, restoring structural integrity in the heat of battle.",
+		"slot": "utility",
+		"base_power_usage": 30,
+		"modules": [
+			{
+				"name": "Emergency Repair Pulse",
+				"passive": false,
+				"power_on_use": 16,
+				"cooldown": 3,
+				"module_range": 4.0,
+				"effects": [
+					{
+						"type": "HEALTH_REPAIR",
+						"target": "ALLY",
+						"amount": 20
+					}
+				]
+			}
+		]
+	},
+	"utl021": {
+		"name": "Shield Stabilizer",
+		"description": "Reinforces the Mek's own shield generators to quickly restore shielding.",
+		"slot": "utility",
+		"base_power_usage": 25,
+		"modules": [
+			{
+				"name": "Self-Shield Boost",
+				"passive": false,
+				"power_on_use": 12,
+				"cooldown": 2,
+				"effects": [
+					{
+						"type": "SHIELD_REPAIR",
+						"target": "SELF",
+						"amount": 30
+					}
+				]
+			}
+		]
+	},
+	"utl022": {
+		"name": "Shield Projector Drone",
+		"description": "Deploys a short-range projector to regenerate an ally’s shield systems.",
+		"slot": "utility",
+		"base_power_usage": 25,
+		"modules": [
+			{
+				"name": "Shield Regeneration Beam",
+				"passive": false,
+				"power_on_use": 12,
+				"cooldown": 2,
+				"module_range": 3.0,
+				"effects": [
+					{
+						"type": "SHIELD_REPAIR",
+						"target": "ALLY",
+						"amount": 30
+					}
+				]
+			}
+		]
+	},
+	"utl023": {
+		"name": "Armor Plating Injector",
+		"description": "Injects nanomaterials into the Mek's armor to patch structural weaknesses.",
+		"slot": "utility",
+		"base_power_usage": 28,
+		"modules": [
+			{
+				"name": "Auto-Weld Reinforcement",
+				"passive": false,
+				"power_on_use": 14,
+				"cooldown": 3,
+				"effects": [
+					{
+						"type": "ARMOR_REPAIR",
+						"target": "SELF",
+						"amount": 25
+					}
+				]
+			}
+		]
+	},
+	"utl024": {
+		"name": "Remote Armor Repair Kit",
+		"description": "Launches a repair pod to restore damaged armor plating on an ally.",
+		"slot": "utility",
+		"base_power_usage": 28,
+		"modules": [
+			{
+				"name": "Remote Nanite Patch",
+				"passive": false,
+				"power_on_use": 14,
+				"cooldown": 3,
+				"module_range": 3.0,
+				"effects": [
+					{
+						"type": "ARMOR_REPAIR",
+						"target": "ALLY",
+						"amount": 25
 					}
 				]
 			}

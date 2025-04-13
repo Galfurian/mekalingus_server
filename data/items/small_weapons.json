@@ -515,7 +515,7 @@
 				"name": "Singularity Detonation",
 				"passive": false,
 				"power_on_use": 19.0,
-				"module_range": 2.0,
+				"module_range": 3.0,
 				"cooldown": 3.0,
 				"effects": [
 					{
@@ -545,7 +545,7 @@
 				"name": "Sonic Pulse",
 				"passive": false,
 				"power_on_use": 10.0,
-				"module_range": 2.0,
+				"module_range": 3.0,
 				"cooldown": 0.0,
 				"effects": [
 					{

@@ -355,6 +355,36 @@ static func from_dict(data: Dictionary) -> GameMap:
 			push_error("Failed to load player unit data.")
 			return null
 
+	# Load the structures (optional for backward compatibility).
+	map.structures.clear()
+	for struct_uuid in data.get("structures", {}):
+		var structure = MapStructure.from_dict(data.get("structures", {})[struct_uuid])
+		if structure:
+			map.structures[struct_uuid] = structure
+		else:
+			push_error("Failed to load structure data.")
+			return null
+
+	# Load the turrets (optional for backward compatibility).
+	map.turrets.clear()
+	for turret_uuid in data.get("turrets", {}):
+		var turret = MapTurret.from_dict(data.get("turrets", {})[turret_uuid])
+		if turret:
+			map.turrets[turret_uuid] = turret
+		else:
+			push_error("Failed to load turret data.")
+			return null
+
+	# Load the pickups (optional for backward compatibility).
+	map.pickups.clear()
+	for pickup_uuid in data.get("pickups", {}):
+		var pickup = MapPickup.from_dict(data.get("pickups", {})[pickup_uuid])
+		if pickup:
+			map.pickups[pickup_uuid] = pickup
+		else:
+			push_error("Failed to load pickup data.")
+			return null
+
 	# Load the loggers.
 	map.combat_logger = MapLogger.from_dict(data.get("combat_logger", {}))
 	map.chat_logger = MapLogger.from_dict(data.get("chat_logger", {}))
@@ -376,6 +406,9 @@ func to_dict() -> Dictionary:
 		"terrain_data": Utils.serialize_matrix(terrain_data, map_width, map_height),
 		"npc_units": Utils.serialize_dict_of_objects(npc_units),
 		"player_units": Utils.serialize_dict_of_objects(player_units),
+		"structures": Utils.serialize_dict_of_objects(structures),
+		"turrets": Utils.serialize_dict_of_objects(turrets),
+		"pickups": Utils.serialize_dict_of_objects(pickups),
 		"combat_logger": combat_logger.to_dict(),
 		"chat_logger": chat_logger.to_dict(),
 	}

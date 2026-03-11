@@ -1,7 +1,9 @@
 extends Node
 
-# Stores connections [peer_id -> Player.player_uuid]
-var peer_player_map: Dictionary[int, String]
+const PeerSessionManagerScript = preload("res://scripts/core/networking/peer_session_manager.gd")
+
+# Manages the peer_id <-> player_uuid associations for active sessions.
+var _sessions = PeerSessionManagerScript.new()
 
 # =============================================================================
 # GENERAL
@@ -11,36 +13,21 @@ func log_message(msg: String):
 	GameServer.log_message(msg)
 
 func associate_peer_with_player(peer_id: int, player_uuid: String):
-	"""When a client logs in, associate their peer_id with their player_uuid."""
-	# Search for a possible previously associated peer_id.
-	var previous_peer_id = find_peer_id(player_uuid)
-	# If an old peer_id exists, force disconnect it before reassigning
-	if previous_peer_id and previous_peer_id != peer_id:
-		# Check if the peer is active.
-		if multiplayer.get_peers().has(previous_peer_id):
-			log_message("Forcing disconnect of old session for:" + player_uuid)
-			multiplayer.disconnect_peer(previous_peer_id)
-		remove_peer(previous_peer_id)
-	# Assign new peer_id to the player_uuid
-	peer_player_map[peer_id] = player_uuid
+	var previous_peer_id: int = _sessions.find_peer_id(player_uuid)
+	if previous_peer_id != 0 and previous_peer_id != peer_id:
+		log_message("Forcing disconnect of old session for:" + player_uuid)
+	_sessions.associate(multiplayer, peer_id, player_uuid)
 	log_message("Associated peer with player: " + str(peer_id) + " -> " + player_uuid)
 
 func find_player_uuid(peer_id: int) -> String:
-	"""Get the player_uuid associated with a peer_id."""
-	return peer_player_map.get(peer_id, "")
+	return _sessions.find_player_uuid(peer_id)
 
 func find_peer_id(player_uuid: String) -> int:
-	"""Get the peer_id associated with a player_uuid."""
-	for peer_id in peer_player_map:
-		if peer_player_map[peer_id] == player_uuid:
-			return peer_id
-	return 0
+	return _sessions.find_peer_id(player_uuid)
 
 func remove_peer(peer_id: int):
-	"""Remove peer association when they disconnect."""
-	if peer_player_map.has(peer_id):
-		log_message("Removing peer from player map: " + str(peer_id) + " -> " + peer_player_map[peer_id])
-		peer_player_map.erase(peer_id)
+	log_message("Removing peer from player map: " + str(peer_id) + " -> " + _sessions.find_player_uuid(peer_id))
+	_sessions.remove(peer_id)
 	
 # =============================================================================
 # RPC: GENERIC

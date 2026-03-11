@@ -198,3 +198,4 @@ func _update_time_based_effects():
 				dot_result.shield,
 				dot_result.armor,
 				dot_result.health])
+		unit.mek.active_effect_manager.decrement_durations()

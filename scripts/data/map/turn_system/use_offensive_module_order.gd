@@ -73,6 +73,20 @@ func execute(game_map: GameMap) -> bool:
 		return false
 
 	for effect in equipped_module.module.effects:
+		var effect_chance: int = clamp(effect.chance, 0, 100)
+		if effect_chance < 100:
+			var effect_roll: int = randi() % 100
+			if effect_roll >= effect_chance:
+				_add_combat_log(
+					game_map,
+					"%s effect %s failed (%d%%, roll=%d)" % [
+						equipped_module.get_chat_tag(),
+						effect.get_effect_type_label(),
+						effect_chance,
+						effect_roll,
+					],
+				)
+				continue
 		if effect.is_damage():
 			_apply_damage_effect(game_map, effect)
 		elif effect.is_repair():

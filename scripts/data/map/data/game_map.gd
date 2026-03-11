@@ -325,8 +325,8 @@ static func from_dict(data: Dictionary) -> GameMap:
 	
 	# Load the NPC units.
 	map.npc_units.clear()
-	for unit_uuid in data["npc_units"]:
-		var unit: MapMek = MapMek.from_dict(data["npc_units"][unit_uuid])
+	for unit_uuid in data.get("npc_units", {}):
+		var unit: MapMek = MapMek.from_dict(data.get("npc_units", {})[unit_uuid])
 		if unit:
 			map.npc_units[unit.mek.uuid] = unit
 		else:

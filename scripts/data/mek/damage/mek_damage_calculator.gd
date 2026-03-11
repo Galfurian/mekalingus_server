@@ -1,6 +1,8 @@
 class_name MekDamageCalculator
 extends RefCounted
 
+const MAX_DAMAGE_REDUCTION_RATIO: float = 0.95
+
 
 static func take_damage_from_effect(mek: Mek, effect: ItemEffect) -> Dictionary:
 	"""
@@ -45,6 +47,8 @@ static func take_damage_from_effect(mek: Mek, effect: ItemEffect) -> Dictionary:
 			reduction += max(0, mek.damage_reduction_plasma)
 		Enums.DamageType.CORROSIVE:
 			reduction += max(0, mek.damage_reduction_corrosive)
+	var max_reduction: int = int(floor(float(effect.amount) * MAX_DAMAGE_REDUCTION_RATIO))
+	reduction = min(reduction, max_reduction)
 	var adjusted = max(effect.amount - reduction, 0)
 	result.reduced = effect.amount - adjusted
 	var remaining = adjusted

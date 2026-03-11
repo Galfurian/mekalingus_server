@@ -2,6 +2,9 @@ extends Node
 
 class_name Mek
 
+const MekDamageCalculatorScript = preload("res://scripts/data/mek/damage/mek_damage_calculator.gd")
+const MekPowerEvaluatorScript = preload("res://scripts/data/mek/power/mek_power_evaluator.gd")
+
 # =============================================================================
 # PROPERTIES
 # =============================================================================
@@ -155,97 +158,14 @@ func take_damage_from_effect(effect: ItemEffect) -> Dictionary:
 	"""
 	Applies damage from a given effect, using resistances and damage-type-specific strengths/weaknesses.
 	"""
-	var result = {
-		"shield": 0,
-		"armor": 0,
-		"health": 0,
-		"total": 0,
-		"raw": effect.amount,
-		"reduced": 0,
-		"type": effect.damage_type
-	}
-
-	# =========================================================================
-	# 1. DAMAGE MODIFIERS BY DAMAGE TYPE (strengths/weaknesses per layer)
-	# =========================================================================
-	const TYPE_MODIFIERS = {
-		Enums.DamageType.KINETIC: {"armor": 0.8, "shield": 0.6, "health": 1.0},
-		Enums.DamageType.ENERGY: {"armor": 0.6, "shield": 1.5, "health": 1.0},
-		Enums.DamageType.PLASMA: {"armor": 1.2, "shield": 1.2, "health": 0.9},
-		Enums.DamageType.EXPLOSIVE: {"armor": 1.3, "shield": 0.7, "health": 1.3},
-		Enums.DamageType.CORROSIVE: {"armor": 1.3, "shield": 0.6, "health": 1.2}
-	}
-	var modifiers = TYPE_MODIFIERS.get(
-		effect.damage_type, {"shield": 1.0, "armor": 1.0, "health": 1.0}
-	)
-
-	# =========================================================================
-	# 2. APPLY FLAT DAMAGE REDUCTION
-	# =========================================================================
-	var reduction = max(0, damage_reduction_all)
-	match effect.damage_type:
-		Enums.DamageType.KINETIC:
-			reduction += max(0, damage_reduction_kinetic)
-		Enums.DamageType.ENERGY:
-			reduction += max(0, damage_reduction_energy)
-		Enums.DamageType.EXPLOSIVE:
-			reduction += max(0, damage_reduction_explosive)
-		Enums.DamageType.PLASMA:
-			reduction += max(0, damage_reduction_plasma)
-		Enums.DamageType.CORROSIVE:
-			reduction += max(0, damage_reduction_corrosive)
-	var adjusted = max(effect.amount - reduction, 0)
-	result.reduced = effect.amount - adjusted
-	var remaining = adjusted
-
-	# =========================================================================
-	# 3. APPLY DAMAGE TO SHIELD
-	# =========================================================================
-	if shield > 0:
-		var scaled = int(round(remaining * modifiers.shield))
-		scaled = min(scaled, shield)
-		adjust_shield(-scaled)
-		remaining -= scaled / modifiers.shield
-		result.shield = scaled
-
-	# =========================================================================
-	# 4. APPLY DAMAGE TO ARMOR
-	# =========================================================================
-	if armor > 0 and remaining > 0:
-		var raw = min(remaining, armor / modifiers.armor)
-		var scaled = int(round(raw * modifiers.armor))
-		adjust_armor(-scaled)
-		remaining -= raw
-		result.armor = scaled
-
-	# =========================================================================
-	# 5. APPLY DAMAGE TO HEALTH
-	# =========================================================================
-	if remaining > 0:
-		var scaled = int(round(remaining * modifiers.health))
-		adjust_health(-scaled)
-		result.health = scaled
-
-
-	# =========================================================================
-	# 6. FINAL TALLY
-	# =========================================================================
-	result.total = result.shield + result.armor + result.health
-	return result
+	return MekDamageCalculatorScript.take_damage_from_effect(self, effect)
 
 
 func take_dot_damage() -> Dictionary:
 	"""
 	Applies all active DOT effects using resistances and returns a breakdown.
 	"""
-	var total_damage = {"shield": 0, "armor": 0, "health": 0, "total": 0}
-	for dot in active_effect_manager.get_dot_effects():
-		var damage = take_damage_from_effect(dot.effect)
-		total_damage.shield += damage.shield
-		total_damage.armor += damage.armor
-		total_damage.health += damage.health
-		total_damage.total += damage.total
-	return total_damage
+	return MekDamageCalculatorScript.take_dot_damage(self)
 
 
 func repair_from_effect(effect: ItemEffect) -> Dictionary:
@@ -424,7 +344,7 @@ func clear_items() -> void:
 	"""
 	for item in items:
 		# Free the UUID if tracked
-		GameServer.free_uuid(item.get(item.uuid))
+		GameServer.free_uuid(item.uuid)
 	items.clear()
 
 
@@ -439,30 +359,7 @@ func evaluate_mek_power() -> float:
 	- Power contribution of equipped items.
 	- Base stats retrieved from the MekTemplate.
 	"""
-	var item_power := 0.0
-	for item in items:
-		item_power += item.evaluate_item_power()
-	var stat_power := (
-		max_health * 0.3
-		+ max_armor * 0.3
-		+ max_shield * 0.3
-		+ max_power * 0.3
-		+ health_generation * 2.0
-		+ armor_generation * 2.0
-		+ shield_generation * 2.0
-		+ power_generation * 2.0
-		+ speed * 15.0
-		+ damage_reduction_all * 5.0
-		+ damage_reduction_kinetic * 2.5
-		+ damage_reduction_energy * 2.5
-		+ damage_reduction_explosive * 2.5
-		+ damage_reduction_plasma * 2.5
-		+ damage_reduction_corrosive * 2.5
-		+ accuracy_modifier * 5.0
-		+ range_modifier * 5.0
-		+ cooldown_modifier * 5.0
-	)
-	return round(item_power + stat_power)
+	return MekPowerEvaluatorScript.evaluate(self)
 
 
 # =============================================================================
@@ -497,7 +394,7 @@ func from_dict(data: Dictionary = {}) -> bool:
 
 	mek_id = data["mek_id"]
 	uuid = data["uuid"]
-	alias = data.get("alia", "")
+	alias = data.get("alias", "")
 	for item_data in data.get("items", []):
 		items.append(Item.new(item_data))
 	items.sort_custom(Item.compare_items)

@@ -194,19 +194,36 @@ func _populate_templates() -> void:
 	template_option.clear()
 	var entity_type: String = _get_selected_metadata(entity_type_option)
 	if entity_type == "mek":
-		var ids: Array[String] = []
+		var grouped: Dictionary = {
+			Enums.MekSize.LIGHT: [],
+			Enums.MekSize.MEDIUM: [],
+			Enums.MekSize.HEAVY: [],
+			Enums.MekSize.COLOSSAL: [],
+		}
 		for template_id: String in TemplateManager.mek_templates.keys():
-			ids.append(template_id)
-		ids.sort_custom(func(a: String, b: String):
-			var ta: MekTemplate = TemplateManager.mek_templates[a]
-			var tb: MekTemplate = TemplateManager.mek_templates[b]
-			return ta.mek_name.to_lower() < tb.mek_name.to_lower()
-		)
-		for index in range(ids.size()):
-			var template_id: String = ids[index]
 			var template: MekTemplate = TemplateManager.mek_templates[template_id]
-			template_option.add_item(template.mek_name)
-			template_option.set_item_metadata(index, template_id)
+			grouped[template.size].append({ "id": template_id, "name": template.mek_name })
+
+		var size_order: Array[int] = [
+			Enums.MekSize.LIGHT,
+			Enums.MekSize.MEDIUM,
+			Enums.MekSize.HEAVY,
+			Enums.MekSize.COLOSSAL,
+		]
+		var added_group: bool = false
+		for size_class: int in size_order:
+			var group: Array[Dictionary] = grouped[size_class]
+			if group.is_empty():
+				continue
+			group.sort_custom(func(a: Dictionary, b: Dictionary):
+				return a["name"].to_lower() < b["name"].to_lower()
+			)
+			if added_group:
+				template_option.add_separator()
+			added_group = true
+			for entry: Dictionary in group:
+				template_option.add_item(entry["name"])
+				template_option.set_item_metadata(template_option.item_count - 1, entry["id"])
 	elif entity_type == "structure":
 		var structure_ids: Array[String] = []
 		for template_id: String in TemplateManager.structure_templates.keys():

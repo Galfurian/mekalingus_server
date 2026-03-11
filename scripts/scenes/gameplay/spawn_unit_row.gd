@@ -69,24 +69,49 @@ func _on_entity_type_changed(_index: int) -> void:
 func _populate_templates() -> void:
 	template_option.clear()
 	var entity_type: String = _selected_meta(entity_type_option)
-	var items: Array[Dictionary] = []
 
 	if entity_type == "mek":
+		var grouped: Dictionary = {
+			Enums.MekSize.LIGHT: [],
+			Enums.MekSize.MEDIUM: [],
+			Enums.MekSize.HEAVY: [],
+			Enums.MekSize.COLOSSAL: [],
+		}
 		for id: String in TemplateManager.mek_templates.keys():
 			var tmpl: MekTemplate = TemplateManager.mek_templates[id]
-			items.append({ "id": id, "name": tmpl.mek_name })
+			grouped[tmpl.size].append({ "id": id, "name": tmpl.mek_name })
+
+		var size_order: Array[int] = [
+			Enums.MekSize.LIGHT,
+			Enums.MekSize.MEDIUM,
+			Enums.MekSize.HEAVY,
+			Enums.MekSize.COLOSSAL,
+		]
+		var added_group: bool = false
+		for size_class: int in size_order:
+			var group: Array[Dictionary] = grouped[size_class]
+			if group.is_empty():
+				continue
+			group.sort_custom(func(a: Dictionary, b: Dictionary):
+				return a["name"].to_lower() < b["name"].to_lower()
+			)
+			if added_group:
+				template_option.add_separator()
+			added_group = true
+			for entry: Dictionary in group:
+				template_option.add_item(entry["name"])
+				template_option.set_item_metadata(template_option.item_count - 1, entry["id"])
 	elif entity_type == "structure":
+		var items: Array[Dictionary] = []
 		for id: String in TemplateManager.structure_templates.keys():
 			var tmpl: StructureTemplate = TemplateManager.structure_templates[id]
 			items.append({ "id": id, "name": tmpl.structure_name })
-
-	items.sort_custom(func(a: Dictionary, b: Dictionary):
-		return a["name"].to_lower() < b["name"].to_lower()
-	)
-
-	for i in range(items.size()):
-		template_option.add_item(items[i]["name"])
-		template_option.set_item_metadata(i, items[i]["id"])
+		items.sort_custom(func(a: Dictionary, b: Dictionary):
+			return a["name"].to_lower() < b["name"].to_lower()
+		)
+		for entry: Dictionary in items:
+			template_option.add_item(entry["name"])
+			template_option.set_item_metadata(template_option.item_count - 1, entry["id"])
 	if template_option.item_count > 0:
 		template_option.select(0)
 

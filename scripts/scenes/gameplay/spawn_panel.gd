@@ -3,6 +3,7 @@ extends PopupPanel
 signal spawn_requested(request: Dictionary)
 
 var _target_cell: Vector2i = Vector2i(-1, -1)
+var _game_map: GameMap = null
 
 @onready var target_value: Label = $MarginContainer/Root/TargetRow/TargetValue
 @onready var entity_type_option: OptionButton = $MarginContainer/Root/Form/EntityTypeOption
@@ -10,7 +11,9 @@ var _target_cell: Vector2i = Vector2i(-1, -1)
 @onready var quantity_spin: SpinBox = $MarginContainer/Root/Form/QuantitySpin
 @onready var owner_type_option: OptionButton = $MarginContainer/Root/Form/OwnerTypeOption
 @onready var clan_option: OptionButton = $MarginContainer/Root/Form/ClanOption
+@onready var npc_mode_option: OptionButton = $MarginContainer/Root/Form/NpcModeOption
 @onready var npc_name_edit: LineEdit = $MarginContainer/Root/Form/NpcNameEdit
+@onready var npc_existing_option: OptionButton = $MarginContainer/Root/Form/NpcExistingOption
 @onready var player_option: OptionButton = $MarginContainer/Root/Form/PlayerOption
 @onready var status_label: Label = $MarginContainer/Root/StatusLabel
 @onready var spawn_button: Button = $MarginContainer/Root/Buttons/SpawnButton
@@ -22,17 +25,35 @@ func _ready() -> void:
 	cancel_button.pressed.connect(_on_cancel_pressed)
 	entity_type_option.item_selected.connect(_on_entity_type_changed)
 	owner_type_option.item_selected.connect(_on_owner_type_changed)
+	npc_mode_option.item_selected.connect(_on_npc_mode_changed)
 
 
-func open_for_cell(cell: Vector2i, default_clan_id: String = "") -> void:
+func open_for_cell(
+	cell: Vector2i,
+	game_map: GameMap,
+	default_clan_id: String = "",
+	default_owner: EntityOwner = null
+) -> void:
 	_target_cell = cell
+	_game_map = game_map
 	target_value.text = "(%d, %d)" % [cell.x, cell.y]
 
 	_populate_entity_types()
 	_populate_owner_types()
 	_populate_clans(default_clan_id)
+	_populate_npc_modes()
+	_populate_existing_npc_owners(default_owner)
 	_populate_players()
 	_populate_templates()
+	_apply_owner_field_visibility()
+
+	if is_instance_of(default_owner, NPCOwned):
+		npc_name_edit.text = default_owner.npc_name
+		if npc_existing_option.item_count > 0:
+			npc_mode_option.select(1)
+	elif is_instance_of(default_owner, PlayerOwned):
+		owner_type_option.select(1)
+
 	_apply_owner_field_visibility()
 
 	quantity_spin.value = 1
@@ -56,6 +77,46 @@ func _populate_owner_types() -> void:
 	owner_type_option.add_item("Player Owner")
 	owner_type_option.set_item_metadata(1, "player")
 	owner_type_option.select(0)
+
+
+func _populate_npc_modes() -> void:
+	npc_mode_option.clear()
+	npc_mode_option.add_item("New Commander")
+	npc_mode_option.set_item_metadata(0, "new")
+	npc_mode_option.add_item("Existing Commander")
+	npc_mode_option.set_item_metadata(1, "existing")
+	npc_mode_option.select(0)
+
+
+func _populate_existing_npc_owners(default_owner: EntityOwner = null) -> void:
+	npc_existing_option.clear()
+	if not _game_map:
+		return
+
+	var commander_map: Dictionary[String, String] = {}
+	for unit: MapCombatEntity in _game_map.npc_units.values():
+		if unit and is_instance_of(unit.owner, NPCOwned) and unit.owner.clan:
+			var key: String = "%s|%s" % [unit.owner.npc_name, unit.owner.clan.id]
+			if not commander_map.has(key):
+				commander_map[key] = "%s (%s)" % [unit.owner.npc_name, unit.owner.clan.clan_name]
+
+	var keys: Array[String] = commander_map.keys()
+	keys.sort_custom(func(a: String, b: String): return commander_map[a].to_lower() < commander_map[b].to_lower())
+
+	var default_index: int = -1
+	for index in range(keys.size()):
+		var key: String = keys[index]
+		npc_existing_option.add_item(commander_map[key])
+		npc_existing_option.set_item_metadata(index, key)
+		if is_instance_of(default_owner, NPCOwned):
+			var expected_key: String = "%s|%s" % [default_owner.npc_name, default_owner.clan.id]
+			if key == expected_key:
+				default_index = index
+
+	if default_index >= 0:
+		npc_existing_option.select(default_index)
+	elif npc_existing_option.item_count > 0:
+		npc_existing_option.select(0)
 
 
 func _populate_clans(default_clan_id: String) -> void:
@@ -136,7 +197,11 @@ func _apply_owner_field_visibility() -> void:
 	var owner_type: String = _get_selected_metadata(owner_type_option)
 	var is_player_owner: bool = owner_type == "player"
 	player_option.visible = is_player_owner
-	npc_name_edit.visible = not is_player_owner
+	npc_mode_option.visible = not is_player_owner
+
+	var use_existing_npc: bool = _get_selected_metadata(npc_mode_option) == "existing"
+	npc_name_edit.visible = not is_player_owner and not use_existing_npc
+	npc_existing_option.visible = not is_player_owner and use_existing_npc
 
 
 func _get_selected_metadata(option: OptionButton) -> String:
@@ -156,6 +221,10 @@ func _on_owner_type_changed(_index: int) -> void:
 	_apply_owner_field_visibility()
 
 
+func _on_npc_mode_changed(_index: int) -> void:
+	_apply_owner_field_visibility()
+
+
 func _on_cancel_pressed() -> void:
 	hide()
 
@@ -164,9 +233,11 @@ func _on_spawn_pressed() -> void:
 	var entity_type: String = _get_selected_metadata(entity_type_option)
 	var template_id: String = _get_selected_metadata(template_option)
 	var owner_type: String = _get_selected_metadata(owner_type_option)
+	var npc_mode: String = _get_selected_metadata(npc_mode_option)
 	var clan_id: String = _get_selected_metadata(clan_option)
 	var player_uuid: String = _get_selected_metadata(player_option)
 	var npc_name: String = npc_name_edit.text.strip_edges()
+	var existing_npc_key: String = _get_selected_metadata(npc_existing_option)
 	var quantity: int = int(quantity_spin.value)
 
 	if entity_type.is_empty() or template_id.is_empty():
@@ -178,8 +249,16 @@ func _on_spawn_pressed() -> void:
 	if owner_type == "player" and player_uuid.is_empty():
 		_set_status("Select a player for Player Owner mode.")
 		return
-	if owner_type == "npc" and npc_name.is_empty():
-		npc_name = NameGenerator.random_full_name()
+	if owner_type == "npc":
+		if npc_mode == "existing":
+			if existing_npc_key.is_empty() or not existing_npc_key.contains("|"):
+				_set_status("Select an existing NPC commander.")
+				return
+			var parts := existing_npc_key.split("|", false, 2)
+			npc_name = parts[0]
+			clan_id = parts[1]
+		elif npc_name.is_empty():
+			npc_name = NameGenerator.random_full_name()
 
 	var request: Dictionary = {
 		"position": _target_cell,
@@ -187,6 +266,7 @@ func _on_spawn_pressed() -> void:
 		"template_id": template_id,
 		"quantity": max(1, quantity),
 		"owner_type": owner_type,
+		"npc_mode": npc_mode,
 		"clan_id": clan_id,
 		"npc_name": npc_name,
 		"player_uuid": player_uuid,

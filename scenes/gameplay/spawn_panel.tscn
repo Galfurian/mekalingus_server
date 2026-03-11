@@ -84,6 +84,20 @@ layout_mode = 2
 layout_mode = 2
 text = "NPC Name"
 
+[node name="NpcModeLabel" type="Label" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+text = "NPC Mode"
+
+[node name="NpcModeOption" type="OptionButton" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+
+[node name="NpcExistingLabel" type="Label" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+text = "NPC Commander"
+
+[node name="NpcExistingOption" type="OptionButton" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+
 [node name="NpcNameEdit" type="LineEdit" parent="MarginContainer/Root/Form"]
 layout_mode = 2
 placeholder_text = "Leave empty for random"

@@ -96,12 +96,12 @@ func update_panel() -> void:
 	entity_info.clear()
 	item_inspector.visible = false
 
-	if is_instance_of(entity, MapMek):
-		_load_mek_details(entity)
+	if is_instance_of(entity, MapCombatEntity):
+		_load_combat_entity_details(entity)
 
 		item_inspector.visible = true
 
-		for item in entity.combatant.items:
+		for item: Item in entity.combatant.items:
 			var index = item_list.add_item(item.template.item_name)
 			item_list.set_item_metadata(index, item)
 			item_list.set_item_custom_fg_color(index, _get_slot_color(item.template.slot))
@@ -116,7 +116,7 @@ func select_item_by_uuid(uuid: String) -> void:
 	"""
 	Selects an item in the list by its UUID and shows its details.
 	"""
-	if not is_instance_valid(entity) or not is_instance_of(entity, MapMek):
+	if not is_instance_valid(entity) or not is_instance_of(entity, MapCombatEntity):
 		return
 
 	for i in item_list.item_count:
@@ -144,76 +144,91 @@ func _on_item_selected(index: int) -> void:
 # =============================================================================
 
 
-func _load_mek_details(map_mek: MapMek) -> void:
-	if not is_instance_valid(map_mek):
+func _load_combat_entity_details(map_entity: MapCombatEntity) -> void:
+	if not is_instance_valid(map_entity):
 		return
-	# Get the mek.
-	var mek: Mek = map_mek.combatant
+	# Get the combat actor.
+	var actor: CombatActor = map_entity.combatant
 	# Add the name.
-	var s = "[center][b]" + mek.get_mek_name() + "[/b][/center]\n"
-	# Add who is controlling the mek.
-	if is_instance_of(map_mek.owner, PlayerOwned):
-		s += "Player  : " + map_mek.owner.player.player_name + "\n"
-	elif is_instance_of(map_mek.owner, NPCOwned):
-		s += "NPC     : " + map_mek.owner.npc_name + "\n"
+	var s = "[center][b]" + _combatant_name(actor) + "[/b][/center]\n"
+	# Add who is controlling the entity.
+	if is_instance_of(map_entity.owner, PlayerOwned):
+		s += "Player  : " + map_entity.owner.player.player_name + "\n"
+	elif is_instance_of(map_entity.owner, NPCOwned):
+		s += "NPC     : " + map_entity.owner.npc_name + "\n"
 	# Add the clan.
-	s += "Clan    : " + map_mek.owner.clan.clan_name + "\n"
-	s += "Power   : " + str(mek.evaluate_mek_power()) + "\n"
-	s += "Size    : " + Utils.enum_to_string(Enums.MekSize, mek.template.size) + "\n"
-	s += "Health  : " + UIColor.apply("health", "%3d" % mek.health) + " / "
-	s += UIColor.apply("health", "%3d" % mek.max_health)
-	if mek.health_generation > 0:
-		s += " [" + UIColor.apply("health", "%3d" % mek.health_generation) + "]"
+	s += "Clan    : " + map_entity.owner.clan.clan_name + "\n"
+	if is_instance_of(actor, Mek):
+		s += "Power   : " + str((actor as Mek).evaluate_mek_power()) + "\n"
+		s += "Size    : " + Utils.enum_to_string(Enums.MekSize, (actor as Mek).template.size) + "\n"
+	else:
+		s += "Power   : " + str(actor.evaluate_combat_power()) + "\n"
+	s += "Health  : " + UIColor.apply("health", "%3d" % actor.health) + " / "
+	s += UIColor.apply("health", "%3d" % actor.max_health)
+	if actor.health_generation > 0:
+		s += " [" + UIColor.apply("health", "%3d" % actor.health_generation) + "]"
 	s += "\n"
-	s += "Armor   : " + UIColor.apply("armor", "%3d" % mek.armor) + " / "
-	s += UIColor.apply("armor", "%3d" % mek.max_armor)
-	if mek.armor_generation > 0:
-		s += " [" + UIColor.apply("armor_generation", "%3d" % mek.armor_generation) + "]"
+	s += "Armor   : " + UIColor.apply("armor", "%3d" % actor.armor) + " / "
+	s += UIColor.apply("armor", "%3d" % actor.max_armor)
+	if actor.armor_generation > 0:
+		s += " [" + UIColor.apply("armor_generation", "%3d" % actor.armor_generation) + "]"
 	s += "\n"
-	s += "Shield  : " + UIColor.apply("shield", "%3d" % mek.shield) + " / "
-	s += UIColor.apply("shield", "%3d" % mek.max_shield)
-	if mek.shield_generation > 0:
-		s += " [" + UIColor.apply("shield_generation", "%3d" % mek.shield_generation) + "]"
+	s += "Shield  : " + UIColor.apply("shield", "%3d" % actor.shield) + " / "
+	s += UIColor.apply("shield", "%3d" % actor.max_shield)
+	if actor.shield_generation > 0:
+		s += " [" + UIColor.apply("shield_generation", "%3d" % actor.shield_generation) + "]"
 	s += "\n"
-	s += "Power   : " + UIColor.apply("power", "%3d" % mek.power) + " / "
-	s += UIColor.apply("power", "%3d" % mek.max_power)
-	if mek.power_generation > 0:
-		s += " [" + UIColor.apply("power_generation", "%3d" % mek.power_generation) + "]"
+	s += "Power   : " + UIColor.apply("power", "%3d" % actor.power) + " / "
+	s += UIColor.apply("power", "%3d" % actor.max_power)
+	if actor.power_generation > 0:
+		s += " [" + UIColor.apply("power_generation", "%3d" % actor.power_generation) + "]"
 	s += "\n"
-	s += "Speed   : " + UIColor.apply("speed", "%3d" % mek.speed) + "\n"
+	s += "Speed   : " + UIColor.apply("speed", "%3d" % actor.speed) + "\n"
 	s += "Damage reductions :\n"
 	s += (
 		"    all       : "
-		+ UIColor.apply("damage_reduction", "%3d" % mek.damage_reduction_all)
+		+ UIColor.apply("damage_reduction", "%3d" % actor.damage_reduction_all)
 		+"\n"
 	)
 	s += (
 		"    kinetic   : "
-		+ UIColor.apply("damage_reduction", "%3d" % mek.damage_reduction_kinetic)
+		+ UIColor.apply("damage_reduction", "%3d" % actor.damage_reduction_kinetic)
 		+"\n"
 	)
 	s += (
 		"    energy    : "
-		+ UIColor.apply("damage_reduction", "%3d" % mek.damage_reduction_energy)
+		+ UIColor.apply("damage_reduction", "%3d" % actor.damage_reduction_energy)
 		+"\n"
 	)
 	s += (
 		"    explosive : "
-		+ UIColor.apply("damage_reduction", "%3d" % mek.damage_reduction_explosive)
+		+ UIColor.apply("damage_reduction", "%3d" % actor.damage_reduction_explosive)
 		+"\n"
 	)
 	s += (
 		"    plasma    : "
-		+ UIColor.apply("damage_reduction", "%3d" % mek.damage_reduction_plasma)
+		+ UIColor.apply("damage_reduction", "%3d" % actor.damage_reduction_plasma)
 		+"\n"
 	)
 	s += (
 		"    corrosive : "
-		+ UIColor.apply("damage_reduction", "%3d" % mek.damage_reduction_corrosive)
+		+ UIColor.apply("damage_reduction", "%3d" % actor.damage_reduction_corrosive)
 		+"\n"
 	)
 	entity_info.clear()
 	entity_info.append_text(s)
+
+
+func _combatant_name(actor: CombatActor) -> String:
+	if not actor:
+		return "Unknown"
+	if actor.has_method("get_mek_name"):
+		return str(actor.call("get_mek_name"))
+	if actor.has_method("get_structure_name"):
+		return str(actor.call("get_structure_name"))
+	if not actor.alias.is_empty():
+		return actor.alias
+	return actor.uuid
 
 
 func _load_item_details(item: Item):

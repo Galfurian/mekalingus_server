@@ -280,10 +280,12 @@ func _open_spawn_panel_for_context_cell() -> void:
 		return
 
 	var default_clan_id: String = ""
+	var default_owner: EntityOwner = null
 	if selected_entity and selected_entity.owner and selected_entity.owner.clan:
 		default_clan_id = selected_entity.owner.clan.id
+		default_owner = selected_entity.owner
 
-	spawn_panel.open_for_cell(_context_cell, default_clan_id)
+	spawn_panel.open_for_cell(_context_cell, game_map, default_clan_id, default_owner)
 
 
 func _on_spawn_panel_spawn_requested(request: Dictionary) -> void:
@@ -366,7 +368,8 @@ func _build_owner_from_request(request: Dictionary, index: int) -> EntityOwner:
 	var base_name: String = str(request.get("npc_name", "")).strip_edges()
 	if base_name.is_empty():
 		base_name = NameGenerator.random_full_name()
-	if index > 0:
+	var npc_mode: String = str(request.get("npc_mode", "new"))
+	if npc_mode != "existing" and index > 0:
 		base_name += " %d" % (index + 1)
 	return NPCOwned.new(base_name, clan)
 

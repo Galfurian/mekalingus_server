@@ -23,6 +23,8 @@ var _game_map: GameMap = null
 @onready var loadout_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/LoadoutOption
 @onready var single_form: GridContainer = $MarginContainer/Root/Panels/Right/SingleForm
 @onready var multi_form: VBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm
+@onready var squad_spread_slider: HSlider = $MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadSpreadRow/SquadSpreadSlider
+@onready var squad_spread_value: Label = $MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadSpreadRow/SquadSpreadValue
 @onready var outpost_form: GridContainer = $MarginContainer/Root/Panels/Right/OutpostForm
 @onready var unit_list: VBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm/MultiScroll/UnitList
 @onready var add_unit_button: Button = $MarginContainer/Root/Panels/Right/MultiForm/AddUnitRow/AddUnitButton
@@ -44,6 +46,7 @@ func _ready() -> void:
 	owner_type_option.item_selected.connect(_on_owner_type_changed)
 	npc_commander_option.item_selected.connect(_on_npc_commander_changed)
 	add_unit_button.pressed.connect(_on_add_unit_pressed)
+	squad_spread_slider.value_changed.connect(_on_squad_spread_changed)
 
 
 func open_for_cell(
@@ -73,6 +76,7 @@ func open_for_cell(
 
 	_apply_owner_field_visibility()
 	_apply_content_visibility()
+	_update_squad_spread_label()
 
 	quantity_spin.value = 1
 	_set_status("")
@@ -339,6 +343,11 @@ func _on_npc_commander_changed(_index: int) -> void:
 	_set_status("")
 
 
+func _on_squad_spread_changed(_value: float) -> void:
+	_update_squad_spread_label()
+	_set_status("")
+
+
 func _apply_content_visibility() -> void:
 	var content_mode: String = _get_selected_metadata(spawn_mode_option)
 	single_form.visible = content_mode == "single"
@@ -458,6 +467,7 @@ func _submit_multi(owner_request: Dictionary, spawn_mode: String) -> void:
 	var request: Dictionary = owner_request.duplicate()
 	request["position"] = _target_cell
 	request["spawn_mode"] = spawn_mode
+	request["squad_spread"] = int(squad_spread_slider.value)
 	request["units"] = units
 	spawn_requested.emit(request)
 	hide()
@@ -477,3 +487,7 @@ func _submit_outpost(owner_request: Dictionary) -> void:
 
 func _set_status(message: String) -> void:
 	status_label.text = message
+
+
+func _update_squad_spread_label() -> void:
+	squad_spread_value.text = str(int(squad_spread_slider.value))

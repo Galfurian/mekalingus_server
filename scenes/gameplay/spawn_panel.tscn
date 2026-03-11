@@ -162,6 +162,32 @@ size_flags_vertical = 3
 visible = false
 theme_override_constants/separation = 4
 
+[node name="SquadSettings" type="GridContainer" parent="MarginContainer/Root/Panels/Right/MultiForm"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
+
+[node name="SquadSpreadLabel" type="Label" parent="MarginContainer/Root/Panels/Right/MultiForm/SquadSettings"]
+layout_mode = 2
+text = "Spread"
+
+[node name="SquadSpreadRow" type="HBoxContainer" parent="MarginContainer/Root/Panels/Right/MultiForm/SquadSettings"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SquadSpreadSlider" type="HSlider" parent="MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadSpreadRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 6.0
+step = 1.0
+value = 2.0
+
+[node name="SquadSpreadValue" type="Label" parent="MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadSpreadRow"]
+layout_mode = 2
+text = "2"
+
 [node name="MultiHeader" type="HBoxContainer" parent="MarginContainer/Root/Panels/Right/MultiForm"]
 layout_mode = 2
 theme_override_constants/separation = 4

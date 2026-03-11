@@ -8,20 +8,20 @@ extends Node
 # PROPERTIES
 # =============================================================================
 
-# The Mek that owns this effect manager.
-var mek: Mek = null
-# List of active active_effects (e.g., DOTs, buffs, debuffs) currently applied to the Mek.
+# The combat actor that owns this effect manager.
+var actor = null
+# List of active effects currently applied to the actor.
 var active_effects: Array[ActiveEffect] = []
 
 # =============================================================================
 # INITIALIZATION
 # =============================================================================
 
-func _init(p_mek: Mek) -> void:
+func _init(p_actor) -> void:
 	"""
-	Initializes the effect manager with the Mek instance.
+	Initializes the effect manager with the owner actor.
 	"""
-	self.mek = p_mek
+	self.actor = p_actor
 	active_effects = []
 
 # =============================================================================
@@ -33,8 +33,8 @@ func add_active_effect(active_effect: ActiveEffect) -> void:
 	"""
 	Adds a new active effect to the list.
 	"""
-	# Toggle the effect on the Mek.
-	active_effect.effect.toggle_effect(mek, true)
+	# Toggle the effect on the owner actor.
+	active_effect.effect.toggle_effect(actor, true)
 	# Add the effect to the list.
 	active_effects.append(active_effect)
 
@@ -43,10 +43,10 @@ func remove_expired_effects() -> void:
 	"""
 	Removes all expired active_effects from the list.
 	"""
-	# Deactivate the effect on the Mek.
+	# Deactivate the effect on the owner actor.
 	for effect in active_effects:
 		if effect.is_expired():
-			effect.effect.toggle_effect(mek, false)
+			effect.effect.toggle_effect(actor, false)
 	# Filter out expired effects from the list.
 	active_effects = active_effects.filter(func(e): return not e.is_expired())
 
@@ -62,10 +62,10 @@ func decrement_durations() -> void:
 
 func remove_all_effects() -> void:
 	"""
-	Removes all active_effects from the list and deactivates them on the Mek.
+	Removes all active_effects from the list and deactivates them on the owner actor.
 	"""
 	for effect in active_effects:
-		effect.effect.toggle_effect(mek, false)
+		effect.effect.toggle_effect(actor, false)
 	active_effects.clear()
 
 # =============================================================================

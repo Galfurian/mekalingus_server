@@ -8,8 +8,8 @@ extends Node
 # PROPERTIES
 # =============================================================================
 
-# The Mek that owns this cooldown manager.
-var mek: Mek = null
+# The combat actor that owns this cooldown manager.
+var actor = null
 # Dictionary mapping module names to remaining cooldown turns.
 var cooldowns: Dictionary = {}
 
@@ -22,11 +22,11 @@ const MAX_COOLDOWN_MODIFIER: int = 5
 # =============================================================================
 
 
-func _init(p_mek: Mek) -> void:
+func _init(p_actor) -> void:
 	"""
-	Initializes the cooldown manager with the Mek instance.
+	Initializes the cooldown manager with the owner actor.
 	"""
-	self.mek = p_mek
+	self.actor = p_actor
 	cooldowns = {}
 
 
@@ -48,7 +48,7 @@ func start_cooldown(item: Item, module: ItemModule):
 	"""
 	if module.cooldown > 0:
 		var effective_modifier: int = clamp(
-			mek.cooldown_modifier,
+			actor.cooldown_modifier,
 			MIN_COOLDOWN_MODIFIER,
 			MAX_COOLDOWN_MODIFIER,
 		)

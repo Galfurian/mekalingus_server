@@ -4,8 +4,8 @@
 class_name GameMap
 extends Node
 
-# utility for random names
-const NameGen = preload("res://scripts/utils/name_generator.gd")
+const EnemySpawnerScript = preload("res://scripts/data/map/spawning/enemy_spawner.gd")
+const MapAStarBuilderScript = preload("res://scripts/data/map/pathfinding/map_astar_builder.gd")
 
 # =============================================================================
 # PROPERTIES
@@ -146,9 +146,9 @@ func get_tile_id(arg1, arg2 = null) -> int:
 	"""
 	if is_in_bounds(arg1, arg2):
 		if typeof(arg1) == TYPE_VECTOR2I:
-			return int(terrain_data[arg1.x][arg1.y])
+			return int(terrain_data[arg1.y][arg1.x])
 		if typeof(arg1) == TYPE_INT and typeof(arg2) == TYPE_INT:
-			return int(terrain_data[arg1][arg2])
+			return int(terrain_data[arg2][arg1])
 	return -1
 
 
@@ -198,36 +198,7 @@ func update_astar() -> void:
 	"""
 	Rebuilds the AStar2D graph based on current walkable map tiles.
 	"""
-	astar.clear()
-	# Step 1: Add all walkable tiles as AStar points.
-	for y in range(map_height):
-		for x in range(map_width):
-			var pos = Vector2i(x, y)
-			# In terms of AStar we only focus on walkable tiles.
-			if is_walkable(pos):
-				# Add the point to the AStar graph.
-				astar.add_point(position_to_astar_id(pos), pos)
-	# Step 2: Connect neighboring walkable tiles (4-directional).
-	for y in range(map_height):
-		for x in range(map_width):
-			var current_pos = Vector2i(x, y)
-			var current_id = position_to_astar_id(current_pos)
-			if not astar.has_point(current_id):
-				continue
-			for dir in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-				var neighbor = current_pos + dir
-				# Skip if out of bounds or not walkable
-				if not is_in_bounds(neighbor):
-					continue
-				# Get the neighbor's AStar ID and check if it's a valid point.
-				var neighbor_id = position_to_astar_id(neighbor)
-				if not astar.has_point(neighbor_id):
-					continue
-				# Connect the points if they are not already connected.
-				if not astar.are_points_connected(current_id, neighbor_id):
-					var cost = float(get_movement_cost(neighbor))
-					astar.connect_points(current_id, neighbor_id)
-					astar.set_point_weight_scale(neighbor_id, cost)
+	MapAStarBuilderScript.rebuild(self)
 
 
 # =============================================================================
@@ -312,82 +283,8 @@ func remove_destroyed_units() -> void:
 	Utils.erase(npc_units, Utils.filter(npc_units, _filter_dead_unit))
 
 
-# =============================================================================
-# ENEMY SPAWNING
-# =============================================================================
-
-const MIN_SQUAD_SIZE: int = 1
-const MAX_SQUAD_SIZE: int = 4
-const MAX_SQUADS: int = 6 # Upper limit per map
-
-
-func _get_enemy_squad_count(difficulty: int) -> int:
-	"""Returns the number of enemy squads based on difficulty and map size."""
-	var map_factor = (map_width * map_height) / ((map_width + map_height) * 3.0)
-	var base_squads = 1 + int(((difficulty + 1) * 0.25) + map_factor)
-	return clamp(base_squads, 1, MAX_SQUADS)
-
-
-func _get_squad_size(difficulty: int) -> int:
-	"""
-	Returns the size of each enemy squad based on difficulty.
-	Low difficulty = smaller squads, high difficulty = larger squads.
-	"""
-	var base_size = MIN_SQUAD_SIZE + int((difficulty / 5.0) * (MAX_SQUAD_SIZE - MIN_SQUAD_SIZE))
-	return clamp(base_size, MIN_SQUAD_SIZE, MAX_SQUAD_SIZE)
-
-
-func _find_valid_spawn_positions() -> Array[Vector2i]:
-	"""Finds valid positions for spawning entities based on the height map."""
-	var valid_positions: Array[Vector2i] = []
-	for x in range(map_width):
-		for y in range(map_height):
-			var pos = Vector2i(x, y)
-			if can_move_to(pos):
-				valid_positions.append(pos)
-	return valid_positions
-
-
 func spawn_enemies_on_map(difficulty: int) -> void:
-	var spawn_points: Array[Vector2i] = _find_valid_spawn_positions()
-	if spawn_points.is_empty():
-		push_error("No valid spawn points found.")
-		return
-
-	var squad_count: int = _get_enemy_squad_count(difficulty)
-
-	# Shuffle clans so we don’t end up with the same ones each time
-	var clans = DataManager.clans.values().duplicate()
-	clans.shuffle()
-
-	for i in range(min(squad_count, clans.size())):
-		var clan: Clan = clans[i]
-		if not clan:
-			continue
-
-		var avg_size = _get_squad_size(difficulty)
-		var squad_size = randi_range(avg_size - 1, avg_size + 1)
-		squad_size = clamp(squad_size, MIN_SQUAD_SIZE, MAX_SQUAD_SIZE)
-
-		for j in range(squad_size):
-			if spawn_points.is_empty():
-				push_error("Out of spawn points while spawning squad #%d" % i)
-				return
-
-			var role: Enums.MekRole = clan.preferred_roles.pick_random()
-			var mek = LoadoutGenerator.generate_mek(difficulty, role)
-			if not mek:
-				push_error("Failed to generate Mek for clan %s" % clan.clan_name)
-				continue
-
-			var spawn_pos = spawn_points.pick_random()
-			spawn_points.erase(spawn_pos)
-
-			# generate a proper NPC name rather than a simple squad label
-			var npc_name := NameGen.random_full_name()
-			# optionally include squad index or clan in the name
-			# npc_name = "%s (Squad %d)" % [npc_name, i]
-			npc_units[mek.uuid] = MapMek.new(spawn_pos, NPCOwned.new(npc_name, clan), mek)
+	EnemySpawnerScript.spawn_enemies_on_map(self, difficulty)
 
 
 # =============================================================================

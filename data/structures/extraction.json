@@ -1,0 +1,38 @@
+{
+	"ext_drill_rig": {
+		"name": "Drill Rig",
+		"health": 210,
+		"armor": 70,
+		"shield": 10,
+		"shield_generation": 1,
+		"power": 120,
+		"power_generation": 10,
+		"speed": 0,
+		"slots": [0, 0, 0, 3],
+		"icon": "structures/basic_turret.jpeg"
+	},
+	"ext_refinery_node": {
+		"name": "Refinery Node",
+		"health": 170,
+		"armor": 52,
+		"shield": 20,
+		"shield_generation": 2,
+		"power": 105,
+		"power_generation": 9,
+		"speed": 0,
+		"slots": [0, 0, 0, 2],
+		"icon": "structures/basic_turret.jpeg"
+	},
+	"ext_salvage_compactor": {
+		"name": "Salvage Compactor",
+		"health": 160,
+		"armor": 50,
+		"shield": 18,
+		"shield_generation": 2,
+		"power": 90,
+		"power_generation": 8,
+		"speed": 0,
+		"slots": [1, 0, 0, 2],
+		"icon": "structures/basic_turret.jpeg"
+	}
+}

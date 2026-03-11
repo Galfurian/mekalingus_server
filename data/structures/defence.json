@@ -1,0 +1,38 @@
+{
+	"def_wall_segment": {
+		"name": "Wall Segment",
+		"health": 280,
+		"armor": 96,
+		"shield": 0,
+		"shield_generation": 0,
+		"power": 40,
+		"power_generation": 2,
+		"speed": 0,
+		"slots": [0, 0, 0, 0],
+		"icon": "structures/basic_turret.jpeg"
+	},
+	"def_gate_segment": {
+		"name": "Gate Segment",
+		"health": 210,
+		"armor": 72,
+		"shield": 0,
+		"shield_generation": 0,
+		"power": 60,
+		"power_generation": 4,
+		"speed": 0,
+		"slots": [0, 0, 0, 1],
+		"icon": "structures/basic_turret.jpeg"
+	},
+	"def_guard_tower": {
+		"name": "Guard Tower",
+		"health": 190,
+		"armor": 62,
+		"shield": 22,
+		"shield_generation": 2,
+		"power": 96,
+		"power_generation": 7,
+		"speed": 0,
+		"slots": [1, 1, 0, 1],
+		"icon": "structures/basic_turret.jpeg"
+	}
+}

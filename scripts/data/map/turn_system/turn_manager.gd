@@ -125,8 +125,10 @@ func tick(delta: float) -> void:
 		# 1) Generate the NPCs order for the current turn.
 		game_map.ai_controller.generate_npc_orders()
 		
-		# 3.1) Process use of module activations.
-		game_map.ai_controller.execute_module_orders()
+		# 3.1) Process use of offensive module activations.
+		game_map.ai_controller.execute_offensive_module_orders()
+		# 3.2) Process use of utility module activations.
+		game_map.ai_controller.execute_utility_module_orders()
 		# 3.3) Check if any units are destroyed after executing the orders.
 		_erase_destroyed_units()
 

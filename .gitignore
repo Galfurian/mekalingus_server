@@ -9,7 +9,6 @@ export_presets.cfg
 Thumbs.db
 
 # IDE / editor config (optional)
-.vscode/
 .idea/
 
 # Build files (optional)

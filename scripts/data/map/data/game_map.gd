@@ -4,6 +4,9 @@
 class_name GameMap
 extends Node
 
+# utility for random names
+const NameGen = preload("res://scripts/utils/name_generator.gd")
+
 # =============================================================================
 # PROPERTIES
 # =============================================================================
@@ -380,7 +383,11 @@ func spawn_enemies_on_map(difficulty: int) -> void:
 			var spawn_pos = spawn_points.pick_random()
 			spawn_points.erase(spawn_pos)
 
-			npc_units[mek.uuid] = MapMek.new(spawn_pos, NPCOwned.new("Squad_%d" % i, clan), mek)
+			# generate a proper NPC name rather than a simple squad label
+			var npc_name := NameGen.random_full_name()
+			# optionally include squad index or clan in the name
+			# npc_name = "%s (Squad %d)" % [npc_name, i]
+			npc_units[mek.uuid] = MapMek.new(spawn_pos, NPCOwned.new(npc_name, clan), mek)
 
 
 # =============================================================================

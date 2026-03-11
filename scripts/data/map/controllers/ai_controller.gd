@@ -13,7 +13,9 @@ var _planner = AIPlanner.new()
 # The current plans for the AI.
 var _current_plans: Dictionary[String, AIPlan] = {}
 # The orders for offensive modules.
-var _use_module_orders: Dictionary[String, UseModuleOrder] = {}
+var _use_offensive_module_orders: Dictionary[String, UseOffensiveModuleOrder] = {}
+# The orders for utility modules.
+var _use_utility_module_orders: Dictionary[String, UseUtilityModuleOrder] = {}
 # The orders for movement.
 var _move_orders: Dictionary[String, MoveOrder] = {}
 
@@ -64,18 +66,28 @@ func remove_orders_of_dead_units() -> void:
 	"""
 	Removes orders for dead units.
 	"""
-	for key in Utils.filter(_use_module_orders, _filter_order_with_dead_mek):
-		_use_module_orders.erase(key)
+	for key in Utils.filter(_use_offensive_module_orders, _filter_order_with_dead_mek):
+		_use_offensive_module_orders.erase(key)
+	for key in Utils.filter(_use_utility_module_orders, _filter_order_with_dead_mek):
+		_use_utility_module_orders.erase(key)
 	for key in Utils.filter(_move_orders, _filter_order_with_dead_mek):
 		_move_orders.erase(key)
 
 
-func queue_module_order(order: UseModuleOrder):
+func queue_offensive_module_order(order: UseOffensiveModuleOrder):
 	"""
 	Queues an offensive module order, replacing any existing one for the unit.
 	"""
 	if order:
-		_use_module_orders[order.source.mek.uuid] = order
+		_use_offensive_module_orders[order.source.mek.uuid] = order
+
+
+func queue_utility_module_order(order: UseUtilityModuleOrder):
+	"""
+	Queues a utility module order, replacing any existing one for the unit.
+	"""
+	if order:
+		_use_utility_module_orders[order.source.mek.uuid] = order
 
 
 func queue_move_order(order: MoveOrder):
@@ -86,13 +98,23 @@ func queue_move_order(order: MoveOrder):
 		_move_orders[order.source.mek.uuid] = order
 
 
-func execute_module_orders() -> void:
+func execute_utility_module_orders() -> void:
 	"""
 	Executes all queued utility module orders.
 	"""
-	for order in _use_module_orders.values():
+	for order in _use_utility_module_orders.values():
 		order.execute(game_map)
-	_use_module_orders.clear()
+	_use_utility_module_orders.clear()
+
+
+func execute_offensive_module_orders() -> void:
+	"""
+	Executes all queued offensive module orders.
+	"""
+	for order in _use_offensive_module_orders.values():
+		order.execute(game_map)
+	_use_offensive_module_orders.clear()
+
 
 func execute_move_orders() -> void:
 	"""
@@ -107,6 +129,7 @@ func execute_move_orders() -> void:
 	for order in _move_orders.values():
 		order.execute(game_map)
 	_move_orders.clear()
+
 
 func plan_for_unit(source: MapMek) -> void:
 	"""
@@ -158,14 +181,17 @@ func generate_orders_for_unit(source: MapMek) -> void:
 
 	_add_log("%s generated order for plan %s : %s" % [source.mek.get_chat_tag(), str(current_plan), str(order)])
 
-	if is_instance_of(order, UseOffensiveModuleOrder) or is_instance_of(order, UseUtilityModuleOrder):
+	if is_instance_of(order, UseOffensiveModuleOrder):
 		# If the order is an offensive module order, queue it.
-		queue_module_order(order)
+		queue_offensive_module_order(order)
+	elif is_instance_of(order, UseUtilityModuleOrder):
+		# If the order is a utility module order, queue it.
+		queue_utility_module_order(order)
 	elif is_instance_of(order, MoveOrder):
 		# If the order is a movement order, queue it.
 		queue_move_order(order)
 	else:
-		return
+		push_error("Unknown order type: %s" % str(order))
 
 
 func generate_npc_orders():
@@ -189,9 +215,11 @@ func _filter_order_with_dead_mek(_key: String, order) -> bool:
 		return order.source.mek.is_dead()
 	return false
 
+
 func _clear_orders() -> void:
 	"""
 	Clears all orders for the AI controller.
 	"""
-	_use_module_orders.clear()
+	_use_offensive_module_orders.clear()
+	_use_utility_module_orders.clear()
 	_move_orders.clear()

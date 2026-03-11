@@ -46,16 +46,9 @@ func execute_turret_actions() -> void:
 		if not target or not target.mek or target.mek.is_dead():
 			continue
 
-		var damage_effect := ItemEffect.new({
-			"type": Enums.EffectType.DAMAGE,
-			"target": Enums.TargetType.ENEMY,
-			"damage_type": Enums.DamageType.KINETIC,
-			"amount": turret.damage,
-			"duration": 0,
-			"chance": 100,
-			"radius": 0,
-			"center_on_target": true,
-		})
+		var damage_effect: ItemEffect = turret.get_fire_effect()
+		if not damage_effect:
+			continue
 
 		var result = target.mek.take_damage_from_effect(damage_effect)
 		turret.start_cooldown(TURRET_COOLDOWN_TURNS)

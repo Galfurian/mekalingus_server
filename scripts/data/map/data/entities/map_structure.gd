@@ -4,7 +4,7 @@
 class_name MapStructure
 extends "res://scripts/data/map/data/entities/map_combat_entity.gd"
 
-const StructureActorScript = preload("res://scripts/data/structure/structure_actor.gd")
+const StructureScript = preload("res://scripts/data/structure/structure.gd")
 
 # =============================================================================
 # PROPERTIES
@@ -29,7 +29,15 @@ func _init(
 ) -> void:
 	position = p_position
 	owner = p_owner
-	combatant = StructureActorScript.new(p_structure_name, p_max_health, p_armor, p_items)
+	combatant = StructureScript.new({
+		"uuid": GameServer.generate_uuid(),
+		"structure_name": p_structure_name,
+		"health": p_max_health,
+		"max_health": p_max_health,
+		"armor": p_armor,
+		"max_armor": p_armor,
+		"items": Utils.convert_objects_to_dict(p_items),
+	})
 	blocking = p_blocking
 	active = true
 
@@ -71,7 +79,7 @@ static func from_dict(data: Dictionary) -> MapStructure:
 		push_error("Invalid MapStructure data: failed to deserialize owner")
 		return null
 
-	var actor = StructureActorScript.from_dict(data["actor"])
+	var actor = StructureScript.new(data["actor"])
 	if not actor:
 		push_error("Invalid MapStructure data: failed to deserialize actor")
 		return null

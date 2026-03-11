@@ -105,7 +105,7 @@ static func from_dict(data: Dictionary) -> MapTurret:
 		data["actor"]["armor"],
 		loaded_items
 	)
-	loaded_turret.combatant = StructureActorScript.from_dict(data["actor"])
+	loaded_turret.combatant = StructureScript.new(data["actor"])
 	if not loaded_turret.combatant:
 		push_error("Invalid MapTurret data: failed to deserialize actor")
 		return null

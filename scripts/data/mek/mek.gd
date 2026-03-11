@@ -2,8 +2,6 @@ extends "res://scripts/data/combat/combat_actor.gd"
 
 class_name Mek
 
-const MekPowerEvaluatorScript = preload("res://scripts/data/mek/power/mek_power_evaluator.gd")
-
 # =============================================================================
 # PROPERTIES
 # =============================================================================
@@ -33,59 +31,29 @@ static func compare_meks(a: Mek, b: Mek) -> bool:
 	return a.template.size < b.template.size
 
 
-func _update_static_values():
-	"""Recalculates max values, regen rates, and speed. Called only when necessary."""
-	# Reset to template base values
-	health = template.health
-	armor = template.armor
-	shield = template.shield
-	power = template.power
-	max_health = template.health
-	max_armor = template.armor
-	max_shield = template.shield
-	max_power = template.power
-	health_generation = 0
-	armor_generation = 0
-	shield_generation = template.shield_generation
-	power_generation = template.power_generation
-	speed = template.speed
-	damage_reduction_all = 0
-	damage_reduction_kinetic = 0
-	damage_reduction_energy = 0
-	damage_reduction_explosive = 0
-	damage_reduction_plasma = 0
-	damage_reduction_corrosive = 0
-	accuracy_modifier = 0
-	range_modifier = 0
-	cooldown_modifier = 0
-
-	# Apply effects from equipped items.
-	for item in items:
-		_enable_item_passive_modifiers(item)
-
-	# Update the slots.
-	slots = template.slots.duplicate()
-	for item in items:
-		slots[item.template.slot] -= 1
+func rebuild_combat_state():
+	"""Rebuilds dynamic combat state from template values plus passive item effects."""
+	var base_stats := {
+		"health": template.health,
+		"max_health": template.health,
+		"armor": template.armor,
+		"max_armor": template.armor,
+		"shield": template.shield,
+		"max_shield": template.shield,
+		"power": template.power,
+		"max_power": template.power,
+		"health_generation": 0,
+		"armor_generation": 0,
+		"shield_generation": template.shield_generation,
+		"power_generation": template.power_generation,
+		"speed": template.speed,
+	}
+	rebuild_combat_state_with_items(base_stats, template.slots)
 
 
 # =============================================================================
 # ITEMS
 # =============================================================================
-
-
-func _enable_item_passive_modifiers(item: Item):
-	"""Deactivates any passive and non-passive modules modifiers."""
-	_toggle_item_passive_effect_modifiers(item, true)
-	power -= item.template.base_power_usage
-	max_power -= item.template.base_power_usage
-
-
-func _disable_item_passive_modifiers(item: Item):
-	"""Deactivates any passive and non-passive modules modifiers."""
-	_toggle_item_passive_effect_modifiers(item, false)
-	power += item.template.base_power_usage
-	max_power += item.template.base_power_usage
 
 
 func can_equip_item(item: Item) -> bool:
@@ -145,7 +113,7 @@ func evaluate_mek_power() -> float:
 	- Power contribution of equipped items.
 	- Base stats retrieved from the MekTemplate.
 	"""
-	return MekPowerEvaluatorScript.evaluate(self)
+	return evaluate_combat_power()
 
 
 # =============================================================================
@@ -193,7 +161,7 @@ func from_dict(data: Dictionary = {}) -> bool:
 	template = TemplateManager.get_mek_template(mek_id)
 	assert(template, "Cannot find the template: " + mek_id + "\n")
 
-	_update_static_values()
+	rebuild_combat_state()
 
 	return true
 

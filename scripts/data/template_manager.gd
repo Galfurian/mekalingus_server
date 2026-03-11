@@ -4,6 +4,7 @@ const PLAYER_TEMPLATE_FILE = "res://data/players/player_template.json"
 
 const CLANS_FOLDER = "res://data/clans/"
 const MEKS_FOLDER = "res://data/meks"
+const STRUCTURES_FOLDER = "res://data/structures"
 const ITEMS_FOLDER = "res://data/items"
 const BIOMES_FOLDER = "res://data/biomes"
 
@@ -15,6 +16,8 @@ const BIOMES_FOLDER = "res://data/biomes"
 var player_template: PlayerTemplate
 # Stores all the mek templates.
 var mek_templates: Dictionary
+# Stores all the structure templates.
+var structure_templates: Dictionary
 # Dictionary to store loaded item templates.
 var item_templates: Dictionary
 # List of biome data.
@@ -44,6 +47,8 @@ func load_all() -> bool:
 		return false
 	if not load_mek_templates():
 		return false
+	if not load_structure_templates():
+		return false
 	if not load_item_templates():
 		return false
 	if not load_biomes():
@@ -61,6 +66,7 @@ func clear_all():
 	slot_power_stats.clear()
 	player_template.clear()
 	mek_templates.clear()
+	structure_templates.clear()
 	item_templates.clear()
 	biomes.clear()
 
@@ -75,6 +81,13 @@ func get_mek_template(mek_id: String) -> MekTemplate:
 	Retrieves a mek template by ID.
 	"""
 	return mek_templates.get(mek_id, null)
+
+
+func get_structure_template(structure_id: String):
+	"""
+	Retrieves a structure template by ID.
+	"""
+	return structure_templates.get(structure_id, null)
 
 
 func get_item_template(item_id: String) -> ItemTemplate:
@@ -232,6 +245,55 @@ func load_mek_templates():
 		file_name = dir.get_next()
 	log_message("Loaded " + str(mek_templates.size()) + " meks.")
 	return !mek_templates.is_empty()
+
+
+func load_structure_templates() -> bool:
+	"""
+	Loads structure templates from JSON files in the STRUCTURES_FOLDER.
+	Returns true even when the folder is missing so structures can still be ad-hoc.
+	"""
+	structure_templates.clear()
+
+	if not DirAccess.dir_exists_absolute(STRUCTURES_FOLDER):
+		log_message("Structures folder not found, skipping structure templates: " + STRUCTURES_FOLDER)
+		return true
+
+	var dir = DirAccess.open(STRUCTURES_FOLDER)
+	if not dir:
+		log_message("Error: Failed to access structure templates folder.")
+		return false
+
+	log_message("Loading structure templates...")
+	dir.list_dir_begin()
+	var file_name = dir.get_next()
+	while not file_name.is_empty():
+		if not file_name.ends_with(".json"):
+			file_name = dir.get_next()
+			continue
+
+		var file_path = STRUCTURES_FOLDER + "/" + file_name
+		var file = FileAccess.open(file_path, FileAccess.READ)
+		if not file:
+			log_message("Error: Failed to open file '" + file_path + "'.")
+			return false
+
+		var content = file.get_as_text()
+		var data = JSON.parse_string(content)
+		if not data:
+			log_message("Failed to parse data file '" + file_path + "'.")
+			return false
+
+		file.close()
+
+		var counter = 0
+		for structure_id in data:
+			structure_templates[structure_id] = StructureTemplate.new(structure_id, data[structure_id])
+			counter += 1
+		log_message("    Loaded " + str(counter) + ' structures from "' + file_path + '".')
+		file_name = dir.get_next()
+
+	log_message("Loaded " + str(structure_templates.size()) + " structures.")
+	return true
 
 
 # =============================================================================

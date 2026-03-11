@@ -455,7 +455,7 @@ static func from_dict(data: Dictionary) -> GameMap:
 
 	# Load legacy turrets into structures (backward compatibility).
 	for turret_uuid in data.get("turrets", {}):
-		var turret = MapTurret.from_dict(data.get("turrets", {})[turret_uuid])
+		var turret = MapStructure.from_dict(data.get("turrets", {})[turret_uuid])
 		if turret:
 			map.structures[turret_uuid] = turret
 		else:

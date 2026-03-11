@@ -1,8 +1,6 @@
 class_name StructureTemplate
 extends Node
 
-const StructureScript = preload("res://scripts/data/structure/structure.gd")
-
 var id: String
 var structure_name: String
 var health: int
@@ -26,8 +24,8 @@ func is_valid() -> bool:
 	return id != "" and structure_name != "" and health > 0 and armor >= 0 and shield >= 0
 
 
-func build_structure(uuid: String = GameServer.generate_uuid()):
-	return StructureScript.new({"structure_id": id, "uuid": uuid})
+func build_structure(uuid: String = GameServer.generate_uuid()) -> Structure:
+	return Structure.new({"structure_id": id, "uuid": uuid})
 
 
 func from_dict(data: Dictionary):

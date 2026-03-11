@@ -1,9 +1,5 @@
 extends Node
 
-const AIPathfinderScript = preload("res://scripts/data/map/controllers/pathfinding/ai_pathfinder.gd")
-const AIUnitQueriesScript = preload("res://scripts/data/map/controllers/ai_unit_queries.gd")
-const AIThreatEvaluatorScript = preload("res://scripts/data/map/controllers/ai_threat_evaluator.gd")
-
 # =====================================================================
 # PRIORITY CALCULATION FUNCTIONS
 # =====================================================================
@@ -229,31 +225,31 @@ func find_matching_modules(
 # =====================================================================
 
 func normalize_position(vector: Vector2i) -> Vector2:
-	return AIPathfinderScript.normalize_position(vector)
+	return AIPathfinder.normalize_position(vector)
 
 
 func round_position(vector: Vector2) -> Vector2i:
-	return AIPathfinderScript.round_position(vector)
+	return AIPathfinder.round_position(vector)
 
 
 func get_shortest_path(game_map, start: Vector2i, end: Vector2i) -> Array[Vector2i]:
-	return AIPathfinderScript.get_shortest_path(game_map, start, end)
+	return AIPathfinder.get_shortest_path(game_map, start, end)
 
 
 func get_path_cost(game_map, path) -> float:
-	return AIPathfinderScript.get_path_cost(game_map, path)
+	return AIPathfinder.get_path_cost(game_map, path)
 
 
 func get_tiles_in_range(game_map, position: Vector2i, max_range: int) -> Array[Vector2i]:
-	return AIPathfinderScript.get_tiles_in_range(game_map, position, max_range)
+	return AIPathfinder.get_tiles_in_range(game_map, position, max_range)
 
 
 func get_reachable_tiles(game_map, start: Vector2i, max_cost: int) -> Array[Vector2i]:
-	return AIPathfinderScript.get_reachable_tiles(game_map, start, max_cost)
+	return AIPathfinder.get_reachable_tiles(game_map, start, max_cost)
 
 
 func get_distance(game_map, from: Vector2i, to: Vector2i) -> float:
-	return AIPathfinderScript.get_distance(game_map, from, to)
+	return AIPathfinder.get_distance(game_map, from, to)
 
 
 func find_furthest_progress_along_path(
@@ -262,7 +258,7 @@ func find_furthest_progress_along_path(
 	target: Vector2i,
 	max_movement: int
 ) -> Vector2i:
-	return AIPathfinderScript.find_furthest_progress_along_path(game_map, start, target, max_movement)
+	return AIPathfinder.find_furthest_progress_along_path(game_map, start, target, max_movement)
 
 
 func find_closest_reachable_tile(
@@ -273,7 +269,7 @@ func find_closest_reachable_tile(
 	max_range: int,
 	max_movement: int
 ) -> Vector2i:
-	return AIPathfinderScript.find_closest_reachable_tile(
+	return AIPathfinder.find_closest_reachable_tile(
 		game_map,
 		source,
 		target,
@@ -291,7 +287,7 @@ func find_best_attack_tile(
 	max_range: int,
 	max_movement: int
 ) -> Vector2i:
-	return AIPathfinderScript.find_best_attack_tile(
+	return AIPathfinder.find_best_attack_tile(
 		game_map,
 		source,
 		target,
@@ -302,7 +298,7 @@ func find_best_attack_tile(
 
 
 func find_random_reachable_tile(game_map, start: Vector2i, max_cost: int) -> Vector2i:
-	return AIPathfinderScript.find_random_reachable_tile(game_map, start, max_cost)
+	return AIPathfinder.find_random_reachable_tile(game_map, start, max_cost)
 
 
 # =====================================================================
@@ -310,7 +306,7 @@ func find_random_reachable_tile(game_map, start: Vector2i, max_cost: int) -> Vec
 # =====================================================================
 
 func get_all_units(game_map) -> Array:
-	return AIUnitQueriesScript.get_all_units(game_map)
+	return AIUnitQueries.get_all_units(game_map)
 
 
 func get_units_in_range(
@@ -322,7 +318,7 @@ func get_units_in_range(
 	include_enemies: bool = true,
 	exclude_units: Array = []
 ) -> Array:
-	return AIUnitQueriesScript.get_units_in_range(
+	return AIUnitQueries.get_units_in_range(
 		game_map,
 		source,
 		position,
@@ -339,7 +335,7 @@ func get_enemies_in_range(
 	radius: int,
 	exclude_units: Array = []
 ) -> Array:
-	return AIUnitQueriesScript.get_enemies_in_range(game_map, source, radius, exclude_units)
+	return AIUnitQueries.get_enemies_in_range(game_map, source, radius, exclude_units)
 
 
 func get_allies_in_range(
@@ -348,11 +344,11 @@ func get_allies_in_range(
 	radius: int,
 	exclude_units: Array = []
 ) -> Array:
-	return AIUnitQueriesScript.get_allies_in_range(game_map, source, radius, exclude_units)
+	return AIUnitQueries.get_allies_in_range(game_map, source, radius, exclude_units)
 
 
 func get_threat_level(game_map, tile: Vector2i, source) -> float:
-	return AIThreatEvaluatorScript.get_threat_level(game_map, tile, source)
+	return AIThreatEvaluator.get_threat_level(game_map, tile, source)
 
 
 func can_reach_target_this_turn(
@@ -363,7 +359,7 @@ func can_reach_target_this_turn(
 	range_max: int,
 	max_movement: int
 ) -> bool:
-	return AIThreatEvaluatorScript.can_reach_target_this_turn(
+	return AIThreatEvaluator.can_reach_target_this_turn(
 		game_map,
 		source,
 		target,
@@ -374,4 +370,4 @@ func can_reach_target_this_turn(
 
 
 func get_most_vulnerable_enemy(game_map, source, max_distance: int) -> MapCombatEntity:
-	return AIUnitQueriesScript.get_most_vulnerable_enemy(game_map, source, max_distance)
+	return AIUnitQueries.get_most_vulnerable_enemy(game_map, source, max_distance)

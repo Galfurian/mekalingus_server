@@ -40,7 +40,7 @@ func select_entity(entity: MapEntity) -> void:
 	var root = mek_tree.get_root()
 	if not root:
 		return
-	var target = _find_item_by_uuid(root, entity.mek.uuid)
+	var target = _find_item_by_uuid(root, entity.combatant.uuid)
 	if target:
 		target.select(0)
 		mek_tree.scroll_to_item(target)
@@ -71,11 +71,11 @@ func _populate_meks_tree() -> void:
 		clan_item.set_custom_color(0, clan_data["color"])
 
 		var meks: Array = clan_data["entities"]
-		meks.sort_custom(func(a: MapMek, b: MapMek): return a.mek.get_mek_name() < b.mek.get_mek_name())
+		meks.sort_custom(func(a: MapMek, b: MapMek): return a.combatant.get_mek_name() < b.combatant.get_mek_name())
 		for map_mek in meks:
 			var mek_item = mek_tree.create_item(clan_item)
 			mek_item.set_text(0, _format_mek_label(map_mek))
-			mek_item.set_metadata(0, map_mek.mek.uuid)
+			mek_item.set_metadata(0, map_mek.combatant.uuid)
 			mek_item.set_custom_color(0, clan_data["color"])
 
 
@@ -103,7 +103,7 @@ func _format_mek_label(map_mek: MapMek) -> String:
 		owner_label = "NPC: " + map_mek.owner.npc_name
 	else:
 		owner_label = "Unknown Owner"
-	return "%s  [%s, %s]" % [map_mek.mek.get_mek_name(), owner_label, str(map_mek.position)]
+	return "%s  [%s, %s]" % [map_mek.combatant.get_mek_name(), owner_label, str(map_mek.position)]
 
 
 func _on_mek_tree_item_selected() -> void:

@@ -37,7 +37,7 @@ func _format_pos_tag(pos: Vector2i) -> String:
 
 
 func execute(game_map) -> bool:
-	var mek = source.mek
+	var mek = source.combatant
 	if mek.is_dead():
 		return false
 
@@ -86,10 +86,10 @@ func execute(game_map) -> bool:
 
 func _to_string() -> String:
 	var s = ""
-	if is_instance_of(source.mek, Mek):
+	if is_instance_of(source.combatant, Mek):
 		s += source.combatant.get_mek_name()
 	else:
-		s += str(source.mek)
+		s += str(source.combatant)
 	s += " is moving"
 	s += " from (" + str(source.position.x) + ", " + str(source.position.y) + ")"
 	s += " to (" + str(destination.x) + ", " + str(destination.y) + ")"

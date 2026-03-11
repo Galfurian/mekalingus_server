@@ -1,7 +1,5 @@
 extends Node
 
-const JsonStoreScript = preload("res://scripts/data/persistence/json_store.gd")
-
 # =============================================================================
 # DATA FOLDERS
 # =============================================================================
@@ -84,7 +82,7 @@ func initialize_players():
 	"""
 	Initializes the players.
 	"""
-	if JsonStoreScript.ensure_directory(players_folder):
+	if JsonStore.ensure_directory(players_folder):
 		GameServer.log_message("Created PLAYERS directory: " + players_folder)
 
 
@@ -132,7 +130,7 @@ func save_player(player: Player) -> bool:
 		return false
 
 	var file_path = players_folder + player.player_name + ".json"
-	if not JsonStoreScript.write_json_file(file_path, player.to_dict()):
+	if not JsonStore.write_json_file(file_path, player.to_dict()):
 		GameServer.log_message("Failed to save player: " + file_path)
 		return false
 
@@ -143,7 +141,7 @@ func save_player(player: Player) -> bool:
 func load_player(player_name: String) -> bool:
 	"""Loads a player from a file."""
 	var file_path = players_folder + player_name + ".json"
-	var json_data = JsonStoreScript.read_json_file(file_path)
+	var json_data = JsonStore.read_json_file(file_path)
 	if json_data == null:
 		GameServer.log_message("Player does not exist: " + file_path)
 		return false
@@ -179,7 +177,7 @@ func delete_player(player_name: String) -> bool:
 
 	GameServer.free_uuid(player.player_uuid)
 	players.erase(player.player_uuid)
-	if not JsonStoreScript.delete_file(file_path):
+	if not JsonStore.delete_file(file_path):
 		GameServer.log_message("Failed to delete player: " + file_path)
 		return false
 
@@ -200,7 +198,7 @@ func load_players():
 	"""
 	Loads all players from the players directory.
 	"""
-	var player_names = JsonStoreScript.list_json_basenames(players_folder)
+	var player_names = JsonStore.list_json_basenames(players_folder)
 	if player_names.is_empty() and not DirAccess.dir_exists_absolute(players_folder):
 		GameServer.log_message("No players folder found, skipping load.")
 		return false
@@ -218,7 +216,7 @@ func load_players():
 
 
 func initialize_clans():
-	if JsonStoreScript.ensure_directory(clans_folder):
+	if JsonStore.ensure_directory(clans_folder):
 		GameServer.log_message("Created CLANS directory: " + clans_folder)
 		TemplateManager.load_standard_clans()
 		save_clans()
@@ -232,7 +230,7 @@ func save_clan(clan: Clan) -> bool:
 		return false
 
 	var file_path = clans_folder + clan.id + ".json"
-	if not JsonStoreScript.write_json_file(file_path, clan.to_dict()):
+	if not JsonStore.write_json_file(file_path, clan.to_dict()):
 		GameServer.log_message("Failed to save clan: " + file_path)
 		return false
 
@@ -253,7 +251,7 @@ func load_clan(file_path: String):
 	"""
 	Loads a clan.
 	"""
-	var data = JsonStoreScript.read_json_file(file_path)
+	var data = JsonStore.read_json_file(file_path)
 	if data == null:
 		GameServer.log_message("No map exists: " + file_path)
 		return false
@@ -275,7 +273,7 @@ func load_clans() -> bool:
 	"""
 	Loads the clans.
 	"""
-	var clan_names = JsonStoreScript.list_json_basenames(clans_folder)
+	var clan_names = JsonStore.list_json_basenames(clans_folder)
 	if clan_names.is_empty() and not DirAccess.dir_exists_absolute(clans_folder):
 		GameServer.log_message("No clans folder found, skipping load.")
 		return false
@@ -296,7 +294,7 @@ func initilize_maps():
 	"""
 	Initializes the maps.
 	"""
-	if JsonStoreScript.ensure_directory(maps_folder):
+	if JsonStore.ensure_directory(maps_folder):
 		GameServer.log_message("Created MAPS directory: " + maps_folder)
 
 
@@ -320,7 +318,7 @@ func get_map(map_uuid: String) -> GameMap:
 func save_map(map: GameMap) -> bool:
 	"""Saves the current game map to a JSON file."""
 	var file_path = maps_folder + map.map_uuid + ".json"
-	if not JsonStoreScript.write_json_file(file_path, map.to_dict(), "    "):
+	if not JsonStore.write_json_file(file_path, map.to_dict(), "    "):
 		GameServer.log_message("Failed to open map file: " + file_path)
 		return false
 
@@ -342,7 +340,7 @@ func delete_map(map_uuid: String) -> bool:
 	var file_path = maps_folder + map_uuid + ".json"
 	if map_uuid in maps:
 		maps.erase(map_uuid)
-	if JsonStoreScript.delete_file(file_path):
+	if JsonStore.delete_file(file_path):
 		GameServer.log_message("Deleted map: " + file_path)
 		return true
 
@@ -353,7 +351,7 @@ func delete_map(map_uuid: String) -> bool:
 func load_map(map_uuid: String) -> bool:
 	"""Loads a saved game map from a JSON file."""
 	var file_path = maps_folder + map_uuid + ".json"
-	var data = JsonStoreScript.read_json_file(file_path)
+	var data = JsonStore.read_json_file(file_path)
 	if data == null:
 		GameServer.log_message("No map exists: " + file_path)
 		return false
@@ -386,7 +384,7 @@ func reload_map(map_uuid: String) -> bool:
 
 func load_maps():
 	"""Loads all maps from the maps directory."""
-	var map_uuids = JsonStoreScript.list_json_basenames(maps_folder)
+	var map_uuids = JsonStore.list_json_basenames(maps_folder)
 	if map_uuids.is_empty() and not DirAccess.dir_exists_absolute(maps_folder):
 		GameServer.log_message("No maps folder found, skipping load.")
 		return false

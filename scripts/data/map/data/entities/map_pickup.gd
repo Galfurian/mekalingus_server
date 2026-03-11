@@ -19,12 +19,11 @@ var item_data: Dictionary
 func _init(
 	p_position: Vector2i,
 	p_owner: EntityOwner,
-	p_item_data: Dictionary
+	p_item_data: Dictionary,
+	p_blocking: bool = false
 ) -> void:
-	position = p_position
-	owner = p_owner
+	super(p_position, p_owner, p_blocking)
 	item_data = p_item_data
-	active = true
 
 
 # =============================================================================
@@ -53,7 +52,8 @@ static func from_dict(data: Dictionary) -> MapPickup:
 	var loaded_pickup := MapPickup.new(
 		Utils.deserialize_position(data["position"]),
 		parsed_owner,
-		data["item_data"]
+		data["item_data"],
+		bool(data.get("blocking", false))
 	)
 	loaded_pickup.active = bool(data["active"])
 	return loaded_pickup
@@ -65,5 +65,6 @@ func to_dict() -> Dictionary:
 		"position": Utils.serialize_position(position),
 		"owner": owner.to_dict(),
 		"item_data": item_data,
+		"blocking": blocking,
 		"active": active
 	}

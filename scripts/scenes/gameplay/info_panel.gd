@@ -101,7 +101,7 @@ func update_panel() -> void:
 
 		item_inspector.visible = true
 
-		for item in entity.mek.items:
+		for item in entity.combatant.items:
 			var index = item_list.add_item(item.template.item_name)
 			item_list.set_item_metadata(index, item)
 			item_list.set_item_custom_fg_color(index, _get_slot_color(item.template.slot))
@@ -148,7 +148,7 @@ func _load_mek_details(map_mek: MapMek) -> void:
 	if not is_instance_valid(map_mek):
 		return
 	# Get the mek.
-	var mek: Mek = map_mek.mek
+	var mek: Mek = map_mek.combatant
 	# Add the name.
 	var s = "[center][b]" + mek.get_mek_name() + "[/b][/center]\n"
 	# Add who is controlling the mek.

@@ -217,10 +217,10 @@ func _has_hostile_pairs() -> bool:
 	"""
 	var alive_units: Array = []
 	for unit in game_map.player_units.values():
-		if unit and unit.mek and unit.combatant.is_alive():
+		if unit and unit.combatant and unit.combatant.is_alive():
 			alive_units.append(unit)
 	for unit in game_map.npc_units.values():
-		if unit and unit.mek and unit.combatant.is_alive():
+		if unit and unit.combatant and unit.combatant.is_alive():
 			alive_units.append(unit)
 	for i in range(alive_units.size()):
 		for j in range(i + 1, alive_units.size()):

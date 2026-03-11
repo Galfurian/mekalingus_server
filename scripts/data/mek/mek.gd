@@ -1,4 +1,4 @@
-extends "res://scripts/data/combat/combat_actor.gd"
+extends CombatActor
 
 class_name Mek
 

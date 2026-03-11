@@ -1,9 +1,6 @@
 class_name CombatActor
 extends Node
 
-const CombatDamageCalculatorScript = preload("res://scripts/data/combat/combat_damage_calculator.gd")
-const CombatPowerEvaluatorScript = preload("res://scripts/data/combat/combat_power_evaluator.gd")
-
 # =============================================================================
 # IDENTITY / EQUIPMENT
 # =============================================================================
@@ -150,7 +147,7 @@ func initialize_runtime_managers() -> void:
 
 
 func evaluate_combat_power() -> float:
-	return CombatPowerEvaluatorScript.evaluate(self)
+	return CombatPowerEvaluator.evaluate(self)
 
 
 func add_effect(module: ItemModule, effect: ItemEffect, source) -> void:
@@ -196,11 +193,11 @@ func _disable_item_passive_modifiers(item: Item) -> void:
 
 
 func take_damage_from_effect(effect: ItemEffect) -> Dictionary:
-	return CombatDamageCalculatorScript.take_damage_from_effect(self, effect)
+	return CombatDamageCalculator.take_damage_from_effect(self, effect)
 
 
 func take_dot_damage() -> Dictionary:
-	return CombatDamageCalculatorScript.take_dot_damage(self)
+	return CombatDamageCalculator.take_dot_damage(self)
 
 
 func repair_from_effect(effect: ItemEffect) -> Dictionary:

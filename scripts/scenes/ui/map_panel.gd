@@ -169,7 +169,7 @@ func _input(_event):
 				if map_hud.selected_entity and is_instance_of(map_hud.selected_entity, MapMek):
 					map_hud.info_panel.clear()
 					map_hud.grid_drawer.deselect_entity()
-					game_map.remove_entity(map_hud.selected_entity.mek.uuid)
+					game_map.remove_entity(map_hud.selected_entity.combatant.uuid)
 					map_hud.mek_drawer.update_meks()
 					map_hud.selected_entity = null
 	elif Input.is_key_pressed(KEY_ESCAPE):

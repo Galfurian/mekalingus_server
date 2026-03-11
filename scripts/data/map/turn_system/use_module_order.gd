@@ -69,8 +69,8 @@ func _is_target_in_module_range(game_map) -> bool:
 
 
 func _apply_damage_effect(game_map, effect: ItemEffect) -> void:
-	var source_mek: Mek = source.mek
-	var target_mek: Mek = target.mek
+	var source_mek: Mek = source.combatant
+	var target_mek: Mek = target.combatant
 	if source_mek.is_dead() or target_mek.is_dead():
 		return
 	# Handle SELF damage.
@@ -91,7 +91,7 @@ func _apply_damage_effect(game_map, effect: ItemEffect) -> void:
 			source, center.position, effect.radius, true, true
 		)
 		for entity in affected:
-			var mek = entity.mek
+			var mek = entity.combatant
 			if mek.is_dead():
 				continue
 			var result = mek.take_damage_from_effect(effect)
@@ -119,8 +119,8 @@ func _apply_damage_effect(game_map, effect: ItemEffect) -> void:
 
 
 func _apply_repair_effect(game_map, effect: ItemEffect) -> void:
-	var source_mek: Mek = source.mek
-	var target_mek: Mek = target.mek
+	var source_mek: Mek = source.combatant
+	var target_mek: Mek = target.combatant
 	if source_mek.is_dead() or target_mek.is_dead():
 		return
 	# Handle SELF repair.
@@ -140,7 +140,7 @@ func _apply_repair_effect(game_map, effect: ItemEffect) -> void:
 			source, center.position, effect.radius, include_allies, include_enemies, []
 		)
 		for entity in affected:
-			var mek = entity.mek
+			var mek = entity.combatant
 			if mek.is_dead():
 				continue
 			var result = mek.repair_from_effect(effect)
@@ -166,8 +166,8 @@ func _apply_repair_effect(game_map, effect: ItemEffect) -> void:
 
 
 func _apply_modifier_effect(game_map, effect: ItemEffect) -> void:
-	var source_mek: Mek = source.mek
-	var target_mek: Mek = target.mek
+	var source_mek: Mek = source.combatant
+	var target_mek: Mek = target.combatant
 	if source_mek.is_dead() or target_mek.is_dead():
 		return
 	# Handle SELF-targeted effects.
@@ -188,7 +188,7 @@ func _apply_modifier_effect(game_map, effect: ItemEffect) -> void:
 			source, center.position, effect.radius, include_allies, include_enemies, [source]
 		)
 		for entity in affected:
-			var mek = entity.mek
+			var mek = entity.combatant
 			if mek.is_dead():
 				continue
 			mek.add_effect(equipped_module.module, effect, source)

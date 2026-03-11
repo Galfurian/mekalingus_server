@@ -1,19 +1,18 @@
 class_name MapCombatEntity
 extends MapEntity
 
-var combatant
-var mek:
-	get:
-		return combatant
-	set(value):
-		combatant = value
+# Runtime combat actor (Mek, Structure, etc.) represented on this map tile.
+var combatant: CombatActor
 
 
-func _init(p_position: Vector2i, p_owner: EntityOwner, p_combatant) -> void:
-	position = p_position
-	owner = p_owner
+func _init(
+	p_position: Vector2i,
+	p_owner: EntityOwner,
+	p_combatant: CombatActor,
+	p_blocking: bool = true
+) -> void:
+	super(p_position, p_owner, p_blocking)
 	combatant = p_combatant
-	active = true
 
 
 func is_alive() -> bool:

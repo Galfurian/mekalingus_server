@@ -1,8 +1,6 @@
 class_name EnemySpawner
 extends RefCounted
 
-const NameGen = preload("res://scripts/utils/name_generator.gd")
-
 const MIN_SQUAD_SIZE: int = 1
 const MAX_SQUAD_SIZE: int = 4
 const MAX_SQUADS: int = 6
@@ -41,7 +39,7 @@ static func spawn_enemies_on_map(game_map, difficulty: int) -> void:
 			var spawn_pos = spawn_points.pick_random()
 			spawn_points.erase(spawn_pos)
 
-			var npc_name := NameGen.random_full_name()
+			var npc_name := NameGenerator.random_full_name()
 			game_map.npc_units[mek.uuid] = MapCombatEntity.new(spawn_pos, NPCOwned.new(npc_name, clan), mek)
 
 

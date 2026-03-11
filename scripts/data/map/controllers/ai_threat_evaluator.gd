@@ -1,18 +1,14 @@
 class_name AIThreatEvaluator
 extends RefCounted
 
-const AIPathfinderScript = preload("res://scripts/data/map/controllers/pathfinding/ai_pathfinder.gd")
-const AIUnitQueriesScript = preload("res://scripts/data/map/controllers/ai_unit_queries.gd")
-
-
 static func get_threat_level(game_map, tile: Vector2i, source) -> float:
 	"""
 	Estimates how dangerous it would be to stand on this tile.
 	"""
 	var threat_score := 0.0
-	for enemy in AIUnitQueriesScript.get_enemies_in_range(game_map, source, 9999):
+	for enemy in AIUnitQueries.get_enemies_in_range(game_map, source, 9999):
 		var range_modifier = enemy.combatant.range_modifier
-		for equipped_module in AIUtils.find_matching_modules(enemy.mek, true, false, false):
+		for equipped_module in AIUtils.find_matching_modules(enemy.combatant, true, false, false):
 			var module_range = equipped_module.module.module_range + range_modifier
 			var distance = tile.distance_to(enemy.position)
 			if distance < 0 or distance > module_range:
@@ -39,7 +35,7 @@ static func can_reach_target_this_turn(
 	"""
 	Determines if the source can reach a tile from which it can attack the target this turn.
 	"""
-	var reachable_tiles = AIPathfinderScript.get_reachable_tiles(game_map, source.position, max_movement)
+	var reachable_tiles = AIPathfinder.get_reachable_tiles(game_map, source.position, max_movement)
 	for tile in reachable_tiles:
 		if game_map.is_occupied(tile):
 			continue

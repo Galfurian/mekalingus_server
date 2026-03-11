@@ -1,5 +1,5 @@
 class_name Structure
-extends "res://scripts/data/combat/combat_actor.gd"
+extends CombatActor
 
 var structure_id: String
 var structure_name: String

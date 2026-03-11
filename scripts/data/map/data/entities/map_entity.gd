@@ -13,6 +13,8 @@ extends RefCounted
 var position: Vector2i
 # The owner of this entity.
 var owner: EntityOwner
+# Whether this entity blocks movement.
+var blocking: bool = false
 # Whether the entity is active (false = destroyed or removed)
 var active: bool = true
 
@@ -21,9 +23,10 @@ var active: bool = true
 # =============================================================================
 
 
-func _init(p_position: Vector2i, p_owner: EntityOwner) -> void:
+func _init(p_position: Vector2i, p_owner: EntityOwner, p_blocking: bool = false) -> void:
 	position = p_position
 	owner = p_owner
+	blocking = p_blocking
 	active = true
 
 

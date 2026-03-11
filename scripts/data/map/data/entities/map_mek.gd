@@ -3,7 +3,7 @@
 # game entity, and other properties related to the entity's state.
 
 class_name MapMek
-extends "res://scripts/data/map/data/entities/map_combat_entity.gd"
+extends MapCombatEntity
 
 # =============================================================================
 # GENERAL FUNCTIONS
@@ -11,10 +11,7 @@ extends "res://scripts/data/map/data/entities/map_combat_entity.gd"
 
 
 func _init(p_position: Vector2i, p_owner: EntityOwner, p_mek: Mek) -> void:
-	position = p_position
-	owner = p_owner
-	combatant = p_mek
-	active = true
+	super(p_position, p_owner, p_mek, true)
 
 
 # =============================================================================
@@ -53,5 +50,6 @@ func to_dict() -> Dictionary:
 		"position": Utils.serialize_position(position),
 		"mek": combatant.to_dict(),
 		"owner": owner.to_dict(),
+		"blocking": true,
 		"active": active
 	}

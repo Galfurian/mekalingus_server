@@ -47,7 +47,7 @@ func _evaluate_attack_intent(plan: AIPlan, aggressiveness: float) -> AIPlan:
 	var best_equipped_module: EquippedModule = null
 
 	# Iterate through all equipped modules on the source unit.
-	for equipped_module in AIUtils.find_matching_modules(source.mek, true, false, false):
+	for equipped_module in AIUtils.find_matching_modules(source.combatant, true, false, false):
 		# Get all the enemies in range.
 		for target in AIUtils.get_enemies_in_range(plan.game_map, source, 999):
 			if target.combatant.is_dead():
@@ -85,7 +85,7 @@ func _evaluate_support_intent(plan: AIPlan) -> AIPlan:
 	var best_equipped_module: EquippedModule = null
 
 	# Iterate through all utility modules the unit can currently use.
-	for equipped_module in AIUtils.find_matching_modules(source.mek, false, false, false):
+	for equipped_module in AIUtils.find_matching_modules(source.combatant, false, false, false):
 		# Get all allies within the range of this module.
 		for target in [source] + AIUtils.get_allies_in_range(plan.game_map, source, 999):
 			if target.combatant.is_dead():
@@ -146,7 +146,7 @@ func _evaluate_retreat_intent(plan: AIPlan) -> AIPlan:
 			best_tile = tile
 
 	# Look for a valid emergency utility module (self-use only)
-	for equipped_module in AIUtils.find_matching_modules(source.mek, false, false, false):
+	for equipped_module in AIUtils.find_matching_modules(source.combatant, false, false, false):
 		var score := AIUtils.score_utility_module_on_target(equipped_module.module, source, source)
 		if score > best_score:
 			best_score = score

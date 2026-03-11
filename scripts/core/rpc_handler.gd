@@ -1,9 +1,7 @@
 extends Node
 
-const PeerSessionManagerScript = preload("res://scripts/core/networking/peer_session_manager.gd")
-
 # Manages the peer_id <-> player_uuid associations for active sessions.
-var _sessions = PeerSessionManagerScript.new()
+var _sessions = PeerSessionManager.new()
 
 # =============================================================================
 # GENERAL

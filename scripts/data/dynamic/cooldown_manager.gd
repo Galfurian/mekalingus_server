@@ -13,6 +13,9 @@ var mek: Mek = null
 # Dictionary mapping module names to remaining cooldown turns.
 var cooldowns: Dictionary = {}
 
+const MIN_COOLDOWN_MODIFIER: int = -5
+const MAX_COOLDOWN_MODIFIER: int = 5
+
 
 # =============================================================================
 # INITIALIZATION
@@ -44,7 +47,12 @@ func start_cooldown(item: Item, module: ItemModule):
 	Starts the cooldown timer for the given module.
 	"""
 	if module.cooldown > 0:
-		cooldowns[_get_key(item, module)] = max(1, module.cooldown + mek.cooldown_modifier)
+		var effective_modifier: int = clamp(
+			mek.cooldown_modifier,
+			MIN_COOLDOWN_MODIFIER,
+			MAX_COOLDOWN_MODIFIER,
+		)
+		cooldowns[_get_key(item, module)] = max(1, module.cooldown + effective_modifier)
 
 
 func decrement_cooldowns():

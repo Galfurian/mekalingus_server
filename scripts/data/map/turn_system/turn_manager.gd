@@ -198,5 +198,6 @@ func _update_time_based_effects():
 				dot_result.shield,
 				dot_result.armor,
 				dot_result.health])
+		unit.mek.apply_regen_effects()
 		unit.mek.active_effect_manager.decrement_durations()
 		unit.mek.cooldown_manager.decrement_cooldowns()

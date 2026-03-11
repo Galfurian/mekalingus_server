@@ -102,7 +102,8 @@ func clear() -> void:
 	# Clear the logs.
 	combat_logger.clear()
 	chat_logger.clear()
-	# Clear the turn manager.
+	# Clear AI and turn systems.
+	ai_controller.clear()
 	turn_manager.clear()
 
 

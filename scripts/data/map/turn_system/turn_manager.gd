@@ -141,7 +141,7 @@ func tick(delta: float) -> void:
 		_update_time_based_effects()
 		# 5.2) Check if any units are destroyed after executing the orders.
 		_erase_destroyed_units()
-		if not _has_hostile_pairs():
+		if not game_map.has_hostile_pairs():
 			_is_active = false
 			game_map.combat_logger.add_log(
 				Enums.LogType.SYSTEM,
@@ -208,20 +208,3 @@ func _update_time_based_effects() -> void:
 		unit.combatant.active_effect_manager.decrement_durations()
 		unit.combatant.cooldown_manager.decrement_cooldowns()
 
-
-func _has_hostile_pairs() -> bool:
-	"""
-	Returns true if at least one pair of living units can still attack each other.
-	"""
-	var alive_units: Array = []
-	for unit in game_map.player_units.values():
-		if unit and unit.combatant and unit.combatant.is_alive():
-			alive_units.append(unit)
-	for unit in game_map.npc_units.values():
-		if unit and unit.combatant and unit.combatant.is_alive():
-			alive_units.append(unit)
-	for i in range(alive_units.size()):
-		for j in range(i + 1, alive_units.size()):
-			if game_map.is_enemy_of(alive_units[i], alive_units[j]):
-				return true
-	return false

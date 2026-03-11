@@ -14,6 +14,8 @@ extends Node
 
 @onready var map_hud = $MapHud
 
+var _observed_map: GameMap = null
+
 
 func _ready() -> void:
 	GameServer.on_server_start.connect(_on_server_start)
@@ -29,6 +31,7 @@ func _ready() -> void:
 		map_difficulty.add_item(difficulty_name, index)
 		index += 1
 	map_difficulty.select(0)
+	_update_map_start_stop_state(null)
 	#GameServer.start()
 
 
@@ -49,17 +52,16 @@ func _on_server_stop():
 	map_biome.clear()
 	map_list.clear()
 	map_hud.clear()
+	_observe_map(null)
+	_update_map_start_stop_state(null)
 
 
 func _on_map_selected(index: int):
 	var game_map: GameMap = map_list.get_item_metadata(index)
+	_observe_map(game_map)
 	if game_map:
 		map_hud.setup(game_map)
-		# Update the label on the map start/stop button.
-		if game_map.turn_manager.is_active():
-			map_start_stop.text = "Stop"
-		else:
-			map_start_stop.text = "Start"
+		_update_map_start_stop_state(game_map)
 
 
 func _get_current_selected_map_index() -> int:
@@ -81,12 +83,14 @@ func _get_current_selected_map() -> GameMap:
 func _on_map_start_stop():
 	var game_map: GameMap = _get_current_selected_map()
 	if game_map:
+		if not game_map.has_hostile_pairs():
+			_update_map_start_stop_state(game_map)
+			return
 		if game_map.turn_manager.is_active():
 			game_map.turn_manager.stop()
-			map_start_stop.text = "Start"
 		else:
 			game_map.turn_manager.start()
-			map_start_stop.text = "Stop"
+		_update_map_start_stop_state(game_map)
 
 
 func _on_generate_map():
@@ -116,6 +120,8 @@ func _on_generate_map():
 		var index = map_list.add_item(game_map.map_uuid)
 		# Set the map metadata.
 		map_list.set_item_metadata(index, game_map)
+		_observe_map(game_map)
+		_update_map_start_stop_state(game_map)
 
 
 func _on_save_map():
@@ -145,8 +151,12 @@ func _on_load_map():
 				map_list.set_item_metadata(index, game_map)
 				# Setup the map hud.
 				map_hud.setup(game_map)
+				_observe_map(game_map)
+				_update_map_start_stop_state(game_map)
 			else:
 				map_list.remove_item(index)
+				_observe_map(null)
+				_update_map_start_stop_state(null)
 	return null
 
 
@@ -158,6 +168,8 @@ func _on_delete():
 			DataManager.delete_map(game_map.map_uuid)
 			map_list.remove_item(index)
 			map_hud.clear()
+			_observe_map(null)
+			_update_map_start_stop_state(null)
 
 
 func _input(_event):
@@ -166,13 +178,44 @@ func _input(_event):
 		if index >= 0:
 			var game_map: GameMap = map_list.get_item_metadata(index)
 			if game_map:
-				if map_hud.selected_entity and is_instance_of(map_hud.selected_entity, MapMek):
+				if map_hud.selected_entity:
 					map_hud.info_panel.clear()
 					map_hud.grid_drawer.deselect_entity()
-					game_map.remove_entity(map_hud.selected_entity.combatant.uuid)
+					game_map.remove_map_entity(map_hud.selected_entity)
 					map_hud.mek_drawer.update_meks()
+					map_hud.entity_list_panel.refresh()
 					map_hud.selected_entity = null
+					_update_map_start_stop_state(game_map)
 	elif Input.is_key_pressed(KEY_ESCAPE):
 		map_hud.selected_entity = null
 		map_hud.info_panel.clear()
 		map_hud.grid_drawer.deselect_entity()
+
+
+func _observe_map(game_map: GameMap) -> void:
+	if _observed_map and _observed_map.turn_manager and _observed_map.turn_manager.on_turn_ended.is_connected(_on_map_turn_ended):
+		_observed_map.turn_manager.on_turn_ended.disconnect(_on_map_turn_ended)
+
+	_observed_map = game_map
+
+	if _observed_map and _observed_map.turn_manager and not _observed_map.turn_manager.on_turn_ended.is_connected(_on_map_turn_ended):
+		_observed_map.turn_manager.on_turn_ended.connect(_on_map_turn_ended)
+
+
+func _on_map_turn_ended(_turn_number: int) -> void:
+	_update_map_start_stop_state(_observed_map)
+
+
+func _update_map_start_stop_state(game_map: GameMap) -> void:
+	if not game_map:
+		map_start_stop.text = "Start"
+		map_start_stop.disabled = true
+		return
+
+	var has_combat: bool = game_map.has_hostile_pairs()
+	map_start_stop.disabled = not has_combat
+
+	if game_map.turn_manager.is_active():
+		map_start_stop.text = "Stop"
+	else:
+		map_start_stop.text = "Start"

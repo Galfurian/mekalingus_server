@@ -313,12 +313,21 @@ func get_blocking_entity_at(position: Vector2i) -> MapEntity:
 
 func get_entity(uuid: String) -> MapEntity:
 	"""
-	Returns the MapCombatEntity for a given UUID.
+	Returns an entity for a given UUID key (or combat UUID for combat entities).
 	"""
 	if player_units.has(uuid):
 		return player_units[uuid]
 	if npc_units.has(uuid):
 		return npc_units[uuid]
+	if structures.has(uuid):
+		return structures[uuid]
+	if pickups.has(uuid):
+		return pickups[uuid]
+
+	for structure: MapStructure in structures.values():
+		if structure and structure.combatant and structure.combatant.uuid == uuid:
+			return structure
+
 	return null
 
 
@@ -355,16 +364,89 @@ func collect_pickup_at(position: Vector2i, collector: MapEntity) -> MapPickup:
 
 func remove_entity(uuid: String) -> MapEntity:
 	"""
-	Removes an entity from the map and returns it.
+	Removes an entity by UUID key (or combat UUID for structures) and returns it.
 	"""
-	var entity = null
+	var entity: MapEntity = null
 	if player_units.has(uuid):
 		entity = player_units[uuid]
 		player_units.erase(uuid)
+		return entity
 	if npc_units.has(uuid):
 		entity = npc_units[uuid]
 		npc_units.erase(uuid)
+		return entity
+	if structures.has(uuid):
+		entity = structures[uuid]
+		structures.erase(uuid)
+		return entity
+	if pickups.has(uuid):
+		entity = pickups[uuid]
+		pickups.erase(uuid)
+		return entity
+
+	for structure_uuid in structures.keys():
+		var structure: MapStructure = structures[structure_uuid]
+		if structure and structure.combatant and structure.combatant.uuid == uuid:
+			entity = structure
+			structures.erase(structure_uuid)
+			return entity
+
+	for pickup_uuid in pickups.keys():
+		var pickup: MapPickup = pickups[pickup_uuid]
+		if pickup and str(pickup.item_data.get("uuid", "")) == uuid:
+			entity = pickup
+			pickups.erase(pickup_uuid)
+			return entity
+
 	return entity
+
+
+func remove_map_entity(entity: MapEntity) -> bool:
+	"""
+	Removes an entity instance from the map collections.
+	"""
+	if not entity:
+		return false
+
+	for unit_uuid in player_units.keys():
+		if player_units[unit_uuid] == entity:
+			player_units.erase(unit_uuid)
+			return true
+
+	for unit_uuid in npc_units.keys():
+		if npc_units[unit_uuid] == entity:
+			npc_units.erase(unit_uuid)
+			return true
+
+	for structure_uuid in structures.keys():
+		if structures[structure_uuid] == entity:
+			structures.erase(structure_uuid)
+			return true
+
+	for pickup_uuid in pickups.keys():
+		if pickups[pickup_uuid] == entity:
+			pickups.erase(pickup_uuid)
+			return true
+
+	return false
+
+
+func has_hostile_pairs() -> bool:
+	"""
+	Returns true if at least one pair of living combat entities can attack each other.
+	"""
+	var alive_units: Array[MapCombatEntity] = []
+	for unit: MapCombatEntity in player_units.values():
+		if unit and unit.combatant and unit.combatant.is_alive():
+			alive_units.append(unit)
+	for unit: MapCombatEntity in npc_units.values():
+		if unit and unit.combatant and unit.combatant.is_alive():
+			alive_units.append(unit)
+	for i in range(alive_units.size()):
+		for j in range(i + 1, alive_units.size()):
+			if is_enemy_of(alive_units[i], alive_units[j]):
+				return true
+	return false
 
 func remove_destroyed_units() -> void:
 	"""

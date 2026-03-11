@@ -332,6 +332,37 @@ func get_entity(uuid: String) -> MapMek:
 	return null
 
 
+func collect_pickup_at(position: Vector2i, collector: MapMek) -> MapPickup:
+	"""
+	Collects and removes an active pickup at the given position.
+	Returns the collected pickup, or null if none was present.
+	"""
+	if not is_in_bounds(position) or not collector:
+		return null
+
+	for pickup_uuid in pickups.keys():
+		var pickup: MapPickup = pickups[pickup_uuid]
+		if not pickup or not pickup.active:
+			continue
+		if pickup.position != position:
+			continue
+
+		pickup.active = false
+		pickups.erase(pickup_uuid)
+
+		var item_label: String = "Unknown Item"
+		if pickup.item_data.has("item_id"):
+			item_label = str(pickup.item_data["item_id"])
+
+		combat_logger.add_log(
+			Enums.LogType.SYSTEM,
+			"%s collected pickup: %s" % [collector.mek.get_chat_tag(), item_label]
+		)
+		return pickup
+
+	return null
+
+
 func remove_entity(uuid: String) -> MapMek:
 	"""
 	Removes an entity from the map and returns it.

@@ -80,6 +80,7 @@ func execute(game_map: GameMap) -> bool:
 		mek.tiles_moved_last_turn])
 
 	source.position = current_tile
+	game_map.collect_pickup_at(current_tile, source)
 	return true
 
 

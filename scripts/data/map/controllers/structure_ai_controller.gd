@@ -5,8 +5,6 @@ extends Node
 # CONSTANTS
 # =============================================================================
 
-const TURRET_COOLDOWN_TURNS: int = 2
-
 # =============================================================================
 # PROPERTIES
 # =============================================================================
@@ -38,25 +36,28 @@ func execute_turret_actions() -> void:
 		if not turret or not turret.active:
 			continue
 
+		var payload: Dictionary = turret.get_offensive_payload()
+		if payload.is_empty():
+			continue
+		var module: ItemModule = payload["module"]
+		var effect: ItemEffect = payload["effect"]
+
 		turret.tick_cooldown()
 		if not turret.can_fire():
 			continue
 
-		var target: MapMek = _find_turret_target(turret)
+		var target: MapMek = _find_turret_target(turret, module.module_range)
 		if not target or not target.mek or target.mek.is_dead():
 			continue
 
-		var damage_effect: ItemEffect = turret.get_fire_effect()
-		if not damage_effect:
-			continue
-
-		var result = target.mek.take_damage_from_effect(damage_effect)
-		turret.start_cooldown(TURRET_COOLDOWN_TURNS)
+		var result = target.mek.take_damage_from_effect(effect)
+		turret.start_cooldown(max(1, module.cooldown))
 
 		game_map.combat_logger.add_log(
 			Enums.LogType.ATTACK,
-			"%s fires at %s -> %d shield, %d armor, %d health" % [
+			"%s uses %s on %s -> %d shield, %d armor, %d health" % [
 				_turret_tag(turret),
+				module.module_name,
 				target.mek.get_chat_tag(),
 				result.shield,
 				result.armor,
@@ -65,7 +66,7 @@ func execute_turret_actions() -> void:
 		)
 
 
-func _find_turret_target(turret: MapTurret) -> MapMek:
+func _find_turret_target(turret: MapTurret, attack_range: int) -> MapMek:
 	"""
 	Selects the closest hostile living mek within turret firing range.
 	"""
@@ -79,7 +80,7 @@ func _find_turret_target(turret: MapTurret) -> MapMek:
 			continue
 
 		var distance := turret.position.distance_to(candidate.position)
-		if distance > turret.fire_range:
+		if distance > attack_range:
 			continue
 		if distance < closest_distance:
 			closest_distance = distance

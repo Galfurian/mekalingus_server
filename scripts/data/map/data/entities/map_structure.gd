@@ -2,16 +2,7 @@
 # Structures have position, ownership, health, armor, and can block movement.
 
 class_name MapStructure
-extends "res://scripts/data/map/data/entities/map_combat_entity.gd"
-
-const StructureScript = preload("res://scripts/data/structure/structure.gd")
-
-# =============================================================================
-# PROPERTIES
-# =============================================================================
-
-# Whether this structure blocks movement
-var blocking: bool
+extends MapCombatEntity
 
 # =============================================================================
 # GENERAL FUNCTIONS
@@ -21,25 +12,10 @@ var blocking: bool
 func _init(
 	p_position: Vector2i,
 	p_owner: EntityOwner,
-	p_structure_name: String,
-	p_max_health: int,
-	p_armor: int,
-	p_items: Array[Item],
+	p_structure: Structure,
 	p_blocking: bool = true
 ) -> void:
-	position = p_position
-	owner = p_owner
-	combatant = StructureScript.new({
-		"uuid": GameServer.generate_uuid(),
-		"structure_name": p_structure_name,
-		"health": p_max_health,
-		"max_health": p_max_health,
-		"armor": p_armor,
-		"max_armor": p_armor,
-		"items": Utils.convert_objects_to_dict(p_items),
-	})
-	blocking = p_blocking
-	active = true
+	super(p_position, p_owner, p_structure, p_blocking)
 
 
 func take_damage(damage: int) -> void:
@@ -53,6 +29,26 @@ func take_damage(damage: int) -> void:
 func is_alive() -> bool:
 	"""Check if this structure still has health."""
 	return combatant and combatant.is_alive() and active
+
+
+func get_offensive_payload() -> Dictionary:
+	"""
+	Returns first usable offensive payload: item + module + effect.
+	"""
+	for item: Item in combatant.items:
+		if not item or not item.template:
+			continue
+		for module: ItemModule in item.template.modules:
+			if module.passive:
+				continue
+			for effect: ItemEffect in module.effects:
+				if effect and effect.is_damage() and effect.target_enemy():
+					return {
+						"item": item,
+						"module": module,
+						"effect": effect,
+					}
+	return {}
 
 
 # =============================================================================
@@ -79,7 +75,7 @@ static func from_dict(data: Dictionary) -> MapStructure:
 		push_error("Invalid MapStructure data: failed to deserialize owner")
 		return null
 
-	var actor = StructureScript.new(data["actor"])
+	var actor: Structure = Structure.new(data["actor"])
 	if not actor:
 		push_error("Invalid MapStructure data: failed to deserialize actor")
 		return null
@@ -87,13 +83,9 @@ static func from_dict(data: Dictionary) -> MapStructure:
 	var loaded_structure := MapStructure.new(
 		Utils.deserialize_position(data["position"]),
 		parsed_owner,
-		actor.structure_name,
-		actor.max_health,
-		actor.armor,
-		actor.items,
-		data["blocking"]
+		actor,
+		bool(data["blocking"])
 	)
-	loaded_structure.combatant = actor
 	loaded_structure.active = bool(data["active"])
 	return loaded_structure
 

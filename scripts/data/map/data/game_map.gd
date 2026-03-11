@@ -4,14 +4,6 @@
 class_name GameMap
 extends Node
 
-const EnemySpawnerScript = preload("res://scripts/data/map/spawning/enemy_spawner.gd")
-const MapAStarBuilderScript = preload("res://scripts/data/map/pathfinding/map_astar_builder.gd")
-const StructureAIControllerScript = preload("res://scripts/data/map/controllers/structure_ai_controller.gd")
-const MapMekScript = preload("res://scripts/data/map/data/entities/map_mek.gd")
-const MapStructureScript = preload("res://scripts/data/map/data/entities/map_structure.gd")
-const MapTurretScript = preload("res://scripts/data/map/data/entities/map_turret.gd")
-const MapPickupScript = preload("res://scripts/data/map/data/entities/map_pickup.gd")
-
 # =============================================================================
 # PROPERTIES
 # =============================================================================
@@ -51,8 +43,6 @@ var npc_units: Dictionary
 var player_units: Dictionary
 # Stores all structures on the map by UUID.
 var structures: Dictionary
-# Stores all turrets on the map by UUID.
-var turrets: Dictionary
 # Stores all pickups on the map by UUID.
 var pickups: Dictionary
 # The combat log.
@@ -90,7 +80,7 @@ func _init(
 	combat_logger.set_combat_preset()
 	chat_logger.set_chat_preset()
 	ai_controller = AIController.new(self)
-	structure_ai_controller = StructureAIControllerScript.new(self)
+	structure_ai_controller = StructureAIController.new(self)
 	turn_manager = TurnManager.new(self)
 
 
@@ -116,7 +106,6 @@ func clear() -> void:
 	npc_units.clear()
 	player_units.clear()
 	structures.clear()
-	turrets.clear()
 	pickups.clear()
 	# Clear the logs.
 	combat_logger.clear()
@@ -222,12 +211,12 @@ func is_tile_blocked_for_pathfinding(position: Vector2i) -> bool:
 	if not is_in_bounds(position):
 		return true
 
-	for turret in turrets.values():
-		if turret and turret.active and turret.blocking and turret.position == position:
-			return true
-
 	for structure in structures.values():
 		if structure and structure.active and structure.blocking and structure.position == position:
+			return true
+
+	for pickup in pickups.values():
+		if pickup and pickup.active and pickup.blocking and pickup.position == position:
 			return true
 
 	return false
@@ -237,13 +226,11 @@ func update_astar() -> void:
 	"""
 	Rebuilds the AStar2D graph based on current walkable map tiles.
 	"""
-	MapAStarBuilderScript.rebuild(self)
+	MapAStarBuilder.rebuild(self)
 
 
 func execute_structure_ai_turn() -> void:
-	"""
-	Executes autonomous actions for structures and turrets.
-	"""
+	"""Executes autonomous actions for armed structures."""
 	structure_ai_controller.execute_turret_actions()
 
 
@@ -300,9 +287,6 @@ func get_entity_at(position: Vector2i) -> MapEntity:
 		for entity in player_units.values():
 			if position == entity.position:
 				return entity
-		for entity in turrets.values():
-			if entity and entity.active and position == entity.position:
-				return entity
 		for entity in structures.values():
 			if entity and entity.active and position == entity.position:
 				return entity
@@ -325,11 +309,11 @@ func get_blocking_entity_at(position: Vector2i) -> MapEntity:
 		if position == entity.position:
 			return entity
 
-	for entity in turrets.values():
+	for entity in structures.values():
 		if entity and entity.active and entity.blocking and position == entity.position:
 			return entity
 
-	for entity in structures.values():
+	for entity in pickups.values():
 		if entity and entity.active and entity.blocking and position == entity.position:
 			return entity
 
@@ -401,7 +385,7 @@ func remove_destroyed_units() -> void:
 
 
 func spawn_enemies_on_map(difficulty: int) -> void:
-	EnemySpawnerScript.spawn_enemies_on_map(self, difficulty)
+	EnemySpawner.spawn_enemies_on_map(self, difficulty)
 
 
 # =============================================================================
@@ -442,7 +426,7 @@ static func from_dict(data: Dictionary) -> GameMap:
 	# Load the NPC units.
 	map.npc_units.clear()
 	for unit_uuid in data.get("npc_units", {}):
-		var unit: MapMek = MapMekScript.from_dict(data.get("npc_units", {})[unit_uuid])
+		var unit: MapMek = MapMek.from_dict(data.get("npc_units", {})[unit_uuid])
 		if unit:
 			map.npc_units[unit.combatant.uuid] = unit
 		else:
@@ -452,7 +436,7 @@ static func from_dict(data: Dictionary) -> GameMap:
 	# Load the player units (optional for backward compatibility).
 	map.player_units.clear()
 	for unit_uuid in data.get("player_units", {}):
-		var player_unit: MapMek = MapMekScript.from_dict(data["player_units"][unit_uuid])
+		var player_unit: MapMek = MapMek.from_dict(data["player_units"][unit_uuid])
 		if player_unit:
 			map.player_units[player_unit.combatant.uuid] = player_unit
 		else:
@@ -469,12 +453,11 @@ static func from_dict(data: Dictionary) -> GameMap:
 			push_error("Failed to load structure data.")
 			return null
 
-	# Load the turrets (optional for backward compatibility).
-	map.turrets.clear()
+	# Load legacy turrets into structures (backward compatibility).
 	for turret_uuid in data.get("turrets", {}):
 		var turret = MapTurret.from_dict(data.get("turrets", {})[turret_uuid])
 		if turret:
-			map.turrets[turret_uuid] = turret
+			map.structures[turret_uuid] = turret
 		else:
 			push_error("Failed to load turret data.")
 			return null
@@ -511,7 +494,6 @@ func to_dict() -> Dictionary:
 		"npc_units": Utils.serialize_dict_of_objects(npc_units),
 		"player_units": Utils.serialize_dict_of_objects(player_units),
 		"structures": Utils.serialize_dict_of_objects(structures),
-		"turrets": Utils.serialize_dict_of_objects(turrets),
 		"pickups": Utils.serialize_dict_of_objects(pickups),
 		"combat_logger": combat_logger.to_dict(),
 		"chat_logger": chat_logger.to_dict(),

@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/scenes/gameplay/spawn_panel.gd" id="1"]
 
 [node name="SpawnPanel" type="PopupPanel"]
-size = Vector2i(460, 360)
+size = Vector2i(660, 400)
 script = ExtResource("1")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
@@ -36,70 +36,124 @@ text = "Target Tile:"
 layout_mode = 2
 text = "(-1, -1)"
 
-[node name="Form" type="GridContainer" parent="MarginContainer/Root"]
+[node name="SpawnModeRow" type="HBoxContainer" parent="MarginContainer/Root"]
+layout_mode = 2
+
+[node name="SpawnModeLabel" type="Label" parent="MarginContainer/Root/SpawnModeRow"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Spawn Mode"
+
+[node name="SpawnModeOption" type="OptionButton" parent="MarginContainer/Root/SpawnModeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/Root"]
+layout_mode = 2
+
+[node name="Panels" type="HBoxContainer" parent="MarginContainer/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="Left" type="VBoxContainer" parent="MarginContainer/Root/Panels"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="LeftTitle" type="Label" parent="MarginContainer/Root/Panels/Left"]
+layout_mode = 2
+text = "Owner"
+
+[node name="LeftForm" type="GridContainer" parent="MarginContainer/Root/Panels/Left"]
 layout_mode = 2
 columns = 2
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 6
 
-[node name="EntityTypeLabel" type="Label" parent="MarginContainer/Root/Form"]
+[node name="ClanLabel" type="Label" parent="MarginContainer/Root/Panels/Left/LeftForm"]
+layout_mode = 2
+text = "Clan"
+
+[node name="ClanOption" type="OptionButton" parent="MarginContainer/Root/Panels/Left/LeftForm"]
+layout_mode = 2
+
+[node name="OwnerTypeLabel" type="Label" parent="MarginContainer/Root/Panels/Left/LeftForm"]
+layout_mode = 2
+text = "Owner Type"
+
+[node name="OwnerTypeOption" type="OptionButton" parent="MarginContainer/Root/Panels/Left/LeftForm"]
+layout_mode = 2
+
+[node name="NpcCommanderLabel" type="Label" parent="MarginContainer/Root/Panels/Left/LeftForm"]
+layout_mode = 2
+text = "Commander"
+
+[node name="NpcCommanderOption" type="OptionButton" parent="MarginContainer/Root/Panels/Left/LeftForm"]
+layout_mode = 2
+
+[node name="NpcNameLabel" type="Label" parent="MarginContainer/Root/Panels/Left/LeftForm"]
+layout_mode = 2
+text = "NPC Name"
+
+[node name="NpcNameEdit" type="LineEdit" parent="MarginContainer/Root/Panels/Left/LeftForm"]
+layout_mode = 2
+placeholder_text = "Leave empty for random"
+
+[node name="PlayerLabel" type="Label" parent="MarginContainer/Root/Panels/Left/LeftForm"]
+layout_mode = 2
+text = "Player"
+
+[node name="PlayerOption" type="OptionButton" parent="MarginContainer/Root/Panels/Left/LeftForm"]
+layout_mode = 2
+
+[node name="VSeparator" type="VSeparator" parent="MarginContainer/Root/Panels"]
+layout_mode = 2
+
+[node name="Right" type="VBoxContainer" parent="MarginContainer/Root/Panels"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="RightTitle" type="Label" parent="MarginContainer/Root/Panels/Right"]
+layout_mode = 2
+text = "Content"
+
+[node name="SingleForm" type="GridContainer" parent="MarginContainer/Root/Panels/Right"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
+
+[node name="EntityTypeLabel" type="Label" parent="MarginContainer/Root/Panels/Right/SingleForm"]
 layout_mode = 2
 text = "Entity Type"
 
-[node name="EntityTypeOption" type="OptionButton" parent="MarginContainer/Root/Form"]
+[node name="EntityTypeOption" type="OptionButton" parent="MarginContainer/Root/Panels/Right/SingleForm"]
 layout_mode = 2
 
-[node name="TemplateLabel" type="Label" parent="MarginContainer/Root/Form"]
+[node name="TemplateLabel" type="Label" parent="MarginContainer/Root/Panels/Right/SingleForm"]
 layout_mode = 2
 text = "Template"
 
-[node name="TemplateOption" type="OptionButton" parent="MarginContainer/Root/Form"]
+[node name="TemplateOption" type="OptionButton" parent="MarginContainer/Root/Panels/Right/SingleForm"]
 layout_mode = 2
 
-[node name="QuantityLabel" type="Label" parent="MarginContainer/Root/Form"]
+[node name="QuantityLabel" type="Label" parent="MarginContainer/Root/Panels/Right/SingleForm"]
 layout_mode = 2
 text = "Quantity"
 
-[node name="QuantitySpin" type="SpinBox" parent="MarginContainer/Root/Form"]
+[node name="QuantitySpin" type="SpinBox" parent="MarginContainer/Root/Panels/Right/SingleForm"]
 layout_mode = 2
 min_value = 1.0
 max_value = 16.0
 value = 1.0
 
-[node name="ClanLabel" type="Label" parent="MarginContainer/Root/Form"]
+[node name="LoadoutLabel" type="Label" parent="MarginContainer/Root/Panels/Right/SingleForm"]
 layout_mode = 2
-text = "Clan"
+text = "Loadout"
 
-[node name="ClanOption" type="OptionButton" parent="MarginContainer/Root/Form"]
-layout_mode = 2
-
-[node name="OwnerTypeLabel" type="Label" parent="MarginContainer/Root/Form"]
-layout_mode = 2
-text = "Owner Type"
-
-[node name="OwnerTypeOption" type="OptionButton" parent="MarginContainer/Root/Form"]
-layout_mode = 2
-
-[node name="NpcCommanderLabel" type="Label" parent="MarginContainer/Root/Form"]
-layout_mode = 2
-text = "Commander"
-
-[node name="NpcCommanderOption" type="OptionButton" parent="MarginContainer/Root/Form"]
-layout_mode = 2
-
-[node name="NpcNameLabel" type="Label" parent="MarginContainer/Root/Form"]
-layout_mode = 2
-text = "NPC Name"
-
-[node name="NpcNameEdit" type="LineEdit" parent="MarginContainer/Root/Form"]
-layout_mode = 2
-placeholder_text = "Leave empty for random"
-
-[node name="PlayerLabel" type="Label" parent="MarginContainer/Root/Form"]
-layout_mode = 2
-text = "Player"
-
-[node name="PlayerOption" type="OptionButton" parent="MarginContainer/Root/Form"]
+[node name="LoadoutOption" type="OptionButton" parent="MarginContainer/Root/Panels/Right/SingleForm"]
 layout_mode = 2
 
 [node name="StatusLabel" type="Label" parent="MarginContainer/Root"]

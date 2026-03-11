@@ -6,17 +6,21 @@ var _target_cell: Vector2i = Vector2i(-1, -1)
 var _game_map: GameMap = null
 
 @onready var target_value: Label = $MarginContainer/Root/TargetRow/TargetValue
-@onready var entity_type_option: OptionButton = $MarginContainer/Root/Form/EntityTypeOption
-@onready var template_option: OptionButton = $MarginContainer/Root/Form/TemplateOption
-@onready var quantity_spin: SpinBox = $MarginContainer/Root/Form/QuantitySpin
-@onready var clan_option: OptionButton = $MarginContainer/Root/Form/ClanOption
-@onready var owner_type_option: OptionButton = $MarginContainer/Root/Form/OwnerTypeOption
-@onready var npc_commander_label: Label = $MarginContainer/Root/Form/NpcCommanderLabel
-@onready var npc_commander_option: OptionButton = $MarginContainer/Root/Form/NpcCommanderOption
-@onready var npc_name_label: Label = $MarginContainer/Root/Form/NpcNameLabel
-@onready var npc_name_edit: LineEdit = $MarginContainer/Root/Form/NpcNameEdit
-@onready var player_label: Label = $MarginContainer/Root/Form/PlayerLabel
-@onready var player_option: OptionButton = $MarginContainer/Root/Form/PlayerOption
+@onready var spawn_mode_option: OptionButton = $MarginContainer/Root/SpawnModeRow/SpawnModeOption
+# Left panel — Owner
+@onready var clan_option: OptionButton = $MarginContainer/Root/Panels/Left/LeftForm/ClanOption
+@onready var owner_type_option: OptionButton = $MarginContainer/Root/Panels/Left/LeftForm/OwnerTypeOption
+@onready var npc_commander_label: Label = $MarginContainer/Root/Panels/Left/LeftForm/NpcCommanderLabel
+@onready var npc_commander_option: OptionButton = $MarginContainer/Root/Panels/Left/LeftForm/NpcCommanderOption
+@onready var npc_name_label: Label = $MarginContainer/Root/Panels/Left/LeftForm/NpcNameLabel
+@onready var npc_name_edit: LineEdit = $MarginContainer/Root/Panels/Left/LeftForm/NpcNameEdit
+@onready var player_label: Label = $MarginContainer/Root/Panels/Left/LeftForm/PlayerLabel
+@onready var player_option: OptionButton = $MarginContainer/Root/Panels/Left/LeftForm/PlayerOption
+# Right panel — Content
+@onready var entity_type_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/EntityTypeOption
+@onready var template_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/TemplateOption
+@onready var quantity_spin: SpinBox = $MarginContainer/Root/Panels/Right/SingleForm/QuantitySpin
+@onready var loadout_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/LoadoutOption
 @onready var status_label: Label = $MarginContainer/Root/StatusLabel
 @onready var spawn_button: Button = $MarginContainer/Root/Buttons/SpawnButton
 @onready var cancel_button: Button = $MarginContainer/Root/Buttons/CancelButton
@@ -25,6 +29,7 @@ var _game_map: GameMap = null
 func _ready() -> void:
 	spawn_button.pressed.connect(_on_spawn_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
+	spawn_mode_option.item_selected.connect(_on_spawn_mode_changed)
 	entity_type_option.item_selected.connect(_on_entity_type_changed)
 	clan_option.item_selected.connect(_on_clan_changed)
 	owner_type_option.item_selected.connect(_on_owner_type_changed)
@@ -41,12 +46,14 @@ func open_for_cell(
 	_game_map = game_map
 	target_value.text = "(%d, %d)" % [cell.x, cell.y]
 
-	_populate_entity_types()
+	_populate_spawn_modes()
 	_populate_owner_types()
 	_populate_clans(default_clan_id)
 	_populate_npc_commander_option(default_owner)
 	_populate_players()
+	_populate_entity_types()
 	_populate_templates()
+	_populate_loadout_options()
 
 	if is_instance_of(default_owner, NPCOwned):
 		npc_name_edit.text = default_owner.npc_name
@@ -58,6 +65,19 @@ func open_for_cell(
 	quantity_spin.value = 1
 	_set_status("")
 	popup_centered_ratio(0.35)
+
+
+func _populate_spawn_modes() -> void:
+	spawn_mode_option.clear()
+	spawn_mode_option.add_item("Single Entity")
+	spawn_mode_option.set_item_metadata(0, "single")
+	spawn_mode_option.add_item("Squad")
+	spawn_mode_option.set_item_metadata(1, "squad")
+	spawn_mode_option.set_item_disabled(1, true)
+	spawn_mode_option.add_item("Outpost")
+	spawn_mode_option.set_item_metadata(2, "outpost")
+	spawn_mode_option.set_item_disabled(2, true)
+	spawn_mode_option.select(0)
 
 
 func _populate_entity_types() -> void:
@@ -222,6 +242,19 @@ func _get_selected_metadata(option: OptionButton) -> String:
 	return str(option.get_item_metadata(selected))
 
 
+func _populate_loadout_options() -> void:
+	loadout_option.clear()
+	loadout_option.add_item("None")
+	loadout_option.set_item_metadata(0, "none")
+	loadout_option.add_item("Random")
+	loadout_option.set_item_metadata(1, "random")
+	loadout_option.select(0)
+
+
+func _on_spawn_mode_changed(_index: int) -> void:
+	_set_status("")
+
+
 func _on_entity_type_changed(_index: int) -> void:
 	_populate_templates()
 	_set_status("")
@@ -250,12 +283,14 @@ func _on_cancel_pressed() -> void:
 func _on_spawn_pressed() -> void:
 	var entity_type: String = _get_selected_metadata(entity_type_option)
 	var template_id: String = _get_selected_metadata(template_option)
+	var spawn_mode: String = _get_selected_metadata(spawn_mode_option)
 	var owner_type: String = _get_selected_metadata(owner_type_option)
 	var clan_id: String = _get_selected_metadata(clan_option)
 	var player_uuid: String = _get_selected_metadata(player_option)
 	var commander_meta: String = _get_selected_metadata(npc_commander_option)
 	var npc_mode: String = "new" if commander_meta == "new" else "existing"
 	var npc_name: String = npc_name_edit.text.strip_edges()
+	var loadout: String = _get_selected_metadata(loadout_option)
 	var quantity: int = int(quantity_spin.value)
 
 	if entity_type.is_empty() or template_id.is_empty():
@@ -280,9 +315,11 @@ func _on_spawn_pressed() -> void:
 
 	var request: Dictionary = {
 		"position": _target_cell,
+		"spawn_mode": spawn_mode,
 		"entity_type": entity_type,
 		"template_id": template_id,
 		"quantity": max(1, quantity),
+		"loadout": loadout,
 		"owner_type": owner_type,
 		"npc_mode": npc_mode,
 		"clan_id": clan_id,

@@ -382,6 +382,8 @@ func _spawn_mek(position: Vector2i, request: Dictionary, entity_owner: EntityOwn
 		return
 
 	var mek: Mek = template.build_mek()
+	if str(request.get("loadout", "")) == "random":
+		_apply_random_loadout(mek)
 	var map_mek: MapMek = MapMek.new(position, entity_owner, mek)
 	if entity_owner.is_player():
 		game_map.player_units[mek.uuid] = map_mek
@@ -397,14 +399,34 @@ func _spawn_structure(position: Vector2i, request: Dictionary, entity_owner: Ent
 		return
 
 	var structure: Structure = template.build_structure()
-	if template.slots.size() > 0 and template.slots[Enums.SlotType.SMALL] > 0:
-		var item_template: ItemTemplate = TemplateManager.get_item_template("swpn001")
-		if item_template and structure.items.is_empty():
-			structure.items.append(item_template.build_item())
-			structure.rebuild_combat_state()
-
+	if str(request.get("loadout", "")) == "random":
+		_apply_random_loadout(structure)
 	var map_structure: MapStructure = MapStructure.new(position, entity_owner, structure, true)
 	game_map.structures[structure.uuid] = map_structure
+
+
+func _apply_random_loadout(actor: CombatActor) -> void:
+	# Fill available slots with shuffled random items; largest slots first so
+	# high-power items get a chance before the power budget shrinks.
+	var slot_priority: Array = [
+		Enums.SlotType.LARGE,
+		Enums.SlotType.MEDIUM,
+		Enums.SlotType.SMALL,
+		Enums.SlotType.UTILITY,
+	]
+	for slot_type: int in slot_priority:
+		var slots_available: int = actor.slots[slot_type] if actor.slots.size() > slot_type else 0
+		if slots_available <= 0:
+			continue
+		var candidates: Array[ItemTemplate] = []
+		for tmpl: ItemTemplate in TemplateManager.item_templates.values():
+			if tmpl.slot == slot_type:
+				candidates.append(tmpl)
+		candidates.shuffle()
+		var fill: int = mini(slots_available, candidates.size())
+		for i in range(fill):
+			actor.items.append(candidates[i].build_item())
+	actor.rebuild_combat_state()
 
 
 func _refresh_entity_views() -> void:

@@ -131,6 +131,10 @@ func reset_combat_state(base_stats: Dictionary, p_slots: Array[int] = []) -> voi
 	slots = p_slots.duplicate()
 
 
+func rebuild_combat_state() -> void:
+	pass
+
+
 func rebuild_combat_state_with_items(base_stats: Dictionary, p_slots: Array[int] = []) -> void:
 	reset_combat_state(base_stats, p_slots)
 

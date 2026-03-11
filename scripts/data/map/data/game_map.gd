@@ -333,6 +333,16 @@ static func from_dict(data: Dictionary) -> GameMap:
 			push_error("Failed to load NPC unit data.")
 			return null
 
+	# Load the player units (optional for backward compatibility).
+	map.player_units.clear()
+	for unit_uuid in data.get("player_units", {}):
+		var player_unit: MapMek = MapMek.from_dict(data["player_units"][unit_uuid])
+		if player_unit:
+			map.player_units[player_unit.mek.uuid] = player_unit
+		else:
+			push_error("Failed to load player unit data.")
+			return null
+
 	# Load the loggers.
 	map.combat_logger = MapLogger.from_dict(data.get("combat_logger", {}))
 	map.chat_logger = MapLogger.from_dict(data.get("chat_logger", {}))
@@ -353,6 +363,7 @@ func to_dict() -> Dictionary:
 		"map_difficulty": map_difficulty,
 		"terrain_data": Utils.serialize_matrix(terrain_data, map_width, map_height),
 		"npc_units": Utils.serialize_dict_of_objects(npc_units),
+		"player_units": Utils.serialize_dict_of_objects(player_units),
 		"combat_logger": combat_logger.to_dict(),
 		"chat_logger": chat_logger.to_dict(),
 	}

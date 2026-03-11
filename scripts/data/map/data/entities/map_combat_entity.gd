@@ -25,3 +25,11 @@ func is_dead() -> bool:
 
 func can_move() -> bool:
 	return false
+
+
+func get_icon_path() -> String:
+	if not combatant:
+		return ""
+	if combatant.get("template") and combatant.get("template").get("icon"):
+		return str(combatant.get("template").get("icon"))
+	return ""

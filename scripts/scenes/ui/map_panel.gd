@@ -182,7 +182,7 @@ func _input(_event):
 					map_hud.info_panel.clear()
 					map_hud.grid_drawer.deselect_entity()
 					game_map.remove_map_entity(map_hud.selected_entity)
-					map_hud.mek_drawer.update_meks()
+					map_hud.icon_drawer.update_icons()
 					map_hud.entity_list_panel.refresh()
 					map_hud.selected_entity = null
 					_update_map_start_stop_state(game_map)

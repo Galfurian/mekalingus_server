@@ -21,7 +21,7 @@ var _context_cell: Vector2i = Vector2i(-1, -1)
 @onready var scroll_view = $RootSplit/MainSplit/GridMap/ScrollView
 @onready var grid_container = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer
 @onready var grid_drawer = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer/GridDrawer
-@onready var mek_drawer = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer/MekDrawer
+@onready var icon_drawer = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer/IconDrawer
 @onready var time_of_day_overlay = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer/TimeOfDayOverlay
 @onready var combat_log = $RootSplit/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
 @onready var info_panel = $RootSplit/MainSplit/LeftSidePanel/InfoPanel
@@ -51,7 +51,7 @@ func setup(p_game_map: GameMap, p_grid_size: int = 50):
 	time_of_day_overlay.setup(p_game_map, grid_size, SECTOR_SIZE)
 	grid_container.setup(p_game_map, grid_size, SECTOR_SIZE)
 	grid_drawer.setup(p_game_map, grid_size, SECTOR_SIZE)
-	mek_drawer.setup(p_game_map, grid_size, SECTOR_SIZE)
+	icon_drawer.setup(p_game_map, grid_size, SECTOR_SIZE)
 	info_panel.setup(p_game_map)
 	entity_list_panel.setup(p_game_map)
 	log_panel.setup(p_game_map)
@@ -74,7 +74,7 @@ func clear():
 	time_of_day_overlay.clear()
 	grid_container.clear()
 	grid_drawer.clear()
-	mek_drawer.clear()
+	icon_drawer.clear()
 	info_panel.clear()
 	entity_list_panel.clear()
 	log_panel.clear()
@@ -90,7 +90,7 @@ func redraw(p_grid_size: int):
 	time_of_day_overlay.setup(game_map, grid_size, SECTOR_SIZE)
 	grid_container.setup(game_map, grid_size, SECTOR_SIZE)
 	grid_drawer.setup(game_map, grid_size, SECTOR_SIZE)
-	mek_drawer.setup(game_map, grid_size, SECTOR_SIZE)
+	icon_drawer.setup(game_map, grid_size, SECTOR_SIZE)
 
 
 func center_on(position: Vector2i) -> void:
@@ -338,7 +338,7 @@ func _spawn_turret_at_context_cell() -> void:
 
 
 func _refresh_entity_views() -> void:
-	mek_drawer.update_meks()
+	icon_drawer.update_icons()
 	grid_drawer.queue_redraw()
 	entity_list_panel.refresh()
 

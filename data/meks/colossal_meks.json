@@ -16,7 +16,7 @@
             5,
             3
         ],
-        "icon": "meks/mek031"
+        "icon": "meks/mek.png"
     },
     "cmek002": {
         "name": "Leviathan Warlord",
@@ -35,7 +35,7 @@
             4,
             4
         ],
-        "icon": "meks/mek032"
+        "icon": "meks/mek.png"
     },
     "cmek003": {
         "name": "Titanus Annihilator",
@@ -54,7 +54,7 @@
             5,
             4
         ],
-        "icon": "meks/mek033"
+        "icon": "meks/mek.png"
     },
     "cmek004": {
         "name": "Oblivion Sentinel",
@@ -73,7 +73,7 @@
             4,
             3
         ],
-        "icon": "meks/mek034"
+        "icon": "meks/mek.png"
     },
     "cmek005": {
         "name": "Doom Bringer",
@@ -92,6 +92,6 @@
             5,
             3
         ],
-        "icon": "meks/mek035"
+        "icon": "meks/mek.png"
     }
 }

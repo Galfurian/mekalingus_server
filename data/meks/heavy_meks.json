@@ -16,7 +16,7 @@
             2,
             2
         ],
-        "icon": "meks/mek021"
+        "icon": "meks/mek.png"
     },
     "hmek002": {
         "name": "Dread Bastion",
@@ -36,7 +36,7 @@
             3,
             2
         ],
-        "icon": "meks/mek022"
+        "icon": "meks/mek.png"
     },
     "hmek003": {
         "name": "Thunder Colossus",
@@ -55,7 +55,7 @@
             2,
             2
         ],
-        "icon": "meks/mek023"
+        "icon": "meks/mek.png"
     },
     "hmek004": {
         "name": "Goliath Enforcer",
@@ -74,7 +74,7 @@
             3,
             3
         ],
-        "icon": "meks/mek024"
+        "icon": "meks/mek.png"
     },
     "hmek005": {
         "name": "Onyx Warlord",
@@ -93,7 +93,7 @@
             2,
             2
         ],
-        "icon": "meks/mek025"
+        "icon": "meks/mek.png"
     },
     "hmek006": {
         "name": "Hellstorm Titan",
@@ -112,7 +112,7 @@
             3,
             2
         ],
-        "icon": "meks/mek026"
+        "icon": "meks/mek.png"
     },
     "hmek007": {
         "name": "Crimson Juggernaut",
@@ -131,7 +131,7 @@
             4,
             2
         ],
-        "icon": "meks/mek027"
+        "icon": "meks/mek.png"
     },
     "hmek008": {
         "name": "Vanguard Behemoth",
@@ -150,7 +150,7 @@
             3,
             3
         ],
-        "icon": "meks/mek028"
+        "icon": "meks/mek.png"
     },
     "hmek009": {
         "name": "Storm Leviathan",
@@ -169,7 +169,7 @@
             2,
             2
         ],
-        "icon": "meks/mek029"
+        "icon": "meks/mek.png"
     },
     "hmek010": {
         "name": "Iron Tyrant",
@@ -188,6 +188,6 @@
             4,
             3
         ],
-        "icon": "meks/mek030"
+        "icon": "meks/mek.png"
     }
 }

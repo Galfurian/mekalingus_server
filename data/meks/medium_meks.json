@@ -16,7 +16,7 @@
             0,
             3
         ],
-        "icon": "meks/mek012"
+        "icon": "meks/mek.png"
     },
     "mmek002": {
         "name": "Titan Vanguard",
@@ -35,7 +35,7 @@
             0,
             2
         ],
-        "icon": "meks/mek012"
+        "icon": "meks/mek.png"
     },
     "mmek003": {
         "name": "Iron Reaver",
@@ -54,7 +54,7 @@
             1,
             2
         ],
-        "icon": "meks/mek013"
+        "icon": "meks/mek.png"
     },
     "mmek004": {
         "name": "Phantom Breaker",
@@ -73,7 +73,7 @@
             1,
             1
         ],
-        "icon": "meks/mek014"
+        "icon": "meks/mek.png"
     },
     "mmek005": {
         "name": "Thunder Sentinel",
@@ -92,7 +92,7 @@
             1,
             3
         ],
-        "icon": "meks/mek015"
+        "icon": "meks/mek.png"
     },
     "mmek006": {
         "name": "Ember Warden",
@@ -111,7 +111,7 @@
             2,
             3
         ],
-        "icon": "meks/mek016"
+        "icon": "meks/mek.png"
     },
     "mmek007": {
         "name": "Shadow Bastion",
@@ -130,7 +130,7 @@
             1,
             1
         ],
-        "icon": "meks/mek017"
+        "icon": "meks/mek.png"
     },
     "mmek008": {
         "name": "Cyclone Hunter",
@@ -149,7 +149,7 @@
             1,
             2
         ],
-        "icon": "meks/mek018"
+        "icon": "meks/mek.png"
     },
     "mmek009": {
         "name": "Avalanche Titan",
@@ -168,7 +168,7 @@
             0,
             2
         ],
-        "icon": "meks/mek019"
+        "icon": "meks/mek.png"
     },
     "mmek010": {
         "name": "Nova Lancer",
@@ -187,6 +187,6 @@
             0,
             2
         ],
-        "icon": "meks/mek020"
+        "icon": "meks/mek.png"
     }
 }

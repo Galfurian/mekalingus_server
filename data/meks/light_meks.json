@@ -16,7 +16,7 @@
 			0,
 			2
 		],
-		"icon": "meks/mek001"
+		"icon": "meks/mek.png"
 	},
 	"lmek002": {
 		"name": "Shadow Phantom",
@@ -35,7 +35,7 @@
 			0,
 			2
 		],
-		"icon": "meks/mek002"
+		"icon": "meks/mek.png"
 	},
 	"lmek003": {
 		"name": "Specter Shadow",
@@ -54,7 +54,7 @@
 			0,
 			2
 		],
-		"icon": "meks/mek003"
+		"icon": "meks/mek.png"
 	},
 	"lmek004": {
 		"name": "Storm Dancer",
@@ -73,7 +73,7 @@
 			0,
 			2
 		],
-		"icon": "meks/mek004"
+		"icon": "meks/mek.png"
 	},
 	"lmek005": {
 		"name": "Blitz Warden",
@@ -92,7 +92,7 @@
 			0,
 			2
 		],
-		"icon": "meks/mek005"
+		"icon": "meks/mek.png"
 	},
 	"lmek006": {
 		"name": "Striker Talon",
@@ -111,7 +111,7 @@
 			0,
 			1
 		],
-		"icon": "meks/mek006"
+		"icon": "meks/mek.png"
 	},
 	"lmek007": {
 		"name": "Falcon Edge",
@@ -130,7 +130,7 @@
 			0,
 			2
 		],
-		"icon": "meks/mek007"
+		"icon": "meks/mek.png"
 	},
 	"lmek008": {
 		"name": "Viper Stride",
@@ -149,7 +149,7 @@
 			0,
 			2
 		],
-		"icon": "meks/mek008"
+		"icon": "meks/mek.png"
 	},
 	"lmek009": {
 		"name": "Ghost Mirage",
@@ -168,7 +168,7 @@
 			0,
 			2
 		],
-		"icon": "meks/mek009"
+		"icon": "meks/mek.png"
 	},
 	"lmek010": {
 		"name": "Raptor Fang",
@@ -187,6 +187,6 @@
 			0,
 			2
 		],
-		"icon": "meks/mek010"
+		"icon": "meks/mek.png"
 	}
 }

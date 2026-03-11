@@ -292,37 +292,70 @@ func _on_spawn_panel_spawn_requested(request: Dictionary) -> void:
 	if not game_map:
 		return
 
+	var origin: Vector2i = request.get("position", _context_cell)
+	var spawn_mode: String = str(request.get("spawn_mode", "single"))
+	match spawn_mode:
+		"single":
+			_spawn_single(request, origin)
+		"squad", "outpost":
+			_spawn_multi(request, origin)
+
+	_refresh_entity_views()
+
+
+func _spawn_single(request: Dictionary, origin: Vector2i) -> void:
 	var entity_type: String = str(request.get("entity_type", ""))
 	var quantity: int = int(request.get("quantity", 1))
-	var spawn_tiles: Array[Vector2i] = _find_spawn_tiles(Vector2i(request.get("position", _context_cell)), quantity, entity_type)
+	var spawn_tiles: Array[Vector2i] = _find_spawn_tiles(origin, quantity, entity_type)
 	if spawn_tiles.is_empty():
 		push_error("Spawn failed: no valid tiles available.")
 		return
 
 	for i in range(spawn_tiles.size()):
-		var tile: Vector2i = spawn_tiles[i]
 		var entity_owner: EntityOwner = _build_owner_from_request(request, i)
 		if not entity_owner:
 			push_error("Spawn failed: invalid owner configuration.")
 			return
-
 		if entity_type == "mek":
-			_spawn_mek(tile, request, entity_owner)
+			_spawn_mek(spawn_tiles[i], request, entity_owner)
 		elif entity_type == "structure":
-			_spawn_structure(tile, request, entity_owner)
-
-	_refresh_entity_views()
+			_spawn_structure(spawn_tiles[i], request, entity_owner)
 
 
-func _find_spawn_tiles(origin: Vector2i, quantity: int, entity_type: String) -> Array[Vector2i]:
-	var tiles: Array[Vector2i] = []
-	if quantity <= 0:
-		return tiles
+func _spawn_multi(request: Dictionary, origin: Vector2i) -> void:
+	# All units in a squad / outpost share the same commander.
+	var entity_owner: EntityOwner = _build_owner_from_request(request, 0)
+	if not entity_owner:
+		push_error("Spawn failed: invalid owner configuration.")
+		return
 
-	if _can_spawn_entity_type_at(origin, entity_type):
-		tiles.append(origin)
-	if tiles.size() >= quantity:
-		return tiles
+	var units: Array = request.get("units", [])
+	var used_tiles: Array[Vector2i] = []
+	for unit: Dictionary in units:
+		var entity_type: String = str(unit.get("entity_type", "mek"))
+		var tile: Vector2i = _find_nearest_free_tile(origin, entity_type, used_tiles)
+		if tile == Vector2i(-1, -1):
+			push_warning("Spawn skipped: no available tile for a unit.")
+			continue
+		used_tiles.append(tile)
+		var unit_request: Dictionary = {
+			"template_id": str(unit.get("template_id", "")),
+			"loadout": str(unit.get("loadout", "none")),
+		}
+		if entity_type == "mek":
+			_spawn_mek(tile, unit_request, entity_owner)
+		elif entity_type == "structure":
+			_spawn_structure(tile, unit_request, entity_owner)
+
+
+## Returns single closest free tile from origin (excluding already-claimed tiles).
+func _find_nearest_free_tile(
+	origin: Vector2i,
+	entity_type: String,
+	excluded: Array[Vector2i] = []
+) -> Vector2i:
+	if _can_spawn_entity_type_at(origin, entity_type) and not origin in excluded:
+		return origin
 
 	var max_radius: int = max(game_map.map_width, game_map.map_height)
 	for radius in range(1, max_radius + 1):
@@ -331,13 +364,21 @@ func _find_spawn_tiles(origin: Vector2i, quantity: int, entity_type: String) -> 
 				if abs(x - origin.x) != radius and abs(y - origin.y) != radius:
 					continue
 				var tile := Vector2i(x, y)
-				if tile in tiles:
+				if tile in excluded:
 					continue
 				if _can_spawn_entity_type_at(tile, entity_type):
-					tiles.append(tile)
-					if tiles.size() >= quantity:
-						return tiles
+					return tile
+	return Vector2i(-1, -1)
 
+
+## Returns up to `quantity` spawn tiles for a single entity type, avoiding duplicates.
+func _find_spawn_tiles(origin: Vector2i, quantity: int, entity_type: String) -> Array[Vector2i]:
+	var tiles: Array[Vector2i] = []
+	for _i in range(quantity):
+		var tile: Vector2i = _find_nearest_free_tile(origin, entity_type, tiles)
+		if tile == Vector2i(-1, -1):
+			break
+		tiles.append(tile)
 	return tiles
 
 

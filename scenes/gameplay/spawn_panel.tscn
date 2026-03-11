@@ -156,6 +156,52 @@ text = "Loadout"
 [node name="LoadoutOption" type="OptionButton" parent="MarginContainer/Root/Panels/Right/SingleForm"]
 layout_mode = 2
 
+[node name="MultiForm" type="VBoxContainer" parent="MarginContainer/Root/Panels/Right"]
+layout_mode = 2
+size_flags_vertical = 3
+visible = false
+theme_override_constants/separation = 4
+
+[node name="MultiHeader" type="HBoxContainer" parent="MarginContainer/Root/Panels/Right/MultiForm"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HeaderType" type="Label" parent="MarginContainer/Root/Panels/Right/MultiForm/MultiHeader"]
+layout_mode = 2
+custom_minimum_size = Vector2(90, 0)
+text = "Type"
+
+[node name="HeaderTemplate" type="Label" parent="MarginContainer/Root/Panels/Right/MultiForm/MultiHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Template"
+
+[node name="HeaderLoadout" type="Label" parent="MarginContainer/Root/Panels/Right/MultiForm/MultiHeader"]
+layout_mode = 2
+custom_minimum_size = Vector2(90, 0)
+text = "Loadout"
+
+[node name="HeaderSpacer" type="Control" parent="MarginContainer/Root/Panels/Right/MultiForm/MultiHeader"]
+layout_mode = 2
+custom_minimum_size = Vector2(28, 0)
+
+[node name="MultiScroll" type="ScrollContainer" parent="MarginContainer/Root/Panels/Right/MultiForm"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="UnitList" type="VBoxContainer" parent="MarginContainer/Root/Panels/Right/MultiForm/MultiScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="AddUnitRow" type="HBoxContainer" parent="MarginContainer/Root/Panels/Right/MultiForm"]
+layout_mode = 2
+alignment = 2
+
+[node name="AddUnitButton" type="Button" parent="MarginContainer/Root/Panels/Right/MultiForm/AddUnitRow"]
+layout_mode = 2
+text = "+ Add Unit"
+
 [node name="StatusLabel" type="Label" parent="MarginContainer/Root"]
 layout_mode = 2
 autowrap_mode = 2

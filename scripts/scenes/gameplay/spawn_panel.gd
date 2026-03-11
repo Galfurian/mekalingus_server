@@ -2,6 +2,8 @@ extends PopupPanel
 
 signal spawn_requested(request: Dictionary)
 
+const _UNIT_ROW := preload("res://scripts/scenes/gameplay/spawn_unit_row.gd")
+
 var _target_cell: Vector2i = Vector2i(-1, -1)
 var _game_map: GameMap = null
 
@@ -21,6 +23,10 @@ var _game_map: GameMap = null
 @onready var template_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/TemplateOption
 @onready var quantity_spin: SpinBox = $MarginContainer/Root/Panels/Right/SingleForm/QuantitySpin
 @onready var loadout_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/LoadoutOption
+@onready var single_form: GridContainer = $MarginContainer/Root/Panels/Right/SingleForm
+@onready var multi_form: VBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm
+@onready var unit_list: VBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm/MultiScroll/UnitList
+@onready var add_unit_button: Button = $MarginContainer/Root/Panels/Right/MultiForm/AddUnitRow/AddUnitButton
 @onready var status_label: Label = $MarginContainer/Root/StatusLabel
 @onready var spawn_button: Button = $MarginContainer/Root/Buttons/SpawnButton
 @onready var cancel_button: Button = $MarginContainer/Root/Buttons/CancelButton
@@ -34,6 +40,7 @@ func _ready() -> void:
 	clan_option.item_selected.connect(_on_clan_changed)
 	owner_type_option.item_selected.connect(_on_owner_type_changed)
 	npc_commander_option.item_selected.connect(_on_npc_commander_changed)
+	add_unit_button.pressed.connect(_on_add_unit_pressed)
 
 
 func open_for_cell(
@@ -61,6 +68,7 @@ func open_for_cell(
 		owner_type_option.select(1)
 
 	_apply_owner_field_visibility()
+	_apply_content_visibility()
 
 	quantity_spin.value = 1
 	_set_status("")
@@ -73,10 +81,8 @@ func _populate_spawn_modes() -> void:
 	spawn_mode_option.set_item_metadata(0, "single")
 	spawn_mode_option.add_item("Squad")
 	spawn_mode_option.set_item_metadata(1, "squad")
-	spawn_mode_option.set_item_disabled(1, true)
 	spawn_mode_option.add_item("Outpost")
 	spawn_mode_option.set_item_metadata(2, "outpost")
-	spawn_mode_option.set_item_disabled(2, true)
 	spawn_mode_option.select(0)
 
 
@@ -252,6 +258,11 @@ func _populate_loadout_options() -> void:
 
 
 func _on_spawn_mode_changed(_index: int) -> void:
+	_apply_content_visibility()
+	var new_mode: String = _get_selected_metadata(spawn_mode_option)
+	if new_mode in ["squad", "outpost"]:
+		_clear_unit_list()
+		_add_unit_row(_default_unit_type_for_mode())
 	_set_status("")
 
 
@@ -276,50 +287,79 @@ func _on_npc_commander_changed(_index: int) -> void:
 	_set_status("")
 
 
+func _apply_content_visibility() -> void:
+	var is_single: bool = _get_selected_metadata(spawn_mode_option) == "single"
+	single_form.visible = is_single
+	multi_form.visible = not is_single
+
+
+func _clear_unit_list() -> void:
+	for child in unit_list.get_children():
+		child.queue_free()
+
+
+func _add_unit_row(default_type: String = "mek") -> void:
+	var row := _UNIT_ROW.new()
+	row.remove_requested.connect(func(): _remove_unit_row(row))
+	unit_list.add_child(row)
+	row.init_with_type(default_type)
+
+
+func _remove_unit_row(row: Node) -> void:
+	row.queue_free()
+
+
+func _default_unit_type_for_mode() -> String:
+	return "structure" if _get_selected_metadata(spawn_mode_option) == "outpost" else "mek"
+
+
+func _on_add_unit_pressed() -> void:
+	_add_unit_row(_default_unit_type_for_mode())
+
+
 func _on_cancel_pressed() -> void:
 	hide()
 
 
 func _on_spawn_pressed() -> void:
-	var entity_type: String = _get_selected_metadata(entity_type_option)
-	var template_id: String = _get_selected_metadata(template_option)
+	var owner_request: Dictionary = _build_owner_request()
+	if owner_request.is_empty():
+		return
+
 	var spawn_mode: String = _get_selected_metadata(spawn_mode_option)
+	match spawn_mode:
+		"single":
+			_submit_single(owner_request)
+		"squad", "outpost":
+			_submit_multi(owner_request, spawn_mode)
+
+
+func _build_owner_request() -> Dictionary:
 	var owner_type: String = _get_selected_metadata(owner_type_option)
 	var clan_id: String = _get_selected_metadata(clan_option)
 	var player_uuid: String = _get_selected_metadata(player_option)
 	var commander_meta: String = _get_selected_metadata(npc_commander_option)
 	var npc_mode: String = "new" if commander_meta == "new" else "existing"
 	var npc_name: String = npc_name_edit.text.strip_edges()
-	var loadout: String = _get_selected_metadata(loadout_option)
-	var quantity: int = int(quantity_spin.value)
 
-	if entity_type.is_empty() or template_id.is_empty():
-		_set_status("Select a valid type and template.")
-		return
 	if clan_id.is_empty():
 		_set_status("Select a clan for ownership.")
-		return
+		return {}
 	if owner_type == "player" and player_uuid.is_empty():
 		_set_status("Select a player for Player Owner mode.")
-		return
+		return {}
 	if owner_type == "npc":
 		if npc_mode == "existing":
 			if commander_meta.is_empty() or not commander_meta.contains("|"):
 				_set_status("Select an existing NPC commander.")
-				return
+				return {}
 			var parts := commander_meta.split("|", false, 2)
 			npc_name = parts[0]
 			clan_id = parts[1]
 		elif npc_name.is_empty():
 			npc_name = NameGenerator.random_full_name()
 
-	var request: Dictionary = {
-		"position": _target_cell,
-		"spawn_mode": spawn_mode,
-		"entity_type": entity_type,
-		"template_id": template_id,
-		"quantity": max(1, quantity),
-		"loadout": loadout,
+	return {
 		"owner_type": owner_type,
 		"npc_mode": npc_mode,
 		"clan_id": clan_id,
@@ -327,7 +367,44 @@ func _on_spawn_pressed() -> void:
 		"player_uuid": player_uuid,
 	}
 
-	emit_signal("spawn_requested", request)
+
+func _submit_single(owner_request: Dictionary) -> void:
+	var entity_type: String = _get_selected_metadata(entity_type_option)
+	var template_id: String = _get_selected_metadata(template_option)
+	if entity_type.is_empty() or template_id.is_empty():
+		_set_status("Select a valid type and template.")
+		return
+
+	var request: Dictionary = owner_request.duplicate()
+	request["position"] = _target_cell
+	request["spawn_mode"] = "single"
+	request["entity_type"] = entity_type
+	request["template_id"] = template_id
+	request["loadout"] = _get_selected_metadata(loadout_option)
+	request["quantity"] = max(1, int(quantity_spin.value))
+	spawn_requested.emit(request)
+	hide()
+
+
+func _submit_multi(owner_request: Dictionary, spawn_mode: String) -> void:
+	var units: Array[Dictionary] = []
+	for child in unit_list.get_children():
+		if child is _UNIT_ROW:
+			var entry: Dictionary = child.to_dict()
+			if entry["entity_type"].is_empty() or entry["template_id"].is_empty():
+				_set_status("Each unit must have a valid template selected.")
+				return
+			units.append(entry)
+
+	if units.is_empty():
+		_set_status("Add at least one unit.")
+		return
+
+	var request: Dictionary = owner_request.duplicate()
+	request["position"] = _target_cell
+	request["spawn_mode"] = spawn_mode
+	request["units"] = units
+	spawn_requested.emit(request)
 	hide()
 
 

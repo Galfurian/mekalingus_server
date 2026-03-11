@@ -117,6 +117,8 @@ func _evaluate_support_intent(plan: AIPlan) -> AIPlan:
 func _evaluate_retreat_intent(plan: AIPlan) -> AIPlan:
 	# Get the source unit from the plan.
 	var source = plan.source
+	if not source.can_move():
+		return null
 	# Get the current thread level.
 	var current_threat: float = AIUtils.get_threat_level(plan.game_map, source.position, source)
 	# Get the health ratio of the source unit.
@@ -169,6 +171,8 @@ func _evaluate_retreat_intent(plan: AIPlan) -> AIPlan:
 func _evaluate_reposition_intent(plan: AIPlan) -> AIPlan:
 	# Get the source unit from the plan.
 	var source = plan.source
+	if not source.can_move():
+		return null
 	# Find a random reachable tile within the unit's speed.
 	var fallback_tile = AIUtils.find_random_reachable_tile(plan.game_map, source.position, source.combatant.speed)
  	# If the fallback tile is the same as the source position, we can't reposition.

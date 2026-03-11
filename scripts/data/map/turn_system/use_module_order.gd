@@ -69,15 +69,15 @@ func _is_target_in_module_range(game_map) -> bool:
 
 
 func _apply_damage_effect(game_map, effect: ItemEffect) -> void:
-	var source_mek: Mek = source.combatant
-	var target_mek: Mek = target.combatant
-	if source_mek.is_dead() or target_mek.is_dead():
+	var source_actor: CombatActor = source.combatant
+	var target_actor: CombatActor = target.combatant
+	if source_actor.is_dead() or target_actor.is_dead():
 		return
 	# Handle SELF damage.
 	if effect.target_self():
-		var result = source_mek.take_damage_from_effect(effect)
+		var result = source_actor.take_damage_from_effect(effect)
 		_add_log(game_map, Enums.LogType.ATTACK, "%s hurts itself with %s -> %d shield, %d armor, %d health (reduced %d %s)" % [
-			source_mek.get_chat_tag(),
+			source_actor.get_chat_tag(),
 			equipped_module.module.module_name,
 			result.shield,
 			result.armor,
@@ -91,13 +91,13 @@ func _apply_damage_effect(game_map, effect: ItemEffect) -> void:
 			source, center.position, effect.radius, true, true
 		)
 		for entity in affected:
-			var mek = entity.combatant
-			if mek.is_dead():
+			var actor: CombatActor = entity.combatant
+			if actor.is_dead():
 				continue
-			var result = mek.take_damage_from_effect(effect)
+			var result = actor.take_damage_from_effect(effect)
 			_add_log(game_map, Enums.LogType.ATTACK, "%s hits %s with AoE from %s -> %d shield, %d armor, %d health (reduced %d %s)" % [
-				source_mek.get_chat_tag(),
-				mek.get_chat_tag(),
+				source_actor.get_chat_tag(),
+				actor.get_chat_tag(),
 				equipped_module.module.module_name,
 				result.shield,
 				result.armor,
@@ -106,10 +106,10 @@ func _apply_damage_effect(game_map, effect: ItemEffect) -> void:
 				Enums.DamageType.keys()[effect.damage_type]])
 	# Handle regular ENEMY / ALLY targeting.
 	else:
-		var result = target_mek.take_damage_from_effect(effect)
+		var result = target_actor.take_damage_from_effect(effect)
 		_add_log(game_map, Enums.LogType.ATTACK, "%s hits %s with %s -> %d shield, %d armor, %d health (reduced %d %s)" % [
-			source_mek.get_chat_tag(),
-			target_mek.get_chat_tag(),
+			source_actor.get_chat_tag(),
+			target_actor.get_chat_tag(),
 			equipped_module.module.module_name,
 			result.shield,
 			result.armor,
@@ -119,15 +119,15 @@ func _apply_damage_effect(game_map, effect: ItemEffect) -> void:
 
 
 func _apply_repair_effect(game_map, effect: ItemEffect) -> void:
-	var source_mek: Mek = source.combatant
-	var target_mek: Mek = target.combatant
-	if source_mek.is_dead() or target_mek.is_dead():
+	var source_actor: CombatActor = source.combatant
+	var target_actor: CombatActor = target.combatant
+	if source_actor.is_dead() or target_actor.is_dead():
 		return
 	# Handle SELF repair.
 	if effect.target_self():
-		var result = source_mek.repair_from_effect(effect)
+		var result = source_actor.repair_from_effect(effect)
 		_add_log(game_map, Enums.LogType.SUPPORT, "%s restores %d %s to itself using %s" % [
-			source_mek.get_chat_tag(),
+			source_actor.get_chat_tag(),
 			result.amount,
 			result.stat,
 			equipped_module.module.module_name])
@@ -140,41 +140,41 @@ func _apply_repair_effect(game_map, effect: ItemEffect) -> void:
 			source, center.position, effect.radius, include_allies, include_enemies, []
 		)
 		for entity in affected:
-			var mek = entity.combatant
-			if mek.is_dead():
+			var actor: CombatActor = entity.combatant
+			if actor.is_dead():
 				continue
-			var result = mek.repair_from_effect(effect)
+			var result = actor.repair_from_effect(effect)
 			_add_log(game_map, Enums.LogType.SUPPORT, "%s restores %d %s to %s using %s (AoE)" % [
-					source_mek.get_chat_tag(),
+					source_actor.get_chat_tag(),
 					result.amount,
 					result.stat,
-					mek.get_chat_tag(),
+					actor.get_chat_tag(),
 					equipped_module.module.module_name
 				]
 			)
 	# Handle ENEMY / ALLY repair.
 	else:
-		if target_mek.is_dead():
+		if target_actor.is_dead():
 			return
-		var result = target_mek.repair_from_effect(effect)
+		var result = target_actor.repair_from_effect(effect)
 		_add_log(game_map, Enums.LogType.SUPPORT, "%s restores %d %s to %s using %s" % [
-			source_mek.get_chat_tag(),
+			source_actor.get_chat_tag(),
 			result.amount,
 			result.stat,
-			target_mek.get_chat_tag(),
+			target_actor.get_chat_tag(),
 			equipped_module.module.module_name])
 
 
 func _apply_modifier_effect(game_map, effect: ItemEffect) -> void:
-	var source_mek: Mek = source.combatant
-	var target_mek: Mek = target.combatant
-	if source_mek.is_dead() or target_mek.is_dead():
+	var source_actor: CombatActor = source.combatant
+	var target_actor: CombatActor = target.combatant
+	if source_actor.is_dead() or target_actor.is_dead():
 		return
 	# Handle SELF-targeted effects.
 	if effect.target_self():
-		source_mek.add_effect(equipped_module.module, effect, source)
+		source_actor.add_effect(equipped_module.module, effect, source)
 		_add_log(game_map, Enums.LogType.SUPPORT, "%s applies %s to itself -> %d for %d turns (%s)" % [
-			source_mek.get_chat_tag(),
+			source_actor.get_chat_tag(),
 			effect.get_effect_type_label(),
 			effect.amount,
 			effect.duration,
@@ -188,24 +188,24 @@ func _apply_modifier_effect(game_map, effect: ItemEffect) -> void:
 			source, center.position, effect.radius, include_allies, include_enemies, [source]
 		)
 		for entity in affected:
-			var mek = entity.combatant
-			if mek.is_dead():
+			var actor: CombatActor = entity.combatant
+			if actor.is_dead():
 				continue
-			mek.add_effect(equipped_module.module, effect, source)
+			actor.add_effect(equipped_module.module, effect, source)
 			_add_log(game_map, Enums.LogType.SUPPORT, "%s applies %s to %s -> %d for %d turns (%s, AoE)" % [
-				source_mek.get_chat_tag(),
+				source_actor.get_chat_tag(),
 				effect.get_effect_type_label(),
-				mek.get_chat_tag(),
+				actor.get_chat_tag(),
 				effect.amount,
 				effect.duration,
 				equipped_module.module.module_name])
 	# Handle direct ENEMY / ALLY targeting.
 	else:
-		target_mek.add_effect(equipped_module.module, effect, source)
+		target_actor.add_effect(equipped_module.module, effect, source)
 		_add_log(game_map, Enums.LogType.SUPPORT, "%s applies %s to %s -> %d for %d turns (%s)" % [
-			source_mek.get_chat_tag(),
+			source_actor.get_chat_tag(),
 			effect.get_effect_type_label(),
-			target_mek.get_chat_tag(),
+			target_actor.get_chat_tag(),
 			effect.amount,
 			effect.duration,
 			equipped_module.module.module_name])

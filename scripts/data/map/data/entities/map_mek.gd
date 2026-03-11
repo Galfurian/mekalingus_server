@@ -14,6 +14,10 @@ func _init(p_position: Vector2i, p_owner: EntityOwner, p_mek: Mek) -> void:
 	super(p_position, p_owner, p_mek, true)
 
 
+func can_move() -> bool:
+	return true
+
+
 # =============================================================================
 # SERIALIZATION
 # =============================================================================

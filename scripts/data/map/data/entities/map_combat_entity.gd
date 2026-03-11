@@ -21,3 +21,7 @@ func is_alive() -> bool:
 
 func is_dead() -> bool:
 	return not is_alive()
+
+
+func can_move() -> bool:
+	return false

@@ -96,7 +96,7 @@ func generate_order() -> Order:
 		if not equipped_module:
 			return null
 		# Get the mek speed.
-		var mek_speed = source.combatant.speed
+		var movement_speed: int = source.combatant.speed
 		# Get the module range.
 		var module_range = equipped_module.module.module_range + range_modifier
 		# Compute the distance to the target to determine if we need to move.
@@ -105,17 +105,20 @@ func generate_order() -> Order:
 		var target_in_range = (source == target) or (distance >= 0 and distance <= module_range)
 		# If the target is out of range, we need to move to the target.
 		if not target_in_range:
+			if not source.can_move() or movement_speed <= 0:
+				completed = true
+				return null
 			# This will keep track of the best tile to act from.
 			var target_tile: Vector2i = Vector2i.ZERO
 			# Check if the target is an enemy of the source.
 			if game_map.is_enemy_of(source, target):
 				# We need to find the best tile to act from.
-				target_tile = AIUtils.find_best_attack_tile(game_map, source, target, 0, module_range, mek_speed)
+				target_tile = AIUtils.find_best_attack_tile(game_map, source, target, 0, module_range, movement_speed)
 			else:
-				target_tile = AIUtils.find_closest_reachable_tile(game_map, source, target, 0, module_range, mek_speed)
+				target_tile = AIUtils.find_closest_reachable_tile(game_map, source, target, 0, module_range, movement_speed)
 			# If the best tile is the same as the source position, we can't move, so we move randomly.
 			if target_tile == source.position:
-				target_tile = AIUtils.find_random_reachable_tile(game_map, source.position, mek_speed)
+				target_tile = AIUtils.find_random_reachable_tile(game_map, source.position, movement_speed)
 			# Move to the best tile to act from.
 			if target_tile == Vector2i.ZERO:
 				return null

@@ -26,35 +26,35 @@ func _format_pos_tag(pos: Vector2i) -> String:
 
 
 func execute(game_map) -> bool:
-	var source_mek: Mek = source.combatant
-	var target_mek: Mek = target.combatant
-	if source_mek.is_dead() or target_mek.is_dead():
+	var source_actor: CombatActor = source.combatant
+	var target_actor: CombatActor = target.combatant
+	if source_actor.is_dead() or target_actor.is_dead():
 		return false
 	if not _is_target_in_module_range(game_map):
 		_add_combat_log(
 			game_map,
 			"%s cannot use %s on %s (out of range: %d)" % [
-				source_mek.get_chat_tag(),
+				source_actor.get_chat_tag(),
 				equipped_module.get_chat_tag(),
-				target_mek.get_chat_tag(),
+				target_actor.get_chat_tag(),
 				_get_effective_module_range(),
 			],
 		)
 		return false
 	# Check if the Mek has enough power.
-	if source_mek.power < equipped_module.module.power_on_use:
+	if source_actor.power < equipped_module.module.power_on_use:
 		return false
 	# Deduct power.
-	source_mek.power -= equipped_module.module.power_on_use
+	source_actor.power -= equipped_module.module.power_on_use
 	# Start cooldown if necessary
 	if equipped_module.module.cooldown > 0:
-		source_mek.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
+		source_actor.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
 	# Perform accuracy check
-	var base_accuracy = 90 + source_mek.accuracy_modifier
+	var base_accuracy = 90 + source_actor.accuracy_modifier
 	# Adjust based on movement.
-	var move_penalty = - min(source_mek.tiles_moved_last_turn * 5, 30) # -5% per tile, up to -30%
+	var move_penalty = - min(source_actor.tiles_moved_last_turn * 5, 30) # -5% per tile, up to -30%
 	# Adjust based on dodge.
-	var dodge_bonus = - min(target_mek.tiles_moved_last_turn * 3, 15) # -3% dodge per tile, up to -15%
+	var dodge_bonus = - min(target_actor.tiles_moved_last_turn * 3, 15) # -3% dodge per tile, up to -15%
 	# Height-based adjustment
 	var source_height = game_map.get_tile_height(source.position)
 	var target_height = game_map.get_tile_height(target.position)
@@ -67,7 +67,7 @@ func execute(game_map) -> bool:
 	# Generate the log.
 	var log_text := (
 		"%s attacking %s with %s:"
-		% [source_mek.get_chat_tag(), target_mek.get_chat_tag(), equipped_module.get_chat_tag()]
+		% [source_actor.get_chat_tag(), target_actor.get_chat_tag(), equipped_module.get_chat_tag()]
 	)
 	log_text += (
 		" base=%d, move=%d, dodge=%d, height=%d"
@@ -112,15 +112,15 @@ func execute(game_map) -> bool:
 			_apply_modifier_effect(game_map, effect)
 		else:
 			_add_combat_log(game_map, "Effect %s not yet implemented" % Enums.EffectType.keys()[effect.type])
-		if source_mek.is_dead() or target_mek.is_dead():
+		if source_actor.is_dead() or target_actor.is_dead():
 			break
 	return true
 
 
 func _to_string() -> String:
-	var source_name = source.combatant.get_mek_name()
+	var source_name = source.combatant.get_chat_tag()
 	var module_name = equipped_module.module.module_name
-	var target_name = target.combatant.get_mek_name()
+	var target_name = target.combatant.get_chat_tag()
 	if source == target:
 		return "%s is attacking itself with %s" % [source_name, module_name]
 	return "%s is attacking %s with %s" % [source_name, target_name, module_name]

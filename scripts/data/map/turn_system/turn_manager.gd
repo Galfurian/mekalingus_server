@@ -122,15 +122,13 @@ func tick(delta: float) -> void:
 		# Emit the turn started signal.
 		on_turn_started.emit(_current_turn)
 
-		# 1) Generate the NPCs order for the current turn.
-		game_map.ai_controller.generate_npc_orders()
+		# 1) Generate AI orders for all AI-controlled combat entities.
+		game_map.ai_controller.generate_ai_orders()
 		
 		# 3.1) Process use of offensive module activations.
 		game_map.ai_controller.execute_offensive_module_orders()
 		# 3.2) Process use of utility module activations.
 		game_map.ai_controller.execute_utility_module_orders()
-		# 3.3) Process autonomous turret actions.
-		game_map.execute_structure_ai_turn()
 		# 3.3) Check if any units are destroyed after executing the orders.
 		_erase_destroyed_units()
 

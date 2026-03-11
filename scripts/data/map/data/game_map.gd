@@ -53,8 +53,6 @@ var chat_logger: MapLogger = MapLogger.new()
 var astar: AStar2D = AStar2D.new()
 # The AI controller for managing enemy actions.
 var ai_controller
-# The controller for structure and turret autonomous behavior.
-var structure_ai_controller
 # The turn manager.
 var turn_manager
 
@@ -80,7 +78,6 @@ func _init(
 	combat_logger.set_combat_preset()
 	chat_logger.set_chat_preset()
 	ai_controller = AIController.new(self)
-	structure_ai_controller = StructureAIController.new(self)
 	turn_manager = TurnManager.new(self)
 
 
@@ -112,7 +109,6 @@ func clear() -> void:
 	chat_logger.clear()
 	# Clear AI and turn systems.
 	ai_controller.clear()
-	structure_ai_controller.clear()
 	turn_manager.clear()
 
 
@@ -227,11 +223,6 @@ func update_astar() -> void:
 	Rebuilds the AStar2D graph based on current walkable map tiles.
 	"""
 	MapAStarBuilder.rebuild(self)
-
-
-func execute_structure_ai_turn() -> void:
-	"""Executes autonomous actions for armed structures."""
-	structure_ai_controller.execute_turret_actions()
 
 
 # =============================================================================

@@ -30,6 +30,10 @@ func _init(p_position: Vector2i, p_owner: EntityOwner, p_blocking: bool = false)
 	active = true
 
 
+func can_move() -> bool:
+	return false
+
+
 # =============================================================================
 # SERIALIZATION
 # =============================================================================

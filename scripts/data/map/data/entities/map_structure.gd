@@ -31,6 +31,10 @@ func is_alive() -> bool:
 	return combatant and combatant.is_alive() and active
 
 
+func can_move() -> bool:
+	return false
+
+
 func get_offensive_payload() -> Dictionary:
 	"""
 	Returns first usable offensive payload: item + module + effect.

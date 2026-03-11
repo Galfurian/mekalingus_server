@@ -26,17 +26,17 @@ func _format_pos_tag(pos: Vector2i) -> String:
 
 
 func execute(game_map) -> bool:
-	var source_mek: Mek = source.combatant
-	var target_mek: Mek = target.combatant
-	if source_mek.is_dead() or target_mek.is_dead():
+	var source_actor: CombatActor = source.combatant
+	var target_actor: CombatActor = target.combatant
+	if source_actor.is_dead() or target_actor.is_dead():
 		return false
 	if not _is_target_in_module_range(game_map):
 		_add_utility_log(
 			game_map,
 			"%s cannot use %s on %s (out of range: %d)" % [
-				source_mek.get_chat_tag(),
+				source_actor.get_chat_tag(),
 				equipped_module.get_chat_tag(),
-				target_mek.get_chat_tag(),
+				target_actor.get_chat_tag(),
 				_get_effective_module_range(),
 			],
 		)
@@ -45,9 +45,9 @@ func execute(game_map) -> bool:
 		func(effect: ItemEffect): return effect.is_offensive()
 	)
 	if has_offensive_effect and game_map.is_enemy_of(source, target):
-		var base_accuracy: int = 90 + source_mek.accuracy_modifier
-		var move_penalty: int = - min(source_mek.tiles_moved_last_turn * 5, 30)
-		var dodge_bonus: int = - min(target_mek.tiles_moved_last_turn * 3, 15)
+		var base_accuracy: int = 90 + source_actor.accuracy_modifier
+		var move_penalty: int = - min(source_actor.tiles_moved_last_turn * 5, 30)
+		var dodge_bonus: int = - min(target_actor.tiles_moved_last_turn * 3, 15)
 		var source_height: int = game_map.get_tile_height(source.position)
 		var target_height: int = game_map.get_tile_height(target.position)
 		var height_diff: int = source_height - target_height
@@ -58,23 +58,23 @@ func execute(game_map) -> bool:
 			_add_utility_log(
 				game_map,
 				"%s used %s on %s and missed (accuracy=%d%%, roll=%d)" % [
-					source_mek.get_chat_tag(),
+					source_actor.get_chat_tag(),
 					equipped_module.get_chat_tag(),
-					target_mek.get_chat_tag(),
+					target_actor.get_chat_tag(),
 					final_accuracy,
 					roll,
 				],
 			)
 			return false
 	# Check if the Mek has enough power.
-	if source_mek.power < equipped_module.module.power_on_use:
+	if source_actor.power < equipped_module.module.power_on_use:
 		return false
 	# Deduct power.
-	source_mek.power -= equipped_module.module.power_on_use
+	source_actor.power -= equipped_module.module.power_on_use
 	# Start cooldown if necessary.
 	if equipped_module.module.cooldown > 0:
-		source_mek.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
-	_add_utility_log(game_map, "%s used %s" % [source_mek.get_chat_tag(), equipped_module.get_chat_tag()])
+		source_actor.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
+	_add_utility_log(game_map, "%s used %s" % [source_actor.get_chat_tag(), equipped_module.get_chat_tag()])
 	for effect in equipped_module.module.effects:
 		var effect_chance: int = clamp(effect.chance, 0, 100)
 		if effect_chance < 100:
@@ -104,15 +104,15 @@ func execute(game_map) -> bool:
 			_apply_modifier_effect(game_map, effect)
 		else:
 			_add_utility_log(game_map, "Effect %s not yet implemented" % Enums.EffectType.keys()[effect.type])
-		if source_mek.is_dead() or target_mek.is_dead():
+		if source_actor.is_dead() or target_actor.is_dead():
 			break
 	return true
 
 
 func _to_string() -> String:
-	var source_name = source.combatant.get_mek_name()
+	var source_name = source.combatant.get_chat_tag()
 	var module_name = equipped_module.module.module_name
-	var target_name = target.combatant.get_mek_name()
+	var target_name = target.combatant.get_chat_tag()
 
 	if source == target:
 		return "%s is supporting itself with %s" % [source_name, module_name]

@@ -56,7 +56,7 @@ func _format_pos_tag(pos: Vector2i) -> String:
 	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
 
 
-func get_current_plan(source: MapEntity) -> AIPlan:
+func get_current_plan(source: MapCombatEntity) -> AIPlan:
 	"""
 	Retrieves the current plan for the given unit.
 	"""
@@ -79,6 +79,9 @@ func remove_orders_of_dead_units() -> void:
 	for unit_uuid in game_map.npc_units:
 		if game_map.npc_units[unit_uuid].combatant.is_dead():
 			_current_plans.erase(unit_uuid)
+	for structure_uuid in game_map.structures:
+		if game_map.structures[structure_uuid].combatant.is_dead():
+			_current_plans.erase(structure_uuid)
 
 
 func queue_offensive_module_order(order: UseOffensiveModuleOrder) -> void:
@@ -127,18 +130,20 @@ func execute_move_orders() -> void:
 	"""
 	Executes all queued movement orders.
 	"""
-	# Resets the movement tracking for all Meks.
+	# Reset movement tracking for all combat entities that may move.
 	for unit_uuid in game_map.player_units:
 		game_map.player_units[unit_uuid].combatant.tiles_moved_last_turn = 0
 	for unit_uuid in game_map.npc_units:
 		game_map.npc_units[unit_uuid].combatant.tiles_moved_last_turn = 0
+	for structure_uuid in game_map.structures:
+		game_map.structures[structure_uuid].combatant.tiles_moved_last_turn = 0
 	# Execute all queued movement orders.
 	for order in _move_orders.values():
 		order.execute(game_map)
 	_move_orders.clear()
 
 
-func plan_for_unit(source: MapEntity) -> void:
+func plan_for_unit(source: MapCombatEntity) -> void:
 	"""
 	Generates a plan for the given unit if the current one is missing or no longer valid.
 	"""
@@ -149,14 +154,16 @@ func plan_for_unit(source: MapEntity) -> void:
 		if current_plan and current_plan.is_valid():
 			return
 		# Get the clan aggressiveness and generate a plan.
-		var aggressiveness: float = source.owner.clan.aggressiveness
+		var aggressiveness: float = 1.0
+		if source.owner and source.owner.clan:
+			aggressiveness = source.owner.clan.aggressiveness
 		# Generate the plan for the source unit.
 		var new_plan: AIPlan = _planner.generate_plan(source, game_map, aggressiveness)
 		# Save the new plan.
 		_current_plans[source.combatant.uuid] = new_plan
 
 
-func generate_orders_for_unit(source: MapEntity) -> void:
+func generate_orders_for_unit(source: MapCombatEntity) -> void:
 	"""
 	Generates an order for the given unit based on its current plan.
 	If the plan is invalid or has been completed, re-planning may occur.
@@ -185,6 +192,8 @@ func generate_orders_for_unit(source: MapEntity) -> void:
 	
 	# Generate the order for the current plan.
 	var order: Order = current_plan.generate_order()
+	if not order:
+		return
 
 	_add_log("%s generated order for plan %s : %s" % [source.combatant.get_chat_tag(), str(current_plan), str(order)])
 
@@ -201,16 +210,39 @@ func generate_orders_for_unit(source: MapEntity) -> void:
 		push_error("Unknown order type: %s" % str(order))
 
 
-func generate_npc_orders() -> void:
+func _iter_ai_controlled_entities() -> Array[MapCombatEntity]:
+	var entities: Array[MapCombatEntity] = []
+
+	for unit: MapCombatEntity in game_map.npc_units.values():
+		if unit and unit.active and unit.combatant.is_alive():
+			entities.append(unit)
+
+	for structure: MapStructure in game_map.structures.values():
+		if not structure or not structure.active or structure.combatant.is_dead():
+			continue
+		if structure.get_offensive_payload().is_empty():
+			continue
+		entities.append(structure)
+
+	return entities
+
+
+func generate_ai_orders() -> void:
 	"""
-	Generates and queues an order for each NPC unit using the AI planner system.
+	Generates and queues one order for each AI-controlled combat entity.
 	"""
-	for unit in game_map.npc_units.values():
+	for unit: MapCombatEntity in _iter_ai_controlled_entities():
 		# Generate or reuse the current plan.
 		game_map.ai_controller.plan_for_unit(unit)
 		# Generate the next order based on the current plan.
 		game_map.ai_controller.generate_orders_for_unit(unit)
 
+
+func generate_npc_orders() -> void:
+	"""
+	Backward-compatible wrapper; use generate_ai_orders() directly.
+	"""
+	generate_ai_orders()
 
 func _filter_order_with_dead_mek(_key: String, order) -> bool:
 	"""

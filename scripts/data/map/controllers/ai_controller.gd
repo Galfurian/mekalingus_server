@@ -43,6 +43,7 @@ func clear():
 	Clears the internal state of the AI controller.
 	"""
 	_current_plans.clear()
+	_clear_orders()
 
 
 func _add_log(message: String) -> void:
@@ -64,7 +65,7 @@ func get_current_plan(source: MapMek) -> AIPlan:
 
 func remove_orders_of_dead_units() -> void:
 	"""
-	Removes orders for dead units.
+	Removes orders and plans for dead units.
 	"""
 	for key in Utils.filter(_use_offensive_module_orders, _filter_order_with_dead_mek):
 		_use_offensive_module_orders.erase(key)
@@ -72,6 +73,12 @@ func remove_orders_of_dead_units() -> void:
 		_use_utility_module_orders.erase(key)
 	for key in Utils.filter(_move_orders, _filter_order_with_dead_mek):
 		_move_orders.erase(key)
+	for unit_uuid in game_map.player_units:
+		if game_map.player_units[unit_uuid].mek.is_dead():
+			_current_plans.erase(unit_uuid)
+	for unit_uuid in game_map.npc_units:
+		if game_map.npc_units[unit_uuid].mek.is_dead():
+			_current_plans.erase(unit_uuid)
 
 
 func queue_offensive_module_order(order: UseOffensiveModuleOrder):

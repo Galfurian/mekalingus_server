@@ -2,6 +2,7 @@ extends Node
 
 # The size of sectors.
 const SECTOR_SIZE: int = 10
+const LEFT_PANEL_RATIO: float = 0.2
 
 # The current game map.
 var game_map: GameMap
@@ -11,22 +12,25 @@ var grid_size: int
 var selected_entity: MapEntity
 
 @onready var action_menu = $ActionMenu
-@onready var scroll_view = $VBoxContainer/HBoxContainer/GridMap/ScrollView
-@onready var grid_container = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer
-@onready var grid_drawer = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/GridDrawer
-@onready var mek_drawer = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/MekDrawer
-@onready var time_of_day_overlay = $VBoxContainer/HBoxContainer/GridMap/ScrollView/GridContainer/TimeOfDayOverlay
-@onready var combat_log = $VBoxContainer/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
-@onready var info_panel = $VBoxContainer/HBoxContainer/InfoPanel
-@onready var log_panel = $VBoxContainer/LogPanel
-
-@onready var time_label = $VBoxContainer/HBoxContainer/GridMap/TimeLabel
+@onready var main_split = $RootSplit/MainSplit
+@onready var scroll_view = $RootSplit/MainSplit/GridMap/ScrollView
+@onready var grid_container = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer
+@onready var grid_drawer = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer/GridDrawer
+@onready var mek_drawer = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer/MekDrawer
+@onready var time_of_day_overlay = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer/TimeOfDayOverlay
+@onready var combat_log = $RootSplit/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
+@onready var info_panel = $RootSplit/MainSplit/LeftSidePanel/InfoPanel
+@onready var entity_list_panel = $RootSplit/MainSplit/LeftSidePanel/EntityListPanel
+@onready var log_panel = $RootSplit/LogPanel
+@onready var time_label = $RootSplit/MainSplit/GridMap/TimeLabel
 
 func _ready():
 	"""Initializes the map HUD."""
 	grid_container.on_cell_selected.connect(_on_cell_selected)
 	combat_log.meta_clicked.connect(_on_log_meta_clicked)
 	scroll_view.scrolled.connect(_on_map_scrolled)
+	if not entity_list_panel.entity_selected.is_connected(_on_entity_list_entity_selected):
+		entity_list_panel.entity_selected.connect(_on_entity_list_entity_selected)
 
 
 func setup(p_game_map: GameMap, p_grid_size: int = 50):
@@ -41,6 +45,7 @@ func setup(p_game_map: GameMap, p_grid_size: int = 50):
 	grid_drawer.setup(p_game_map, grid_size, SECTOR_SIZE)
 	mek_drawer.setup(p_game_map, grid_size, SECTOR_SIZE)
 	info_panel.setup(p_game_map)
+	entity_list_panel.setup(p_game_map)
 	log_panel.setup(p_game_map)
 	# Connect signals once.
 	if game_map and not game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
@@ -63,6 +68,7 @@ func clear():
 	grid_drawer.clear()
 	mek_drawer.clear()
 	info_panel.clear()
+	entity_list_panel.clear()
 	log_panel.clear()
 
 
@@ -128,6 +134,7 @@ func _on_turn_ended(_turn_number: int):
 	# Called when the turn ends
 	if selected_entity:
 		center_on(selected_entity.position)
+	entity_list_panel.refresh()
 	# Update the time of day based on the current turn.
 	_update_time_of_day()
 
@@ -159,6 +166,7 @@ func _on_log_meta_clicked(meta: String) -> void:
 			selected_entity = entity
 			center_on(entity.position)
 			info_panel.set_entity(entity)
+			entity_list_panel.select_entity(entity)
 			info_panel.select_item_by_uuid(item_uuid)
 			grid_drawer.set_selected_entity(entity)
 		else:
@@ -171,6 +179,7 @@ func _on_log_meta_clicked(meta: String) -> void:
 			selected_entity = entity
 			center_on(entity.position)
 			info_panel.set_entity(entity)
+			entity_list_panel.select_entity(entity)
 			grid_drawer.set_selected_entity(entity)
 		else:
 			printerr("Could not find valid Mek entity for mek link: ", meta)
@@ -199,7 +208,17 @@ func _on_cell_selected(cell_position: Vector2i):
 		selected_entity = entity
 		center_on(entity.position)
 		info_panel.set_entity(entity)
+		entity_list_panel.select_entity(entity)
 		grid_drawer.set_selected_entity(entity)
+
+
+func _on_entity_list_entity_selected(entity: MapEntity) -> void:
+	if not is_instance_valid(entity):
+		return
+	selected_entity = entity
+	center_on(entity.position)
+	info_panel.set_entity(entity)
+	grid_drawer.set_selected_entity(entity)
 
 
 func _on_map_scrolled(scroll_up: bool):

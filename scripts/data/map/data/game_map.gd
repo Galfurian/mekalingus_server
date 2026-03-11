@@ -264,9 +264,16 @@ func is_enemy_of(me1: MapMek, me2: MapMek) -> bool:
 	"""
 	if me1 == me2:
 		return false
-	if not me1.owner or not me2.owner:
+	return can_owners_attack(me1.owner, me2.owner)
+
+
+func can_owners_attack(owner1: EntityOwner, owner2: EntityOwner) -> bool:
+	"""
+	Determines if two owners are hostile under current combat rules.
+	"""
+	if not owner1 or not owner2:
 		return false
-	return combat_rules.can_attack(me1.owner, me2.owner)
+	return combat_rules.can_attack(owner1, owner2)
 
 
 func get_entity_at(position: Vector2i) -> MapEntity:

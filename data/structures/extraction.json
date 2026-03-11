@@ -9,6 +9,8 @@
 		"power_generation": 10,
 		"speed": 0,
 		"slots": [0, 0, 0, 3],
+		"structure_type": "extraction",
+		"passable": false,
 		"icon": "structures/basic_turret.jpeg"
 	},
 	"ext_refinery_node": {
@@ -21,6 +23,8 @@
 		"power_generation": 9,
 		"speed": 0,
 		"slots": [0, 0, 0, 2],
+		"structure_type": "extraction",
+		"passable": false,
 		"icon": "structures/basic_turret.jpeg"
 	},
 	"ext_salvage_compactor": {
@@ -33,6 +37,8 @@
 		"power_generation": 8,
 		"speed": 0,
 		"slots": [1, 0, 0, 2],
+		"structure_type": "extraction",
+		"passable": false,
 		"icon": "structures/basic_turret.jpeg"
 	}
 }

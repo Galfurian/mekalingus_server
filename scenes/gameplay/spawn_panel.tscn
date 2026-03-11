@@ -202,6 +202,43 @@ alignment = 2
 layout_mode = 2
 text = "+ Add Unit"
 
+[node name="OutpostForm" type="GridContainer" parent="MarginContainer/Root/Panels/Right"]
+visible = false
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
+
+[node name="OutpostTypeLabel" type="Label" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
+layout_mode = 2
+text = "Outpost Type"
+
+[node name="OutpostTypeOption" type="OptionButton" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
+layout_mode = 2
+
+[node name="OutpostSizeLabel" type="Label" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
+layout_mode = 2
+text = "Outpost Size"
+
+[node name="OutpostSizeOption" type="OptionButton" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
+layout_mode = 2
+
+[node name="OutpostDefensesLabel" type="Label" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
+layout_mode = 2
+text = "Add Defenses"
+
+[node name="OutpostDefensesCheck" type="CheckBox" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
+layout_mode = 2
+text = "Enabled"
+
+[node name="OutpostWallsLabel" type="Label" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
+layout_mode = 2
+text = "Perimeter Walls"
+
+[node name="OutpostWallsCheck" type="CheckBox" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
+layout_mode = 2
+text = "Enabled"
+
 [node name="StatusLabel" type="Label" parent="MarginContainer/Root"]
 layout_mode = 2
 autowrap_mode = 2

@@ -9,6 +9,8 @@
 		"power_generation": 2,
 		"speed": 0,
 		"slots": [0, 0, 0, 0],
+		"structure_type": "wall",
+		"passable": false,
 		"icon": "structures/basic_turret.jpeg"
 	},
 	"def_gate_segment": {
@@ -21,6 +23,8 @@
 		"power_generation": 4,
 		"speed": 0,
 		"slots": [0, 0, 0, 1],
+		"structure_type": "gate",
+		"passable": true,
 		"icon": "structures/basic_turret.jpeg"
 	},
 	"def_guard_tower": {
@@ -33,6 +37,8 @@
 		"power_generation": 7,
 		"speed": 0,
 		"slots": [1, 1, 0, 1],
+		"structure_type": "defense",
+		"passable": false,
 		"icon": "structures/basic_turret.jpeg"
 	}
 }

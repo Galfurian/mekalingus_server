@@ -297,8 +297,10 @@ func _on_spawn_panel_spawn_requested(request: Dictionary) -> void:
 	match spawn_mode:
 		"single":
 			_spawn_single(request, origin)
-		"squad", "outpost":
+		"squad":
 			_spawn_multi(request, origin)
+		"outpost":
+			_spawn_outpost(request, origin)
 
 	_refresh_entity_views()
 
@@ -323,7 +325,7 @@ func _spawn_single(request: Dictionary, origin: Vector2i) -> void:
 
 
 func _spawn_multi(request: Dictionary, origin: Vector2i) -> void:
-	# All units in a squad / outpost share the same commander.
+	# All units in a squad share the same commander.
 	var entity_owner: EntityOwner = _build_owner_from_request(request, 0)
 	if not entity_owner:
 		push_error("Spawn failed: invalid owner configuration.")
@@ -346,6 +348,164 @@ func _spawn_multi(request: Dictionary, origin: Vector2i) -> void:
 			_spawn_mek(tile, unit_request, entity_owner)
 		elif entity_type == "structure":
 			_spawn_structure(tile, unit_request, entity_owner)
+
+
+func _spawn_outpost(request: Dictionary, origin: Vector2i) -> void:
+	var entity_owner: EntityOwner = _build_owner_from_request(request, 0)
+	if not entity_owner:
+		push_error("Spawn failed: invalid owner configuration.")
+		return
+
+	var outpost_type: String = str(request.get("outpost_type", "military"))
+	var outpost_size: String = str(request.get("outpost_size", "small"))
+	var add_defenses: bool = bool(request.get("outpost_add_defenses", true))
+	var add_walls: bool = bool(request.get("outpost_add_walls", false))
+
+	var blueprint: Array[Dictionary] = _build_outpost_blueprint(outpost_type, outpost_size, add_defenses)
+	if blueprint.is_empty():
+		push_error("Spawn failed: no outpost blueprint could be generated.")
+		return
+
+	var used_tiles: Array[Vector2i] = []
+	for unit: Dictionary in blueprint:
+		var entity_type: String = str(unit.get("entity_type", "structure"))
+		var tile: Vector2i = _find_nearest_free_tile(origin, entity_type, used_tiles)
+		if tile == Vector2i(-1, -1):
+			continue
+		used_tiles.append(tile)
+		if entity_type == "mek":
+			_spawn_mek(tile, unit, entity_owner)
+		elif entity_type == "structure":
+			_spawn_structure(tile, unit, entity_owner)
+
+	if add_walls:
+		_spawn_outpost_perimeter(origin, outpost_size, entity_owner, used_tiles)
+
+
+func _build_outpost_blueprint(
+	outpost_type: String,
+	outpost_size: String,
+	add_defenses: bool
+) -> Array[Dictionary]:
+	var core_count_map: Dictionary = {
+		"small": 2,
+		"medium": 4,
+		"large": 6,
+	}
+	var defense_count_map: Dictionary = {
+		"small": 1,
+		"medium": 2,
+		"large": 3,
+	}
+	var core_count: int = int(core_count_map.get(outpost_size, 2))
+	var defense_count: int = int(defense_count_map.get(outpost_size, 1))
+
+	var primary_structure_type: String = "combat"
+	match outpost_type:
+		"industrial":
+			primary_structure_type = "extraction"
+		"salvage":
+			primary_structure_type = "loot"
+		"hunting":
+			primary_structure_type = "hunting"
+		_:
+			primary_structure_type = "combat"
+
+	var primary_templates: Array[String] = _get_structure_template_ids_by_type(primary_structure_type)
+	if primary_templates.is_empty():
+		primary_templates = _get_structure_template_ids_by_type("extraction")
+	if primary_templates.is_empty():
+		primary_templates = _get_structure_template_ids_by_type("combat")
+
+	var blueprint: Array[Dictionary] = []
+	for _i in range(core_count):
+		var template_id: String = _pick_random_id(primary_templates)
+		if template_id.is_empty():
+			continue
+		blueprint.append({
+			"entity_type": "structure",
+			"template_id": template_id,
+			"loadout": "preset_utility",
+		})
+
+	if add_defenses:
+		var defense_templates: Array[String] = _get_structure_template_ids_by_type("defense")
+		if defense_templates.is_empty():
+			defense_templates = _get_structure_template_ids_by_type("combat")
+		for _j in range(defense_count):
+			var defense_id: String = _pick_random_id(defense_templates)
+			if defense_id.is_empty():
+				continue
+			blueprint.append({
+				"entity_type": "structure",
+				"template_id": defense_id,
+				"loadout": "preset_offense",
+			})
+
+	return blueprint
+
+
+func _spawn_outpost_perimeter(
+	origin: Vector2i,
+	outpost_size: String,
+	entity_owner: EntityOwner,
+	used_tiles: Array[Vector2i]
+) -> void:
+	var radius_map: Dictionary = {
+		"small": 2,
+		"medium": 3,
+		"large": 4,
+	}
+	var radius: int = int(radius_map.get(outpost_size, 2))
+
+	var wall_ids: Array[String] = _get_structure_template_ids_by_type("wall")
+	var gate_ids: Array[String] = _get_structure_template_ids_by_type("gate")
+	if wall_ids.is_empty() and gate_ids.is_empty():
+		return
+
+	var perimeter: Array[Vector2i] = []
+	for x in range(origin.x - radius, origin.x + radius + 1):
+		perimeter.append(Vector2i(x, origin.y - radius))
+		perimeter.append(Vector2i(x, origin.y + radius))
+	for y in range(origin.y - radius + 1, origin.y + radius):
+		perimeter.append(Vector2i(origin.x - radius, y))
+		perimeter.append(Vector2i(origin.x + radius, y))
+
+	var gate_candidates: Array[Vector2i] = [
+		Vector2i(origin.x, origin.y - radius),
+		Vector2i(origin.x, origin.y + radius),
+	]
+
+	for tile: Vector2i in perimeter:
+		if tile in used_tiles:
+			continue
+		if not game_map.is_in_bounds(tile):
+			continue
+		if game_map.is_occupied(tile):
+			continue
+
+		var use_gate: bool = tile in gate_candidates and not gate_ids.is_empty()
+		var template_id: String = _pick_random_id(gate_ids if use_gate else wall_ids)
+		if template_id.is_empty():
+			continue
+
+		used_tiles.append(tile)
+		_spawn_structure(tile, { "template_id": template_id, "loadout": "none" }, entity_owner)
+
+
+func _get_structure_template_ids_by_type(structure_type: String) -> Array[String]:
+	var ids: Array[String] = []
+	for template_id: String in TemplateManager.structure_templates.keys():
+		var template: StructureTemplate = TemplateManager.structure_templates[template_id]
+		if template and template.structure_type == structure_type:
+			ids.append(template_id)
+	return ids
+
+
+func _pick_random_id(ids: Array[String]) -> String:
+	if ids.is_empty():
+		return ""
+	return ids[randi() % ids.size()]
 
 
 ## Returns single closest free tile from origin (excluding already-claimed tiles).
@@ -423,8 +583,9 @@ func _spawn_mek(position: Vector2i, request: Dictionary, entity_owner: EntityOwn
 		return
 
 	var mek: Mek = template.build_mek()
-	if str(request.get("loadout", "")) == "random":
-		_apply_random_loadout(mek)
+	var loadout: String = str(request.get("loadout", "none"))
+	if loadout != "none":
+		_apply_random_loadout(mek, loadout)
 	var map_mek: MapMek = MapMek.new(position, entity_owner, mek)
 	if entity_owner.is_player():
 		game_map.player_units[mek.uuid] = map_mek
@@ -440,13 +601,21 @@ func _spawn_structure(position: Vector2i, request: Dictionary, entity_owner: Ent
 		return
 
 	var structure: Structure = template.build_structure()
-	if str(request.get("loadout", "")) == "random":
-		_apply_random_loadout(structure)
-	var map_structure: MapStructure = MapStructure.new(position, entity_owner, structure, true)
+	var loadout: String = str(request.get("loadout", "none"))
+	if loadout != "none":
+		_apply_random_loadout(structure, loadout)
+	var is_blocking: bool = not template.passable
+	if request.has("blocking_override"):
+		is_blocking = bool(request["blocking_override"])
+	var map_structure: MapStructure = MapStructure.new(position, entity_owner, structure, is_blocking)
 	game_map.structures[structure.uuid] = map_structure
 
 
-func _apply_random_loadout(actor: CombatActor) -> void:
+func _apply_random_loadout(actor: CombatActor, loadout: String = "preset_balanced") -> void:
+	var preset: String = loadout
+	if preset == "random":
+		preset = "preset_balanced"
+
 	# Fill available slots with shuffled random items; largest slots first so
 	# high-power items get a chance before the power budget shrinks.
 	var slot_priority: Array = [
@@ -459,15 +628,62 @@ func _apply_random_loadout(actor: CombatActor) -> void:
 		var slots_available: int = actor.slots[slot_type] if actor.slots.size() > slot_type else 0
 		if slots_available <= 0:
 			continue
-		var candidates: Array[ItemTemplate] = []
+		var weighted: Array[Dictionary] = []
 		for tmpl: ItemTemplate in TemplateManager.item_templates.values():
 			if tmpl.slot == slot_type:
-				candidates.append(tmpl)
-		candidates.shuffle()
-		var fill: int = mini(slots_available, candidates.size())
+				var weight: int = _preset_weight_for_item(tmpl, preset)
+				weighted.append({ "template": tmpl, "weight": weight + randi() % 3 })
+		weighted.sort_custom(func(a: Dictionary, b: Dictionary):
+			return int(a["weight"]) > int(b["weight"])
+		)
+		var fill: int = mini(slots_available, weighted.size())
 		for i in range(fill):
-			actor.items.append(candidates[i].build_item())
+			actor.items.append(weighted[i]["template"].build_item())
 	actor.rebuild_combat_state()
+
+
+func _preset_weight_for_item(item_template: ItemTemplate, preset: String) -> int:
+	if preset == "preset_balanced":
+		return 10
+
+	var offense: int = 0
+	var defense: int = 0
+	var utility: int = 0
+
+	for module: ItemModule in item_template.modules:
+		for effect: ItemEffect in module.effects:
+			if effect.target == Enums.TargetType.ENEMY and (
+				effect.effect_type == Enums.EffectType.DAMAGE
+				or effect.effect_type == Enums.EffectType.DAMAGE_OVER_TIME
+			):
+				offense += 4
+			elif (
+				effect.effect_type == Enums.EffectType.HEALTH_REPAIR
+				or effect.effect_type == Enums.EffectType.SHIELD_REPAIR
+				or effect.effect_type == Enums.EffectType.ARMOR_REPAIR
+				or effect.effect_type == Enums.EffectType.HEALTH_MODIFIER
+				or effect.effect_type == Enums.EffectType.SHIELD_MODIFIER
+				or effect.effect_type == Enums.EffectType.ARMOR_MODIFIER
+				or effect.effect_type == Enums.EffectType.DAMAGE_REDUCTION_ALL
+				or effect.effect_type == Enums.EffectType.DAMAGE_REDUCTION_KINETIC
+				or effect.effect_type == Enums.EffectType.DAMAGE_REDUCTION_ENERGY
+				or effect.effect_type == Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE
+				or effect.effect_type == Enums.EffectType.DAMAGE_REDUCTION_PLASMA
+				or effect.effect_type == Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE
+			):
+				defense += 4
+			else:
+				utility += 3
+
+	match preset:
+		"preset_offense":
+			return 1 + offense * 4 + defense + utility
+		"preset_defense":
+			return 1 + defense * 4 + offense + utility
+		"preset_utility":
+			return 1 + utility * 4 + offense + defense
+		_:
+			return 10
 
 
 func _refresh_entity_views() -> void:

@@ -2,8 +2,6 @@ extends PopupPanel
 
 signal spawn_requested(request: Dictionary)
 
-const _UNIT_ROW := preload("res://scripts/scenes/gameplay/spawn_unit_row.gd")
-
 var _target_cell: Vector2i = Vector2i(-1, -1)
 var _game_map: GameMap = null
 
@@ -25,8 +23,13 @@ var _game_map: GameMap = null
 @onready var loadout_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/LoadoutOption
 @onready var single_form: GridContainer = $MarginContainer/Root/Panels/Right/SingleForm
 @onready var multi_form: VBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm
+@onready var outpost_form: GridContainer = $MarginContainer/Root/Panels/Right/OutpostForm
 @onready var unit_list: VBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm/MultiScroll/UnitList
 @onready var add_unit_button: Button = $MarginContainer/Root/Panels/Right/MultiForm/AddUnitRow/AddUnitButton
+@onready var outpost_type_option: OptionButton = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostTypeOption
+@onready var outpost_size_option: OptionButton = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostSizeOption
+@onready var outpost_defenses_check: CheckBox = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostDefensesCheck
+@onready var outpost_walls_check: CheckBox = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostWallsCheck
 @onready var status_label: Label = $MarginContainer/Root/StatusLabel
 @onready var spawn_button: Button = $MarginContainer/Root/Buttons/SpawnButton
 @onready var cancel_button: Button = $MarginContainer/Root/Buttons/CancelButton
@@ -61,6 +64,7 @@ func open_for_cell(
 	_populate_entity_types()
 	_populate_templates()
 	_populate_loadout_options()
+	_populate_outpost_options()
 
 	if is_instance_of(default_owner, NPCOwned):
 		npc_name_edit.text = default_owner.npc_name
@@ -212,7 +216,7 @@ func _populate_templates() -> void:
 		]
 		var added_group: bool = false
 		for size_class: int in size_order:
-			var group: Array[Dictionary] = grouped[size_class]
+			var group: Array = grouped[size_class]
 			if group.is_empty():
 				continue
 			group.sort_custom(func(a: Dictionary, b: Dictionary):
@@ -269,15 +273,46 @@ func _populate_loadout_options() -> void:
 	loadout_option.clear()
 	loadout_option.add_item("None")
 	loadout_option.set_item_metadata(0, "none")
-	loadout_option.add_item("Random")
-	loadout_option.set_item_metadata(1, "random")
+	loadout_option.add_item("Random: Balanced")
+	loadout_option.set_item_metadata(1, "preset_balanced")
+	loadout_option.add_item("Random: Offense")
+	loadout_option.set_item_metadata(2, "preset_offense")
+	loadout_option.add_item("Random: Defense")
+	loadout_option.set_item_metadata(3, "preset_defense")
+	loadout_option.add_item("Random: Utility")
+	loadout_option.set_item_metadata(4, "preset_utility")
 	loadout_option.select(0)
+
+
+func _populate_outpost_options() -> void:
+	outpost_type_option.clear()
+	outpost_type_option.add_item("Military")
+	outpost_type_option.set_item_metadata(0, "military")
+	outpost_type_option.add_item("Industrial")
+	outpost_type_option.set_item_metadata(1, "industrial")
+	outpost_type_option.add_item("Salvage")
+	outpost_type_option.set_item_metadata(2, "salvage")
+	outpost_type_option.add_item("Hunting")
+	outpost_type_option.set_item_metadata(3, "hunting")
+	outpost_type_option.select(0)
+
+	outpost_size_option.clear()
+	outpost_size_option.add_item("Small")
+	outpost_size_option.set_item_metadata(0, "small")
+	outpost_size_option.add_item("Medium")
+	outpost_size_option.set_item_metadata(1, "medium")
+	outpost_size_option.add_item("Large")
+	outpost_size_option.set_item_metadata(2, "large")
+	outpost_size_option.select(0)
+
+	outpost_defenses_check.button_pressed = true
+	outpost_walls_check.button_pressed = false
 
 
 func _on_spawn_mode_changed(_index: int) -> void:
 	_apply_content_visibility()
 	var new_mode: String = _get_selected_metadata(spawn_mode_option)
-	if new_mode in ["squad", "outpost"]:
+	if new_mode == "squad":
 		_clear_unit_list()
 		_add_unit_row(_default_unit_type_for_mode())
 	_set_status("")
@@ -305,9 +340,10 @@ func _on_npc_commander_changed(_index: int) -> void:
 
 
 func _apply_content_visibility() -> void:
-	var is_single: bool = _get_selected_metadata(spawn_mode_option) == "single"
-	single_form.visible = is_single
-	multi_form.visible = not is_single
+	var content_mode: String = _get_selected_metadata(spawn_mode_option)
+	single_form.visible = content_mode == "single"
+	multi_form.visible = content_mode == "squad"
+	outpost_form.visible = content_mode == "outpost"
 
 
 func _clear_unit_list() -> void:
@@ -316,7 +352,7 @@ func _clear_unit_list() -> void:
 
 
 func _add_unit_row(default_type: String = "mek") -> void:
-	var row := _UNIT_ROW.new()
+	var row: SpawnUnitRow = SpawnUnitRow.new()
 	row.remove_requested.connect(func(): _remove_unit_row(row))
 	unit_list.add_child(row)
 	row.init_with_type(default_type)
@@ -327,7 +363,7 @@ func _remove_unit_row(row: Node) -> void:
 
 
 func _default_unit_type_for_mode() -> String:
-	return "structure" if _get_selected_metadata(spawn_mode_option) == "outpost" else "mek"
+	return "mek"
 
 
 func _on_add_unit_pressed() -> void:
@@ -347,8 +383,10 @@ func _on_spawn_pressed() -> void:
 	match spawn_mode:
 		"single":
 			_submit_single(owner_request)
-		"squad", "outpost":
+		"squad":
 			_submit_multi(owner_request, spawn_mode)
+		"outpost":
+			_submit_outpost(owner_request)
 
 
 func _build_owner_request() -> Dictionary:
@@ -406,7 +444,7 @@ func _submit_single(owner_request: Dictionary) -> void:
 func _submit_multi(owner_request: Dictionary, spawn_mode: String) -> void:
 	var units: Array[Dictionary] = []
 	for child in unit_list.get_children():
-		if child is _UNIT_ROW:
+		if child is SpawnUnitRow:
 			var entry: Dictionary = child.to_dict()
 			if entry["entity_type"].is_empty() or entry["template_id"].is_empty():
 				_set_status("Each unit must have a valid template selected.")
@@ -421,6 +459,18 @@ func _submit_multi(owner_request: Dictionary, spawn_mode: String) -> void:
 	request["position"] = _target_cell
 	request["spawn_mode"] = spawn_mode
 	request["units"] = units
+	spawn_requested.emit(request)
+	hide()
+
+
+func _submit_outpost(owner_request: Dictionary) -> void:
+	var request: Dictionary = owner_request.duplicate()
+	request["position"] = _target_cell
+	request["spawn_mode"] = "outpost"
+	request["outpost_type"] = _get_selected_metadata(outpost_type_option)
+	request["outpost_size"] = _get_selected_metadata(outpost_size_option)
+	request["outpost_add_defenses"] = outpost_defenses_check.button_pressed
+	request["outpost_add_walls"] = outpost_walls_check.button_pressed
 	spawn_requested.emit(request)
 	hide()
 

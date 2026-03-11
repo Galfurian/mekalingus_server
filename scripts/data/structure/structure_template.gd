@@ -12,6 +12,8 @@ var power_generation: int
 var speed: int
 var slots: Array[int]
 var icon: String
+var structure_type: String
+var passable: bool
 
 
 func _init(_id: String = "", data: Dictionary = {}):
@@ -43,6 +45,8 @@ func from_dict(data: Dictionary):
 	speed = int(data.get("speed", 0))
 	slots = Utils.to_array_int(data.get("slots", []))
 	icon = data.get("icon", "")
+	structure_type = str(data.get("structure_type", "generic"))
+	passable = bool(data.get("passable", false))
 
 
 func to_dict() -> Dictionary:
@@ -58,4 +62,6 @@ func to_dict() -> Dictionary:
 		"speed": speed,
 		"slots": slots,
 		"icon": icon,
+		"structure_type": structure_type,
+		"passable": passable,
 	}

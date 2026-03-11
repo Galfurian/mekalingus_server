@@ -29,10 +29,16 @@ func _ready() -> void:
 
 	loadout_option = OptionButton.new()
 	loadout_option.custom_minimum_size = Vector2(90, 0)
-	loadout_option.add_item("No Loadout")
+	loadout_option.add_item("None")
 	loadout_option.set_item_metadata(0, "none")
-	loadout_option.add_item("Random")
-	loadout_option.set_item_metadata(1, "random")
+	loadout_option.add_item("Random: Balanced")
+	loadout_option.set_item_metadata(1, "preset_balanced")
+	loadout_option.add_item("Random: Offense")
+	loadout_option.set_item_metadata(2, "preset_offense")
+	loadout_option.add_item("Random: Defense")
+	loadout_option.set_item_metadata(3, "preset_defense")
+	loadout_option.add_item("Random: Utility")
+	loadout_option.set_item_metadata(4, "preset_utility")
 	add_child(loadout_option)
 
 	var remove_button := Button.new()
@@ -89,7 +95,7 @@ func _populate_templates() -> void:
 		]
 		var added_group: bool = false
 		for size_class: int in size_order:
-			var group: Array[Dictionary] = grouped[size_class]
+			var group: Array = grouped[size_class]
 			if group.is_empty():
 				continue
 			group.sort_custom(func(a: Dictionary, b: Dictionary):

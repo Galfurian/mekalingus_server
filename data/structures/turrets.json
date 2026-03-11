@@ -9,6 +9,8 @@
 		"power_generation": 6,
 		"speed": 0,
 		"slots": [1, 0, 0, 0],
+		"structure_type": "combat",
+		"passable": false,
 		"icon": "structures/basic_turret.jpeg"
 	}
 }

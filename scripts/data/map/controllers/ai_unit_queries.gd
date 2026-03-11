@@ -2,32 +2,32 @@ class_name AIUnitQueries
 extends RefCounted
 
 
-static func get_all_units(game_map) -> Array:
+static func get_all_units(game_map) -> Array[MapCombatEntity]:
 	"""
 	Returns all units in the game map.
 	"""
-	var units: Array = []
-	for unit in game_map.player_units.values():
+	var units: Array[MapCombatEntity] = []
+	for unit: MapCombatEntity in game_map.player_units.values():
 		units.append(unit)
-	for unit in game_map.npc_units.values():
+	for unit: MapCombatEntity in game_map.npc_units.values():
 		units.append(unit)
 	return units
 
 
 static func get_units_in_range(
 	game_map,
-	source,
+	source: MapCombatEntity,
 	position: Vector2i,
 	radius: int,
 	include_allies: bool = true,
 	include_enemies: bool = true,
-	exclude_units: Array = []
-) -> Array:
+	exclude_units: Array[MapCombatEntity] = []
+) -> Array[MapCombatEntity]:
 	"""
 	Returns all units within the specified range of a position.
 	"""
-	var units_in_range: Array = []
-	for entity in get_all_units(game_map):
+	var units_in_range: Array[MapCombatEntity] = []
+	for entity: MapCombatEntity in get_all_units(game_map):
 		if entity == source:
 			continue
 		if entity in exclude_units:
@@ -43,10 +43,10 @@ static func get_units_in_range(
 
 static func get_enemies_in_range(
 	game_map,
-	source,
+	source: MapCombatEntity,
 	radius: int,
-	exclude_units: Array = []
-) -> Array:
+	exclude_units: Array[MapCombatEntity] = []
+) -> Array[MapCombatEntity]:
 	"""
 	Returns all enemy units within a specified range of the source unit.
 	"""
@@ -55,10 +55,10 @@ static func get_enemies_in_range(
 
 static func get_allies_in_range(
 	game_map,
-	source,
+	source: MapCombatEntity,
 	radius: int,
-	exclude_units: Array = []
-) -> Array:
+	exclude_units: Array[MapCombatEntity] = []
+) -> Array[MapCombatEntity]:
 	"""
 	Returns all ally units within a specified range of the source unit.
 	"""
@@ -67,13 +67,13 @@ static func get_allies_in_range(
 
 static func get_most_vulnerable_enemy(
 	game_map,
-	source,
+	source: MapCombatEntity,
 	max_distance: int
 ) -> MapCombatEntity:
 	"""
 	Returns the enemy with the lowest combined survivability ratio within range.
 	"""
-	var weakest = null
+	var weakest: MapCombatEntity = null
 	var lowest_score := INF
 
 	for enemy in get_units_in_range(game_map, source, source.position, max_distance, false, true):

@@ -4,7 +4,7 @@ extends Node
 # PRIORITY CALCULATION FUNCTIONS
 # =====================================================================
 
-func evaluate_utility_effect_priority(target, effect: ItemEffect) -> int:
+func evaluate_utility_effect_priority(target: MapCombatEntity, effect: ItemEffect) -> int:
 	"""
 	Calculates a priority score for a specific effect on a specific target.
 	"""
@@ -72,7 +72,7 @@ func evaluate_utility_effect_priority(target, effect: ItemEffect) -> int:
 	return priority
 
 
-func evaluate_offensive_effect_priority(target, effect: ItemEffect) -> int:
+func evaluate_offensive_effect_priority(target: MapCombatEntity, effect: ItemEffect) -> int:
 	"""
 	Assigns a priority value to an offensive effect targeting a specific entity.
 	"""
@@ -145,8 +145,8 @@ func evaluate_offensive_effect_priority(target, effect: ItemEffect) -> int:
 
 func score_utility_module_on_target(
 	module: ItemModule,
-	source,
-	target
+	source: MapCombatEntity,
+	target: MapCombatEntity
 ) -> int:
 	"""
 	Calculates the total priority score for a module on a target.
@@ -163,7 +163,7 @@ func score_utility_module_on_target(
 	return total
 
 
-func score_offensive_module_on_target(module: ItemModule, target) -> int:
+func score_offensive_module_on_target(module: ItemModule, target: MapCombatEntity) -> int:
 	"""
 	Calculates the total priority score for a module on a target.
 	"""
@@ -177,20 +177,20 @@ func score_offensive_module_on_target(module: ItemModule, target) -> int:
 # MODULE FILTERING FUNCTIONS
 # =====================================================================
 
-func can_module_be_used_now(mek: Mek, item: Item, module: ItemModule) -> bool:
+func can_module_be_used_now(combatant: CombatActor, item: Item, module: ItemModule) -> bool:
 	"""
 	Checks if a module can be used based on its cooldown and power requirements.
 	"""
 	if module.passive:
 		return false
-	if mek.cooldown_manager.is_on_cooldown(item, module):
+	if combatant.cooldown_manager.is_on_cooldown(item, module):
 		return false
-	if mek.power < module.power_on_use:
+	if combatant.power < module.power_on_use:
 		return false
 	return true
 
 func find_matching_modules(
-	mek: Mek,
+	combatant: CombatActor,
 	offensive: bool,
 	include_passive: bool,
 	include_on_cooldown: bool
@@ -200,7 +200,7 @@ func find_matching_modules(
 	Flags control whether passive modules and modules on cooldown are included.
 	"""
 	var matching_modules: Array[EquippedModule] = []
-	for item in mek.items:
+	for item in combatant.items:
 		# Filter by slot type based on offensive flag.
 		if offensive and item.template.slot == Enums.SlotType.UTILITY:
 			continue
@@ -211,13 +211,13 @@ func find_matching_modules(
 			if not include_passive and module.passive:
 				continue
 			# Optionally skip modules on cooldown.
-			if not include_on_cooldown and mek.cooldown_manager.is_on_cooldown(item, module):
+			if not include_on_cooldown and combatant.cooldown_manager.is_on_cooldown(item, module):
 				continue
 			# Always skip if not enough power.
-			if mek.power < module.power_on_use:
+			if combatant.power < module.power_on_use:
 				continue
 			# Add the module if all checks passed.
-			matching_modules.append(EquippedModule.new(mek, item, module))
+			matching_modules.append(EquippedModule.new(combatant, item, module))
 	return matching_modules
 
 # =====================================================================
@@ -311,13 +311,13 @@ func get_all_units(game_map) -> Array:
 
 func get_units_in_range(
 	game_map,
-	source,
+	source: MapCombatEntity,
 	position: Vector2i,
 	radius: int,
 	include_allies: bool = true,
 	include_enemies: bool = true,
-	exclude_units: Array = []
-) -> Array:
+	exclude_units: Array[MapCombatEntity] = []
+) -> Array[MapCombatEntity]:
 	return AIUnitQueries.get_units_in_range(
 		game_map,
 		source,
@@ -331,30 +331,30 @@ func get_units_in_range(
 
 func get_enemies_in_range(
 	game_map,
-	source,
+	source: MapCombatEntity,
 	radius: int,
-	exclude_units: Array = []
-) -> Array:
+	exclude_units: Array[MapCombatEntity] = []
+) -> Array[MapCombatEntity]:
 	return AIUnitQueries.get_enemies_in_range(game_map, source, radius, exclude_units)
 
 
 func get_allies_in_range(
 	game_map,
-	source,
+	source: MapCombatEntity,
 	radius: int,
-	exclude_units: Array = []
-) -> Array:
+	exclude_units: Array[MapCombatEntity] = []
+) -> Array[MapCombatEntity]:
 	return AIUnitQueries.get_allies_in_range(game_map, source, radius, exclude_units)
 
 
-func get_threat_level(game_map, tile: Vector2i, source) -> float:
+func get_threat_level(game_map, tile: Vector2i, source: MapCombatEntity) -> float:
 	return AIThreatEvaluator.get_threat_level(game_map, tile, source)
 
 
 func can_reach_target_this_turn(
 	game_map,
-	source,
-	target,
+	source: MapCombatEntity,
+	target: MapCombatEntity,
 	range_min: int,
 	range_max: int,
 	max_movement: int
@@ -369,5 +369,5 @@ func can_reach_target_this_turn(
 	)
 
 
-func get_most_vulnerable_enemy(game_map, source, max_distance: int) -> MapCombatEntity:
+func get_most_vulnerable_enemy(game_map, source: MapCombatEntity, max_distance: int) -> MapCombatEntity:
 	return AIUnitQueries.get_most_vulnerable_enemy(game_map, source, max_distance)

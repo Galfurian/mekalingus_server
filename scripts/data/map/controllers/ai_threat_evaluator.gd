@@ -1,7 +1,7 @@
 class_name AIThreatEvaluator
 extends RefCounted
 
-static func get_threat_level(game_map, tile: Vector2i, source) -> float:
+static func get_threat_level(game_map, tile: Vector2i, source: MapCombatEntity) -> float:
 	"""
 	Estimates how dangerous it would be to stand on this tile.
 	"""
@@ -26,8 +26,8 @@ static func get_threat_level(game_map, tile: Vector2i, source) -> float:
 
 static func can_reach_target_this_turn(
 	game_map,
-	source,
-	target,
+	source: MapCombatEntity,
+	target: MapCombatEntity,
 	range_min: int,
 	range_max: int,
 	max_movement: int

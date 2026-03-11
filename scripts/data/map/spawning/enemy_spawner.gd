@@ -40,7 +40,7 @@ static func spawn_enemies_on_map(game_map, difficulty: int) -> void:
 			spawn_points.erase(spawn_pos)
 
 			var npc_name := NameGenerator.random_full_name()
-			game_map.npc_units[mek.uuid] = MapCombatEntity.new(spawn_pos, NPCOwned.new(npc_name, clan), mek)
+			game_map.npc_units[mek.uuid] = MapMek.new(spawn_pos, NPCOwned.new(npc_name, clan), mek)
 
 
 static func _get_enemy_squad_count(game_map, difficulty: int) -> int:

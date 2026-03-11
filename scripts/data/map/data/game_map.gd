@@ -416,23 +416,15 @@ static func from_dict(data: Dictionary) -> GameMap:
 	
 	# Load the NPC units.
 	map.npc_units.clear()
-	var migrated_npc_structures: Dictionary = {}
 	for unit_uuid in data.get("npc_units", {}):
-		var unit_data: Dictionary = data.get("npc_units", {})[unit_uuid]
-		var unit: MapMek = MapMek.from_dict(unit_data)
+		var unit: MapMek = MapMek.from_dict(data.get("npc_units", {})[unit_uuid])
 		if unit:
 			map.npc_units[unit.combatant.uuid] = unit
 		else:
-			# Backward compatibility: legacy data may contain structure-like entries in npc_units.
-			var migrated_structure: MapStructure = MapStructure.from_dict(unit_data)
-			if migrated_structure:
-				migrated_npc_structures[migrated_structure.combatant.uuid] = migrated_structure
-				push_warning("Migrated NPC entry '%s' from npc_units to structures during load." % unit_uuid)
-				continue
 			push_error("Failed to load NPC unit data: %s" % unit_uuid)
 			return null
 
-	# Load the player units (optional for backward compatibility).
+	# Load the player units.
 	map.player_units.clear()
 	for unit_uuid in data.get("player_units", {}):
 		var player_unit: MapMek = MapMek.from_dict(data["player_units"][unit_uuid])
@@ -442,7 +434,7 @@ static func from_dict(data: Dictionary) -> GameMap:
 			push_error("Failed to load player unit data.")
 			return null
 
-	# Load the structures (optional for backward compatibility).
+	# Load the structures.
 	map.structures.clear()
 	for struct_uuid in data.get("structures", {}):
 		var structure = MapStructure.from_dict(data.get("structures", {})[struct_uuid])
@@ -452,20 +444,7 @@ static func from_dict(data: Dictionary) -> GameMap:
 			push_error("Failed to load structure data.")
 			return null
 
-	# Merge migrated legacy structures after regular structure loading.
-	for structure_uuid in migrated_npc_structures:
-		map.structures[structure_uuid] = migrated_npc_structures[structure_uuid]
-
-	# Load legacy turrets into structures (backward compatibility).
-	for turret_uuid in data.get("turrets", {}):
-		var turret = MapStructure.from_dict(data.get("turrets", {})[turret_uuid])
-		if turret:
-			map.structures[turret_uuid] = turret
-		else:
-			push_error("Failed to load turret data.")
-			return null
-
-	# Load the pickups (optional for backward compatibility).
+	# Load the pickups.
 	map.pickups.clear()
 	for pickup_uuid in data.get("pickups", {}):
 		var pickup = MapPickup.from_dict(data.get("pickups", {})[pickup_uuid])

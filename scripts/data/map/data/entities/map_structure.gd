@@ -67,11 +67,16 @@ static func from_dict(data: Dictionary) -> MapStructure:
 	if (
 		not data.has("position")
 		or not data.has("owner")
+		or not data.has("actor_type")
 		or not data.has("actor")
 		or not data.has("blocking")
 		or not data.has("active")
 	):
 		push_error("Invalid MapStructure data: Missing required fields")
+		return null
+
+	if str(data["actor_type"]) != "structure":
+		push_error("Invalid MapStructure data: actor_type must be 'structure'")
 		return null
 
 	var parsed_owner: EntityOwner = EntityOwner.from_dict(data["owner"])
@@ -99,6 +104,7 @@ func to_dict() -> Dictionary:
 	return {
 		"position": Utils.serialize_position(position),
 		"owner": owner.to_dict(),
+		"actor_type": "structure",
 		"actor": combatant.to_dict(),
 		"blocking": blocking,
 		"active": active

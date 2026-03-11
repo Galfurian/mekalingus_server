@@ -27,20 +27,22 @@ static func from_dict(data: Dictionary) -> MapMek:
 	"""
 	Loads item data from a dictionary.
 	"""
-	if not data.has("position") or not data.has("owner") or not data.has("active"):
+	if (
+		not data.has("position")
+		or not data.has("owner")
+		or not data.has("actor_type")
+		or not data.has("actor")
+		or not data.has("blocking")
+		or not data.has("active")
+	):
 		push_error("Invalid MapMek data: Missing required fields")
 		return null
 
-	var actor_data: Dictionary = {}
-	if data.has("mek"):
-		actor_data = data["mek"]
-	elif data.has("actor"):
-		# Backward compatibility: some map payloads store Mek data under "actor".
-		actor_data = data["actor"]
-	else:
-		push_error("Invalid MapMek data: Missing mek/actor payload")
+	if str(data["actor_type"]) != "mek":
+		push_error("Invalid MapMek data: actor_type must be 'mek'")
 		return null
 
+	var actor_data: Dictionary = data["actor"]
 	if not actor_data.has("mek_id") or not actor_data.has("uuid"):
 		push_error("Invalid MapMek data: payload is not a Mek actor")
 		return null
@@ -68,8 +70,9 @@ func to_dict() -> Dictionary:
 	"""Converts item data to a dictionary."""
 	return {
 		"position": Utils.serialize_position(position),
-		"mek": combatant.to_dict(),
+		"actor_type": "mek",
+		"actor": combatant.to_dict(),
 		"owner": owner.to_dict(),
-		"blocking": true,
+		"blocking": blocking,
 		"active": active
 	}

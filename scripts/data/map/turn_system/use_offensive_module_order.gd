@@ -30,6 +30,17 @@ func execute(game_map: GameMap) -> bool:
 	var target_mek: Mek = target.mek
 	if source_mek.is_dead() or target_mek.is_dead():
 		return false
+	if not _is_target_in_module_range(game_map):
+		_add_combat_log(
+			game_map,
+			"%s cannot use %s on %s (out of range: %d)" % [
+				source_mek.get_chat_tag(),
+				equipped_module.get_chat_tag(),
+				target_mek.get_chat_tag(),
+				_get_effective_module_range(),
+			],
+		)
+		return false
 	# Check if the Mek has enough power.
 	if source_mek.power < equipped_module.module.power_on_use:
 		return false

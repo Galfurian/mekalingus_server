@@ -53,6 +53,16 @@ func _to_string() -> String:
 	return "<UseModuleOrder base class>"
 
 
+func _get_effective_module_range() -> int:
+	return max(0, equipped_module.module.module_range + source.mek.range_modifier)
+
+
+func _is_target_in_module_range(game_map: GameMap) -> bool:
+	var effective_range: int = _get_effective_module_range()
+	var distance: float = AIUtils.get_distance(game_map, source.position, target.position)
+	return distance <= float(effective_range)
+
+
 # =============================================================================
 # PRIVATE FUNCTIONS
 # =============================================================================

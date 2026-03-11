@@ -6,9 +6,9 @@ extends Node
 
 const EnemySpawnerScript = preload("res://scripts/data/map/spawning/enemy_spawner.gd")
 const MapAStarBuilderScript = preload("res://scripts/data/map/pathfinding/map_astar_builder.gd")
-const MapStructureScript = preload("res://scripts/data/map/data/map_structure.gd")
-const MapTurretScript = preload("res://scripts/data/map/data/map_turret.gd")
-const MapPickupScript = preload("res://scripts/data/map/data/map_pickup.gd")
+const MapStructureScript = preload("res://scripts/data/map/data/entities/map_structure.gd")
+const MapTurretScript = preload("res://scripts/data/map/data/entities/map_turret.gd")
+const MapPickupScript = preload("res://scripts/data/map/data/entities/map_pickup.gd")
 
 # =============================================================================
 # PROPERTIES

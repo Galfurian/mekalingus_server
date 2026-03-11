@@ -142,4 +142,4 @@ func get_dot_damage_by_type() -> Dictionary:
 
 func clear() -> void:
 	"""Clears all active_effects from the manager (used at the end of combat)."""
-	active_effects.clear()
+	remove_all_effects()

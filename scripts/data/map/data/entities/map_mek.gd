@@ -3,13 +3,7 @@
 # game entity, and other properties related to the entity's state.
 
 class_name MapMek
-extends MapEntity
-
-# =============================================================================
-# PROPERTIES
-# =============================================================================
-
-var mek: Mek
+extends "res://scripts/data/map/data/entities/map_combat_entity.gd"
 
 # =============================================================================
 # GENERAL FUNCTIONS
@@ -19,7 +13,7 @@ var mek: Mek
 func _init(p_position: Vector2i, p_owner: EntityOwner, p_mek: Mek) -> void:
 	position = p_position
 	owner = p_owner
-	mek = p_mek
+	combatant = p_mek
 	active = true
 
 
@@ -57,7 +51,7 @@ func to_dict() -> Dictionary:
 	"""Converts item data to a dictionary."""
 	return {
 		"position": Utils.serialize_position(position),
-		"mek": mek.to_dict(),
+		"mek": combatant.to_dict(),
 		"owner": owner.to_dict(),
 		"active": active
 	}

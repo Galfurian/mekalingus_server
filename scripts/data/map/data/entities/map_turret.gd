@@ -2,15 +2,13 @@
 # that can automatically attack hostile units within range.
 
 class_name MapTurret
-extends MapStructure
+extends "res://scripts/data/map/data/entities/map_structure.gd"
 
 # =============================================================================
 # PROPERTIES
 # =============================================================================
 
 var turret_name: String
-# Equipped items (same concept as Mek loadout).
-var items: Array[Item]
 # Cooldown remaining (in turns)
 var cooldown_remaining: int
 
@@ -27,9 +25,8 @@ func _init(
 	p_armor: int,
 	p_items: Array[Item]
 ) -> void:
-	super(p_position, p_owner, p_turret_name, p_max_health, p_armor, true)
+	super(p_position, p_owner, p_turret_name, p_max_health, p_armor, p_items, true)
 	turret_name = p_turret_name
-	items = p_items
 	cooldown_remaining = 0
 
 
@@ -53,7 +50,7 @@ func get_offensive_payload() -> Dictionary:
 	"""
 	Returns first usable offensive payload: item + module + effect.
 	"""
-	for item: Item in items:
+	for item: Item in combatant.items:
 		if not item or not item.template:
 			continue
 		for module: ItemModule in item.template.modules:
@@ -82,10 +79,9 @@ static func from_dict(data: Dictionary) -> MapTurret:
 		not data.has("position")
 		or not data.has("owner")
 		or not data.has("turret_name")
-		or not data.has("max_health")
-		or not data.has("current_health")
-		or not data.has("armor")
 		or not data.has("items")
+		or not data.has("actor")
+		or not data.has("blocking")
 		or not data.has("cooldown_remaining")
 		or not data.has("active")
 	):
@@ -105,11 +101,14 @@ static func from_dict(data: Dictionary) -> MapTurret:
 		Utils.deserialize_position(data["position"]),
 		parsed_owner,
 		data["turret_name"],
-		data["max_health"],
-		data["armor"],
+		data["actor"]["max_health"],
+		data["actor"]["armor"],
 		loaded_items
 	)
-	loaded_turret.current_health = data["current_health"]
+	loaded_turret.combatant = StructureActorScript.from_dict(data["actor"])
+	if not loaded_turret.combatant:
+		push_error("Invalid MapTurret data: failed to deserialize actor")
+		return null
 	loaded_turret.cooldown_remaining = data["cooldown_remaining"]
 	loaded_turret.active = bool(data["active"])
 	loaded_turret.blocking = bool(data["blocking"])
@@ -122,11 +121,9 @@ func to_dict() -> Dictionary:
 		"position": Utils.serialize_position(position),
 		"owner": owner.to_dict(),
 		"turret_name": turret_name,
-		"max_health": max_health,
-		"current_health": current_health,
-		"armor": armor,
+		"actor": combatant.to_dict(),
 		"blocking": blocking,
-		"items": Utils.convert_objects_to_dict(items),
+		"items": Utils.convert_objects_to_dict(combatant.items),
 		"cooldown_remaining": cooldown_remaining,
 		"active": active
 	}

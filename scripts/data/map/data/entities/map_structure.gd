@@ -2,16 +2,14 @@
 # Structures have position, ownership, health, armor, and can block movement.
 
 class_name MapStructure
-extends MapEntity
+extends "res://scripts/data/map/data/entities/map_combat_entity.gd"
+
+const StructureActorScript = preload("res://scripts/data/structure/structure_actor.gd")
 
 # =============================================================================
 # PROPERTIES
 # =============================================================================
 
-var structure_name: String
-var max_health: int
-var current_health: int
-var armor: int
 # Whether this structure blocks movement
 var blocking: bool
 
@@ -26,29 +24,27 @@ func _init(
 	p_structure_name: String,
 	p_max_health: int,
 	p_armor: int,
+	p_items: Array[Item],
 	p_blocking: bool = true
 ) -> void:
 	position = p_position
 	owner = p_owner
-	structure_name = p_structure_name
-	max_health = p_max_health
-	current_health = p_max_health
-	armor = p_armor
+	combatant = StructureActorScript.new(p_structure_name, p_max_health, p_armor, p_items)
 	blocking = p_blocking
 	active = true
 
 
 func take_damage(damage: int) -> void:
 	"""Apply damage to this structure."""
-	var adjusted_damage: int = max(1, damage - armor)
-	current_health = max(0, current_health - adjusted_damage)
-	if current_health <= 0:
+	var adjusted_damage: int = max(1, damage - combatant.armor)
+	combatant.health = max(0, combatant.health - adjusted_damage)
+	if combatant.health <= 0:
 		active = false
 
 
 func is_alive() -> bool:
 	"""Check if this structure still has health."""
-	return current_health > 0 and active
+	return combatant and combatant.is_alive() and active
 
 
 # =============================================================================
@@ -63,10 +59,7 @@ static func from_dict(data: Dictionary) -> MapStructure:
 	if (
 		not data.has("position")
 		or not data.has("owner")
-		or not data.has("structure_name")
-		or not data.has("max_health")
-		or not data.has("current_health")
-		or not data.has("armor")
+		or not data.has("actor")
 		or not data.has("blocking")
 		or not data.has("active")
 	):
@@ -78,15 +71,21 @@ static func from_dict(data: Dictionary) -> MapStructure:
 		push_error("Invalid MapStructure data: failed to deserialize owner")
 		return null
 
+	var actor = StructureActorScript.from_dict(data["actor"])
+	if not actor:
+		push_error("Invalid MapStructure data: failed to deserialize actor")
+		return null
+
 	var loaded_structure := MapStructure.new(
 		Utils.deserialize_position(data["position"]),
 		parsed_owner,
-		data["structure_name"],
-		data["max_health"],
-		data["armor"],
+		actor.structure_name,
+		actor.max_health,
+		actor.armor,
+		actor.items,
 		data["blocking"]
 	)
-	loaded_structure.current_health = data["current_health"]
+	loaded_structure.combatant = actor
 	loaded_structure.active = bool(data["active"])
 	return loaded_structure
 
@@ -96,10 +95,7 @@ func to_dict() -> Dictionary:
 	return {
 		"position": Utils.serialize_position(position),
 		"owner": owner.to_dict(),
-		"structure_name": structure_name,
-		"max_health": max_health,
-		"current_health": current_health,
-		"armor": armor,
+		"actor": combatant.to_dict(),
 		"blocking": blocking,
 		"active": active
 	}

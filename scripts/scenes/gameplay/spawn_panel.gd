@@ -23,8 +23,20 @@ var _game_map: GameMap = null
 @onready var loadout_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/LoadoutOption
 @onready var single_form: GridContainer = $MarginContainer/Root/Panels/Right/SingleForm
 @onready var multi_form: VBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm
+@onready var squad_mode_option: OptionButton = $MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadModeOption
 @onready var squad_spread_slider: HSlider = $MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadSpreadRow/SquadSpreadSlider
 @onready var squad_spread_value: Label = $MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadSpreadRow/SquadSpreadValue
+@onready var multi_header: HBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm/MultiHeader
+@onready var multi_scroll: ScrollContainer = $MarginContainer/Root/Panels/Right/MultiForm/MultiScroll
+@onready var add_unit_row: HBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm/AddUnitRow
+@onready var budget_form: GridContainer = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm
+@onready var budget_power_spin: SpinBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetPowerSpin
+@onready var budget_count_spin: SpinBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetCountSpin
+@onready var budget_light_check: CheckBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow/BudgetLightCheck
+@onready var budget_medium_check: CheckBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow/BudgetMediumCheck
+@onready var budget_heavy_check: CheckBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow/BudgetHeavyCheck
+@onready var budget_colossal_check: CheckBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow/BudgetColossalCheck
+@onready var budget_loadout_option: OptionButton = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetLoadoutOption
 @onready var outpost_form: GridContainer = $MarginContainer/Root/Panels/Right/OutpostForm
 @onready var unit_list: VBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm/MultiScroll/UnitList
 @onready var add_unit_button: Button = $MarginContainer/Root/Panels/Right/MultiForm/AddUnitRow/AddUnitButton
@@ -41,6 +53,7 @@ func _ready() -> void:
 	spawn_button.pressed.connect(_on_spawn_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
 	spawn_mode_option.item_selected.connect(_on_spawn_mode_changed)
+	squad_mode_option.item_selected.connect(_on_squad_mode_changed)
 	entity_type_option.item_selected.connect(_on_entity_type_changed)
 	clan_option.item_selected.connect(_on_clan_changed)
 	owner_type_option.item_selected.connect(_on_owner_type_changed)
@@ -67,6 +80,7 @@ func open_for_cell(
 	_populate_entity_types()
 	_populate_templates()
 	_populate_loadout_options()
+	_populate_squad_modes()
 	_populate_outpost_options()
 
 	if is_instance_of(default_owner, NPCOwned):
@@ -76,6 +90,7 @@ func open_for_cell(
 
 	_apply_owner_field_visibility()
 	_apply_content_visibility()
+	_apply_squad_mode_visibility()
 	_update_squad_spread_label()
 
 	quantity_spin.value = 1
@@ -275,6 +290,7 @@ func _get_selected_metadata(option: OptionButton) -> String:
 
 func _populate_loadout_options() -> void:
 	loadout_option.clear()
+	budget_loadout_option.clear()
 	loadout_option.add_item("None")
 	loadout_option.set_item_metadata(0, "none")
 	loadout_option.add_item("Random: Balanced")
@@ -286,6 +302,19 @@ func _populate_loadout_options() -> void:
 	loadout_option.add_item("Random: Utility")
 	loadout_option.set_item_metadata(4, "preset_utility")
 	loadout_option.select(0)
+	for index in range(loadout_option.item_count):
+		budget_loadout_option.add_item(loadout_option.get_item_text(index))
+		budget_loadout_option.set_item_metadata(index, loadout_option.get_item_metadata(index))
+	budget_loadout_option.select(1)
+
+
+func _populate_squad_modes() -> void:
+	squad_mode_option.clear()
+	squad_mode_option.add_item("Manual")
+	squad_mode_option.set_item_metadata(0, "manual")
+	squad_mode_option.add_item("Power Budget")
+	squad_mode_option.set_item_metadata(1, "budget")
+	squad_mode_option.select(0)
 
 
 func _populate_outpost_options() -> void:
@@ -319,6 +348,12 @@ func _on_spawn_mode_changed(_index: int) -> void:
 	if new_mode == "squad":
 		_clear_unit_list()
 		_add_unit_row(_default_unit_type_for_mode())
+		_apply_squad_mode_visibility()
+	_set_status("")
+
+
+func _on_squad_mode_changed(_index: int) -> void:
+	_apply_squad_mode_visibility()
 	_set_status("")
 
 
@@ -353,6 +388,16 @@ func _apply_content_visibility() -> void:
 	single_form.visible = content_mode == "single"
 	multi_form.visible = content_mode == "squad"
 	outpost_form.visible = content_mode == "outpost"
+	if content_mode == "squad":
+		_apply_squad_mode_visibility()
+
+
+func _apply_squad_mode_visibility() -> void:
+	var is_manual: bool = _get_selected_metadata(squad_mode_option) == "manual"
+	multi_header.visible = is_manual
+	multi_scroll.visible = is_manual
+	add_unit_row.visible = is_manual
+	budget_form.visible = not is_manual
 
 
 func _clear_unit_list() -> void:
@@ -451,6 +496,11 @@ func _submit_single(owner_request: Dictionary) -> void:
 
 
 func _submit_multi(owner_request: Dictionary, spawn_mode: String) -> void:
+	var squad_mode: String = _get_selected_metadata(squad_mode_option)
+	if squad_mode == "budget":
+		_submit_squad_budget(owner_request, spawn_mode)
+		return
+
 	var units: Array[Dictionary] = []
 	for child in unit_list.get_children():
 		if child is SpawnUnitRow:
@@ -467,8 +517,37 @@ func _submit_multi(owner_request: Dictionary, spawn_mode: String) -> void:
 	var request: Dictionary = owner_request.duplicate()
 	request["position"] = _target_cell
 	request["spawn_mode"] = spawn_mode
+	request["squad_mode"] = "manual"
 	request["squad_spread"] = int(squad_spread_slider.value)
 	request["units"] = units
+	spawn_requested.emit(request)
+	hide()
+
+
+func _submit_squad_budget(owner_request: Dictionary, spawn_mode: String) -> void:
+	var allowed_sizes: Array[String] = []
+	if budget_light_check.button_pressed:
+		allowed_sizes.append("LIGHT")
+	if budget_medium_check.button_pressed:
+		allowed_sizes.append("MEDIUM")
+	if budget_heavy_check.button_pressed:
+		allowed_sizes.append("HEAVY")
+	if budget_colossal_check.button_pressed:
+		allowed_sizes.append("COLOSSAL")
+
+	if allowed_sizes.is_empty():
+		_set_status("Enable at least one Mek size.")
+		return
+
+	var request: Dictionary = owner_request.duplicate()
+	request["position"] = _target_cell
+	request["spawn_mode"] = spawn_mode
+	request["squad_mode"] = "budget"
+	request["squad_spread"] = int(squad_spread_slider.value)
+	request["squad_power_budget"] = int(budget_power_spin.value)
+	request["squad_count"] = int(budget_count_spin.value)
+	request["squad_allowed_sizes"] = allowed_sizes
+	request["squad_loadout"] = _get_selected_metadata(budget_loadout_option)
 	spawn_requested.emit(request)
 	hide()
 

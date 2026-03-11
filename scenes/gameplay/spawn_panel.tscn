@@ -168,6 +168,13 @@ columns = 2
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 6
 
+[node name="SquadModeLabel" type="Label" parent="MarginContainer/Root/Panels/Right/MultiForm/SquadSettings"]
+layout_mode = 2
+text = "Squad Mode"
+
+[node name="SquadModeOption" type="OptionButton" parent="MarginContainer/Root/Panels/Right/MultiForm/SquadSettings"]
+layout_mode = 2
+
 [node name="SquadSpreadLabel" type="Label" parent="MarginContainer/Root/Panels/Right/MultiForm/SquadSettings"]
 layout_mode = 2
 text = "Spread"
@@ -227,6 +234,69 @@ alignment = 2
 [node name="AddUnitButton" type="Button" parent="MarginContainer/Root/Panels/Right/MultiForm/AddUnitRow"]
 layout_mode = 2
 text = "+ Add Unit"
+
+[node name="BudgetForm" type="GridContainer" parent="MarginContainer/Root/Panels/Right/MultiForm"]
+visible = false
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
+
+[node name="BudgetPowerLabel" type="Label" parent="MarginContainer/Root/Panels/Right/MultiForm/BudgetForm"]
+layout_mode = 2
+text = "Power Budget"
+
+[node name="BudgetPowerSpin" type="SpinBox" parent="MarginContainer/Root/Panels/Right/MultiForm/BudgetForm"]
+layout_mode = 2
+min_value = 100.0
+max_value = 5000.0
+step = 50.0
+value = 900.0
+
+[node name="BudgetCountLabel" type="Label" parent="MarginContainer/Root/Panels/Right/MultiForm/BudgetForm"]
+layout_mode = 2
+text = "Mek Count"
+
+[node name="BudgetCountSpin" type="SpinBox" parent="MarginContainer/Root/Panels/Right/MultiForm/BudgetForm"]
+layout_mode = 2
+min_value = 1.0
+max_value = 12.0
+step = 1.0
+value = 4.0
+
+[node name="BudgetSizesLabel" type="Label" parent="MarginContainer/Root/Panels/Right/MultiForm/BudgetForm"]
+layout_mode = 2
+text = "Allowed Sizes"
+
+[node name="BudgetSizesRow" type="HBoxContainer" parent="MarginContainer/Root/Panels/Right/MultiForm/BudgetForm"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="BudgetLightCheck" type="CheckBox" parent="MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow"]
+layout_mode = 2
+button_pressed = true
+text = "L"
+
+[node name="BudgetMediumCheck" type="CheckBox" parent="MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow"]
+layout_mode = 2
+button_pressed = true
+text = "M"
+
+[node name="BudgetHeavyCheck" type="CheckBox" parent="MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow"]
+layout_mode = 2
+button_pressed = true
+text = "H"
+
+[node name="BudgetColossalCheck" type="CheckBox" parent="MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow"]
+layout_mode = 2
+text = "C"
+
+[node name="BudgetLoadoutLabel" type="Label" parent="MarginContainer/Root/Panels/Right/MultiForm/BudgetForm"]
+layout_mode = 2
+text = "Loadout Bias"
+
+[node name="BudgetLoadoutOption" type="OptionButton" parent="MarginContainer/Root/Panels/Right/MultiForm/BudgetForm"]
+layout_mode = 2
 
 [node name="OutpostForm" type="GridContainer" parent="MarginContainer/Root/Panels/Right"]
 visible = false

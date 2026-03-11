@@ -6,6 +6,9 @@ extends Node
 
 const EnemySpawnerScript = preload("res://scripts/data/map/spawning/enemy_spawner.gd")
 const MapAStarBuilderScript = preload("res://scripts/data/map/pathfinding/map_astar_builder.gd")
+const MapStructureScript = preload("res://scripts/data/map/data/map_structure.gd")
+const MapTurretScript = preload("res://scripts/data/map/data/map_turret.gd")
+const MapPickupScript = preload("res://scripts/data/map/data/map_pickup.gd")
 
 # =============================================================================
 # PROPERTIES
@@ -44,6 +47,12 @@ var is_free_for_all_enabled: bool = true
 var npc_units: Dictionary[String, MapMek]
 # Stores all active Player units by UUID.
 var player_units: Dictionary[String, MapMek]
+# Stores all structures on the map by UUID.
+var structures: Dictionary
+# Stores all turrets on the map by UUID.
+var turrets: Dictionary
+# Stores all pickups on the map by UUID.
+var pickups: Dictionary
 # The combat log.
 var combat_logger: MapLogger = MapLogger.new()
 # The chat log.
@@ -99,6 +108,9 @@ func clear() -> void:
 	# Clear the entity lists.
 	npc_units.clear()
 	player_units.clear()
+	structures.clear()
+	turrets.clear()
+	pickups.clear()
 	# Clear the logs.
 	combat_logger.clear()
 	chat_logger.clear()

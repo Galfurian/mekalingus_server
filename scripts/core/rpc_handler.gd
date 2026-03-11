@@ -159,6 +159,9 @@ func request_equip_item(mek_uuid: String, item_uuid: String):
 		return
 		
 	log_message("Player " + player.player_name + " equipped " + mek.template.mek_name + " with " + item.template.item_name)
+	if not DataManager.save_player(player):
+		send_generic_failure(peer_id, "Failed to save player after equipping item.")
+		return
 	
 	# Send the updated player.
 	request_equip_item_success.rpc_id(peer_id, mek_uuid, item_uuid)
@@ -201,6 +204,9 @@ func request_unequip_item(mek_uuid: String, item_uuid: String):
 	player.add_item(item)
 	
 	log_message("Player " + player.player_name + " unequipped " + item.template.item_name + " from " + mek.template.mek_name)
+	if not DataManager.save_player(player):
+		send_generic_failure(peer_id, "Failed to save player after unequipping item.")
+		return
 	
 	# Send the updated player.
 	request_unequip_item_success.rpc_id(peer_id, mek_uuid, item_uuid)

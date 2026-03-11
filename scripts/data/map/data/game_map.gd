@@ -416,12 +416,20 @@ static func from_dict(data: Dictionary) -> GameMap:
 	
 	# Load the NPC units.
 	map.npc_units.clear()
+	var migrated_npc_structures: Dictionary = {}
 	for unit_uuid in data.get("npc_units", {}):
-		var unit: MapMek = MapMek.from_dict(data.get("npc_units", {})[unit_uuid])
+		var unit_data: Dictionary = data.get("npc_units", {})[unit_uuid]
+		var unit: MapMek = MapMek.from_dict(unit_data)
 		if unit:
 			map.npc_units[unit.combatant.uuid] = unit
 		else:
-			push_error("Failed to load NPC unit data.")
+			# Backward compatibility: legacy data may contain structure-like entries in npc_units.
+			var migrated_structure: MapStructure = MapStructure.from_dict(unit_data)
+			if migrated_structure:
+				migrated_npc_structures[migrated_structure.combatant.uuid] = migrated_structure
+				push_warning("Migrated NPC entry '%s' from npc_units to structures during load." % unit_uuid)
+				continue
+			push_error("Failed to load NPC unit data: %s" % unit_uuid)
 			return null
 
 	# Load the player units (optional for backward compatibility).
@@ -443,6 +451,10 @@ static func from_dict(data: Dictionary) -> GameMap:
 		else:
 			push_error("Failed to load structure data.")
 			return null
+
+	# Merge migrated legacy structures after regular structure loading.
+	for structure_uuid in migrated_npc_structures:
+		map.structures[structure_uuid] = migrated_npc_structures[structure_uuid]
 
 	# Load legacy turrets into structures (backward compatibility).
 	for turret_uuid in data.get("turrets", {}):

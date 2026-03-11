@@ -42,8 +42,11 @@ var _game_map: GameMap = null
 @onready var add_unit_button: Button = $MarginContainer/Root/Panels/Right/MultiForm/AddUnitRow/AddUnitButton
 @onready var outpost_type_option: OptionButton = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostTypeOption
 @onready var outpost_size_option: OptionButton = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostSizeOption
+@onready var outpost_spread_slider: HSlider = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostSpreadRow/OutpostSpreadSlider
+@onready var outpost_spread_value: Label = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostSpreadRow/OutpostSpreadValue
 @onready var outpost_defenses_check: CheckBox = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostDefensesCheck
 @onready var outpost_walls_check: CheckBox = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostWallsCheck
+@onready var outpost_clearance_check: CheckBox = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostClearanceCheck
 @onready var status_label: Label = $MarginContainer/Root/StatusLabel
 @onready var spawn_button: Button = $MarginContainer/Root/Buttons/SpawnButton
 @onready var cancel_button: Button = $MarginContainer/Root/Buttons/CancelButton
@@ -60,6 +63,7 @@ func _ready() -> void:
 	npc_commander_option.item_selected.connect(_on_npc_commander_changed)
 	add_unit_button.pressed.connect(_on_add_unit_pressed)
 	squad_spread_slider.value_changed.connect(_on_squad_spread_changed)
+	outpost_spread_slider.value_changed.connect(_on_outpost_spread_changed)
 
 
 func open_for_cell(
@@ -92,6 +96,7 @@ func open_for_cell(
 	_apply_content_visibility()
 	_apply_squad_mode_visibility()
 	_update_squad_spread_label()
+	_update_outpost_spread_label()
 
 	quantity_spin.value = 1
 	_set_status("")
@@ -340,6 +345,7 @@ func _populate_outpost_options() -> void:
 
 	outpost_defenses_check.button_pressed = true
 	outpost_walls_check.button_pressed = false
+	outpost_clearance_check.button_pressed = false
 
 
 func _on_spawn_mode_changed(_index: int) -> void:
@@ -380,6 +386,11 @@ func _on_npc_commander_changed(_index: int) -> void:
 
 func _on_squad_spread_changed(_value: float) -> void:
 	_update_squad_spread_label()
+	_set_status("")
+
+
+func _on_outpost_spread_changed(_value: float) -> void:
+	_update_outpost_spread_label()
 	_set_status("")
 
 
@@ -558,8 +569,10 @@ func _submit_outpost(owner_request: Dictionary) -> void:
 	request["spawn_mode"] = "outpost"
 	request["outpost_type"] = _get_selected_metadata(outpost_type_option)
 	request["outpost_size"] = _get_selected_metadata(outpost_size_option)
+	request["outpost_spread"] = int(outpost_spread_slider.value)
 	request["outpost_add_defenses"] = outpost_defenses_check.button_pressed
 	request["outpost_add_walls"] = outpost_walls_check.button_pressed
+	request["outpost_require_clearance"] = outpost_clearance_check.button_pressed
 	spawn_requested.emit(request)
 	hide()
 
@@ -570,3 +583,7 @@ func _set_status(message: String) -> void:
 
 func _update_squad_spread_label() -> void:
 	squad_spread_value.text = str(int(squad_spread_slider.value))
+
+
+func _update_outpost_spread_label() -> void:
+	outpost_spread_value.text = str(int(outpost_spread_slider.value))

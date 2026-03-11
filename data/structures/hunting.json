@@ -1,0 +1,44 @@
+{
+	"hnt_bait_pylon": {
+		"name": "Bait Pylon",
+		"health": 135,
+		"armor": 40,
+		"shield": 12,
+		"shield_generation": 1,
+		"power": 82,
+		"power_generation": 7,
+		"speed": 0,
+		"slots": [0, 1, 0, 1],
+		"structure_type": "hunting",
+		"passable": false,
+		"icon": "structures/basic_turret.jpeg"
+	},
+	"hnt_tracking_array": {
+		"name": "Tracking Array",
+		"health": 150,
+		"armor": 44,
+		"shield": 18,
+		"shield_generation": 2,
+		"power": 98,
+		"power_generation": 8,
+		"speed": 0,
+		"slots": [0, 0, 0, 3],
+		"structure_type": "hunting",
+		"passable": false,
+		"icon": "structures/basic_turret.jpeg"
+	},
+	"hnt_harpoon_battery": {
+		"name": "Harpoon Battery",
+		"health": 170,
+		"armor": 56,
+		"shield": 14,
+		"shield_generation": 1,
+		"power": 92,
+		"power_generation": 7,
+		"speed": 0,
+		"slots": [0, 2, 0, 0],
+		"structure_type": "hunting",
+		"passable": false,
+		"icon": "structures/basic_turret.jpeg"
+	}
+}

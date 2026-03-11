@@ -1,0 +1,30 @@
+{
+	"lot_secure_cache": {
+		"name": "Secure Cache",
+		"health": 145,
+		"armor": 46,
+		"shield": 16,
+		"shield_generation": 2,
+		"power": 80,
+		"power_generation": 6,
+		"speed": 0,
+		"slots": [0, 0, 0, 2],
+		"structure_type": "loot",
+		"passable": false,
+		"icon": "structures/basic_turret.jpeg"
+	},
+	"lot_recovery_terminal": {
+		"name": "Recovery Terminal",
+		"health": 155,
+		"armor": 48,
+		"shield": 20,
+		"shield_generation": 2,
+		"power": 88,
+		"power_generation": 7,
+		"speed": 0,
+		"slots": [1, 0, 0, 2],
+		"structure_type": "loot",
+		"passable": false,
+		"icon": "structures/basic_turret.jpeg"
+	}
+}

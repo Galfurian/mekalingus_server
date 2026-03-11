@@ -319,6 +319,26 @@ text = "Outpost Size"
 [node name="OutpostSizeOption" type="OptionButton" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
 layout_mode = 2
 
+[node name="OutpostSpreadLabel" type="Label" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
+layout_mode = 2
+text = "Spread"
+
+[node name="OutpostSpreadRow" type="HBoxContainer" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="OutpostSpreadSlider" type="HSlider" parent="MarginContainer/Root/Panels/Right/OutpostForm/OutpostSpreadRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 6.0
+step = 1.0
+value = 2.0
+
+[node name="OutpostSpreadValue" type="Label" parent="MarginContainer/Root/Panels/Right/OutpostForm/OutpostSpreadRow"]
+layout_mode = 2
+text = "2"
+
 [node name="OutpostDefensesLabel" type="Label" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
 layout_mode = 2
 text = "Add Defenses"
@@ -334,6 +354,14 @@ text = "Perimeter Walls"
 [node name="OutpostWallsCheck" type="CheckBox" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
 layout_mode = 2
 text = "Enabled"
+
+[node name="OutpostClearanceLabel" type="Label" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
+layout_mode = 2
+text = "Empty Border"
+
+[node name="OutpostClearanceCheck" type="CheckBox" parent="MarginContainer/Root/Panels/Right/OutpostForm"]
+layout_mode = 2
+text = "Require around structures"
 
 [node name="StatusLabel" type="Label" parent="MarginContainer/Root"]
 layout_mode = 2

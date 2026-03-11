@@ -41,6 +41,31 @@ func execute(game_map: GameMap) -> bool:
 			],
 		)
 		return false
+	var has_offensive_effect: bool = equipped_module.module.effects.any(
+		func(effect: ItemEffect): return effect.is_offensive()
+	)
+	if has_offensive_effect and game_map.is_enemy_of(source, target):
+		var base_accuracy: int = 90 + source_mek.accuracy_modifier
+		var move_penalty: int = - min(source_mek.tiles_moved_last_turn * 5, 30)
+		var dodge_bonus: int = - min(target_mek.tiles_moved_last_turn * 3, 15)
+		var source_height: int = game_map.get_tile_height(source.position)
+		var target_height: int = game_map.get_tile_height(target.position)
+		var height_diff: int = source_height - target_height
+		var height_bonus: int = clamp(height_diff * 2, -10, 10)
+		var final_accuracy: int = min(base_accuracy + move_penalty + dodge_bonus + height_bonus, 90)
+		var roll: int = randi() % 100
+		if roll >= final_accuracy:
+			_add_utility_log(
+				game_map,
+				"%s used %s on %s and missed (accuracy=%d%%, roll=%d)" % [
+					source_mek.get_chat_tag(),
+					equipped_module.get_chat_tag(),
+					target_mek.get_chat_tag(),
+					final_accuracy,
+					roll,
+				],
+			)
+			return false
 	# Check if the Mek has enough power.
 	if source_mek.power < equipped_module.module.power_on_use:
 		return false

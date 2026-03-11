@@ -89,8 +89,6 @@ func generate_map() -> void:
 	terrain_data = map_generator.generate(map_biome)
 	# Update the AStar graph.
 	update_astar()
-	# Spawn enemies on the map.
-	spawn_enemies_on_map(map_difficulty)
 
 
 func clear() -> void:

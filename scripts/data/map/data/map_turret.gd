@@ -2,16 +2,13 @@
 # that can automatically attack hostile units within range.
 
 class_name MapTurret
-extends MapEntity
+extends MapStructure
 
 # =============================================================================
 # PROPERTIES
 # =============================================================================
 
 var turret_name: String
-var max_health: int
-var current_health: int
-var armor: int
 # Attack range in tiles
 var fire_range: int
 # Base damage per attack
@@ -33,29 +30,11 @@ func _init(
 	p_fire_range: int,
 	p_damage: int
 ) -> void:
-	position = p_position
-	owner = p_owner
+	super(p_position, p_owner, p_turret_name, p_max_health, p_armor, true)
 	turret_name = p_turret_name
-	max_health = p_max_health
-	current_health = p_max_health
-	armor = p_armor
 	fire_range = p_fire_range
 	damage = p_damage
 	cooldown_remaining = 0
-	active = true
-
-
-func take_damage(damage_amount: int) -> void:
-	"""Apply damage to this turret."""
-	var adjusted_damage: int = max(1, damage_amount - armor)
-	current_health = max(0, current_health - adjusted_damage)
-	if current_health <= 0:
-		active = false
-
-
-func is_alive() -> bool:
-	"""Check if this turret still has health."""
-	return current_health > 0 and active
 
 
 func can_fire() -> bool:
@@ -115,6 +94,7 @@ static func from_dict(data: Dictionary) -> MapTurret:
 	loaded_turret.current_health = data["current_health"]
 	loaded_turret.cooldown_remaining = data["cooldown_remaining"]
 	loaded_turret.active = bool(data["active"])
+	loaded_turret.blocking = bool(data.get("blocking", true))
 	return loaded_turret
 
 
@@ -127,6 +107,7 @@ func to_dict() -> Dictionary:
 		"max_health": max_health,
 		"current_health": current_health,
 		"armor": armor,
+		"blocking": blocking,
 		"fire_range": fire_range,
 		"damage": damage,
 		"cooldown_remaining": cooldown_remaining,

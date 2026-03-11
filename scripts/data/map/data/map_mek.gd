@@ -44,11 +44,13 @@ static func from_dict(data: Dictionary) -> MapMek:
 	if not parsed_owner:
 		push_error("Invalid MapMek data: failed to deserialize owner")
 		return null
-	return MapMek.new(
+	var loaded_map_mek := MapMek.new(
 		Utils.deserialize_position(data["position"]),
 		parsed_owner,
 		Mek.new(data["mek"])
 	)
+	loaded_map_mek.active = bool(data["active"])
+	return loaded_map_mek
 
 
 func to_dict() -> Dictionary:

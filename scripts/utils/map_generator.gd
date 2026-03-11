@@ -3,11 +3,8 @@
 class_name MapGenerator
 extends Node
 
-enum SmoothType {
-	MEAN,
-	MEDIAN,
-	GAUSSIAN,
-}
+const TerrainSmootherScript = preload("res://scripts/utils/map_generation/terrain_smoother.gd")
+const HeightNormalizerScript = preload("res://scripts/utils/map_generation/height_normalizer.gd")
 
 # The width of the map.
 var width: int
@@ -53,23 +50,23 @@ func generate(p_biome: Biome) -> Array:
 			# Apply noise to the terrain.
 			_apply_noise(2.0, 0.05, 5, 0.5, 2.0)
 			# Soften with a mild average, applied once
-			_smooth_terrain(SmoothType.MEAN, 1, 1, 1.0)
+			_smooth_terrain(TerrainSmootherScript.SmoothType.MEAN, 1, 1, 1.0)
 		"grassland":
 			_generate_mountains(0.05, 0.05, 0.10, 0.2, 0.4)
 			_apply_noise(2.0, 0.05, 5, 0.5, 2.0)
 			# Soften with a mild average, applied once
-			# _smooth_terrain(SmoothType.MEAN, 1, 1, 1.0)
+			# _smooth_terrain(TerrainSmootherScript.SmoothType.MEAN, 1, 1, 1.0)
 			# Soften aggressively with median filter (good for removing sharp edges)
-			_smooth_terrain(SmoothType.MEDIAN, 2, 2)
+			_smooth_terrain(TerrainSmootherScript.SmoothType.MEDIAN, 2, 2)
 			# Light Gaussian-like smoothing (mean + low blend)
-			# _smooth_terrain(SmoothType.MEAN, 2, 3, 0.3)
+			# _smooth_terrain(TerrainSmootherScript.SmoothType.MEAN, 2, 3, 0.3)
 		"mountain":
 			_generate_mountains(0.15, 0.05, 0.15, 0.6, 0.4)
 			_apply_noise(2.0, 0.05, 5, 0.5, 2.0)
 			_generate_mountain_peak(0.60, 0.80, 1.0, 2.0)
-			_smooth_terrain(SmoothType.MEAN, 1, 1, 1.0)
-			# _smooth_terrain(SmoothType.MEDIAN, 2, 2)
-			# _smooth_terrain(SmoothType.MEAN, 2, 3, 0.3)
+			_smooth_terrain(TerrainSmootherScript.SmoothType.MEAN, 1, 1, 1.0)
+			# _smooth_terrain(TerrainSmootherScript.SmoothType.MEDIAN, 2, 2)
+			# _smooth_terrain(TerrainSmootherScript.SmoothType.MEAN, 2, 3, 0.3)
 		_:
 			_generate_mountains()
 			_apply_noise(7.5)
@@ -269,63 +266,24 @@ func _apply_noise(
 
 
 func _normalize_height_map(round_result: bool = true, min_range_threshold: float = 1.0) -> void:
-	# Compute actual map min/max
-	var map_min = INF
-	var map_max = -INF
-	for y in range(height):
-		for x in range(width):
-			var h = height_map[y][x]
-			if h < map_min:
-				map_min = h
-			if h > map_max:
-				map_max = h
-
-	# Avoid flat terrain issues
-	if (map_max - map_min) < min_range_threshold:
-		map_max = map_min + min_range_threshold
-
-	for y in range(height):
-		for x in range(width):
-			var h = float(height_map[y][x])
-			# Normalize to [0,1] based on map min/max
-			var t = (h - map_min) / (map_max - map_min)
-			t = clamp(t, 0.0, 1.0)
-			# Remap to biome range
-			var final = lerp(biome.min_height, biome.max_height, t)
-			height_map[y][x] = round(final) if round_result else final
+	HeightNormalizerScript.normalize(
+		height_map, width, height, biome.min_height, biome.max_height,
+		round_result, min_range_threshold
+	)
 
 
 func _flatten_to_biome_levels() -> Array:
 	"""
 	Converts the height map to a terrain map using the biome levels.
 	"""
-	var terrain_map := []
-	for y in range(height):
-		terrain_map.append([])
-		for x in range(width):
-			terrain_map[y].append(_get_closest_level_index(height_map[y][x]))
-	return terrain_map
-
-
-func _get_closest_level_index(value: int) -> int:
-	"""
-	Returns the index of the closest biome level to the given value.
-	"""
-	var closest_index = 0
-	var min_diff = INF
-	for i in biome.biome_levels.size():
-		var level = biome.get_level(i)
-		if level == null:
-			continue
-		var diff = abs(level.height - value)
-		if diff < min_diff or (diff == min_diff and i > closest_index):
-			closest_index = i
-			min_diff = diff
-	return closest_index
+	return HeightNormalizerScript.flatten_to_biome_levels(height_map, width, height, biome)
 
 
 func _smooth_terrain(
-	type: int = SmoothType.MEAN, radius: int = 1, iterations: int = 1, blend: float = 1.0
+	type: int = TerrainSmootherScript.SmoothType.MEAN,
+	radius: int = 1,
+	iterations: int = 1,
+	blend: float = 1.0
 ) -> void:
 	"""
 	Smooths the terrain by applying a local filter.
@@ -334,40 +292,7 @@ func _smooth_terrain(
 	iterations	: How many times to apply the smoothing pass.
 	blend		: How much to blend the smoothed value with the original [0-1]
 	"""
-	for _pass in range(iterations):
-		var new_map := []
-		for y in range(height):
-			new_map.append([])
-			for x in range(width):
-				var values := []
-
-				for dy in range(-radius, radius + 1):
-					for dx in range(-radius, radius + 1):
-						var nx = x + dx
-						var ny = y + dy
-						if nx >= 0 and nx < width and ny >= 0 and ny < height:
-							values.append(height_map[ny][nx])
-				var result = height_map[y][x]
-				if values.size() > 0:
-					match type:
-						SmoothType.MEAN:
-							var sum := 0
-							for v in values:
-								sum += v
-							result = float(sum) / values.size()
-
-						SmoothType.MEDIAN:
-							values.sort()
-							result = values[values.size() / 2.0]
-						_:
-							pass  # fallback = original value
-
-				var blended = lerp(float(height_map[y][x]), float(result), blend)
-				new_map[y].append(blended)
-
-		for y in range(height):
-			for x in range(width):
-				height_map[y][x] = int(round(new_map[y][x]))
+	TerrainSmootherScript.smooth(height_map, width, height, type, radius, iterations, blend)
 
 
 func get_random_point_in_bounds(

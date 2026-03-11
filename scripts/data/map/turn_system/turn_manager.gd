@@ -141,6 +141,12 @@ func tick(delta: float) -> void:
 		_update_time_based_effects()
 		# 5.2) Check if any units are destroyed after executing the orders.
 		_erase_destroyed_units()
+		if not _has_hostile_pairs():
+			_is_active = false
+			game_map.combat_logger.add_log(
+				Enums.LogType.SYSTEM,
+				"Combat ended on turn %d: no hostile units remain." % _current_turn,
+			)
 
 		# Emit the turn ended signal.
 		on_turn_ended.emit(_current_turn)
@@ -201,3 +207,21 @@ func _update_time_based_effects():
 		unit.mek.apply_regen_effects()
 		unit.mek.active_effect_manager.decrement_durations()
 		unit.mek.cooldown_manager.decrement_cooldowns()
+
+
+func _has_hostile_pairs() -> bool:
+	"""
+	Returns true if at least one pair of living units can still attack each other.
+	"""
+	var alive_units: Array[MapMek] = []
+	for unit: MapMek in game_map.player_units.values():
+		if unit and unit.mek and unit.mek.is_alive():
+			alive_units.append(unit)
+	for unit: MapMek in game_map.npc_units.values():
+		if unit and unit.mek and unit.mek.is_alive():
+			alive_units.append(unit)
+	for i in range(alive_units.size()):
+		for j in range(i + 1, alive_units.size()):
+			if game_map.is_enemy_of(alive_units[i], alive_units[j]):
+				return true
+	return false

@@ -25,6 +25,14 @@ func is_player() -> bool:
 
 
 static func from_dict(_data: Dictionary) -> EntityOwner:
+	if _data.is_empty():
+		push_error("Invalid owner data: empty dictionary")
+		return null
+	if _data.has("player_uuid"):
+		return PlayerOwned.from_dict(_data)
+	if _data.has("npc_name"):
+		return NPCOwned.from_dict(_data)
+	push_error("Invalid owner data: unknown owner type")
 	return null
 
 

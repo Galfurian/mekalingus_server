@@ -25,7 +25,14 @@ static func from_dict(data: Dictionary) -> EntityOwner:
 	"""
 	Loads NPC data from a dictionary.
 	"""
-	return NPCOwned.new(data["npc_name"], DataManager.clans[data["clan"]])
+	if not data.has_all(["npc_name", "clan"]):
+		push_error("Invalid NPCOwned data: missing required fields")
+		return null
+	var resolved_clan: Clan = DataManager.clans.get(data["clan"], null)
+	if not resolved_clan:
+		push_error("Invalid NPCOwned data: unknown clan %s" % data["clan"])
+		return null
+	return NPCOwned.new(data["npc_name"], resolved_clan)
 
 
 func to_dict() -> Dictionary:

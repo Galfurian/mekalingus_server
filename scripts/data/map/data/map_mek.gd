@@ -40,9 +40,13 @@ static func from_dict(data: Dictionary) -> MapMek:
 	):
 		push_error("Invalid MapMek data: Missing required fields")
 		return null
+	var parsed_owner: EntityOwner = EntityOwner.from_dict(data["owner"])
+	if not parsed_owner:
+		push_error("Invalid MapMek data: failed to deserialize owner")
+		return null
 	return MapMek.new(
 		Utils.deserialize_position(data["position"]),
-		NPCOwned.from_dict(data["owner"]),
+		parsed_owner,
 		Mek.new(data["mek"])
 	)
 

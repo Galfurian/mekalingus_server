@@ -80,11 +80,11 @@ text = "Owner Type"
 [node name="OwnerTypeOption" type="OptionButton" parent="MarginContainer/Root/Form"]
 layout_mode = 2
 
-[node name="NpcModeLabel" type="Label" parent="MarginContainer/Root/Form"]
+[node name="NpcCommanderLabel" type="Label" parent="MarginContainer/Root/Form"]
 layout_mode = 2
-text = "NPC Mode"
+text = "Commander"
 
-[node name="NpcModeOption" type="OptionButton" parent="MarginContainer/Root/Form"]
+[node name="NpcCommanderOption" type="OptionButton" parent="MarginContainer/Root/Form"]
 layout_mode = 2
 
 [node name="NpcNameLabel" type="Label" parent="MarginContainer/Root/Form"]
@@ -94,13 +94,6 @@ text = "NPC Name"
 [node name="NpcNameEdit" type="LineEdit" parent="MarginContainer/Root/Form"]
 layout_mode = 2
 placeholder_text = "Leave empty for random"
-
-[node name="NpcExistingLabel" type="Label" parent="MarginContainer/Root/Form"]
-layout_mode = 2
-text = "NPC Commander"
-
-[node name="NpcExistingOption" type="OptionButton" parent="MarginContainer/Root/Form"]
-layout_mode = 2
 
 [node name="PlayerLabel" type="Label" parent="MarginContainer/Root/Form"]
 layout_mode = 2

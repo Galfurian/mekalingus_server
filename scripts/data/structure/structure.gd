@@ -3,7 +3,7 @@ extends "res://scripts/data/combat/combat_actor.gd"
 
 var structure_id: String
 var structure_name: String
-var template = null
+var template: StructureTemplate = null
 
 
 func _init(data: Dictionary = {}) -> void:
@@ -26,7 +26,7 @@ func get_chat_tag() -> String:
 
 
 func rebuild_combat_state() -> void:
-	var base_stats := {
+	var base_stats: Dictionary = {
 		"health": health,
 		"max_health": max_health,
 		"armor": armor,
@@ -71,7 +71,7 @@ func from_dict(data: Dictionary = {}) -> bool:
 	alias = data.get("alias", "")
 	structure_id = data.get("structure_id", "")
 	items.clear()
-	for item_data in data.get("items", []):
+	for item_data: Dictionary in data.get("items", []):
 		items.append(Item.new(item_data))
 	items.sort_custom(Item.compare_items)
 

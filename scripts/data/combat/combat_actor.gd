@@ -18,8 +18,8 @@ var slots: Array[int]
 # =============================================================================
 
 # Wiring to concrete managers is intentionally deferred to migration steps.
-var active_effect_manager = null
-var cooldown_manager = null
+var active_effect_manager: ActiveEffectManager = null
+var cooldown_manager: CooldownManager = null
 
 # =============================================================================
 # COMBAT STATS
@@ -156,7 +156,7 @@ func evaluate_combat_power() -> float:
 func add_effect(module: ItemModule, effect: ItemEffect, source) -> void:
 	if not active_effect_manager:
 		return
-	var active = ActiveEffect.new(module, effect, source, effect.duration)
+	var active: ActiveEffect = ActiveEffect.new(module, effect, source, effect.duration)
 	active_effect_manager.add_active_effect(active)
 
 
@@ -205,7 +205,7 @@ func take_dot_damage() -> Dictionary:
 
 func repair_from_effect(effect: ItemEffect) -> Dictionary:
 	var restored := 0
-	var stat := ""
+	var stat: String = ""
 	match effect.type:
 		Enums.EffectType.HEALTH_REPAIR:
 			restored = adjust_health(effect.amount)

@@ -9,7 +9,7 @@ class_name Mek
 # Unique identifier of the Mek template.
 var mek_id: String
 # Reference to the Mek template.
-var template: MekTemplate
+var template = null
 
 # =============================================================================
 # GENERAL

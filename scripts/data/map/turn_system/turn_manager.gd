@@ -25,7 +25,7 @@ signal on_turn_ended(turn_number: int)
 # ===================================================================
 
 # The game map associated with this turn manager.
-var game_map
+var game_map: Object
 
 # The current turn number.
 var _current_turn: int
@@ -192,14 +192,14 @@ func _regenerate_units() -> void:
 		unit.combatant.regenerate()
 
 
-func _update_time_based_effects():
+func _update_time_based_effects() -> void:
 	"""
 	Updates time-based effects for all units.
 	"""
 	# Then, tick active effects, cooldowns, and durations.
 	for unit in game_map.player_units.values() + game_map.npc_units.values():
 		# Process time-based effects like DOT, HOT, buffs.
-		var dot_result = unit.combatant.take_dot_damage()
+		var dot_result: Dictionary = unit.combatant.take_dot_damage()
 		if dot_result.total > 0:
 			game_map.combat_logger.add_log(Enums.LogType.ATTACK, "%s suffers DOT -> %d shield, %d armor, %d health" % [
 				unit.combatant.get_chat_tag(),

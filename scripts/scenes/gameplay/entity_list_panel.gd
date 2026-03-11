@@ -35,7 +35,7 @@ func select_entity(entity: MapEntity) -> void:
 	if not mek_tree:
 		return
 	mek_tree.deselect_all()
-	if not is_instance_of(entity, MapMek):
+	if not is_instance_of(entity, MapCombatEntity):
 		return
 	var root = mek_tree.get_root()
 	if not root:
@@ -71,15 +71,15 @@ func _populate_meks_tree() -> void:
 		clan_item.set_custom_color(0, clan_data["color"])
 
 		var meks: Array = clan_data["entities"]
-		meks.sort_custom(func(a: MapMek, b: MapMek): return a.combatant.get_mek_name() < b.combatant.get_mek_name())
-		for map_mek in meks:
+		meks.sort_custom(func(a: MapCombatEntity, b: MapCombatEntity): return _combatant_display_name(a.combatant) < _combatant_display_name(b.combatant))
+		for map_mek: MapCombatEntity in meks:
 			var mek_item = mek_tree.create_item(clan_item)
 			mek_item.set_text(0, _format_mek_label(map_mek))
 			mek_item.set_metadata(0, map_mek.combatant.uuid)
 			mek_item.set_custom_color(0, clan_data["color"])
 
 
-func _add_mek_to_clan_bucket(clans: Dictionary, map_mek: MapMek) -> void:
+func _add_mek_to_clan_bucket(clans: Dictionary, map_mek: MapCombatEntity) -> void:
 	if not is_instance_valid(map_mek) or not map_mek.owner:
 		return
 	var clan_name = "No Clan"
@@ -95,7 +95,7 @@ func _add_mek_to_clan_bucket(clans: Dictionary, map_mek: MapMek) -> void:
 	clans[clan_name]["entities"].append(map_mek)
 
 
-func _format_mek_label(map_mek: MapMek) -> String:
+func _format_mek_label(map_mek: MapCombatEntity) -> String:
 	var owner_label = ""
 	if is_instance_of(map_mek.owner, PlayerOwned):
 		owner_label = "Player: " + map_mek.owner.player.player_name
@@ -103,7 +103,19 @@ func _format_mek_label(map_mek: MapMek) -> String:
 		owner_label = "NPC: " + map_mek.owner.npc_name
 	else:
 		owner_label = "Unknown Owner"
-	return "%s  [%s, %s]" % [map_mek.combatant.get_mek_name(), owner_label, str(map_mek.position)]
+	return "%s  [%s, %s]" % [_combatant_display_name(map_mek.combatant), owner_label, str(map_mek.position)]
+
+
+func _combatant_display_name(combatant: CombatActor) -> String:
+	if combatant == null:
+		return "Unknown"
+	if combatant.has_method("get_mek_name"):
+		return str(combatant.call("get_mek_name"))
+	if combatant.has_method("get_structure_name"):
+		return str(combatant.call("get_structure_name"))
+	if not combatant.alias.is_empty():
+		return combatant.alias
+	return combatant.uuid
 
 
 func _on_mek_tree_item_selected() -> void:

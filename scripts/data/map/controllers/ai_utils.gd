@@ -8,7 +8,7 @@ const AIThreatEvaluatorScript = preload("res://scripts/data/map/controllers/ai_t
 # PRIORITY CALCULATION FUNCTIONS
 # =====================================================================
 
-func evaluate_utility_effect_priority(target: MapMek, effect: ItemEffect) -> int:
+func evaluate_utility_effect_priority(target, effect: ItemEffect) -> int:
 	"""
 	Calculates a priority score for a specific effect on a specific target.
 	"""
@@ -18,29 +18,29 @@ func evaluate_utility_effect_priority(target: MapMek, effect: ItemEffect) -> int
 	match effect.type:
 		# Repairs (High priority if the related stat is low)
 		Enums.EffectType.HEALTH_REPAIR:
-			if target.mek.health < target.mek.max_health * 0.4:
+			if target.combatant.health < target.combatant.max_health * 0.4:
 				priority += 16
-			elif target.mek.health < target.mek.max_health * 0.7:
+			elif target.combatant.health < target.combatant.max_health * 0.7:
 				priority += 8
 		Enums.EffectType.SHIELD_REPAIR:
-			if target.mek.shield < target.mek.max_shield * 0.4:
+			if target.combatant.shield < target.combatant.max_shield * 0.4:
 				priority += 16
-			elif target.mek.shield < target.mek.max_shield * 0.7:
+			elif target.combatant.shield < target.combatant.max_shield * 0.7:
 				priority += 8
 		Enums.EffectType.ARMOR_REPAIR:
-			if target.mek.armor < target.mek.max_armor * 0.4:
+			if target.combatant.armor < target.combatant.max_armor * 0.4:
 				priority += 16
-			elif target.mek.armor < target.mek.max_armor * 0.7:
+			elif target.combatant.armor < target.combatant.max_armor * 0.7:
 				priority += 8
 		# Max stat modifiers (Lower priority than direct repairs)
 		Enums.EffectType.HEALTH_MODIFIER:
-			priority += 4 if target.mek.health < target.mek.max_health * 0.4 else 2
+			priority += 4 if target.combatant.health < target.combatant.max_health * 0.4 else 2
 		Enums.EffectType.SHIELD_MODIFIER:
-			priority += 4 if target.mek.shield < target.mek.max_shield * 0.4 else 2
+			priority += 4 if target.combatant.shield < target.combatant.max_shield * 0.4 else 2
 		Enums.EffectType.ARMOR_MODIFIER:
-			priority += 4 if target.mek.armor < target.mek.max_armor * 0.4 else 2
+			priority += 4 if target.combatant.armor < target.combatant.max_armor * 0.4 else 2
 		Enums.EffectType.POWER_MODIFIER:
-			priority += 3 if target.mek.power < target.mek.max_power * 0.4 else 1
+			priority += 3 if target.combatant.power < target.combatant.max_power * 0.4 else 1
 		# Speed modifier (Always useful, moderate priority)
 		Enums.EffectType.SPEED_MODIFIER:
 			priority += 8
@@ -53,13 +53,13 @@ func evaluate_utility_effect_priority(target: MapMek, effect: ItemEffect) -> int
 			priority += 12
 		# Regeneration effects (Lower than direct repair but useful)
 		Enums.EffectType.HEALTH_REGEN:
-			priority += 5 if target.mek.health < target.mek.max_health * 0.3 else 3
+			priority += 5 if target.combatant.health < target.combatant.max_health * 0.3 else 3
 		Enums.EffectType.SHIELD_REGEN:
-			priority += 5 if target.mek.shield < target.mek.max_shield * 0.3 else 3
+			priority += 5 if target.combatant.shield < target.combatant.max_shield * 0.3 else 3
 		Enums.EffectType.ARMOR_REGEN:
-			priority += 5 if target.mek.armor < target.mek.max_armor * 0.3 else 3
+			priority += 5 if target.combatant.armor < target.combatant.max_armor * 0.3 else 3
 		Enums.EffectType.POWER_REGEN:
-			priority += 5 if target.mek.power < target.mek.max_power * 0.3 else 3
+			priority += 5 if target.combatant.power < target.combatant.max_power * 0.3 else 3
 		# Damage Reduction (Always useful, medium priority)
 		Enums.EffectType.DAMAGE_REDUCTION_ALL:
 			priority += 12
@@ -76,7 +76,7 @@ func evaluate_utility_effect_priority(target: MapMek, effect: ItemEffect) -> int
 	return priority
 
 
-func evaluate_offensive_effect_priority(target: MapMek, effect: ItemEffect) -> int:
+func evaluate_offensive_effect_priority(target, effect: ItemEffect) -> int:
 	"""
 	Assigns a priority value to an offensive effect targeting a specific entity.
 	"""
@@ -84,23 +84,23 @@ func evaluate_offensive_effect_priority(target: MapMek, effect: ItemEffect) -> i
 
 	# Factor 1: Threat level by size (larger = more threatening)
 
-	priority += (target.mek.template.size + 1) * (target.mek.template.size + 1)
+	priority += (target.combatant.template.size + 1) * (target.combatant.template.size + 1)
 
 	# Factor 2: Target state sensitivity.
 
-	if target.mek.health < target.mek.max_health * 0.25:
+	if target.combatant.health < target.combatant.max_health * 0.25:
 		priority += 10
-	elif target.mek.health < target.mek.max_health * 0.5:
+	elif target.combatant.health < target.combatant.max_health * 0.5:
 		priority += 5
 
-	if target.mek.shield < target.mek.max_shield * 0.25:
+	if target.combatant.shield < target.combatant.max_shield * 0.25:
 		priority += 6
-	elif target.mek.shield < target.mek.max_shield * 0.5:
+	elif target.combatant.shield < target.combatant.max_shield * 0.5:
 		priority += 3
 
-	if target.mek.armor < target.mek.max_armor * 0.25:
+	if target.combatant.armor < target.combatant.max_armor * 0.25:
 		priority += 4
-	elif target.mek.armor < target.mek.max_armor * 0.5:
+	elif target.combatant.armor < target.combatant.max_armor * 0.5:
 		priority += 2
 
 	# Factor 3: Effect-Specific Logic
@@ -111,7 +111,7 @@ func evaluate_offensive_effect_priority(target: MapMek, effect: ItemEffect) -> i
 			priority += clamp(effect.amount / 10.0, 1, 10)
 
 		Enums.EffectType.DAMAGE_OVER_TIME:
-			var existing_effects: Array[ActiveEffect] = target.mek.active_effect_manager.get_effects_by_type(effect.type)
+			var existing_effects: Array[ActiveEffect] = target.combatant.active_effect_manager.get_effects_by_type(effect.type)
 			if existing_effects.size() > 0:
 				# If the target already has this effect, prioritize it based on
 				# how much time it has left.
@@ -149,8 +149,8 @@ func evaluate_offensive_effect_priority(target: MapMek, effect: ItemEffect) -> i
 
 func score_utility_module_on_target(
 	module: ItemModule,
-	source: MapMek,
-	target: MapMek
+	source,
+	target
 ) -> int:
 	"""
 	Calculates the total priority score for a module on a target.
@@ -167,7 +167,7 @@ func score_utility_module_on_target(
 	return total
 
 
-func score_offensive_module_on_target(module: ItemModule, target: MapMek) -> int:
+func score_offensive_module_on_target(module: ItemModule, target) -> int:
 	"""
 	Calculates the total priority score for a module on a target.
 	"""
@@ -236,28 +236,28 @@ func round_position(vector: Vector2) -> Vector2i:
 	return AIPathfinderScript.round_position(vector)
 
 
-func get_shortest_path(game_map: GameMap, start: Vector2i, end: Vector2i) -> Array[Vector2i]:
+func get_shortest_path(game_map, start: Vector2i, end: Vector2i) -> Array[Vector2i]:
 	return AIPathfinderScript.get_shortest_path(game_map, start, end)
 
 
-func get_path_cost(game_map: GameMap, path) -> float:
+func get_path_cost(game_map, path) -> float:
 	return AIPathfinderScript.get_path_cost(game_map, path)
 
 
-func get_tiles_in_range(game_map: GameMap, position: Vector2i, max_range: int) -> Array[Vector2i]:
+func get_tiles_in_range(game_map, position: Vector2i, max_range: int) -> Array[Vector2i]:
 	return AIPathfinderScript.get_tiles_in_range(game_map, position, max_range)
 
 
-func get_reachable_tiles(game_map: GameMap, start: Vector2i, max_cost: int) -> Array[Vector2i]:
+func get_reachable_tiles(game_map, start: Vector2i, max_cost: int) -> Array[Vector2i]:
 	return AIPathfinderScript.get_reachable_tiles(game_map, start, max_cost)
 
 
-func get_distance(game_map: GameMap, from: Vector2i, to: Vector2i) -> float:
+func get_distance(game_map, from: Vector2i, to: Vector2i) -> float:
 	return AIPathfinderScript.get_distance(game_map, from, to)
 
 
 func find_furthest_progress_along_path(
-	game_map: GameMap,
+	game_map,
 	start: Vector2i,
 	target: Vector2i,
 	max_movement: int
@@ -266,9 +266,9 @@ func find_furthest_progress_along_path(
 
 
 func find_closest_reachable_tile(
-	game_map: GameMap,
-	source: MapMek,
-	target: MapMek,
+	game_map,
+	source,
+	target,
 	min_range: int,
 	max_range: int,
 	max_movement: int
@@ -284,9 +284,9 @@ func find_closest_reachable_tile(
 
 
 func find_best_attack_tile(
-	game_map: GameMap,
-	source: MapMek,
-	target: MapMek,
+	game_map,
+	source,
+	target,
 	min_range: int,
 	max_range: int,
 	max_movement: int
@@ -301,7 +301,7 @@ func find_best_attack_tile(
 	)
 
 
-func find_random_reachable_tile(game_map: GameMap, start: Vector2i, max_cost: int) -> Vector2i:
+func find_random_reachable_tile(game_map, start: Vector2i, max_cost: int) -> Vector2i:
 	return AIPathfinderScript.find_random_reachable_tile(game_map, start, max_cost)
 
 
@@ -309,19 +309,19 @@ func find_random_reachable_tile(game_map: GameMap, start: Vector2i, max_cost: in
 # UNIT UTILITY FUNCTIONS
 # =====================================================================
 
-func get_all_units(game_map: GameMap) -> Array[MapMek]:
+func get_all_units(game_map) -> Array:
 	return AIUnitQueriesScript.get_all_units(game_map)
 
 
 func get_units_in_range(
-	game_map: GameMap,
-	source: MapMek,
+	game_map,
+	source,
 	position: Vector2i,
 	radius: int,
 	include_allies: bool = true,
 	include_enemies: bool = true,
-	exclude_units: Array[MapMek] = []
-) -> Array[MapMek]:
+	exclude_units: Array = []
+) -> Array:
 	return AIUnitQueriesScript.get_units_in_range(
 		game_map,
 		source,
@@ -334,31 +334,31 @@ func get_units_in_range(
 
 
 func get_enemies_in_range(
-	game_map: GameMap,
-	source: MapMek,
+	game_map,
+	source,
 	radius: int,
-	exclude_units: Array[MapMek] = []
-) -> Array[MapMek]:
+	exclude_units: Array = []
+) -> Array:
 	return AIUnitQueriesScript.get_enemies_in_range(game_map, source, radius, exclude_units)
 
 
 func get_allies_in_range(
-	game_map: GameMap,
-	source: MapMek,
+	game_map,
+	source,
 	radius: int,
-	exclude_units: Array[MapMek] = []
-) -> Array[MapMek]:
+	exclude_units: Array = []
+) -> Array:
 	return AIUnitQueriesScript.get_allies_in_range(game_map, source, radius, exclude_units)
 
 
-func get_threat_level(game_map: GameMap, tile: Vector2i, source: MapMek) -> float:
+func get_threat_level(game_map, tile: Vector2i, source) -> float:
 	return AIThreatEvaluatorScript.get_threat_level(game_map, tile, source)
 
 
 func can_reach_target_this_turn(
-	game_map: GameMap,
-	source: MapMek,
-	target: MapMek,
+	game_map,
+	source,
+	target,
 	range_min: int,
 	range_max: int,
 	max_movement: int
@@ -373,5 +373,5 @@ func can_reach_target_this_turn(
 	)
 
 
-func get_most_vulnerable_enemy(game_map: GameMap, source: MapMek, max_distance: int) -> MapMek:
+func get_most_vulnerable_enemy(game_map, source, max_distance: int) -> MapCombatEntity:
 	return AIUnitQueriesScript.get_most_vulnerable_enemy(game_map, source, max_distance)

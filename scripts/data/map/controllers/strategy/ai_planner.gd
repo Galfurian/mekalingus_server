@@ -5,7 +5,7 @@ extends RefCounted
 # PLAN GENERATION ENTRY POINT
 # =============================================================================
 
-func generate_plan(source: MapMek, game_map: GameMap, aggressiveness: float = 1.0) -> AIPlan:
+func generate_plan(source, game_map, aggressiveness: float = 1.0) -> AIPlan:
 	var plan := AIPlan.new(source, game_map)
 	var best_score := -INF
 
@@ -38,11 +38,11 @@ func generate_plan(source: MapMek, game_map: GameMap, aggressiveness: float = 1.
 
 func _evaluate_attack_intent(plan: AIPlan, aggressiveness: float) -> AIPlan:
 	# Get the source unit from the plan.
-	var source: MapMek = plan.source
+	var source = plan.source
 	# This will keep track of the best score for the attack.
 	var best_score := -INF
 	# This will keep track of the best target to attack.
-	var best_target: MapMek = null
+	var best_target = null
 	# This will keep track of the best equipped module for the attack.
 	var best_equipped_module: EquippedModule = null
 
@@ -50,7 +50,7 @@ func _evaluate_attack_intent(plan: AIPlan, aggressiveness: float) -> AIPlan:
 	for equipped_module in AIUtils.find_matching_modules(source.mek, true, false, false):
 		# Get all the enemies in range.
 		for target in AIUtils.get_enemies_in_range(plan.game_map, source, 999):
-			if target.mek.is_dead():
+			if target.combatant.is_dead():
 				continue
 			# Get the score of the target.			
 			var score = AIUtils.score_offensive_module_on_target(equipped_module.module, target)
@@ -76,11 +76,11 @@ func _evaluate_attack_intent(plan: AIPlan, aggressiveness: float) -> AIPlan:
 
 func _evaluate_support_intent(plan: AIPlan) -> AIPlan:
 	# Get the source unit from the plan.
-	var source: MapMek = plan.source
+	var source = plan.source
 	# This will keep track of the best score for the support action.
 	var best_score := -INF
 	# This will keep track of the best target to support.
-	var best_target: MapMek = null
+	var best_target = null
 	# This will keep track of the best equipped module to use.
 	var best_equipped_module: EquippedModule = null
 
@@ -88,7 +88,7 @@ func _evaluate_support_intent(plan: AIPlan) -> AIPlan:
 	for equipped_module in AIUtils.find_matching_modules(source.mek, false, false, false):
 		# Get all allies within the range of this module.
 		for target in [source] + AIUtils.get_allies_in_range(plan.game_map, source, 999):
-			if target.mek.is_dead():
+			if target.combatant.is_dead():
 				continue
 			# Score how useful the module would be on this target.
 			var score := AIUtils.score_utility_module_on_target(equipped_module.module, source, target)
@@ -116,11 +116,11 @@ func _evaluate_support_intent(plan: AIPlan) -> AIPlan:
 
 func _evaluate_retreat_intent(plan: AIPlan) -> AIPlan:
 	# Get the source unit from the plan.
-	var source: MapMek = plan.source
+	var source = plan.source
 	# Get the current thread level.
 	var current_threat: float = AIUtils.get_threat_level(plan.game_map, source.position, source)
 	# Get the health ratio of the source unit.
-	var health_ratio := float(source.mek.health + source.mek.armor + source.mek.shield) / float(source.mek.max_health + source.mek.max_armor + source.mek.max_shield)
+	var health_ratio := float(source.combatant.health + source.combatant.armor + source.combatant.shield) / float(source.combatant.max_health + source.combatant.max_armor + source.combatant.max_shield)
 	# This will keep track of the best equipped module to use.
 	var best_equipped_module: EquippedModule = null
 
@@ -134,7 +134,7 @@ func _evaluate_retreat_intent(plan: AIPlan) -> AIPlan:
 	var best_score: float = INF
 
 	# Evaluate all reachable tiles within the unit's speed.
-	for tile in AIUtils.get_reachable_tiles(plan.game_map, source.position, source.mek.speed):
+	for tile in AIUtils.get_reachable_tiles(plan.game_map, source.position, source.combatant.speed):
 		# Check if the tile is occupied by an enemy unit.
 		if plan.game_map.is_occupied(tile):
 			continue
@@ -168,9 +168,9 @@ func _evaluate_retreat_intent(plan: AIPlan) -> AIPlan:
 
 func _evaluate_reposition_intent(plan: AIPlan) -> AIPlan:
 	# Get the source unit from the plan.
-	var source: MapMek = plan.source
+	var source = plan.source
 	# Find a random reachable tile within the unit's speed.
-	var fallback_tile = AIUtils.find_random_reachable_tile(plan.game_map, source.position, source.mek.speed)
+	var fallback_tile = AIUtils.find_random_reachable_tile(plan.game_map, source.position, source.combatant.speed)
  	# If the fallback tile is the same as the source position, we can't reposition.
 	if fallback_tile == Vector2i.ZERO or fallback_tile == source.position:
 		return null

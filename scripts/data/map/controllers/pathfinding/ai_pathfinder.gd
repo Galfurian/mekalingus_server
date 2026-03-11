@@ -19,7 +19,7 @@ static func round_position(vector: Vector2) -> Vector2i:
 	return Vector2i(round(vector.x), round(vector.y))
 
 
-static func get_shortest_path(game_map: GameMap, start: Vector2i, end: Vector2i) -> Array[Vector2i]:
+static func get_shortest_path(game_map, start: Vector2i, end: Vector2i) -> Array[Vector2i]:
 	"""
 	Returns the shortest path between two tiles using AStar2D.
 	"""
@@ -40,7 +40,7 @@ static func get_shortest_path(game_map: GameMap, start: Vector2i, end: Vector2i)
 	return result
 
 
-static func get_path_cost(game_map: GameMap, path) -> float:
+static func get_path_cost(game_map, path) -> float:
 	"""
 	Compute the total cost of a path.
 	"""
@@ -50,7 +50,7 @@ static func get_path_cost(game_map: GameMap, path) -> float:
 	return cost
 
 
-static func get_tiles_in_range(game_map: GameMap, position: Vector2i, max_range: int) -> Array[Vector2i]:
+static func get_tiles_in_range(game_map, position: Vector2i, max_range: int) -> Array[Vector2i]:
 	"""
 	Returns all tiles within a given range from a starting position.
 	"""
@@ -63,7 +63,7 @@ static func get_tiles_in_range(game_map: GameMap, position: Vector2i, max_range:
 	return visible
 
 
-static func get_reachable_tiles(game_map: GameMap, start: Vector2i, max_cost: int) -> Array[Vector2i]:
+static func get_reachable_tiles(game_map, start: Vector2i, max_cost: int) -> Array[Vector2i]:
 	"""
 	Returns all reachable tiles from a starting position within a given cost.
 	"""
@@ -91,7 +91,7 @@ static func get_reachable_tiles(game_map: GameMap, start: Vector2i, max_cost: in
 	return reachable
 
 
-static func get_distance(game_map: GameMap, from: Vector2i, to: Vector2i) -> float:
+static func get_distance(game_map, from: Vector2i, to: Vector2i) -> float:
 	"""
 	Returns the pathing distance between two tiles on the game map.
 	"""
@@ -102,7 +102,7 @@ static func get_distance(game_map: GameMap, from: Vector2i, to: Vector2i) -> flo
 
 
 static func find_furthest_progress_along_path(
-	game_map: GameMap,
+	game_map,
 	start: Vector2i,
 	target: Vector2i,
 	max_movement: int
@@ -132,9 +132,9 @@ static func find_furthest_progress_along_path(
 
 
 static func find_closest_reachable_tile(
-	game_map: GameMap,
-	source: MapMek,
-	target: MapMek,
+	game_map,
+	source,
+	target,
 	min_range: int,
 	max_range: int,
 	max_movement: int
@@ -161,9 +161,9 @@ static func find_closest_reachable_tile(
 
 
 static func find_best_attack_tile(
-	game_map: GameMap,
-	source: MapMek,
-	target: MapMek,
+	game_map,
+	source,
+	target,
 	min_range: int,
 	max_range: int,
 	max_movement: int
@@ -194,7 +194,7 @@ static func find_best_attack_tile(
 	return find_furthest_progress_along_path(game_map, source.position, target.position, max_movement)
 
 
-static func find_random_reachable_tile(game_map: GameMap, start: Vector2i, max_cost: int) -> Vector2i:
+static func find_random_reachable_tile(game_map, start: Vector2i, max_cost: int) -> Vector2i:
 	"""
 	Returns a random unoccupied reachable tile.
 	"""

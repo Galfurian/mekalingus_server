@@ -2,6 +2,11 @@ class_name MapCombatEntity
 extends MapEntity
 
 var combatant
+var mek:
+	get:
+		return combatant
+	set(value):
+		combatant = value
 
 
 func _init(p_position: Vector2i, p_owner: EntityOwner, p_combatant) -> void:

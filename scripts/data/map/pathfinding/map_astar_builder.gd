@@ -2,7 +2,7 @@ class_name MapAStarBuilder
 extends RefCounted
 
 
-static func rebuild(game_map: GameMap) -> void:
+static func rebuild(game_map) -> void:
 	"""
 	Rebuilds the AStar2D graph based on current walkable map tiles.
 	"""

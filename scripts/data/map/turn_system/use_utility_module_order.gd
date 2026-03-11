@@ -6,11 +6,11 @@ extends UseModuleOrder
 # =============================================================================
 
 
-func _init(p_source: MapMek, p_target: MapMek, p_equipped_module: EquippedModule) -> void:
+func _init(p_source, p_target, p_equipped_module: EquippedModule) -> void:
 	super (p_source, p_target, p_equipped_module)
 
 
-func _add_utility_log(game_map: GameMap, message: String) -> void:
+func _add_utility_log(game_map, message: String) -> void:
 	if is_instance_valid(game_map):
 		game_map.combat_logger.add_log(Enums.LogType.SUPPORT, message)
 		return
@@ -25,7 +25,7 @@ func _format_pos_tag(pos: Vector2i) -> String:
 # =============================================================================
 
 
-func execute(game_map: GameMap) -> bool:
+func execute(game_map) -> bool:
 	var source_mek: Mek = source.mek
 	var target_mek: Mek = target.mek
 	if source_mek.is_dead() or target_mek.is_dead():
@@ -110,9 +110,9 @@ func execute(game_map: GameMap) -> bool:
 
 
 func _to_string() -> String:
-	var source_name = source.mek.get_mek_name()
+	var source_name = source.combatant.get_mek_name()
 	var module_name = equipped_module.module.module_name
-	var target_name = target.mek.get_mek_name()
+	var target_name = target.combatant.get_mek_name()
 
 	if source == target:
 		return "%s is supporting itself with %s" % [source_name, module_name]

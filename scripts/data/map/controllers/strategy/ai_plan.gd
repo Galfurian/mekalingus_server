@@ -21,11 +21,11 @@ var completed: bool = false
 
 
 # The game map associated with this plan.
-var game_map: GameMap
+var game_map
 # The unit executing the plan.
-var source: MapMek = null
+var source = null
 # The target of the action (if any).
-var target: MapMek = null
+var target = null
 # The tile the AI wants to move to, if movement is part of the plan.
 var destination: Vector2i
 # The offensive or utility module involved in the action.
@@ -37,7 +37,7 @@ var score: float = 0.0
 # ========== CORE METHODS ==========
 
 
-func _init(p_source: MapMek, p_game_map: GameMap) -> void:
+func _init(p_source, p_game_map) -> void:
 	intent = Intent.NONE
 	completed = false
 
@@ -55,10 +55,10 @@ func _format_pos_tag(pos: Vector2i) -> String:
 
 
 func is_valid() -> bool:
-	if source == null or source.mek.is_dead():
+	if source == null or source.combatant.is_dead():
 		return false
 	if intent == Intent.ATTACK or intent == Intent.SUPPORT:
-		if target == null or target.mek.is_dead():
+		if target == null or target.combatant.is_dead():
 			return false
 		if equipped_module == null or not AIUtils.can_module_be_used_now(source.mek, equipped_module.item, equipped_module.module):
 			return false
@@ -76,7 +76,7 @@ func is_complete() -> bool:
 	if completed:
 		return true
 	if intent == Intent.ATTACK or intent == Intent.SUPPORT:
-		if equipped_module and source.mek.cooldown_manager.is_on_cooldown(equipped_module.item, equipped_module.module):
+		if equipped_module and source.combatant.cooldown_manager.is_on_cooldown(equipped_module.item, equipped_module.module):
 			return true
 	if intent == Intent.RETREAT or intent == Intent.REPOSITION:
 		if source.position == destination:
@@ -86,7 +86,7 @@ func is_complete() -> bool:
 
 func generate_order() -> Order:
 	# Get the range modifier for the enemy unit.
-	var range_modifier = source.mek.range_modifier
+	var range_modifier = source.combatant.range_modifier
 	
 	# Check if the intent is that to attack or support.
 	if intent == Intent.ATTACK or intent == Intent.SUPPORT:
@@ -96,7 +96,7 @@ func generate_order() -> Order:
 		if not equipped_module:
 			return null
 		# Get the mek speed.
-		var mek_speed = source.mek.speed
+		var mek_speed = source.combatant.speed
 		# Get the module range.
 		var module_range = equipped_module.module.module_range + range_modifier
 		# Compute the distance to the target to determine if we need to move.
@@ -155,9 +155,9 @@ func generate_order() -> Order:
 func _to_string() -> String:
 	var s := "AIPlan(intent=%s, completed=%s" % [AIPlan.Intent.keys()[intent], str(completed)]
 	if source:
-		s += ", source=%s" % source.mek.get_chat_tag()
+		s += ", source=%s" % source.combatant.get_chat_tag()
 	if target:
-		s += ", target=%s" % target.mek.get_chat_tag()
+		s += ", target=%s" % target.combatant.get_chat_tag()
 	if equipped_module:
 		s += ", module=%s" % equipped_module.get_chat_tag()
 	if destination != Vector2i.ZERO:

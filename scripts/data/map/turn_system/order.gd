@@ -7,7 +7,7 @@ extends RefCounted
 # =============================================================================
 
 
-func execute(_game_map: GameMap) -> bool:
+func execute(_game_map) -> bool:
 	push_error("execute() not implemented in subclass: %s" % self)
 	return false
 

@@ -2,31 +2,31 @@ class_name AIUnitQueries
 extends RefCounted
 
 
-static func get_all_units(game_map: GameMap) -> Array[MapMek]:
+static func get_all_units(game_map) -> Array:
 	"""
 	Returns all units in the game map.
 	"""
-	var units: Array[MapMek] = []
-	for unit: MapMek in game_map.player_units.values():
+	var units: Array = []
+	for unit in game_map.player_units.values():
 		units.append(unit)
-	for unit: MapMek in game_map.npc_units.values():
+	for unit in game_map.npc_units.values():
 		units.append(unit)
 	return units
 
 
 static func get_units_in_range(
-	game_map: GameMap,
-	source: MapMek,
+	game_map,
+	source,
 	position: Vector2i,
 	radius: int,
 	include_allies: bool = true,
 	include_enemies: bool = true,
-	exclude_units: Array[MapMek] = []
-) -> Array[MapMek]:
+	exclude_units: Array = []
+) -> Array:
 	"""
 	Returns all units within the specified range of a position.
 	"""
-	var units_in_range: Array[MapMek] = []
+	var units_in_range: Array = []
 	for entity in get_all_units(game_map):
 		if entity == source:
 			continue
@@ -42,11 +42,11 @@ static func get_units_in_range(
 
 
 static func get_enemies_in_range(
-	game_map: GameMap,
-	source: MapMek,
+	game_map,
+	source,
 	radius: int,
-	exclude_units: Array[MapMek] = []
-) -> Array[MapMek]:
+	exclude_units: Array = []
+) -> Array:
 	"""
 	Returns all enemy units within a specified range of the source unit.
 	"""
@@ -54,11 +54,11 @@ static func get_enemies_in_range(
 
 
 static func get_allies_in_range(
-	game_map: GameMap,
-	source: MapMek,
+	game_map,
+	source,
 	radius: int,
-	exclude_units: Array[MapMek] = []
-) -> Array[MapMek]:
+	exclude_units: Array = []
+) -> Array:
 	"""
 	Returns all ally units within a specified range of the source unit.
 	"""
@@ -66,19 +66,19 @@ static func get_allies_in_range(
 
 
 static func get_most_vulnerable_enemy(
-	game_map: GameMap,
-	source: MapMek,
+	game_map,
+	source,
 	max_distance: int
-) -> MapMek:
+) -> MapCombatEntity:
 	"""
 	Returns the enemy with the lowest combined survivability ratio within range.
 	"""
-	var weakest: MapMek = null
+	var weakest = null
 	var lowest_score := INF
 
 	for enemy in get_units_in_range(game_map, source, source.position, max_distance, false, true):
-		var current_total = float(enemy.mek.health + enemy.mek.armor + enemy.mek.shield)
-		var max_total = float(enemy.mek.max_health + enemy.mek.max_armor + enemy.mek.max_shield)
+		var current_total = float(enemy.combatant.health + enemy.combatant.armor + enemy.combatant.shield)
+		var max_total = float(enemy.combatant.max_health + enemy.combatant.max_armor + enemy.combatant.max_shield)
 		if max_total <= 0:
 			continue
 

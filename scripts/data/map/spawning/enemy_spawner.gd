@@ -8,7 +8,7 @@ const MAX_SQUAD_SIZE: int = 4
 const MAX_SQUADS: int = 6
 
 
-static func spawn_enemies_on_map(game_map: GameMap, difficulty: int) -> void:
+static func spawn_enemies_on_map(game_map, difficulty: int) -> void:
 	var spawn_points = _find_valid_spawn_positions(game_map)
 	if spawn_points.is_empty():
 		push_error("No valid spawn points found.")
@@ -42,10 +42,10 @@ static func spawn_enemies_on_map(game_map: GameMap, difficulty: int) -> void:
 			spawn_points.erase(spawn_pos)
 
 			var npc_name := NameGen.random_full_name()
-			game_map.npc_units[mek.uuid] = MapMek.new(spawn_pos, NPCOwned.new(npc_name, clan), mek)
+			game_map.npc_units[mek.uuid] = MapCombatEntity.new(spawn_pos, NPCOwned.new(npc_name, clan), mek)
 
 
-static func _get_enemy_squad_count(game_map: GameMap, difficulty: int) -> int:
+static func _get_enemy_squad_count(game_map, difficulty: int) -> int:
 	"""
 	Returns the number of enemy squads based on difficulty and map size.
 	"""
@@ -62,7 +62,7 @@ static func _get_squad_size(difficulty: int) -> int:
 	return clamp(base_size, MIN_SQUAD_SIZE, MAX_SQUAD_SIZE)
 
 
-static func _find_valid_spawn_positions(game_map: GameMap) -> Array[Vector2i]:
+static func _find_valid_spawn_positions(game_map) -> Array[Vector2i]:
 	"""
 	Finds valid positions for spawning entities based on map walkability.
 	"""

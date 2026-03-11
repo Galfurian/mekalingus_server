@@ -5,13 +5,13 @@ const AIPathfinderScript = preload("res://scripts/data/map/controllers/pathfindi
 const AIUnitQueriesScript = preload("res://scripts/data/map/controllers/ai_unit_queries.gd")
 
 
-static func get_threat_level(game_map: GameMap, tile: Vector2i, source: MapMek) -> float:
+static func get_threat_level(game_map, tile: Vector2i, source) -> float:
 	"""
 	Estimates how dangerous it would be to stand on this tile.
 	"""
 	var threat_score := 0.0
 	for enemy in AIUnitQueriesScript.get_enemies_in_range(game_map, source, 9999):
-		var range_modifier = enemy.mek.range_modifier
+		var range_modifier = enemy.combatant.range_modifier
 		for equipped_module in AIUtils.find_matching_modules(enemy.mek, true, false, false):
 			var module_range = equipped_module.module.module_range + range_modifier
 			var distance = tile.distance_to(enemy.position)
@@ -29,9 +29,9 @@ static func get_threat_level(game_map: GameMap, tile: Vector2i, source: MapMek) 
 
 
 static func can_reach_target_this_turn(
-	game_map: GameMap,
-	source: MapMek,
-	target: MapMek,
+	game_map,
+	source,
+	target,
 	range_min: int,
 	range_max: int,
 	max_movement: int

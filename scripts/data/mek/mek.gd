@@ -22,8 +22,7 @@ func _init(data: Dictionary = {}):
 	"""Initializes a Mek instance from a dictionary."""
 	items = []
 	slots = []
-	active_effect_manager = ActiveEffectManager.new(self)
-	cooldown_manager = CooldownManager.new(self)
+	initialize_runtime_managers()
 	from_dict(data)
 
 
@@ -32,48 +31,6 @@ static func compare_meks(a: Mek, b: Mek) -> bool:
 	if a.template.size == b.template.size:
 		return a.get_mek_name().to_lower() > b.get_mek_name().to_lower()
 	return a.template.size < b.template.size
-
-
-# =============================================================================
-# ACTIVE EFFECTS
-# =============================================================================
-
-
-func add_effect(module: ItemModule, effect: ItemEffect, source: MapEntity) -> void:
-	"""
-	Adds a new time-based effect to this Mek.
-	Creates an ActiveEffect instance and registers it in the ActiveEffectManager.
-	"""
-	var active = ActiveEffect.new(module, effect, source, effect.duration)
-	active_effect_manager.add_active_effect(active)
-
-
-func has_effect_type(effect_type: Enums.EffectType) -> bool:
-	"""Returns true if this Mek currently has an active effect of the given type."""
-	return active_effect_manager.has_effect_type(effect_type)
-
-
-func clear_active_effects() -> void:
-	"""Clears all ongoing active effects (used at end of combat)."""
-	active_effect_manager.clear()
-
-
-# =============================================================================
-# PASSIVE EFFECTs MANAGEMENT
-# =============================================================================
-
-
-func _toggle_module_passive_effect_modifiers(module: ItemModule, enable: bool):
-	"""Applies or removes passive or active effects for a module."""
-	if module.passive:
-		for effect in module.effects:
-			effect.toggle_effect(self, enable)
-
-
-func _toggle_item_passive_effect_modifiers(item: Item, enable: bool):
-	"""Applies or removes passive or active effects for an item."""
-	for module in item.template.modules:
-		_toggle_module_passive_effect_modifiers(module, enable)
 
 
 func _update_static_values():

@@ -7,6 +7,7 @@ extends Node
 const EnemySpawnerScript = preload("res://scripts/data/map/spawning/enemy_spawner.gd")
 const MapAStarBuilderScript = preload("res://scripts/data/map/pathfinding/map_astar_builder.gd")
 const StructureAIControllerScript = preload("res://scripts/data/map/controllers/structure_ai_controller.gd")
+const MapMekScript = preload("res://scripts/data/map/data/entities/map_mek.gd")
 const MapStructureScript = preload("res://scripts/data/map/data/entities/map_structure.gd")
 const MapTurretScript = preload("res://scripts/data/map/data/entities/map_turret.gd")
 const MapPickupScript = preload("res://scripts/data/map/data/entities/map_pickup.gd")
@@ -45,9 +46,9 @@ var is_pvp_enabled: bool = false
 # If true the map allows PVP.
 var is_free_for_all_enabled: bool = true
 # Stores all active NPC units by UUID.
-var npc_units: Dictionary[String, MapMek]
+var npc_units: Dictionary
 # Stores all active Player units by UUID.
-var player_units: Dictionary[String, MapMek]
+var player_units: Dictionary
 # Stores all structures on the map by UUID.
 var structures: Dictionary
 # Stores all turrets on the map by UUID.
@@ -61,11 +62,11 @@ var chat_logger: MapLogger = MapLogger.new()
 # AStar2D graph.
 var astar: AStar2D = AStar2D.new()
 # The AI controller for managing enemy actions.
-var ai_controller: AIController = AIController.new(self)
+var ai_controller
 # The controller for structure and turret autonomous behavior.
-var structure_ai_controller = StructureAIControllerScript.new(self)
+var structure_ai_controller
 # The turn manager.
-var turn_manager: TurnManager = TurnManager.new(self)
+var turn_manager
 
 # =============================================================================
 # GENERIC FUNCTIONS
@@ -88,6 +89,9 @@ func _init(
 	combat_rules.set_game_mode(p_game_mode)
 	combat_logger.set_combat_preset()
 	chat_logger.set_chat_preset()
+	ai_controller = AIController.new(self)
+	structure_ai_controller = StructureAIControllerScript.new(self)
+	turn_manager = TurnManager.new(self)
 
 
 func generate_map() -> void:
@@ -252,24 +256,24 @@ func _filter_dead_unit(_key: String, unit: MapEntity) -> bool:
 	"""
 	Checks if the unit is dead.
 	"""
-	return unit.mek.is_dead()
+	return unit.combatant.is_dead()
 
 
-func is_npc(entity: MapMek) -> bool:
+func is_npc(entity: MapEntity) -> bool:
 	"""
 	Returns true if the entity belongs to the npc_units dictionary (i.e., NPC).
 	"""
-	return npc_units.has(entity.mek.uuid)
+	return npc_units.has(entity.combatant.uuid)
 
 
-func is_player(entity: MapMek) -> bool:
+func is_player(entity: MapEntity) -> bool:
 	"""
 	Returns true if the entity belongs to the player_units dictionary (i.e., Player).
 	"""
-	return player_units.has(entity.mek.uuid)
+	return player_units.has(entity.combatant.uuid)
 
 
-func is_enemy_of(me1: MapMek, me2: MapMek) -> bool:
+func is_enemy_of(me1: MapEntity, me2: MapEntity) -> bool:
 	"""
 	Determines if two meks are enemies using CombatRules and clan-based ownership.
 	"""
@@ -332,9 +336,9 @@ func get_blocking_entity_at(position: Vector2i) -> MapEntity:
 	return null
 
 
-func get_entity(uuid: String) -> MapMek:
+func get_entity(uuid: String) -> MapEntity:
 	"""
-	Returns the MapMek for a given UUID.
+	Returns the MapCombatEntity for a given UUID.
 	"""
 	if player_units.has(uuid):
 		return player_units[uuid]
@@ -343,7 +347,7 @@ func get_entity(uuid: String) -> MapMek:
 	return null
 
 
-func collect_pickup_at(position: Vector2i, collector: MapMek) -> MapPickup:
+func collect_pickup_at(position: Vector2i, collector: MapEntity) -> MapPickup:
 	"""
 	Collects and removes an active pickup at the given position.
 	Returns the collected pickup, or null if none was present.
@@ -367,14 +371,14 @@ func collect_pickup_at(position: Vector2i, collector: MapMek) -> MapPickup:
 
 		combat_logger.add_log(
 			Enums.LogType.SYSTEM,
-			"%s collected pickup: %s" % [collector.mek.get_chat_tag(), item_label]
+			"%s collected pickup: %s" % [collector.combatant.get_chat_tag(), item_label]
 		)
 		return pickup
 
 	return null
 
 
-func remove_entity(uuid: String) -> MapMek:
+func remove_entity(uuid: String) -> MapEntity:
 	"""
 	Removes an entity from the map and returns it.
 	"""
@@ -438,9 +442,9 @@ static func from_dict(data: Dictionary) -> GameMap:
 	# Load the NPC units.
 	map.npc_units.clear()
 	for unit_uuid in data.get("npc_units", {}):
-		var unit: MapMek = MapMek.from_dict(data.get("npc_units", {})[unit_uuid])
+		var unit: MapMek = MapMekScript.from_dict(data.get("npc_units", {})[unit_uuid])
 		if unit:
-			map.npc_units[unit.mek.uuid] = unit
+			map.npc_units[unit.combatant.uuid] = unit
 		else:
 			push_error("Failed to load NPC unit data.")
 			return null
@@ -448,9 +452,9 @@ static func from_dict(data: Dictionary) -> GameMap:
 	# Load the player units (optional for backward compatibility).
 	map.player_units.clear()
 	for unit_uuid in data.get("player_units", {}):
-		var player_unit: MapMek = MapMek.from_dict(data["player_units"][unit_uuid])
+		var player_unit: MapMek = MapMekScript.from_dict(data["player_units"][unit_uuid])
 		if player_unit:
-			map.player_units[player_unit.mek.uuid] = player_unit
+			map.player_units[player_unit.combatant.uuid] = player_unit
 		else:
 			push_error("Failed to load player unit data.")
 			return null

@@ -6,7 +6,7 @@ extends Node
 # =============================================================================
 
 # A reference to the game map.
-var game_map: GameMap
+var game_map
 
 # Create a planner instance and generate a plan.
 var _planner = AIPlanner.new()
@@ -24,7 +24,7 @@ var _move_orders: Dictionary[String, MoveOrder] = {}
 # =============================================================================
 
 
-func _init(p_game_map: GameMap) -> void:
+func _init(p_game_map) -> void:
 	"""
 	Initialize the AI controller with a game map.
 	"""
@@ -56,11 +56,11 @@ func _format_pos_tag(pos: Vector2i) -> String:
 	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
 
 
-func get_current_plan(source: MapMek) -> AIPlan:
+func get_current_plan(source) -> AIPlan:
 	"""
 	Retrieves the current plan for the given unit.
 	"""
-	return _current_plans.get(source.mek.uuid, null)
+	return _current_plans.get(source.combatant.uuid, null)
 
 
 func remove_orders_of_dead_units() -> void:
@@ -74,10 +74,10 @@ func remove_orders_of_dead_units() -> void:
 	for key in Utils.filter(_move_orders, _filter_order_with_dead_mek):
 		_move_orders.erase(key)
 	for unit_uuid in game_map.player_units:
-		if game_map.player_units[unit_uuid].mek.is_dead():
+		if game_map.player_units[unit_uuid].combatant.is_dead():
 			_current_plans.erase(unit_uuid)
 	for unit_uuid in game_map.npc_units:
-		if game_map.npc_units[unit_uuid].mek.is_dead():
+		if game_map.npc_units[unit_uuid].combatant.is_dead():
 			_current_plans.erase(unit_uuid)
 
 
@@ -86,7 +86,7 @@ func queue_offensive_module_order(order: UseOffensiveModuleOrder):
 	Queues an offensive module order, replacing any existing one for the unit.
 	"""
 	if order:
-		_use_offensive_module_orders[order.source.mek.uuid] = order
+		_use_offensive_module_orders[order.source.combatant.uuid] = order
 
 
 func queue_utility_module_order(order: UseUtilityModuleOrder):
@@ -94,7 +94,7 @@ func queue_utility_module_order(order: UseUtilityModuleOrder):
 	Queues a utility module order, replacing any existing one for the unit.
 	"""
 	if order:
-		_use_utility_module_orders[order.source.mek.uuid] = order
+		_use_utility_module_orders[order.source.combatant.uuid] = order
 
 
 func queue_move_order(order: MoveOrder):
@@ -102,7 +102,7 @@ func queue_move_order(order: MoveOrder):
 	Queues a movement order, replacing any existing one for the unit.
 	"""
 	if order:
-		_move_orders[order.source.mek.uuid] = order
+		_move_orders[order.source.combatant.uuid] = order
 
 
 func execute_utility_module_orders() -> void:
@@ -129,20 +129,20 @@ func execute_move_orders() -> void:
 	"""
 	# Resets the movement tracking for all Meks.
 	for unit_uuid in game_map.player_units:
-		game_map.player_units[unit_uuid].mek.tiles_moved_last_turn = 0
+		game_map.player_units[unit_uuid].combatant.tiles_moved_last_turn = 0
 	for unit_uuid in game_map.npc_units:
-		game_map.npc_units[unit_uuid].mek.tiles_moved_last_turn = 0
+		game_map.npc_units[unit_uuid].combatant.tiles_moved_last_turn = 0
 	# Execute all queued movement orders.
 	for order in _move_orders.values():
 		order.execute(game_map)
 	_move_orders.clear()
 
 
-func plan_for_unit(source: MapMek) -> void:
+func plan_for_unit(source) -> void:
 	"""
 	Generates a plan for the given unit if the current one is missing or no longer valid.
 	"""
-	if source.mek.is_alive():
+	if source.combatant.is_alive():
 		# Check if we already have a valid plan.
 		var current_plan = get_current_plan(source)
 		# If the plan is valid, no need to re-plan.
@@ -153,15 +153,15 @@ func plan_for_unit(source: MapMek) -> void:
 		# Generate the plan for the source unit.
 		var new_plan = _planner.generate_plan(source, game_map, aggressiveness)
 		# Save the new plan.
-		_current_plans[source.mek.uuid] = new_plan
+		_current_plans[source.combatant.uuid] = new_plan
 
 
-func generate_orders_for_unit(source: MapMek) -> void:
+func generate_orders_for_unit(source) -> void:
 	"""
 	Generates an order for the given unit based on its current plan.
 	If the plan is invalid or has been completed, re-planning may occur.
 	"""
-	if source.mek.is_dead():
+	if source.combatant.is_dead():
 		# If the unit is dead, no order can be generated.
 		return
 	
@@ -186,7 +186,7 @@ func generate_orders_for_unit(source: MapMek) -> void:
 	# Generate the order for the current plan.
 	var order = current_plan.generate_order()
 
-	_add_log("%s generated order for plan %s : %s" % [source.mek.get_chat_tag(), str(current_plan), str(order)])
+	_add_log("%s generated order for plan %s : %s" % [source.combatant.get_chat_tag(), str(current_plan), str(order)])
 
 	if is_instance_of(order, UseOffensiveModuleOrder):
 		# If the order is an offensive module order, queue it.
@@ -205,7 +205,7 @@ func generate_npc_orders():
 	"""
 	Generates and queues an order for each NPC unit using the AI planner system.
 	"""
-	for unit: MapMek in game_map.npc_units.values():
+	for unit in game_map.npc_units.values():
 		# Generate or reuse the current plan.
 		game_map.ai_controller.plan_for_unit(unit)
 		# Generate the next order based on the current plan.
@@ -217,9 +217,9 @@ func _filter_order_with_dead_mek(_key: String, order) -> bool:
 	Checks if the order is valid and the source and target are not dead.
 	"""
 	if is_instance_of(order, UseModuleOrder):
-		return order.source.mek.is_dead() or order.target.mek.is_dead()
+		return order.source.combatant.is_dead() or order.target.combatant.is_dead()
 	if is_instance_of(order, MoveOrder):
-		return order.source.mek.is_dead()
+		return order.source.combatant.is_dead()
 	return false
 
 

@@ -13,8 +13,7 @@ func _init(
 	structure_name = p_structure_name
 	items = p_items
 	slots = []
-	active_effect_manager = ActiveEffectManager.new(self)
-	cooldown_manager = CooldownManager.new(self)
+	initialize_runtime_managers()
 
 	health = p_max_health
 	max_health = p_max_health

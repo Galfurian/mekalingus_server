@@ -7,7 +7,7 @@ extends Order
 # =============================================================================
 
 # The unit that is moving.
-var source: MapMek
+var source
 # The target position.
 var destination: Vector2i
 
@@ -21,7 +21,7 @@ func _init(p_source: MapEntity, p_destination: Vector2i) -> void:
 	destination = p_destination
 
 
-func _add_log(game_map: GameMap, message: String) -> void:
+func _add_log(game_map, message: String) -> void:
 	if is_instance_valid(game_map):
 		game_map.combat_logger.add_log(Enums.LogType.MOVEMENT, message)
 		return
@@ -36,7 +36,7 @@ func _format_pos_tag(pos: Vector2i) -> String:
 # =============================================================================
 
 
-func execute(game_map: GameMap) -> bool:
+func execute(game_map) -> bool:
 	var mek = source.mek
 	if mek.is_dead():
 		return false
@@ -87,7 +87,7 @@ func execute(game_map: GameMap) -> bool:
 func _to_string() -> String:
 	var s = ""
 	if is_instance_of(source.mek, Mek):
-		s += source.mek.get_mek_name()
+		s += source.combatant.get_mek_name()
 	else:
 		s += str(source.mek)
 	s += " is moving"

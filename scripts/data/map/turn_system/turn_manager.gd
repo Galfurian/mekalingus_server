@@ -25,7 +25,7 @@ signal on_turn_ended(turn_number: int)
 # ===================================================================
 
 # The game map associated with this turn manager.
-var game_map: GameMap
+var game_map
 
 # The current turn number.
 var _current_turn: int
@@ -41,7 +41,7 @@ var _turn_interval: float
 # =================================================================
 
 
-func _init(p_game_map: GameMap, p_turn_interval: float = 1.0) -> void:
+func _init(p_game_map, p_turn_interval: float = 1.0) -> void:
 	"""
 	Initialize the turn manager with a game map.
 	"""
@@ -169,7 +169,7 @@ func _filter_dead_unit(_key: String, unit: MapEntity) -> bool:
 	"""
 	Checks if the unit is dead.
 	"""
-	return unit.mek.is_dead()
+	return unit.combatant.is_dead()
 
 
 func _erase_destroyed_units() -> void:
@@ -186,10 +186,10 @@ func _regenerate_units() -> void:
 	"""
 	Regenerates all units.
 	"""
-	for unit: MapMek in game_map.player_units.values():
-		unit.mek.regenerate()
-	for unit: MapMek in game_map.npc_units.values():
-		unit.mek.regenerate()
+	for unit in game_map.player_units.values():
+		unit.combatant.regenerate()
+	for unit in game_map.npc_units.values():
+		unit.combatant.regenerate()
 
 
 func _update_time_based_effects():
@@ -197,30 +197,30 @@ func _update_time_based_effects():
 	Updates time-based effects for all units.
 	"""
 	# Then, tick active effects, cooldowns, and durations.
-	for unit: MapMek in game_map.player_units.values() + game_map.npc_units.values():
+	for unit in game_map.player_units.values() + game_map.npc_units.values():
 		# Process time-based effects like DOT, HOT, buffs.
-		var dot_result = unit.mek.take_dot_damage()
+		var dot_result = unit.combatant.take_dot_damage()
 		if dot_result.total > 0:
 			game_map.combat_logger.add_log(Enums.LogType.ATTACK, "%s suffers DOT -> %d shield, %d armor, %d health" % [
-				unit.mek.get_chat_tag(),
+				unit.combatant.get_chat_tag(),
 				dot_result.shield,
 				dot_result.armor,
 				dot_result.health])
-		unit.mek.apply_regen_effects()
-		unit.mek.active_effect_manager.decrement_durations()
-		unit.mek.cooldown_manager.decrement_cooldowns()
+		unit.combatant.apply_regen_effects()
+		unit.combatant.active_effect_manager.decrement_durations()
+		unit.combatant.cooldown_manager.decrement_cooldowns()
 
 
 func _has_hostile_pairs() -> bool:
 	"""
 	Returns true if at least one pair of living units can still attack each other.
 	"""
-	var alive_units: Array[MapMek] = []
-	for unit: MapMek in game_map.player_units.values():
-		if unit and unit.mek and unit.mek.is_alive():
+	var alive_units: Array = []
+	for unit in game_map.player_units.values():
+		if unit and unit.mek and unit.combatant.is_alive():
 			alive_units.append(unit)
-	for unit: MapMek in game_map.npc_units.values():
-		if unit and unit.mek and unit.mek.is_alive():
+	for unit in game_map.npc_units.values():
+		if unit and unit.mek and unit.combatant.is_alive():
 			alive_units.append(unit)
 	for i in range(alive_units.size()):
 		for j in range(i + 1, alive_units.size()):

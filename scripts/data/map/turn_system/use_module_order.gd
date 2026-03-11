@@ -7,9 +7,9 @@ extends Order
 # =============================================================================
 
 # The unit using the module.
-var source: MapMek
+var source
 # The entity affected (can be `source`, an ally, or an enemy).
-var target: MapMek
+var target
 # The equipped module being activated.
 var equipped_module: EquippedModule
 
@@ -18,13 +18,13 @@ var equipped_module: EquippedModule
 # =============================================================================
 
 
-func _init(p_source: MapMek, p_target: MapMek, p_equipped_module: EquippedModule) -> void:
+func _init(p_source, p_target, p_equipped_module: EquippedModule) -> void:
 	source = p_source
 	target = p_target
 	equipped_module = p_equipped_module
 
 
-func _add_log(game_map: GameMap, type: Enums.LogType, message: String) -> void:
+func _add_log(game_map, type: Enums.LogType, message: String) -> void:
 	if is_instance_valid(game_map):
 		game_map.combat_logger.add_log(type, message)
 		return
@@ -39,7 +39,7 @@ func _format_pos_tag(pos: Vector2i) -> String:
 # =============================================================================
 
 
-func execute(_game_map: GameMap) -> bool:
+func execute(_game_map) -> bool:
 	push_error("execute() not implemented in subclass: %s" % self)
 	return false
 
@@ -54,10 +54,10 @@ func _to_string() -> String:
 
 
 func _get_effective_module_range() -> int:
-	return max(0, equipped_module.module.module_range + source.mek.range_modifier)
+	return max(0, equipped_module.module.module_range + source.combatant.range_modifier)
 
 
-func _is_target_in_module_range(game_map: GameMap) -> bool:
+func _is_target_in_module_range(game_map) -> bool:
 	var effective_range: int = _get_effective_module_range()
 	var distance: float = AIUtils.get_distance(game_map, source.position, target.position)
 	return distance <= float(effective_range)
@@ -68,7 +68,7 @@ func _is_target_in_module_range(game_map: GameMap) -> bool:
 # =============================================================================
 
 
-func _apply_damage_effect(game_map: GameMap, effect: ItemEffect) -> void:
+func _apply_damage_effect(game_map, effect: ItemEffect) -> void:
 	var source_mek: Mek = source.mek
 	var target_mek: Mek = target.mek
 	if source_mek.is_dead() or target_mek.is_dead():
@@ -118,7 +118,7 @@ func _apply_damage_effect(game_map: GameMap, effect: ItemEffect) -> void:
 			Enums.DamageType.keys()[effect.damage_type]])
 
 
-func _apply_repair_effect(game_map: GameMap, effect: ItemEffect) -> void:
+func _apply_repair_effect(game_map, effect: ItemEffect) -> void:
 	var source_mek: Mek = source.mek
 	var target_mek: Mek = target.mek
 	if source_mek.is_dead() or target_mek.is_dead():
@@ -165,7 +165,7 @@ func _apply_repair_effect(game_map: GameMap, effect: ItemEffect) -> void:
 			equipped_module.module.module_name])
 
 
-func _apply_modifier_effect(game_map: GameMap, effect: ItemEffect) -> void:
+func _apply_modifier_effect(game_map, effect: ItemEffect) -> void:
 	var source_mek: Mek = source.mek
 	var target_mek: Mek = target.mek
 	if source_mek.is_dead() or target_mek.is_dead():

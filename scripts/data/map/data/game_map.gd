@@ -190,7 +190,7 @@ func is_occupied(position: Vector2i) -> bool:
 	"""
 	Check if the place is occupied.
 	"""
-	return get_entity_at(position) != null
+	return get_blocking_entity_at(position) != null
 
 
 func is_walkable(position: Vector2i) -> bool:
@@ -205,6 +205,24 @@ func can_move_to(position: Vector2i) -> bool:
 	Check if the height is walkable.
 	"""
 	return is_walkable(position) and not is_occupied(position)
+
+
+func is_tile_blocked_for_pathfinding(position: Vector2i) -> bool:
+	"""
+	Returns true when a static blocking entity occupies the tile.
+	"""
+	if not is_in_bounds(position):
+		return true
+
+	for turret in turrets.values():
+		if turret and turret.active and turret.blocking and turret.position == position:
+			return true
+
+	for structure in structures.values():
+		if structure and structure.active and structure.blocking and structure.position == position:
+			return true
+
+	return false
 
 
 func update_astar() -> void:
@@ -260,6 +278,39 @@ func get_entity_at(position: Vector2i) -> MapEntity:
 		for entity in player_units.values():
 			if position == entity.position:
 				return entity
+		for entity in turrets.values():
+			if entity and entity.active and position == entity.position:
+				return entity
+		for entity in structures.values():
+			if entity and entity.active and position == entity.position:
+				return entity
+		for entity in pickups.values():
+			if entity and entity.active and position == entity.position:
+				return entity
+	return null
+
+
+func get_blocking_entity_at(position: Vector2i) -> MapEntity:
+	"""Returns a movement-blocking entity at the given position, if any."""
+	if not is_in_bounds(position):
+		return null
+
+	for entity in npc_units.values():
+		if position == entity.position:
+			return entity
+
+	for entity in player_units.values():
+		if position == entity.position:
+			return entity
+
+	for entity in turrets.values():
+		if entity and entity.active and entity.blocking and position == entity.position:
+			return entity
+
+	for entity in structures.values():
+		if entity and entity.active and entity.blocking and position == entity.position:
+			return entity
+
 	return null
 
 

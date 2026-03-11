@@ -11,7 +11,7 @@ static func rebuild(game_map: GameMap) -> void:
 	for y in range(game_map.map_height):
 		for x in range(game_map.map_width):
 			var pos = Vector2i(x, y)
-			if game_map.is_walkable(pos):
+			if game_map.is_walkable(pos) and not game_map.is_tile_blocked_for_pathfinding(pos):
 				game_map.astar.add_point(game_map.position_to_astar_id(pos), pos)
 
 	for y in range(game_map.map_height):

@@ -66,13 +66,6 @@ min_value = 1.0
 max_value = 16.0
 value = 1.0
 
-[node name="OwnerTypeLabel" type="Label" parent="MarginContainer/Root/Form"]
-layout_mode = 2
-text = "Owner Type"
-
-[node name="OwnerTypeOption" type="OptionButton" parent="MarginContainer/Root/Form"]
-layout_mode = 2
-
 [node name="ClanLabel" type="Label" parent="MarginContainer/Root/Form"]
 layout_mode = 2
 text = "Clan"
@@ -80,9 +73,12 @@ text = "Clan"
 [node name="ClanOption" type="OptionButton" parent="MarginContainer/Root/Form"]
 layout_mode = 2
 
-[node name="NpcNameLabel" type="Label" parent="MarginContainer/Root/Form"]
+[node name="OwnerTypeLabel" type="Label" parent="MarginContainer/Root/Form"]
 layout_mode = 2
-text = "NPC Name"
+text = "Owner Type"
+
+[node name="OwnerTypeOption" type="OptionButton" parent="MarginContainer/Root/Form"]
+layout_mode = 2
 
 [node name="NpcModeLabel" type="Label" parent="MarginContainer/Root/Form"]
 layout_mode = 2
@@ -91,16 +87,20 @@ text = "NPC Mode"
 [node name="NpcModeOption" type="OptionButton" parent="MarginContainer/Root/Form"]
 layout_mode = 2
 
+[node name="NpcNameLabel" type="Label" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+text = "NPC Name"
+
+[node name="NpcNameEdit" type="LineEdit" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+placeholder_text = "Leave empty for random"
+
 [node name="NpcExistingLabel" type="Label" parent="MarginContainer/Root/Form"]
 layout_mode = 2
 text = "NPC Commander"
 
 [node name="NpcExistingOption" type="OptionButton" parent="MarginContainer/Root/Form"]
 layout_mode = 2
-
-[node name="NpcNameEdit" type="LineEdit" parent="MarginContainer/Root/Form"]
-layout_mode = 2
-placeholder_text = "Leave empty for random"
 
 [node name="PlayerLabel" type="Label" parent="MarginContainer/Root/Form"]
 layout_mode = 2

@@ -9,11 +9,15 @@ var _game_map: GameMap = null
 @onready var entity_type_option: OptionButton = $MarginContainer/Root/Form/EntityTypeOption
 @onready var template_option: OptionButton = $MarginContainer/Root/Form/TemplateOption
 @onready var quantity_spin: SpinBox = $MarginContainer/Root/Form/QuantitySpin
-@onready var owner_type_option: OptionButton = $MarginContainer/Root/Form/OwnerTypeOption
 @onready var clan_option: OptionButton = $MarginContainer/Root/Form/ClanOption
+@onready var owner_type_option: OptionButton = $MarginContainer/Root/Form/OwnerTypeOption
+@onready var npc_mode_label: Label = $MarginContainer/Root/Form/NpcModeLabel
 @onready var npc_mode_option: OptionButton = $MarginContainer/Root/Form/NpcModeOption
+@onready var npc_name_label: Label = $MarginContainer/Root/Form/NpcNameLabel
 @onready var npc_name_edit: LineEdit = $MarginContainer/Root/Form/NpcNameEdit
+@onready var npc_existing_label: Label = $MarginContainer/Root/Form/NpcExistingLabel
 @onready var npc_existing_option: OptionButton = $MarginContainer/Root/Form/NpcExistingOption
+@onready var player_label: Label = $MarginContainer/Root/Form/PlayerLabel
 @onready var player_option: OptionButton = $MarginContainer/Root/Form/PlayerOption
 @onready var status_label: Label = $MarginContainer/Root/StatusLabel
 @onready var spawn_button: Button = $MarginContainer/Root/Buttons/SpawnButton
@@ -24,6 +28,7 @@ func _ready() -> void:
 	spawn_button.pressed.connect(_on_spawn_pressed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
 	entity_type_option.item_selected.connect(_on_entity_type_changed)
+	clan_option.item_selected.connect(_on_clan_changed)
 	owner_type_option.item_selected.connect(_on_owner_type_changed)
 	npc_mode_option.item_selected.connect(_on_npc_mode_changed)
 
@@ -92,10 +97,21 @@ func _populate_existing_npc_owners(default_owner: EntityOwner = null) -> void:
 	npc_existing_option.clear()
 	if not _game_map:
 		return
+	var selected_clan_id: String = _get_selected_metadata(clan_option)
+	if selected_clan_id.is_empty():
+		return
 
 	var commander_map: Dictionary[String, String] = {}
+	var npcs: Array[MapCombatEntity] = []
 	for unit: MapCombatEntity in _game_map.npc_units.values():
+		npcs.append(unit)
+	for structure: MapStructure in _game_map.structures.values():
+		npcs.append(structure)
+
+	for unit: MapCombatEntity in npcs:
 		if unit and is_instance_of(unit.owner, NPCOwned) and unit.owner.clan:
+			if unit.owner.clan.id != selected_clan_id:
+				continue
 			var key: String = "%s|%s" % [unit.owner.npc_name, unit.owner.clan.id]
 			if not commander_map.has(key):
 				commander_map[key] = "%s (%s)" % [unit.owner.npc_name, unit.owner.clan.clan_name]
@@ -196,12 +212,24 @@ func _populate_templates() -> void:
 func _apply_owner_field_visibility() -> void:
 	var owner_type: String = _get_selected_metadata(owner_type_option)
 	var is_player_owner: bool = owner_type == "player"
+	player_label.visible = is_player_owner
 	player_option.visible = is_player_owner
+	npc_mode_label.visible = not is_player_owner
 	npc_mode_option.visible = not is_player_owner
 
+	if not is_player_owner and _get_selected_metadata(npc_mode_option) == "existing" and npc_existing_option.item_count <= 0:
+		npc_mode_option.select(0)
+
 	var use_existing_npc: bool = _get_selected_metadata(npc_mode_option) == "existing"
+	npc_name_label.visible = not is_player_owner and not use_existing_npc
 	npc_name_edit.visible = not is_player_owner and not use_existing_npc
+	npc_existing_label.visible = not is_player_owner and use_existing_npc
 	npc_existing_option.visible = not is_player_owner and use_existing_npc
+
+	if not is_player_owner:
+		var existing_index: int = 1
+		if npc_mode_option.item_count > existing_index:
+			npc_mode_option.set_item_disabled(existing_index, npc_existing_option.item_count <= 0)
 
 
 func _get_selected_metadata(option: OptionButton) -> String:
@@ -215,14 +243,23 @@ func _get_selected_metadata(option: OptionButton) -> String:
 
 func _on_entity_type_changed(_index: int) -> void:
 	_populate_templates()
+	_set_status("")
+
+
+func _on_clan_changed(_index: int) -> void:
+	_populate_existing_npc_owners()
+	_apply_owner_field_visibility()
+	_set_status("")
 
 
 func _on_owner_type_changed(_index: int) -> void:
 	_apply_owner_field_visibility()
+	_set_status("")
 
 
 func _on_npc_mode_changed(_index: int) -> void:
 	_apply_owner_field_visibility()
+	_set_status("")
 
 
 func _on_cancel_pressed() -> void:

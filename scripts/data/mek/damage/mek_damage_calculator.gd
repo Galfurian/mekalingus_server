@@ -23,10 +23,10 @@ static func take_damage_from_effect(mek: Mek, effect: ItemEffect) -> Dictionary:
 	# =========================================================================
 	const TYPE_MODIFIERS = {
 		Enums.DamageType.KINETIC: {"armor": 0.8, "shield": 0.6, "health": 1.0},
-		Enums.DamageType.ENERGY: {"armor": 0.6, "shield": 1.5, "health": 1.0},
+		Enums.DamageType.ENERGY: {"armor": 0.8, "shield": 1.4, "health": 1.0},
 		Enums.DamageType.PLASMA: {"armor": 1.2, "shield": 1.2, "health": 0.9},
 		Enums.DamageType.EXPLOSIVE: {"armor": 1.3, "shield": 0.7, "health": 1.3},
-		Enums.DamageType.CORROSIVE: {"armor": 1.3, "shield": 0.6, "health": 1.2}
+		Enums.DamageType.CORROSIVE: {"armor": 1.2, "shield": 0.8, "health": 1.1}
 	}
 	var modifiers = TYPE_MODIFIERS.get(
 		effect.damage_type, {"shield": 1.0, "armor": 1.0, "health": 1.0}

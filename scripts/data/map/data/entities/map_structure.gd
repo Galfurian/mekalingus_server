@@ -35,26 +35,6 @@ func can_move() -> bool:
 	return false
 
 
-func get_offensive_payload() -> Dictionary:
-	"""
-	Returns first usable offensive payload: item + module + effect.
-	"""
-	for item: Item in combatant.items:
-		if not item or not item.template:
-			continue
-		for module: ItemModule in item.template.modules:
-			if module.passive:
-				continue
-			for effect: ItemEffect in module.effects:
-				if effect and effect.is_damage() and effect.target_enemy():
-					return {
-						"item": item,
-						"module": module,
-						"effect": effect,
-					}
-	return {}
-
-
 # =============================================================================
 # SERIALIZATION
 # =============================================================================

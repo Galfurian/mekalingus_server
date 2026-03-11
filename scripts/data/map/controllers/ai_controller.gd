@@ -220,8 +220,6 @@ func _iter_ai_controlled_entities() -> Array[MapCombatEntity]:
 	for structure: MapStructure in game_map.structures.values():
 		if not structure or not structure.active or structure.combatant.is_dead():
 			continue
-		if structure.get_offensive_payload().is_empty():
-			continue
 		entities.append(structure)
 
 	return entities

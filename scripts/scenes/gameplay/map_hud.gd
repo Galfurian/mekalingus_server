@@ -4,8 +4,7 @@ extends Node
 const SECTOR_SIZE: int = 10
 const LEFT_PANEL_RATIO: float = 0.2
 const MENU_DELETE_ENTITY: int = 1
-const MENU_SPAWN_NPC_MEK: int = 2
-const MENU_SPAWN_STRUCTURE_BASE: int = 1000
+const MENU_OPEN_SPAWN_PANEL: int = 2
 
 # The current game map.
 var game_map: GameMap
@@ -14,7 +13,6 @@ var grid_size: int
 # The currently selected entity.
 var selected_entity: MapEntity
 var _context_cell: Vector2i = Vector2i(-1, -1)
-var _structure_spawn_actions: Dictionary[int, String] = {}
 
 @onready var action_menu = $ActionMenu
 @onready var main_split = $RootSplit/MainSplit
@@ -28,6 +26,7 @@ var _structure_spawn_actions: Dictionary[int, String] = {}
 @onready var entity_list_panel = $RootSplit/MainSplit/LeftSidePanel/EntityListPanel
 @onready var log_panel = $RootSplit/LogPanel
 @onready var time_label = $RootSplit/MainSplit/GridMap/TimeLabel
+@onready var spawn_panel = $SpawnPanel
 
 func _ready():
 	"""Initializes the map HUD."""
@@ -39,6 +38,8 @@ func _ready():
 		entity_list_panel.entity_selected.connect(_on_entity_list_entity_selected)
 	if not action_menu.id_pressed.is_connected(_on_action_menu_id_pressed):
 		action_menu.id_pressed.connect(_on_action_menu_id_pressed)
+	if not spawn_panel.spawn_requested.is_connected(_on_spawn_panel_spawn_requested):
+		spawn_panel.spawn_requested.connect(_on_spawn_panel_spawn_requested)
 
 
 func setup(p_game_map: GameMap, p_grid_size: int = 50):
@@ -235,14 +236,12 @@ func _on_cell_context_requested(cell_position: Vector2i, mouse_position: Vector2
 
 	_context_cell = cell_position
 	var entity_at_cell: MapEntity = game_map.get_entity_at(cell_position)
-	_structure_spawn_actions.clear()
 
 	action_menu.clear()
 	if entity_at_cell:
 		action_menu.add_item("Delete Entity", MENU_DELETE_ENTITY)
 	else:
-		action_menu.add_item("Spawn NPC Mek", MENU_SPAWN_NPC_MEK)
-		_add_structure_spawn_items()
+		action_menu.add_item("Spawn...", MENU_OPEN_SPAWN_PANEL)
 
 	action_menu.position = Vector2i(mouse_position)
 	action_menu.reset_size()
@@ -256,11 +255,8 @@ func _on_action_menu_id_pressed(action_id: int) -> void:
 	match action_id:
 		MENU_DELETE_ENTITY:
 			_delete_entity_at_context_cell()
-		MENU_SPAWN_NPC_MEK:
-			_spawn_npc_mek_at_context_cell()
-		_:
-			if _structure_spawn_actions.has(action_id):
-				_spawn_structure_at_context_cell(_structure_spawn_actions[action_id])
+		MENU_OPEN_SPAWN_PANEL:
+			_open_spawn_panel_for_context_cell()
 
 	_context_cell = Vector2i(-1, -1)
 
@@ -279,87 +275,133 @@ func _delete_entity_at_context_cell() -> void:
 	_refresh_entity_views()
 
 
-func _spawn_npc_mek_at_context_cell() -> void:
-	if not game_map.can_move_to(_context_cell):
+func _open_spawn_panel_for_context_cell() -> void:
+	if not game_map:
 		return
 
-	var clans: Array = DataManager.clans.values()
-	if clans.is_empty():
-		push_error("Cannot spawn NPC Mek: no clans loaded.")
+	var default_clan_id: String = ""
+	if selected_entity and selected_entity.owner and selected_entity.owner.clan:
+		default_clan_id = selected_entity.owner.clan.id
+
+	spawn_panel.open_for_cell(_context_cell, default_clan_id)
+
+
+func _on_spawn_panel_spawn_requested(request: Dictionary) -> void:
+	if not game_map:
 		return
 
-	var clan: Clan = clans.pick_random()
-	var preferred_roles: Array = clan.preferred_roles if clan and clan.preferred_roles else []
-	var role: Enums.MekRole = Enums.MekRole.BRAWLER
-	if not preferred_roles.is_empty():
-		role = preferred_roles.pick_random()
-
-	var mek: Mek = LoadoutGenerator.generate_mek(game_map.map_difficulty, role)
-	if not mek:
-		push_error("Cannot spawn NPC Mek: loadout generation failed.")
+	var entity_type: String = str(request.get("entity_type", ""))
+	var quantity: int = int(request.get("quantity", 1))
+	var spawn_tiles: Array[Vector2i] = _find_spawn_tiles(Vector2i(request.get("position", _context_cell)), quantity, entity_type)
+	if spawn_tiles.is_empty():
+		push_error("Spawn failed: no valid tiles available.")
 		return
 
-	var npc_owner: NPCOwned = NPCOwned.new(NameGenerator.random_full_name(), clan)
-	var map_mek: MapMek = MapMek.new(_context_cell, npc_owner, mek)
-	game_map.npc_units[mek.uuid] = map_mek
+	for i in range(spawn_tiles.size()):
+		var tile: Vector2i = spawn_tiles[i]
+		var entity_owner: EntityOwner = _build_owner_from_request(request, i)
+		if not entity_owner:
+			push_error("Spawn failed: invalid owner configuration.")
+			return
+
+		if entity_type == "mek":
+			_spawn_mek(tile, request, entity_owner)
+		elif entity_type == "structure":
+			_spawn_structure(tile, request, entity_owner)
 
 	_refresh_entity_views()
 
 
-func _spawn_structure_at_context_cell(template_id: String) -> void:
-	if game_map.is_occupied(_context_cell):
+func _find_spawn_tiles(origin: Vector2i, quantity: int, entity_type: String) -> Array[Vector2i]:
+	var tiles: Array[Vector2i] = []
+	if quantity <= 0:
+		return tiles
+
+	if _can_spawn_entity_type_at(origin, entity_type):
+		tiles.append(origin)
+	if tiles.size() >= quantity:
+		return tiles
+
+	var max_radius: int = max(game_map.map_width, game_map.map_height)
+	for radius in range(1, max_radius + 1):
+		for x in range(origin.x - radius, origin.x + radius + 1):
+			for y in range(origin.y - radius, origin.y + radius + 1):
+				if abs(x - origin.x) != radius and abs(y - origin.y) != radius:
+					continue
+				var tile := Vector2i(x, y)
+				if tile in tiles:
+					continue
+				if _can_spawn_entity_type_at(tile, entity_type):
+					tiles.append(tile)
+					if tiles.size() >= quantity:
+						return tiles
+
+	return tiles
+
+
+func _can_spawn_entity_type_at(position: Vector2i, entity_type: String) -> bool:
+	if not game_map.is_in_bounds(position):
+		return false
+	if entity_type == "mek":
+		return game_map.can_move_to(position)
+	if entity_type == "structure":
+		return game_map.is_walkable(position) and not game_map.is_occupied(position)
+	return false
+
+
+func _build_owner_from_request(request: Dictionary, index: int) -> EntityOwner:
+	var clan_id: String = str(request.get("clan_id", ""))
+	var clan: Clan = DataManager.clans.get(clan_id, null)
+	if not clan:
+		return null
+
+	var owner_type: String = str(request.get("owner_type", "npc"))
+	if owner_type == "player":
+		var player_uuid: String = str(request.get("player_uuid", ""))
+		var player: Player = DataManager.find_player_by_uuid(player_uuid)
+		if not player:
+			return null
+		return PlayerOwned.new(player, clan)
+
+	var base_name: String = str(request.get("npc_name", "")).strip_edges()
+	if base_name.is_empty():
+		base_name = NameGenerator.random_full_name()
+	if index > 0:
+		base_name += " %d" % (index + 1)
+	return NPCOwned.new(base_name, clan)
+
+
+func _spawn_mek(position: Vector2i, request: Dictionary, entity_owner: EntityOwner) -> void:
+	var template_id: String = str(request.get("template_id", ""))
+	var template: MekTemplate = TemplateManager.get_mek_template(template_id)
+	if not template:
+		push_error("Spawn failed: unknown Mek template '%s'." % template_id)
 		return
 
-	var clans: Array = DataManager.clans.values()
-	if clans.is_empty():
-		push_error("Cannot spawn turret: no clans loaded.")
-		return
+	var mek: Mek = template.build_mek()
+	var map_mek: MapMek = MapMek.new(position, entity_owner, mek)
+	if entity_owner.is_player():
+		game_map.player_units[mek.uuid] = map_mek
+	else:
+		game_map.npc_units[mek.uuid] = map_mek
 
-	var clan: Clan = clans.pick_random()
+
+func _spawn_structure(position: Vector2i, request: Dictionary, entity_owner: EntityOwner) -> void:
+	var template_id: String = str(request.get("template_id", ""))
 	var template: StructureTemplate = TemplateManager.get_structure_template(template_id)
 	if not template:
-		push_error("Cannot spawn structure: missing structure template '%s'." % template_id)
+		push_error("Spawn failed: unknown Structure template '%s'." % template_id)
 		return
 
 	var structure: Structure = template.build_structure()
-	if not structure:
-		push_error("Cannot spawn structure: failed to build structure actor.")
-		return
-
 	if template.slots.size() > 0 and template.slots[Enums.SlotType.SMALL] > 0:
 		var item_template: ItemTemplate = TemplateManager.get_item_template("swpn001")
-		if item_template:
+		if item_template and structure.items.is_empty():
 			structure.items.append(item_template.build_item())
 			structure.rebuild_combat_state()
 
-	var npc_owner: NPCOwned = NPCOwned.new(template.structure_name, clan)
-	var map_structure: MapStructure = MapStructure.new(_context_cell, npc_owner, structure, true)
+	var map_structure: MapStructure = MapStructure.new(position, entity_owner, structure, true)
 	game_map.structures[structure.uuid] = map_structure
-
-	_refresh_entity_views()
-
-
-func _add_structure_spawn_items() -> void:
-	var template_ids: Array[String] = []
-	for template_id: String in TemplateManager.structure_templates.keys():
-		template_ids.append(template_id)
-	template_ids.sort()
-
-	if template_ids.is_empty():
-		action_menu.add_separator()
-		action_menu.add_item("No Structures Available", MENU_SPAWN_STRUCTURE_BASE)
-		action_menu.set_item_disabled(action_menu.item_count - 1, true)
-		return
-
-	action_menu.add_separator()
-	for index in range(template_ids.size()):
-		var template_id: String = template_ids[index]
-		var template: StructureTemplate = TemplateManager.get_structure_template(template_id)
-		if not template:
-			continue
-		var action_id: int = MENU_SPAWN_STRUCTURE_BASE + index
-		_structure_spawn_actions[action_id] = template_id
-		action_menu.add_item("Spawn Structure: %s" % template.structure_name, action_id)
 
 
 func _refresh_entity_views() -> void:

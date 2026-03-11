@@ -1,0 +1,113 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/scenes/gameplay/spawn_panel.gd" id="1"]
+
+[node name="SpawnPanel" type="PopupPanel"]
+size = Vector2i(460, 360)
+script = ExtResource("1")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Root" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="MarginContainer/Root"]
+layout_mode = 2
+text = "Spawn Configuration"
+
+[node name="TargetRow" type="HBoxContainer" parent="MarginContainer/Root"]
+layout_mode = 2
+
+[node name="TargetLabel" type="Label" parent="MarginContainer/Root/TargetRow"]
+layout_mode = 2
+text = "Target Tile:"
+
+[node name="TargetValue" type="Label" parent="MarginContainer/Root/TargetRow"]
+layout_mode = 2
+text = "(-1, -1)"
+
+[node name="Form" type="GridContainer" parent="MarginContainer/Root"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
+
+[node name="EntityTypeLabel" type="Label" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+text = "Entity Type"
+
+[node name="EntityTypeOption" type="OptionButton" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+
+[node name="TemplateLabel" type="Label" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+text = "Template"
+
+[node name="TemplateOption" type="OptionButton" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+
+[node name="QuantityLabel" type="Label" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+text = "Quantity"
+
+[node name="QuantitySpin" type="SpinBox" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+min_value = 1.0
+max_value = 16.0
+value = 1.0
+
+[node name="OwnerTypeLabel" type="Label" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+text = "Owner Type"
+
+[node name="OwnerTypeOption" type="OptionButton" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+
+[node name="ClanLabel" type="Label" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+text = "Clan"
+
+[node name="ClanOption" type="OptionButton" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+
+[node name="NpcNameLabel" type="Label" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+text = "NPC Name"
+
+[node name="NpcNameEdit" type="LineEdit" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+placeholder_text = "Leave empty for random"
+
+[node name="PlayerLabel" type="Label" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+text = "Player"
+
+[node name="PlayerOption" type="OptionButton" parent="MarginContainer/Root/Form"]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/Root"]
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="MarginContainer/Root"]
+layout_mode = 2
+alignment = 2
+theme_override_constants/separation = 8
+
+[node name="CancelButton" type="Button" parent="MarginContainer/Root/Buttons"]
+layout_mode = 2
+text = "Cancel"
+
+[node name="SpawnButton" type="Button" parent="MarginContainer/Root/Buttons"]
+layout_mode = 2
+text = "Spawn"

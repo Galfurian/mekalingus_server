@@ -6,6 +6,7 @@ extends Node
 
 const EnemySpawnerScript = preload("res://scripts/data/map/spawning/enemy_spawner.gd")
 const MapAStarBuilderScript = preload("res://scripts/data/map/pathfinding/map_astar_builder.gd")
+const StructureAIControllerScript = preload("res://scripts/data/map/controllers/structure_ai_controller.gd")
 const MapStructureScript = preload("res://scripts/data/map/data/entities/map_structure.gd")
 const MapTurretScript = preload("res://scripts/data/map/data/entities/map_turret.gd")
 const MapPickupScript = preload("res://scripts/data/map/data/entities/map_pickup.gd")
@@ -61,6 +62,8 @@ var chat_logger: MapLogger = MapLogger.new()
 var astar: AStar2D = AStar2D.new()
 # The AI controller for managing enemy actions.
 var ai_controller: AIController = AIController.new(self)
+# The controller for structure and turret autonomous behavior.
+var structure_ai_controller = StructureAIControllerScript.new(self)
 # The turn manager.
 var turn_manager: TurnManager = TurnManager.new(self)
 
@@ -116,6 +119,7 @@ func clear() -> void:
 	chat_logger.clear()
 	# Clear AI and turn systems.
 	ai_controller.clear()
+	structure_ai_controller.clear()
 	turn_manager.clear()
 
 
@@ -230,6 +234,13 @@ func update_astar() -> void:
 	Rebuilds the AStar2D graph based on current walkable map tiles.
 	"""
 	MapAStarBuilderScript.rebuild(self)
+
+
+func execute_structure_ai_turn() -> void:
+	"""
+	Executes autonomous actions for structures and turrets.
+	"""
+	structure_ai_controller.execute_turret_actions()
 
 
 # =============================================================================

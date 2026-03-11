@@ -10,7 +10,6 @@ extends Node
 
 # The maximum number of turns in a day.
 const TURNS_PER_DAY: int = 48
-const TURRET_COOLDOWN_TURNS: int = 2
 
 # ====================================================================
 # SIGNALS
@@ -131,7 +130,7 @@ func tick(delta: float) -> void:
 		# 3.2) Process use of utility module activations.
 		game_map.ai_controller.execute_utility_module_orders()
 		# 3.3) Process autonomous turret actions.
-		_process_turret_actions()
+		game_map.execute_structure_ai_turn()
 		# 3.3) Check if any units are destroyed after executing the orders.
 		_erase_destroyed_units()
 
@@ -210,79 +209,6 @@ func _update_time_based_effects():
 		unit.mek.apply_regen_effects()
 		unit.mek.active_effect_manager.decrement_durations()
 		unit.mek.cooldown_manager.decrement_cooldowns()
-
-
-func _process_turret_actions() -> void:
-	"""
-	Ticks turret cooldowns and executes one attack when a target is in range.
-	"""
-	for turret: MapTurret in game_map.turrets.values():
-		if not turret or not turret.active:
-			continue
-
-		turret.tick_cooldown()
-		if not turret.can_fire():
-			continue
-
-		var target: MapMek = _find_turret_target(turret)
-		if not target or not target.mek or target.mek.is_dead():
-			continue
-
-		var damage_effect := ItemEffect.new({
-			"type": Enums.EffectType.DAMAGE,
-			"target": Enums.TargetType.ENEMY,
-			"damage_type": Enums.DamageType.KINETIC,
-			"amount": turret.damage,
-			"duration": 0,
-			"chance": 100,
-			"radius": 0,
-			"center_on_target": true,
-		})
-
-		var result = target.mek.take_damage_from_effect(damage_effect)
-		turret.start_cooldown(TURRET_COOLDOWN_TURNS)
-
-		game_map.combat_logger.add_log(
-			Enums.LogType.ATTACK,
-			"%s fires at %s -> %d shield, %d armor, %d health" % [
-				_turret_tag(turret),
-				target.mek.get_chat_tag(),
-				result.shield,
-				result.armor,
-				result.health,
-			]
-		)
-
-
-func _find_turret_target(turret: MapTurret) -> MapMek:
-	"""
-	Selects the closest hostile living mek within turret firing range.
-	"""
-	var closest_target: MapMek = null
-	var closest_distance: float = INF
-
-	for candidate: MapMek in game_map.player_units.values() + game_map.npc_units.values():
-		if not candidate or not candidate.mek or candidate.mek.is_dead():
-			continue
-		if not game_map.can_owners_attack(turret.owner, candidate.owner):
-			continue
-
-		var distance := turret.position.distance_to(candidate.position)
-		if distance > turret.fire_range:
-			continue
-		if distance < closest_distance:
-			closest_distance = distance
-			closest_target = candidate
-
-	return closest_target
-
-
-func _turret_tag(turret: MapTurret) -> String:
-	return "[url=pos:%d,%d]%s[/url]" % [
-		turret.position.x,
-		turret.position.y,
-		turret.turret_name,
-	]
 
 
 func _has_hostile_pairs() -> bool:

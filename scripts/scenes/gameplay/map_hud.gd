@@ -3,6 +3,10 @@ extends Node
 # The size of sectors.
 const SECTOR_SIZE: int = 10
 const LEFT_PANEL_RATIO: float = 0.2
+const MENU_DELETE_ENTITY: int = 1
+const MENU_SPAWN_NPC_MEK: int = 2
+const MENU_SPAWN_TURRET: int = 3
+const DEFAULT_TURRET_TEMPLATE_ID: String = "turret_basic"
 
 # The current game map.
 var game_map: GameMap
@@ -10,6 +14,7 @@ var game_map: GameMap
 var grid_size: int
 # The currently selected entity.
 var selected_entity: MapEntity
+var _context_cell: Vector2i = Vector2i(-1, -1)
 
 @onready var action_menu = $ActionMenu
 @onready var main_split = $RootSplit/MainSplit
@@ -27,10 +32,13 @@ var selected_entity: MapEntity
 func _ready():
 	"""Initializes the map HUD."""
 	grid_container.on_cell_selected.connect(_on_cell_selected)
+	grid_container.on_cell_context_requested.connect(_on_cell_context_requested)
 	combat_log.meta_clicked.connect(_on_log_meta_clicked)
 	scroll_view.scrolled.connect(_on_map_scrolled)
 	if not entity_list_panel.entity_selected.is_connected(_on_entity_list_entity_selected):
 		entity_list_panel.entity_selected.connect(_on_entity_list_entity_selected)
+	if not action_menu.id_pressed.is_connected(_on_action_menu_id_pressed):
+		action_menu.id_pressed.connect(_on_action_menu_id_pressed)
 
 
 func setup(p_game_map: GameMap, p_grid_size: int = 50):
@@ -219,6 +227,120 @@ func _on_entity_list_entity_selected(entity: MapEntity) -> void:
 	center_on(entity.position)
 	info_panel.set_entity(entity)
 	grid_drawer.set_selected_entity(entity)
+
+
+func _on_cell_context_requested(cell_position: Vector2i, mouse_position: Vector2) -> void:
+	if not game_map:
+		return
+
+	_context_cell = cell_position
+	var entity_at_cell: MapEntity = game_map.get_entity_at(cell_position)
+
+	action_menu.clear()
+	if entity_at_cell:
+		action_menu.add_item("Delete Entity", MENU_DELETE_ENTITY)
+	else:
+		action_menu.add_item("Spawn NPC Mek", MENU_SPAWN_NPC_MEK)
+		action_menu.add_item("Spawn Turret", MENU_SPAWN_TURRET)
+
+	action_menu.position = Vector2i(mouse_position)
+	action_menu.reset_size()
+	action_menu.popup()
+
+
+func _on_action_menu_id_pressed(action_id: int) -> void:
+	if not game_map or _context_cell.x < 0 or _context_cell.y < 0:
+		return
+
+	match action_id:
+		MENU_DELETE_ENTITY:
+			_delete_entity_at_context_cell()
+		MENU_SPAWN_NPC_MEK:
+			_spawn_npc_mek_at_context_cell()
+		MENU_SPAWN_TURRET:
+			_spawn_turret_at_context_cell()
+
+	_context_cell = Vector2i(-1, -1)
+
+
+func _delete_entity_at_context_cell() -> void:
+	var entity: MapEntity = game_map.get_entity_at(_context_cell)
+	if not entity:
+		return
+
+	game_map.remove_map_entity(entity)
+	if selected_entity == entity:
+		selected_entity = null
+		info_panel.clear()
+		grid_drawer.deselect_entity()
+
+	_refresh_entity_views()
+
+
+func _spawn_npc_mek_at_context_cell() -> void:
+	if not game_map.can_move_to(_context_cell):
+		return
+
+	var clans: Array = DataManager.clans.values()
+	if clans.is_empty():
+		push_error("Cannot spawn NPC Mek: no clans loaded.")
+		return
+
+	var clan: Clan = clans.pick_random()
+	var preferred_roles: Array = clan.preferred_roles if clan and clan.preferred_roles else []
+	var role: Enums.MekRole = Enums.MekRole.BRAWLER
+	if not preferred_roles.is_empty():
+		role = preferred_roles.pick_random()
+
+	var mek: Mek = LoadoutGenerator.generate_mek(game_map.map_difficulty, role)
+	if not mek:
+		push_error("Cannot spawn NPC Mek: loadout generation failed.")
+		return
+
+	var npc_owner: NPCOwned = NPCOwned.new(NameGenerator.random_full_name(), clan)
+	var map_mek: MapMek = MapMek.new(_context_cell, npc_owner, mek)
+	game_map.npc_units[mek.uuid] = map_mek
+
+	_refresh_entity_views()
+
+
+func _spawn_turret_at_context_cell() -> void:
+	if game_map.is_occupied(_context_cell):
+		return
+
+	var clans: Array = DataManager.clans.values()
+	if clans.is_empty():
+		push_error("Cannot spawn turret: no clans loaded.")
+		return
+
+	var clan: Clan = clans.pick_random()
+	var template: StructureTemplate = TemplateManager.get_structure_template(DEFAULT_TURRET_TEMPLATE_ID)
+	if not template:
+		push_error("Cannot spawn turret: missing structure template '%s'." % DEFAULT_TURRET_TEMPLATE_ID)
+		return
+
+	var structure: Structure = template.build_structure()
+	if not structure:
+		push_error("Cannot spawn turret: failed to build structure actor.")
+		return
+
+	if template.slots.size() > 0 and template.slots[Enums.SlotType.SMALL] > 0:
+		var item_template: ItemTemplate = TemplateManager.get_item_template("swpn001")
+		if item_template:
+			structure.items.append(item_template.build_item())
+			structure.rebuild_combat_state()
+
+	var npc_owner: NPCOwned = NPCOwned.new("Turret", clan)
+	var map_structure: MapStructure = MapStructure.new(_context_cell, npc_owner, structure, true)
+	game_map.structures[structure.uuid] = map_structure
+
+	_refresh_entity_views()
+
+
+func _refresh_entity_views() -> void:
+	mek_drawer.update_meks()
+	grid_drawer.queue_redraw()
+	entity_list_panel.refresh()
 
 
 func _on_map_scrolled(scroll_up: bool):

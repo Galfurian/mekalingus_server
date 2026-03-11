@@ -250,13 +250,12 @@ func load_mek_templates():
 func load_structure_templates() -> bool:
 	"""
 	Loads structure templates from JSON files in the STRUCTURES_FOLDER.
-	Returns true even when the folder is missing so structures can still be ad-hoc.
 	"""
 	structure_templates.clear()
 
 	if not DirAccess.dir_exists_absolute(STRUCTURES_FOLDER):
-		log_message("Structures folder not found, skipping structure templates: " + STRUCTURES_FOLDER)
-		return true
+		log_message("Error: Structure templates folder missing: " + STRUCTURES_FOLDER)
+		return false
 
 	var dir = DirAccess.open(STRUCTURES_FOLDER)
 	if not dir:
@@ -293,7 +292,7 @@ func load_structure_templates() -> bool:
 		file_name = dir.get_next()
 
 	log_message("Loaded " + str(structure_templates.size()) + " structures.")
-	return true
+	return not structure_templates.is_empty()
 
 
 # =============================================================================

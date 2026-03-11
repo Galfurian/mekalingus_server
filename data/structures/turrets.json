@@ -1,0 +1,14 @@
+{
+	"turret_basic": {
+		"name": "Basic Turret",
+		"health": 140,
+		"armor": 45,
+		"shield": 20,
+		"shield_generation": 2,
+		"power": 80,
+		"power_generation": 6,
+		"speed": 0,
+		"slots": [1, 0, 0, 0],
+		"icon": "structures/basic_turret.jpeg"
+	}
+}

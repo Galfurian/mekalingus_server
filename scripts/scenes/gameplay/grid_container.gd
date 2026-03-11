@@ -2,6 +2,7 @@ extends Control
 
 # Define a signal for cell selection.
 signal on_cell_selected(cell_position: Vector2i)
+signal on_cell_context_requested(cell_position: Vector2i, mouse_position: Vector2)
 
 # References to the GameMap.
 var game_map: GameMap
@@ -28,8 +29,11 @@ func clear():
 
 
 func _gui_input(event):
-	"""Detects left mouse clicks and emits the selected cell index."""
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	"""Detects mouse clicks and emits select/context actions for valid tiles."""
+	if event is InputEventMouseButton and event.pressed and (
+		event.button_index == MOUSE_BUTTON_LEFT
+		or event.button_index == MOUSE_BUTTON_RIGHT
+	):
 		# Get position relative to this Control.
 		var local_mouse_pos = get_local_mouse_position()
 		# Compute the selected cell based on the local mouse position.
@@ -44,4 +48,7 @@ func _gui_input(event):
 			and selected_cell.y >= 0
 			and selected_cell.y < game_map.map_height
 		):
-			on_cell_selected.emit(selected_cell)
+			if event.button_index == MOUSE_BUTTON_LEFT:
+				on_cell_selected.emit(selected_cell)
+			else:
+				on_cell_context_requested.emit(selected_cell, event.global_position)

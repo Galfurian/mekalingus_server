@@ -5,8 +5,7 @@ const SECTOR_SIZE: int = 10
 const LEFT_PANEL_RATIO: float = 0.2
 const MENU_DELETE_ENTITY: int = 1
 const MENU_SPAWN_NPC_MEK: int = 2
-const MENU_SPAWN_TURRET: int = 3
-const DEFAULT_TURRET_TEMPLATE_ID: String = "turret_basic"
+const MENU_SPAWN_STRUCTURE_BASE: int = 1000
 
 # The current game map.
 var game_map: GameMap
@@ -15,6 +14,7 @@ var grid_size: int
 # The currently selected entity.
 var selected_entity: MapEntity
 var _context_cell: Vector2i = Vector2i(-1, -1)
+var _structure_spawn_actions: Dictionary[int, String] = {}
 
 @onready var action_menu = $ActionMenu
 @onready var main_split = $RootSplit/MainSplit
@@ -235,13 +235,14 @@ func _on_cell_context_requested(cell_position: Vector2i, mouse_position: Vector2
 
 	_context_cell = cell_position
 	var entity_at_cell: MapEntity = game_map.get_entity_at(cell_position)
+	_structure_spawn_actions.clear()
 
 	action_menu.clear()
 	if entity_at_cell:
 		action_menu.add_item("Delete Entity", MENU_DELETE_ENTITY)
 	else:
 		action_menu.add_item("Spawn NPC Mek", MENU_SPAWN_NPC_MEK)
-		action_menu.add_item("Spawn Turret", MENU_SPAWN_TURRET)
+		_add_structure_spawn_items()
 
 	action_menu.position = Vector2i(mouse_position)
 	action_menu.reset_size()
@@ -257,8 +258,9 @@ func _on_action_menu_id_pressed(action_id: int) -> void:
 			_delete_entity_at_context_cell()
 		MENU_SPAWN_NPC_MEK:
 			_spawn_npc_mek_at_context_cell()
-		MENU_SPAWN_TURRET:
-			_spawn_turret_at_context_cell()
+		_:
+			if _structure_spawn_actions.has(action_id):
+				_spawn_structure_at_context_cell(_structure_spawn_actions[action_id])
 
 	_context_cell = Vector2i(-1, -1)
 
@@ -304,7 +306,7 @@ func _spawn_npc_mek_at_context_cell() -> void:
 	_refresh_entity_views()
 
 
-func _spawn_turret_at_context_cell() -> void:
+func _spawn_structure_at_context_cell(template_id: String) -> void:
 	if game_map.is_occupied(_context_cell):
 		return
 
@@ -314,14 +316,14 @@ func _spawn_turret_at_context_cell() -> void:
 		return
 
 	var clan: Clan = clans.pick_random()
-	var template: StructureTemplate = TemplateManager.get_structure_template(DEFAULT_TURRET_TEMPLATE_ID)
+	var template: StructureTemplate = TemplateManager.get_structure_template(template_id)
 	if not template:
-		push_error("Cannot spawn turret: missing structure template '%s'." % DEFAULT_TURRET_TEMPLATE_ID)
+		push_error("Cannot spawn structure: missing structure template '%s'." % template_id)
 		return
 
 	var structure: Structure = template.build_structure()
 	if not structure:
-		push_error("Cannot spawn turret: failed to build structure actor.")
+		push_error("Cannot spawn structure: failed to build structure actor.")
 		return
 
 	if template.slots.size() > 0 and template.slots[Enums.SlotType.SMALL] > 0:
@@ -330,11 +332,34 @@ func _spawn_turret_at_context_cell() -> void:
 			structure.items.append(item_template.build_item())
 			structure.rebuild_combat_state()
 
-	var npc_owner: NPCOwned = NPCOwned.new("Turret", clan)
+	var npc_owner: NPCOwned = NPCOwned.new(template.structure_name, clan)
 	var map_structure: MapStructure = MapStructure.new(_context_cell, npc_owner, structure, true)
 	game_map.structures[structure.uuid] = map_structure
 
 	_refresh_entity_views()
+
+
+func _add_structure_spawn_items() -> void:
+	var template_ids: Array[String] = []
+	for template_id: String in TemplateManager.structure_templates.keys():
+		template_ids.append(template_id)
+	template_ids.sort()
+
+	if template_ids.is_empty():
+		action_menu.add_separator()
+		action_menu.add_item("No Structures Available", MENU_SPAWN_STRUCTURE_BASE)
+		action_menu.set_item_disabled(action_menu.item_count - 1, true)
+		return
+
+	action_menu.add_separator()
+	for index in range(template_ids.size()):
+		var template_id: String = template_ids[index]
+		var template: StructureTemplate = TemplateManager.get_structure_template(template_id)
+		if not template:
+			continue
+		var action_id: int = MENU_SPAWN_STRUCTURE_BASE + index
+		_structure_spawn_actions[action_id] = template_id
+		action_menu.add_item("Spawn Structure: %s" % template.structure_name, action_id)
 
 
 func _refresh_entity_views() -> void:

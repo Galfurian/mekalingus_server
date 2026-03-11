@@ -97,7 +97,7 @@ func _apply_damage_effect(game_map: GameMap, effect: ItemEffect) -> void:
 			var result = mek.take_damage_from_effect(effect)
 			_add_log(game_map, Enums.LogType.ATTACK, "%s hits %s with AoE from %s -> %d shield, %d armor, %d health (reduced %d %s)" % [
 				source_mek.get_chat_tag(),
-				target_mek.get_chat_tag(),
+				mek.get_chat_tag(),
 				equipped_module.module.module_name,
 				result.shield,
 				result.armor,

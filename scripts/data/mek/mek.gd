@@ -136,6 +136,12 @@ func get_chat_tag() -> String:
 	return "[url=mek:" + uuid + "]" + get_mek_name() + "[/url]"
 
 
+func get_icon_path() -> String:
+	if template and not template.icon.is_empty():
+		return template.icon
+	return ""
+
+
 func _to_string() -> String:
 	return "Mek<" + mek_id + ", " + uuid + ">"
 

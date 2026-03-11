@@ -25,6 +25,12 @@ func get_chat_tag() -> String:
 	return "[url=structure:" + uuid + "]" + get_structure_name() + "[/url]"
 
 
+func get_icon_path() -> String:
+	if template and not template.icon.is_empty():
+		return template.icon
+	return ""
+
+
 func rebuild_combat_state() -> void:
 	var base_stats: Dictionary = {
 		"health": health,

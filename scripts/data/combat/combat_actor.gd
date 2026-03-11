@@ -65,6 +65,10 @@ func is_alive() -> bool:
 	return health > 0
 
 
+func get_icon_path() -> String:
+	return ""
+
+
 func adjust_health(amount: int) -> int:
 	var before = health
 	health = clamp(health + amount, 0, max_health)

@@ -5,6 +5,7 @@ signal map_state_changed(game_map: GameMap)
 # The size of sectors.
 const SECTOR_SIZE: int = 10
 const SCROLL_PADDING_TILES: int = 10
+const CLAMP_MIN_ZOOM_HORIZONTAL_TO_MAP: bool = true
 const LEFT_PANEL_RATIO: float = 0.2
 const MENU_DELETE_ENTITY: int = 1
 const MENU_OPEN_SPAWN_PANEL: int = 2
@@ -141,6 +142,7 @@ func zoom_out():
 	# Redraw first so content size and scroll limits are up-to-date.
 	redraw(grid_size)
 	_center_map_for_current_zoom(total_tiles_x, total_tiles_y)
+	_clamp_horizontal_focus_to_map(total_tiles_x)
 
 
 func _center_map_for_current_zoom(total_tiles_x: int, total_tiles_y: int) -> void:
@@ -151,6 +153,40 @@ func _center_map_for_current_zoom(total_tiles_x: int, total_tiles_y: int) -> voi
 	var center_scroll_v := maxi(0, int(round((content_height - visible_size.y) / 2.0)))
 	scroll_view.scroll_horizontal = center_scroll_h
 	scroll_view.scroll_vertical = center_scroll_v
+
+
+func _clamp_horizontal_focus_to_map(total_tiles_x: int) -> void:
+	if not CLAMP_MIN_ZOOM_HORIZONTAL_TO_MAP or not game_map:
+		return
+
+	var visible_size: Vector2 = scroll_view.get_size()
+	var padding_tiles := _get_map_padding_tiles()
+	var content_max_scroll_h := maxi(0, int(total_tiles_x * grid_size - visible_size.x))
+	if content_max_scroll_h <= 0:
+		scroll_view.scroll_horizontal = 0
+		return
+
+	var map_left_px: float = float(padding_tiles * grid_size)
+	var map_right_px: float = map_left_px + float(game_map.map_width * grid_size)
+	var half_view_w: float = visible_size.x / 2.0
+	var min_focus_scroll_h: int = clampi(int(floor(map_left_px - half_view_w)), 0, content_max_scroll_h)
+	var max_focus_scroll_h: int = clampi(int(ceil(map_right_px - half_view_w)), 0, content_max_scroll_h)
+
+	if min_focus_scroll_h > max_focus_scroll_h:
+		# View is wider than map body: keep body centered.
+		var centered_map_scroll_h: int = clampi(
+			int(round((map_left_px + map_right_px) / 2.0 - half_view_w)),
+			0,
+			content_max_scroll_h
+		)
+		scroll_view.scroll_horizontal = centered_map_scroll_h
+		return
+
+	scroll_view.scroll_horizontal = clampi(
+		scroll_view.scroll_horizontal,
+		min_focus_scroll_h,
+		max_focus_scroll_h
+	)
 
 
 func _on_turn_ended(_turn_number: int):
@@ -350,6 +386,7 @@ func _on_map_scrolled(scroll_up: bool, mouse_pos: Vector2):
 
 	if not scroll_up and grid_size <= min_grid_size:
 		_center_map_for_current_zoom(total_tiles_x, total_tiles_y)
+		_clamp_horizontal_focus_to_map(total_tiles_x)
 		return
 
 	# Use finer steps near minimum zoom to reduce clank during burst zooming.
@@ -359,6 +396,7 @@ func _on_map_scrolled(scroll_up: bool, mouse_pos: Vector2):
 	if new_grid_size == grid_size:
 		if not scroll_up:
 			_center_map_for_current_zoom(total_tiles_x, total_tiles_y)
+			_clamp_horizontal_focus_to_map(total_tiles_x)
 		return
 	# Store previous scroll positions.
 	var old_scroll_h = scroll_view.scroll_horizontal
@@ -385,3 +423,4 @@ func _on_map_scrolled(scroll_up: bool, mouse_pos: Vector2):
 
 	if not scroll_up and grid_size == min_grid_size:
 		_center_map_for_current_zoom(total_tiles_x, total_tiles_y)
+		_clamp_horizontal_focus_to_map(total_tiles_x)

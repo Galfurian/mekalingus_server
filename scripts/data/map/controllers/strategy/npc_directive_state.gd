@@ -28,8 +28,8 @@ func _init() -> void:
 static func from_dict(data: Dictionary) -> NpcDirectiveState:
 	var state := NpcDirectiveState.new()
 	state.directive = int(data.get("directive", Directive.HOLD_PERIMETER))
-	state.anchor_position = Utils.deserialize_position(data.get("anchor_position", { "x": 0, "y": 0 }))
-	state.defend_position = Utils.deserialize_position(data.get("defend_position", { "x": 0, "y": 0 }))
+	state.anchor_position = Utils.deserialize_position(data.get("anchor_position", [0, 0]))
+	state.defend_position = Utils.deserialize_position(data.get("defend_position", [0, 0]))
 	state.patrol_index = max(0, int(data.get("patrol_index", 0)))
 	state.compact_radius = maxi(1, int(data.get("compact_radius", 4)))
 	state.leash_radius = maxi(1, int(data.get("leash_radius", 6)))
@@ -48,7 +48,7 @@ static func from_dict(data: Dictionary) -> NpcDirectiveState:
 
 
 func to_dict() -> Dictionary:
-	var serialized_waypoints: Array[Dictionary] = []
+	var serialized_waypoints: Array = []
 	for point in patrol_waypoints:
 		serialized_waypoints.append(Utils.serialize_position(point))
 

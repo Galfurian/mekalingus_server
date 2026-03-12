@@ -19,6 +19,9 @@ const NPC_DIRECTIVE_STATE = preload("res://scripts/data/map/controllers/strategy
 @onready var quick_seek_button: Button = $TabContainer/Squads/QuickButtons/QuickSeek
 @onready var quick_defend_button: Button = $TabContainer/Squads/QuickButtons/QuickDefend
 @onready var quick_retreat_button: Button = $TabContainer/Squads/QuickButtons/QuickRetreat
+@onready var set_anchor_here_button: Button = $TabContainer/Squads/AnchorButtons/SetAnchorHere
+@onready var set_defend_here_button: Button = $TabContainer/Squads/AnchorButtons/SetDefendHere
+@onready var auto_patrol_ring_button: Button = $TabContainer/Squads/AnchorButtons/AutoPatrolRing
 
 var game_map: GameMap = null
 
@@ -37,6 +40,9 @@ func _ready() -> void:
 	quick_seek_button.pressed.connect(func(): _apply_quick_directive(NPC_DIRECTIVE_STATE.Directive.SEEK_AND_DESTROY))
 	quick_defend_button.pressed.connect(func(): _apply_quick_directive(NPC_DIRECTIVE_STATE.Directive.DEFEND_POINT))
 	quick_retreat_button.pressed.connect(func(): _apply_quick_directive(NPC_DIRECTIVE_STATE.Directive.RETREAT_TO_SAFE_ZONE))
+	set_anchor_here_button.pressed.connect(_on_set_anchor_here_pressed)
+	set_defend_here_button.pressed.connect(_on_set_defend_here_pressed)
+	auto_patrol_ring_button.pressed.connect(_on_auto_patrol_ring_pressed)
 	_populate_directive_options()
 	clear()
 
@@ -82,6 +88,7 @@ func _populate_directive_options() -> void:
 
 
 func _refresh_owner_options() -> void:
+	var selected_owner_key: String = _get_selected_owner_key_from_owner_option()
 	owner_option.clear()
 	if not game_map:
 		return
@@ -95,8 +102,10 @@ func _refresh_owner_options() -> void:
 		var index: int = owner_option.item_count
 		owner_option.add_item(game_map.get_owner_label_by_key(owner_key))
 		owner_option.set_item_metadata(index, owner_key)
+		if owner_key == selected_owner_key:
+			owner_option.select(index)
 
-	if owner_option.item_count > 0:
+	if owner_option.item_count > 0 and owner_option.get_selected() < 0:
 		owner_option.select(0)
 
 
@@ -169,6 +178,7 @@ func _on_reset_anchor_pressed() -> void:
 
 
 func _refresh_squad_tree() -> void:
+	var selected_owner_key: String = _get_selected_owner_key_from_squad_tree()
 	squad_tree.clear()
 	var root: TreeItem = squad_tree.create_item()
 	if not game_map:
@@ -193,11 +203,13 @@ func _refresh_squad_tree() -> void:
 		row.set_text(2, _directive_label(int(state.directive)))
 		row.set_text(3, "(%d, %d)" % [centroid.x, centroid.y])
 		row.set_metadata(0, owner_key)
+		if owner_key == selected_owner_key:
+			row.select(0)
 
 	var first_child: TreeItem = squad_tree.get_root().get_first_child()
-	if first_child:
+	if first_child and not squad_tree.get_selected():
 		first_child.select(0)
-	_toggle_quick_buttons(first_child != null)
+	_toggle_quick_buttons(squad_tree.get_selected() != null)
 
 
 func _toggle_quick_buttons(enabled: bool) -> void:
@@ -206,6 +218,9 @@ func _toggle_quick_buttons(enabled: bool) -> void:
 	quick_seek_button.disabled = not enabled
 	quick_defend_button.disabled = not enabled
 	quick_retreat_button.disabled = not enabled
+	set_anchor_here_button.disabled = not enabled
+	set_defend_here_button.disabled = not enabled
+	auto_patrol_ring_button.disabled = not enabled
 
 
 func _on_squad_tree_item_selected() -> void:
@@ -244,6 +259,52 @@ func _apply_quick_directive(directive: int) -> void:
 	_refresh_selected_state()
 	_refresh_squad_tree()
 	directives_changed.emit(game_map)
+
+
+func _on_set_anchor_here_pressed() -> void:
+	var owner_key: String = _get_selected_owner_key_from_squad_tree()
+	if owner_key.is_empty() or not game_map:
+		return
+
+	game_map.set_owner_anchor_from_centroid(owner_key)
+	_refresh_selected_state()
+	_refresh_squad_tree()
+	directives_changed.emit(game_map)
+
+
+func _on_set_defend_here_pressed() -> void:
+	var owner_key: String = _get_selected_owner_key_from_squad_tree()
+	if owner_key.is_empty() or not game_map:
+		return
+
+	game_map.set_owner_defend_from_centroid(owner_key)
+	_refresh_selected_state()
+	_refresh_squad_tree()
+	directives_changed.emit(game_map)
+
+
+func _on_auto_patrol_ring_pressed() -> void:
+	var owner_key: String = _get_selected_owner_key_from_squad_tree()
+	if owner_key.is_empty() or not game_map:
+		return
+
+	game_map.auto_generate_owner_patrol_ring_from_centroid(owner_key)
+	_refresh_selected_state()
+	_refresh_squad_tree()
+	directives_changed.emit(game_map)
+
+
+func _get_selected_owner_key_from_owner_option() -> String:
+	if owner_option.item_count <= 0 or owner_option.get_selected() < 0:
+		return ""
+	return str(owner_option.get_item_metadata(owner_option.get_selected()))
+
+
+func _get_selected_owner_key_from_squad_tree() -> String:
+	var selected_item: TreeItem = squad_tree.get_selected()
+	if not selected_item:
+		return ""
+	return str(selected_item.get_metadata(0))
 
 
 func _directive_label(directive: int) -> String:

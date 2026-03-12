@@ -1,9 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://coanqrlt58aby"]
 
-[ext_resource type="Script" path="res://scripts/scenes/ui/npc_directive_panel.gd" id="1_5d61b"]
+[ext_resource type="Script" uid="uid://bkkfw46aeoxtj" path="res://scripts/scenes/ui/npc_directive_panel.gd" id="1_5d61b"]
 
 [node name="NpcDirectivePanel" type="VBoxContainer"]
-layout_mode = 2
 script = ExtResource("1_5d61b")
 
 [node name="Title" type="Label" parent="."]
@@ -14,8 +13,10 @@ horizontal_alignment = 1
 [node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 3
+current_tab = 1
 
 [node name="Directive" type="VBoxContainer" parent="TabContainer"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -62,7 +63,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 min_value = 1.0
 max_value = 20.0
-step = 1.0
 value = 4.0
 rounded = true
 
@@ -79,7 +79,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 min_value = 1.0
 max_value = 30.0
-step = 1.0
 value = 6.0
 rounded = true
 
@@ -129,6 +128,7 @@ layout_mode = 2
 metadata/_tab_index = 1
 
 [node name="SquadTree" type="Tree" parent="TabContainer/Squads"]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_vertical = 3
 columns = 4
@@ -162,3 +162,21 @@ text = "Defend"
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Retreat"
+
+[node name="AnchorButtons" type="HBoxContainer" parent="TabContainer/Squads"]
+layout_mode = 2
+
+[node name="SetAnchorHere" type="Button" parent="TabContainer/Squads/AnchorButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Set Anchor Here"
+
+[node name="SetDefendHere" type="Button" parent="TabContainer/Squads/AnchorButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Set Defend Here"
+
+[node name="AutoPatrolRing" type="Button" parent="TabContainer/Squads/AnchorButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Auto Patrol Ring"

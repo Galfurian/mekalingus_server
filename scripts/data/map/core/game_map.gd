@@ -623,6 +623,56 @@ func refresh_owner_patrol_waypoints(owner_key: String) -> void:
 	owner_directives[owner_key] = state
 
 
+func set_owner_anchor_from_centroid(owner_key: String) -> void:
+	if owner_key.is_empty():
+		return
+
+	var state: RefCounted = get_owner_directive_by_key(owner_key)
+	if not state:
+		return
+
+	var centroid: Vector2i = _compute_owner_anchor(owner_key)
+	if centroid == Vector2i.ZERO:
+		return
+
+	state.anchor_position = centroid
+	owner_directives[owner_key] = state
+
+
+func set_owner_defend_from_centroid(owner_key: String) -> void:
+	if owner_key.is_empty():
+		return
+
+	var state: RefCounted = get_owner_directive_by_key(owner_key)
+	if not state:
+		return
+
+	var centroid: Vector2i = _compute_owner_anchor(owner_key)
+	if centroid == Vector2i.ZERO:
+		return
+
+	state.defend_position = centroid
+	owner_directives[owner_key] = state
+
+
+func auto_generate_owner_patrol_ring_from_centroid(owner_key: String) -> void:
+	if owner_key.is_empty():
+		return
+
+	var state: RefCounted = get_owner_directive_by_key(owner_key)
+	if not state:
+		return
+
+	var centroid: Vector2i = _compute_owner_anchor(owner_key)
+	if centroid == Vector2i.ZERO:
+		return
+
+	state.anchor_position = centroid
+	state.patrol_waypoints = _build_default_patrol_waypoints(centroid, state.leash_radius)
+	state.patrol_index = 0
+	owner_directives[owner_key] = state
+
+
 func advance_patrol_directives() -> void:
 	for owner_key in get_owner_keys(true):
 		var state: RefCounted = get_owner_directive_by_key(owner_key)

@@ -1,17 +1,17 @@
 extends Node
 
-@onready var turn_management_panel = $MapSelector/TurnManagementPanel
-@onready var npc_directive_panel = $MapSelector/NpcDirectivePanel
-@onready var save_map = $MapSelector/SaveMap
-@onready var load_map = $MapSelector/LoadMap
+@onready var turn_management_panel = $LeftSidebarSplit/TopControlsSplit/TurnSection/TurnInner/TurnManagementPanel
+@onready var npc_directive_panel = $LeftSidebarSplit/TopControlsSplit/DirectiveSection/DirectiveInner/NpcDirectivePanel
+@onready var save_map = $LeftSidebarSplit/MapManagerSection/MapManagerInner/StorageButtons/SaveMap
+@onready var load_map = $LeftSidebarSplit/MapManagerSection/MapManagerInner/StorageButtons/LoadMap
 
-@onready var generate = $MapSelector/Generate
-@onready var delete = $MapSelector/Delete
-@onready var map_list = $MapSelector/MapList
+@onready var generate = $LeftSidebarSplit/MapManagerSection/MapManagerInner/Generate
+@onready var delete = $LeftSidebarSplit/MapManagerSection/MapManagerInner/Delete
+@onready var map_list = $LeftSidebarSplit/MapManagerSection/MapManagerInner/MapList
 
-@onready var map_size = $MapSelector/HBoxContainer1/MapSize
-@onready var map_difficulty = $MapSelector/HBoxContainer2/Difficulty
-@onready var map_biome = $MapSelector/HBoxContainer3/Biome
+@onready var map_size = $LeftSidebarSplit/MapManagerSection/MapManagerInner/HBoxContainer1/MapSize
+@onready var map_difficulty = $LeftSidebarSplit/MapManagerSection/MapManagerInner/HBoxContainer2/Difficulty
+@onready var map_biome = $LeftSidebarSplit/MapManagerSection/MapManagerInner/HBoxContainer3/Biome
 
 @onready var map_hud = $MapHud
 

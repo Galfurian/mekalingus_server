@@ -6,6 +6,11 @@ extends Node2D
 
 const DEFAULT_ICON_PATH = "res://assets/tileset/meks/mek.png"
 const ICON_BASE_PATH = "res://assets/tileset/"
+const CLAN_FRAME_TEXTURE_SIZE = 64
+const CLAN_FRAME_CORNER_RADIUS = 12
+const CLAN_FRAME_SIZE_RATIO = 0.92
+const ICON_SIZE_RATIO = 0.76
+const CLAN_FRAME_ALPHA = 0.48
 
 # =============================================================================
 # VARIABLES
@@ -16,6 +21,7 @@ var grid_size: int
 var sector_size: int
 var entity_sprites: Dictionary
 var _texture_cache: Dictionary
+var _clan_frame_texture: Texture2D = null
 
 # =============================================================================
 # INITIALIZATION and CLEANUP
@@ -51,9 +57,11 @@ func _on_turn_ended(_turn_number: int) -> void:
 
 
 func _get_clan_color(entity_owner: EntityOwner) -> Color:
+	var color := Color(1, 1, 1, CLAN_FRAME_ALPHA)
 	if entity_owner and entity_owner.clan:
-		return entity_owner.clan.color
-	return Color(1, 1, 1, 0.4)
+		color = entity_owner.clan.color
+	color.a = CLAN_FRAME_ALPHA
+	return color
 
 
 func update_icons() -> void:
@@ -76,22 +84,46 @@ func update_icons() -> void:
 			(sector_size + icon_position.y + 0.5) * grid_size
 		)
 
-		var sprite: Sprite2D
+		var holder: Node2D
+		var frame_sprite: Sprite2D
+		var icon_sprite: Sprite2D
 		if entity_sprites.has(entity_key):
-			sprite = entity_sprites[entity_key]
+			holder = entity_sprites[entity_key]
+			frame_sprite = holder.get_node("ClanFrame") as Sprite2D
+			icon_sprite = holder.get_node("Icon") as Sprite2D
 		else:
-			sprite = Sprite2D.new()
-			sprite.position = Vector2.ZERO
-			sprite.modulate = _get_clan_color(map_entity.owner)
-			add_child(sprite)
-			entity_sprites[entity_key] = sprite
+			holder = Node2D.new()
+			holder.position = Vector2.ZERO
+
+			frame_sprite = Sprite2D.new()
+			frame_sprite.name = "ClanFrame"
+			holder.add_child(frame_sprite)
+
+			icon_sprite = Sprite2D.new()
+			icon_sprite.name = "Icon"
+			holder.add_child(icon_sprite)
+
+			add_child(holder)
+			entity_sprites[entity_key] = holder
 
 		var texture: Texture2D = _load_icon_texture_for_entity(map_entity)
 		if texture:
-			sprite.texture = texture
-			sprite.scale = Vector2(grid_size / texture.get_size().x, grid_size / texture.get_size().y)
-			sprite.position = center
-			sprite.modulate = _get_clan_color(map_entity.owner)
+			var visual_profile: Dictionary = _get_visual_profile(map_entity)
+			var frame_ratio: float = float(visual_profile.get("frame_ratio", CLAN_FRAME_SIZE_RATIO))
+			var icon_ratio: float = float(visual_profile.get("icon_ratio", ICON_SIZE_RATIO))
+
+			frame_sprite.texture = _get_clan_frame_texture()
+			frame_sprite.modulate = _get_clan_color(map_entity.owner)
+
+			icon_sprite.texture = texture
+			icon_sprite.modulate = Color.WHITE
+
+			var frame_size: float = grid_size * frame_ratio
+			var icon_size: float = grid_size * icon_ratio
+			frame_sprite.scale = Vector2.ONE * (frame_size / CLAN_FRAME_TEXTURE_SIZE)
+			icon_sprite.scale = Vector2(icon_size / texture.get_size().x, icon_size / texture.get_size().y)
+
+			holder.position = center
 
 
 func _collect_drawable_entities() -> Dictionary:
@@ -123,9 +155,74 @@ func _load_icon_texture_for_entity(entity: MapEntity) -> Texture2D:
 		icon_path = ICON_BASE_PATH + icon_path
 
 	if not ResourceLoader.exists(icon_path):
+		push_error("Icon path '%s' does not exist. Using default icon." % icon_path)
 		icon_path = DEFAULT_ICON_PATH
 
 	if not _texture_cache.has(icon_path):
 		_texture_cache[icon_path] = load(icon_path)
 
 	return _texture_cache[icon_path]
+
+
+func _get_clan_frame_texture() -> Texture2D:
+	if _clan_frame_texture:
+		return _clan_frame_texture
+
+	var image := Image.create(CLAN_FRAME_TEXTURE_SIZE, CLAN_FRAME_TEXTURE_SIZE, false, Image.FORMAT_RGBA8)
+	image.fill(Color(1, 1, 1, 0))
+
+	var max_index: int = CLAN_FRAME_TEXTURE_SIZE - 1
+	for x in range(CLAN_FRAME_TEXTURE_SIZE):
+		for y in range(CLAN_FRAME_TEXTURE_SIZE):
+			if _is_inside_rounded_square(x, y, max_index):
+				image.set_pixel(x, y, Color.WHITE)
+
+	_clan_frame_texture = ImageTexture.create_from_image(image)
+	return _clan_frame_texture
+
+
+func _is_inside_rounded_square(x: int, y: int, max_index: int) -> bool:
+	var radius: int = CLAN_FRAME_CORNER_RADIUS
+
+	if x >= radius and x <= max_index - radius:
+		return true
+	if y >= radius and y <= max_index - radius:
+		return true
+
+	var corner_center := Vector2(radius, radius)
+	if x > max_index - radius:
+		corner_center.x = max_index - radius
+	if y > max_index - radius:
+		corner_center.y = max_index - radius
+
+	return Vector2(x, y).distance_to(corner_center) <= radius
+
+
+func _get_visual_profile(map_entity: MapEntity) -> Dictionary:
+	var profile := {
+		"frame_ratio": CLAN_FRAME_SIZE_RATIO,
+		"icon_ratio": ICON_SIZE_RATIO,
+	}
+
+	if not is_instance_of(map_entity, MapMek):
+		return profile
+
+	var map_mek: MapMek = map_entity
+	if not map_mek.combatant or not map_mek.combatant.template:
+		return profile
+
+	match map_mek.combatant.template.size:
+		Enums.MekSize.LIGHT:
+			profile["frame_ratio"] = 0.88
+			profile["icon_ratio"] = 0.70
+		Enums.MekSize.MEDIUM:
+			profile["frame_ratio"] = 0.92
+			profile["icon_ratio"] = 0.76
+		Enums.MekSize.HEAVY:
+			profile["frame_ratio"] = 1.02
+			profile["icon_ratio"] = 0.84
+		Enums.MekSize.COLOSSAL:
+			profile["frame_ratio"] = 1.14
+			profile["icon_ratio"] = 0.96
+
+	return profile

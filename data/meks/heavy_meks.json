@@ -2,6 +2,7 @@
     "hmek001": {
         "name": "Titan Hammer",
         "description": "A frontline juggernaut armed with immense firepower and reinforced armor plating.",
+        "appearance": "A massive, heavily armored mech with a bulky frame and a menacing silhouette. It has thick armor plates in a steel gray finish, accented with black highlights. The Titan Hammer is designed for close-quarters combat, featuring large hands.",
         "size": "Heavy",
         "health": 312,
         "armor": 188,
@@ -16,11 +17,12 @@
             2,
             2
         ],
-        "icon": "meks/mek.png"
+        "icon": "meks/heavy/hmek001.png"
     },
     "hmek002": {
         "name": "Dread Bastion",
         "description": "A fortress on legs, designed to absorb immense damage while controlling the battlefield.",
+        "appearance": "A towering mech with a heavily fortified design, featuring thick armor plating and a robust frame. It has a dark, matte finish with red accents, giving it an intimidating presence on the battlefield. The Dread Bastion is built for defense and area control, equipped with multiple weapon mounts and reinforced joints.",
         "size": "Heavy",
         "health": 375,
         "armor": 325,
@@ -36,11 +38,12 @@
             3,
             2
         ],
-        "icon": "meks/mek.png"
+        "icon": "meks/heavy/hmek002.png"
     },
     "hmek003": {
         "name": "Thunder Colossus",
         "description": "A walking artillery platform capable of unleashing devastating long-range barrages.",
+        "appearance": "A colossal mech with a design that emphasizes long-range firepower. It features a heavily armored chassis with multiple weapon mounts, including large cannons and missile launchers. The Thunder Colossus has a rugged, industrial look with a dark gray color scheme and yellow highlights.",
         "size": "Heavy",
         "health": 475,
         "armor": 175,
@@ -55,11 +58,12 @@
             2,
             2
         ],
-        "icon": "meks/mek.png"
+        "icon": "meks/heavy/hmek003.png"
     },
     "hmek004": {
         "name": "Goliath Enforcer",
         "description": "An elite suppression unit, built for enduring engagements and area control.",
+        "appearance": "A heavily armored mech with a design that emphasizes its role as a frontline enforcer. It has thick armor plates in a steel gray finish, accented with red highlights. The Goliath Enforcer is equipped with powerful weaponry and a robust frame, making it a formidable presence on the battlefield.",
         "size": "Heavy",
         "health": 338,
         "armor": 200,
@@ -74,11 +78,12 @@
             3,
             3
         ],
-        "icon": "meks/mek.png"
+        "icon": "meks/heavy/hmek004.png"
     },
     "hmek005": {
         "name": "Onyx Warlord",
         "description": "A relentless war machine, engineered for brutal assaults and frontline dominance.",
+        "appearance": "A heavily armored mech with a sleek, aggressive design. It features a dark, glossy pure black finish with red accents, giving it a menacing appearance. The Onyx Warlord is built for close-quarters combat, equipped with powerful melee weapons and reinforced armor plating.",
         "size": "Heavy",
         "health": 350,
         "armor": 212,
@@ -93,11 +98,12 @@
             2,
             2
         ],
-        "icon": "meks/mek.png"
+        "icon": "meks/heavy/hmek005.png"
     },
     "hmek006": {
         "name": "Hellstorm Titan",
         "description": "A walking inferno, equipped with flame-based weaponry for area-wide destruction.",
+        "appearance": "A massive FOUR LEGS mech with a design that emphasizes its destructive capabilities. It features a heavily armored chassis with multiple weapon mounts, including flamethrowers and incendiary launchers. The Hellstorm Titan has a fiery red and orange color scheme, giving it a menacing presence on the battlefield. IT HAS FOUR LEGS.",
         "size": "Heavy",
         "health": 288,
         "armor": 162,

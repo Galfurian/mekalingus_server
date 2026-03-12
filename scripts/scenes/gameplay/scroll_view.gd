@@ -32,17 +32,23 @@ func _gui_input(event):
 	elif event is InputEventMouseButton and Input.is_key_pressed(KEY_CTRL):
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			scrolled.emit(true, event.position)
+			accept_event()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			scrolled.emit(false, event.position)
+			accept_event()
 	# SHIFT + Scroll for Horizontal Scrolling
 	elif event is InputEventMouseButton and Input.is_key_pressed(KEY_SHIFT):
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			scroll_horizontal -= 30
+			accept_event()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			scroll_horizontal += 30
+			accept_event()
 	# Normal Scroll for Vertical Scrolling
 	elif event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			scroll_vertical -= 30
+			accept_event()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			scroll_vertical += 30
+			accept_event()

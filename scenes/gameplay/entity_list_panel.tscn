@@ -25,6 +25,7 @@ size_flags_vertical = 3
 hide_root = true
 
 [node name="Meks" type="VBoxContainer" parent="TabContainer"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
@@ -35,6 +36,7 @@ size_flags_vertical = 3
 hide_root = true
 
 [node name="Structures" type="VBoxContainer" parent="TabContainer"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
@@ -45,6 +47,7 @@ size_flags_vertical = 3
 hide_root = true
 
 [node name="Loot" type="VBoxContainer" parent="TabContainer"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 3
 

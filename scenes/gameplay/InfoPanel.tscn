@@ -39,9 +39,11 @@ size_flags_vertical = 3
 [node name="Tabs" type="TabContainer" parent="EntityInspector/ItemInspector"]
 layout_mode = 2
 size_flags_vertical = 3
+current_tab = 0
 
 [node name="Equipment" type="Control" parent="EntityInspector/ItemInspector/Tabs"]
 layout_mode = 2
+metadata/_tab_index = 0
 
 [node name="SlotEditorScroll" type="ScrollContainer" parent="EntityInspector/ItemInspector/Tabs/Equipment"]
 layout_mode = 1
@@ -57,7 +59,9 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Plan" type="Control" parent="EntityInspector/ItemInspector/Tabs"]
+visible = false
 layout_mode = 2
+metadata/_tab_index = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="EntityInspector/ItemInspector/Tabs/Plan"]
 layout_mode = 1

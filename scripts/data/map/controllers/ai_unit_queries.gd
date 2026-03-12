@@ -8,9 +8,14 @@ static func get_all_units(game_map) -> Array[MapCombatEntity]:
 	"""
 	var units: Array[MapCombatEntity] = []
 	for unit: MapCombatEntity in game_map.player_units.values():
-		units.append(unit)
+		if unit and unit.active and unit.combatant.is_alive():
+			units.append(unit)
 	for unit: MapCombatEntity in game_map.npc_units.values():
-		units.append(unit)
+		if unit and unit.active and unit.combatant.is_alive():
+			units.append(unit)
+	for structure: MapStructure in game_map.structures.values():
+		if structure and structure.active and structure.combatant.is_alive():
+			units.append(structure)
 	return units
 
 

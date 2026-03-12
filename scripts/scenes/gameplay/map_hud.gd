@@ -173,6 +173,16 @@ func redraw(p_grid_size: int):
 	icon_drawer.setup(game_map, grid_size, padding_tiles)
 
 
+func set_ai_overlay_enabled(enabled: bool) -> void:
+	if grid_drawer:
+		grid_drawer.set_ai_overlay_enabled(enabled)
+
+
+func refresh_ai_overlay() -> void:
+	if grid_drawer:
+		grid_drawer.queue_redraw()
+
+
 func _get_map_padding_tiles() -> int:
 	return SECTOR_SIZE + SCROLL_PADDING_TILES
 

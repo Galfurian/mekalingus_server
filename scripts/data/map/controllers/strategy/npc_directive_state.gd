@@ -10,7 +10,6 @@ enum Directive {
 
 var directive: int = Directive.HOLD_PERIMETER
 var anchor_position: Vector2i = Vector2i.ZERO
-var defend_position: Vector2i = Vector2i.ZERO
 var patrol_waypoints: Array[Vector2i] = []
 var patrol_index: int = 0
 var compact_radius: int = 4
@@ -24,9 +23,12 @@ func _init() -> void:
 
 static func from_dict(data: Dictionary) -> NpcDirectiveState:
 	var state := NpcDirectiveState.new()
-	state.directive = _normalize_legacy_directive(int(data.get("directive", Directive.HOLD_PERIMETER)))
+	state.directive = clampi(
+		int(data.get("directive", Directive.HOLD_PERIMETER)),
+		Directive.HOLD_PERIMETER,
+		Directive.PATROL
+	)
 	state.anchor_position = Utils.deserialize_position(data.get("anchor_position", [0, 0]))
-	state.defend_position = Utils.deserialize_position(data.get("defend_position", [0, 0]))
 	state.patrol_index = max(0, int(data.get("patrol_index", 0)))
 	state.compact_radius = maxi(1, int(data.get("compact_radius", 4)))
 	state.leash_radius = maxi(1, int(data.get("leash_radius", 6)))
@@ -44,18 +46,6 @@ static func from_dict(data: Dictionary) -> NpcDirectiveState:
 	return state
 
 
-static func _normalize_legacy_directive(raw_directive: int) -> int:
-	# Legacy mapping:
-	# 0 HOLD_PERIMETER -> HOLD_PERIMETER
-	# 1 PATROL -> PATROL
-	# 2 SEEK_AND_DESTROY -> PATROL
-	# 3 DEFEND_POINT -> HOLD_PERIMETER
-	# 4 RETREAT_TO_SAFE_ZONE -> HOLD_PERIMETER
-	if raw_directive == 1 or raw_directive == 2:
-		return Directive.PATROL
-	return Directive.HOLD_PERIMETER
-
-
 func to_dict() -> Dictionary:
 	var serialized_waypoints: Array = []
 	for point in patrol_waypoints:
@@ -64,7 +54,6 @@ func to_dict() -> Dictionary:
 	return {
 		"directive": directive,
 		"anchor_position": Utils.serialize_position(anchor_position),
-		"defend_position": Utils.serialize_position(defend_position),
 		"patrol_waypoints": serialized_waypoints,
 		"patrol_index": patrol_index,
 		"compact_radius": compact_radius,

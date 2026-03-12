@@ -176,24 +176,13 @@ func execute_move_orders() -> void:
 		var order: MoveOrder = _move_orders.get(source_uuid, null)
 		if not order or not order.source or order.source.combatant.is_dead():
 			continue
-
-		# Replan this source against the latest board state to avoid stale face-to-face destinations.
-		_current_plans.erase(source_uuid)
-		plan_for_unit(order.source)
-		var refreshed_plan: AIPlan = _current_plans.get(source_uuid, null)
-		if not refreshed_plan or not refreshed_plan.is_valid() or refreshed_plan.is_complete():
+		if order.destination == order.source.position:
+			continue
+		if game_map.is_occupied(order.destination):
 			continue
 
-		var next_order: Order = refreshed_plan.generate_order(_reserved_move_tiles)
-		if not next_order or not is_instance_of(next_order, MoveOrder):
-			continue
-
-		var next_move: MoveOrder = next_order
-		if next_move.destination == order.source.position:
-			continue
-
-		_reserved_move_tiles[_tile_key(next_move.destination)] = true
-		next_move.execute(game_map)
+		_reserved_move_tiles[_tile_key(order.destination)] = true
+		order.execute(game_map)
 
 	_move_orders.clear()
 	_reserved_move_tiles.clear()
@@ -317,9 +306,9 @@ func generate_ai_orders() -> void:
 
 	for unit: MapCombatEntity in units:
 		# Generate or reuse the current plan.
-		game_map.ai_controller.plan_for_unit(unit)
+		plan_for_unit(unit)
 		# Generate the next order based on the current plan.
-		game_map.ai_controller.generate_orders_for_unit(unit)
+		generate_orders_for_unit(unit)
 
 
 func generate_npc_orders() -> void:

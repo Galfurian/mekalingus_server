@@ -10,6 +10,10 @@ layout_mode = 2
 text = "NPC Directives"
 horizontal_alignment = 1
 
+[node name="OverlayToggle" type="CheckButton" parent="."]
+layout_mode = 2
+text = "Show AI Intent Overlay"
+
 [node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 3
@@ -122,6 +126,11 @@ text = "Apply"
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Reset Anchor"
+
+[node name="ResetAllButton" type="Button" parent="TabContainer/Directive/Section/Inner/ButtonsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Reset All"
 
 [node name="Squads" type="VBoxContainer" parent="TabContainer"]
 layout_mode = 2

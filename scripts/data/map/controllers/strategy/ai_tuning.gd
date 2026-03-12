@@ -1,0 +1,42 @@
+class_name AITuning
+extends RefCounted
+
+
+const FALLBACK_GLOBAL_SCAN_RADIUS: int = 256
+const GLOBAL_SCAN_RADIUS_MARGIN: int = 4
+const RETREAT_HEALTH_THRESHOLD: float = 0.5
+const RETREAT_THREAT_THRESHOLD: float = 10.0
+const REPOSITION_HOLD_SCORE: float = 3.0
+const REPOSITION_PATROL_SCORE: float = 4.0
+
+const ATTACK_STANDOFF_BONUS: float = 8.0
+const ATTACK_REACHABLE_BONUS: float = 4.0
+const ATTACK_UNREACHABLE_PENALTY: float = 12.0
+const AGGRESSIVENESS_MIN: float = 1.0
+const AGGRESSIVENESS_MAX: float = 1.2
+
+const HOLD_THREAT_WEIGHT: float = 1.6
+const HOLD_OBJECTIVE_WEIGHT: float = 1.1
+const PATROL_THREAT_WEIGHT: float = 0.5
+const PATROL_OBJECTIVE_WEIGHT: float = 1.6
+const COHESION_WEIGHT: float = 1.3
+
+const ATTACK_RANGE_WEIGHT: float = 14.0
+const ATTACK_MOVE_COST_WEIGHT: float = 1.2
+const ATTACK_HEIGHT_WEIGHT: float = 3.0
+const ATTACK_THREAT_WEIGHT: float = 0.08
+const ATTACK_ADJACENT_ENEMY_WEIGHT: float = 9.0
+const ATTACK_ADJACENT_ALLY_WEIGHT: float = 5.0
+const ATTACK_CONTACT_PENALTY: float = 30.0
+
+
+static func get_global_scan_radius(game_map) -> int:
+	if not game_map:
+		return FALLBACK_GLOBAL_SCAN_RADIUS
+
+	var width: int = int(game_map.get("map_width"))
+	var height: int = int(game_map.get("map_height"))
+	if width <= 0 or height <= 0:
+		return FALLBACK_GLOBAL_SCAN_RADIUS
+
+	return maxi(width, height) + GLOBAL_SCAN_RADIUS_MARGIN

@@ -89,82 +89,14 @@ func is_complete() -> bool:
 
 
 func generate_order(reserved_tiles: Dictionary = {}) -> Order:
-	# Get the range modifier for the enemy unit.
-	var range_modifier = source.combatant.range_modifier
-	
-	# Check if the intent is that to attack or support.
 	if intent == Intent.ATTACK or intent == Intent.SUPPORT:
-		# Check the essential parameters.
-		if not target:
-			return null
-		if not equipped_module:
-			return null
-		# Get the mek speed.
-		var movement_speed: int = source.combatant.speed
-		# Get the module range.
-		var module_range = equipped_module.module.module_range + range_modifier
-		var is_enemy_target: bool = game_map.is_enemy_of(source, target)
-		var min_range: int = 0
-		if is_enemy_target:
-			min_range = AIUtils.get_offensive_min_range(module_range)
-		# Compute the distance to the target to determine if we need to move.
-		var distance = source.position.distance_to(target.position)
-		# Check if the target is in range of the module.
-		var target_in_range = (source == target) or (distance >= min_range and distance <= module_range)
-		# If the target is out of range, we need to move to the target.
-		if not target_in_range:
-			if not source.can_move() or movement_speed <= 0:
-				completed = true
-				return null
-			AIUtils.set_reserved_tiles(reserved_tiles)
-			# This will keep track of the best tile to act from.
-			var target_tile: Vector2i = Vector2i.ZERO
-			# Check if the target is an enemy of the source.
-			if is_enemy_target:
-				# We need to find the best tile to act from.
-				target_tile = AIUtils.find_best_attack_tile(
-					game_map,
-					source,
-					target,
-					min_range,
-					module_range,
-					movement_speed
-				)
-			else:
-				target_tile = AIUtils.find_closest_reachable_tile(
-					game_map,
-					source,
-					target,
-					0,
-					module_range,
-					movement_speed
-				)
-			# Move to the best tile to act from.
-			if target_tile == Vector2i.ZERO or target_tile == source.position:
-				return null
-			return MoveOrder.new(source, target_tile)
-		# Mark the plan as completed.
-		completed = true
-		# Check if the target is an enemy of the source.
-		if game_map.is_enemy_of(source, target):
-			# Generate the order to use the offensive module on the target.
-			return UseOffensiveModuleOrder.new(source, target, equipped_module)
-		# Generate the order to use the utility module on the target.
-		return UseUtilityModuleOrder.new(source, target, equipped_module)
+		return _generate_combat_order(reserved_tiles)
 
 	if intent == Intent.RETREAT:
-		# Check the essential parameters.
-		if destination == Vector2i.ZERO:
-			return null
-		# Generate the order to move to the destination.
-		return MoveOrder.new(source, destination)
+		return _generate_move_order_for_destination()
 
 	if intent == Intent.REPOSITION:
-		# Check the essential parameters.
-		if destination == Vector2i.ZERO:
-			return null
-		# Generate the order to move to the destination.
-		return MoveOrder.new(source, destination)
+		return _generate_move_order_for_destination()
 
 	if intent == Intent.NONE:
 		# No intent to act on.
@@ -174,6 +106,77 @@ func generate_order(reserved_tiles: Dictionary = {}) -> Order:
 	# No valid order was generated.
 	push_error("AIPlan: No valid order generated.")
 	return null
+
+
+func _generate_combat_order(reserved_tiles: Dictionary) -> Order:
+	if not target:
+		return null
+	if not equipped_module:
+		return null
+
+	var movement_speed: int = source.combatant.speed
+	var range_modifier: int = source.combatant.range_modifier
+	var module_range: int = equipped_module.module.module_range + range_modifier
+	var is_enemy_target: bool = game_map.is_enemy_of(source, target)
+	var min_range: int = 0
+	if is_enemy_target:
+		min_range = AIUtils.get_offensive_min_range(module_range)
+
+	var distance: float = source.position.distance_to(target.position)
+	var target_in_range: bool = (source == target) or (distance >= min_range and distance <= module_range)
+	if target_in_range:
+		completed = true
+		if is_enemy_target:
+			return UseOffensiveModuleOrder.new(source, target, equipped_module)
+		return UseUtilityModuleOrder.new(source, target, equipped_module)
+
+	if not source.can_move() or movement_speed <= 0:
+		completed = true
+		return null
+
+	AIUtils.set_reserved_tiles(reserved_tiles)
+	var target_tile: Vector2i = _find_combat_approach_tile(
+		is_enemy_target,
+		module_range,
+		min_range,
+		movement_speed
+	)
+	if target_tile == Vector2i.ZERO or target_tile == source.position:
+		return null
+
+	return MoveOrder.new(source, target_tile)
+
+
+func _find_combat_approach_tile(
+	is_enemy_target: bool,
+	module_range: int,
+	min_range: int,
+	movement_speed: int
+) -> Vector2i:
+	if is_enemy_target:
+		return AIUtils.find_best_attack_tile(
+			game_map,
+			source,
+			target,
+			min_range,
+			module_range,
+			movement_speed
+		)
+
+	return AIUtils.find_closest_reachable_tile(
+		game_map,
+		source,
+		target,
+		0,
+		module_range,
+		movement_speed
+	)
+
+
+func _generate_move_order_for_destination() -> Order:
+	if destination == Vector2i.ZERO:
+		return null
+	return MoveOrder.new(source, destination)
 
 func _to_string() -> String:
 	var s := "AIPlan(intent=%s, completed=%s" % [AIPlan.Intent.keys()[intent], str(completed)]

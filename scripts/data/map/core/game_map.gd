@@ -561,7 +561,6 @@ func get_owner_directive_by_key(
 	state.anchor_position = _compute_owner_anchor(owner_key)
 	if state.anchor_position == Vector2i.ZERO and fallback_anchor != Vector2i(-1, -1):
 		state.anchor_position = fallback_anchor
-	state.defend_position = state.anchor_position
 	state.patrol_waypoints = _build_default_patrol_waypoints(state.anchor_position, state.leash_radius)
 	owner_directives[owner_key] = state
 	return state
@@ -594,7 +593,6 @@ func reset_owner_anchor(owner_key: String) -> void:
 		return
 
 	state.anchor_position = new_anchor
-	state.defend_position = new_anchor
 	state.patrol_waypoints = _build_default_patrol_waypoints(new_anchor, state.leash_radius)
 	state.patrol_index = 0
 	owner_directives[owner_key] = state
@@ -629,11 +627,6 @@ func set_owner_anchor_from_centroid(owner_key: String) -> void:
 	owner_directives[owner_key] = state
 
 
-func set_owner_defend_from_centroid(owner_key: String) -> void:
-	# Defend has been merged into hold behavior.
-	set_owner_anchor_from_centroid(owner_key)
-
-
 func auto_generate_owner_patrol_ring_from_centroid(owner_key: String) -> void:
 	if owner_key.is_empty():
 		return
@@ -650,6 +643,10 @@ func auto_generate_owner_patrol_ring_from_centroid(owner_key: String) -> void:
 	state.patrol_waypoints = _build_default_patrol_waypoints(centroid, state.leash_radius)
 	state.patrol_index = 0
 	owner_directives[owner_key] = state
+
+
+func clear_all_owner_directives() -> void:
+	owner_directives.clear()
 
 
 func advance_patrol_directives() -> void:

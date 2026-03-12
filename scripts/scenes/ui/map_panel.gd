@@ -27,6 +27,8 @@ func _ready() -> void:
 		turn_management_panel.turn_controls_changed.connect(_on_turn_controls_changed)
 	if npc_directive_panel and not npc_directive_panel.directives_changed.is_connected(_on_directives_changed):
 		npc_directive_panel.directives_changed.connect(_on_directives_changed)
+	if npc_directive_panel and not npc_directive_panel.ai_overlay_toggled.is_connected(_on_ai_overlay_toggled):
+		npc_directive_panel.ai_overlay_toggled.connect(_on_ai_overlay_toggled)
 	if map_hud and not map_hud.map_state_changed.is_connected(_on_map_hud_state_changed):
 		map_hud.map_state_changed.connect(_on_map_hud_state_changed)
 	turn_management_panel.clear()
@@ -202,3 +204,9 @@ func _on_directives_changed(game_map: GameMap) -> void:
 	if game_map:
 		npc_directive_panel.refresh_state()
 		map_hud.entity_list_panel.refresh()
+		map_hud.refresh_ai_overlay()
+
+
+func _on_ai_overlay_toggled(enabled: bool) -> void:
+	if map_hud:
+		map_hud.set_ai_overlay_enabled(enabled)

@@ -236,12 +236,16 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 	# Retrieve the current plan from the cache.
 	var current_plan: AIPlan = get_current_plan(source)
 
-	# If no plan is available, return.
-	if not current_plan:
-		return
+	# If no plan is available or invalid, attempt to regenerate.
+	if not current_plan or not current_plan.is_valid():
+		_add_log("%s plan was missing or invalid; regenerating..." % source.combatant.get_chat_tag())
+		_current_plans.erase(source.combatant.uuid)
+		plan_for_unit(source)
+		current_plan = get_current_plan(source)
 
-	if not current_plan.is_valid():
-		# If the plan is invalid, we need to re-plan.
+	# If still no valid plan, we cannot generate an order.
+	if not current_plan or not current_plan.is_valid():
+		_add_log("%s could not generate a valid plan." % source.combatant.get_chat_tag())
 		return
 
 	# If the plan is already complete, there's nothing left to do this turn.
@@ -251,6 +255,7 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 	# Generate the order for the current plan.
 	var order: Order = current_plan.generate_order(_reserved_move_tiles)
 	if not order:
+		_add_log("%s plan could not generate an order" % source.combatant.get_chat_tag())
 		return
 
 	_add_log("%s generated order for plan %s : %s" % [source.combatant.get_chat_tag(), str(current_plan), str(order)])

@@ -109,7 +109,4 @@ enum MekRole {
 enum NpcDirective {
 	HOLD_PERIMETER,
 	PATROL,
-	SEEK_AND_DESTROY,
-	DEFEND_POINT,
-	RETREAT_TO_SAFE_ZONE,
 }

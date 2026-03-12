@@ -5,9 +5,6 @@ extends RefCounted
 enum Directive {
 	HOLD_PERIMETER,
 	PATROL,
-	SEEK_AND_DESTROY,
-	DEFEND_POINT,
-	RETREAT_TO_SAFE_ZONE,
 }
 
 
@@ -27,7 +24,7 @@ func _init() -> void:
 
 static func from_dict(data: Dictionary) -> NpcDirectiveState:
 	var state := NpcDirectiveState.new()
-	state.directive = int(data.get("directive", Directive.HOLD_PERIMETER))
+	state.directive = _normalize_legacy_directive(int(data.get("directive", Directive.HOLD_PERIMETER)))
 	state.anchor_position = Utils.deserialize_position(data.get("anchor_position", [0, 0]))
 	state.defend_position = Utils.deserialize_position(data.get("defend_position", [0, 0]))
 	state.patrol_index = max(0, int(data.get("patrol_index", 0)))
@@ -45,6 +42,18 @@ static func from_dict(data: Dictionary) -> NpcDirectiveState:
 		state.patrol_index = 0
 
 	return state
+
+
+static func _normalize_legacy_directive(raw_directive: int) -> int:
+	# Legacy mapping:
+	# 0 HOLD_PERIMETER -> HOLD_PERIMETER
+	# 1 PATROL -> PATROL
+	# 2 SEEK_AND_DESTROY -> PATROL
+	# 3 DEFEND_POINT -> HOLD_PERIMETER
+	# 4 RETREAT_TO_SAFE_ZONE -> HOLD_PERIMETER
+	if raw_directive == 1 or raw_directive == 2:
+		return Directive.PATROL
+	return Directive.HOLD_PERIMETER
 
 
 func to_dict() -> Dictionary:

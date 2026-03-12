@@ -218,9 +218,9 @@ func _evaluate_reposition_intent(plan: AIPlan) -> AIPlan:
 				plan,
 				source,
 				squad_center,
-				state.anchor_position,
-				state.anchor_position,
-				state.leash_radius,
+				squad_center,
+				squad_center,
+				maxi(1, state.compact_radius + 1),
 				state.compact_radius,
 				true
 			)
@@ -233,53 +233,12 @@ func _evaluate_reposition_intent(plan: AIPlan) -> AIPlan:
 				source,
 				squad_center,
 				patrol_target,
-				state.anchor_position,
-				state.leash_radius * 2,
+				Vector2i.ZERO,
+				0,
 				state.compact_radius,
 				false
 			)
 			score = 4.0
-
-		NPC_DIRECTIVE_STATE.Directive.SEEK_AND_DESTROY:
-			var enemy_target: MapCombatEntity = AIUtils.get_most_vulnerable_enemy(plan.game_map, source, 9999)
-			if enemy_target:
-				destination = AIUtils.find_furthest_progress_along_path(
-					plan.game_map,
-					source.position,
-					enemy_target.position,
-					source.combatant.speed
-				)
-			score = 2.0
-
-		NPC_DIRECTIVE_STATE.Directive.DEFEND_POINT:
-			var defend_target: Vector2i = state.defend_position
-			if defend_target == Vector2i.ZERO:
-				defend_target = state.anchor_position
-			destination = _pick_destination_for_objective(
-				plan,
-				source,
-				squad_center,
-				defend_target,
-				defend_target,
-				state.leash_radius,
-				state.compact_radius,
-				true
-			)
-			score = 3.5
-
-		NPC_DIRECTIVE_STATE.Directive.RETREAT_TO_SAFE_ZONE:
-			var safe_target: Vector2i = state.anchor_position
-			destination = _pick_destination_for_objective(
-				plan,
-				source,
-				squad_center,
-				safe_target,
-				safe_target,
-				state.leash_radius,
-				state.compact_radius,
-				true
-			)
-			score = 4.5
 
 		_:
 			destination = source.position

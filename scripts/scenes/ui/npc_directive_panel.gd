@@ -16,11 +16,7 @@ const NPC_DIRECTIVE_STATE = preload("res://scripts/data/map/controllers/strategy
 @onready var squad_tree: Tree = $TabContainer/Squads/SquadTree
 @onready var quick_hold_button: Button = $TabContainer/Squads/QuickButtons/QuickHold
 @onready var quick_patrol_button: Button = $TabContainer/Squads/QuickButtons/QuickPatrol
-@onready var quick_seek_button: Button = $TabContainer/Squads/QuickButtons/QuickSeek
-@onready var quick_defend_button: Button = $TabContainer/Squads/QuickButtons/QuickDefend
-@onready var quick_retreat_button: Button = $TabContainer/Squads/QuickButtons/QuickRetreat
 @onready var set_anchor_here_button: Button = $TabContainer/Squads/AnchorButtons/SetAnchorHere
-@onready var set_defend_here_button: Button = $TabContainer/Squads/AnchorButtons/SetDefendHere
 @onready var auto_patrol_ring_button: Button = $TabContainer/Squads/AnchorButtons/AutoPatrolRing
 
 var game_map: GameMap = null
@@ -37,11 +33,7 @@ func _ready() -> void:
 	squad_tree.set_column_title(3, "Center")
 	quick_hold_button.pressed.connect(func(): _apply_quick_directive(NPC_DIRECTIVE_STATE.Directive.HOLD_PERIMETER))
 	quick_patrol_button.pressed.connect(func(): _apply_quick_directive(NPC_DIRECTIVE_STATE.Directive.PATROL))
-	quick_seek_button.pressed.connect(func(): _apply_quick_directive(NPC_DIRECTIVE_STATE.Directive.SEEK_AND_DESTROY))
-	quick_defend_button.pressed.connect(func(): _apply_quick_directive(NPC_DIRECTIVE_STATE.Directive.DEFEND_POINT))
-	quick_retreat_button.pressed.connect(func(): _apply_quick_directive(NPC_DIRECTIVE_STATE.Directive.RETREAT_TO_SAFE_ZONE))
 	set_anchor_here_button.pressed.connect(_on_set_anchor_here_pressed)
-	set_defend_here_button.pressed.connect(_on_set_defend_here_pressed)
 	auto_patrol_ring_button.pressed.connect(_on_auto_patrol_ring_pressed)
 	_populate_directive_options()
 	clear()
@@ -80,11 +72,8 @@ func refresh_state() -> void:
 
 func _populate_directive_options() -> void:
 	directive_option.clear()
-	directive_option.add_item("Hold Perimeter")
+	directive_option.add_item("Hold")
 	directive_option.add_item("Patrol")
-	directive_option.add_item("Seek And Destroy")
-	directive_option.add_item("Defend Point")
-	directive_option.add_item("Retreat To Safe Zone")
 
 
 func _refresh_owner_options() -> void:
@@ -215,11 +204,7 @@ func _refresh_squad_tree() -> void:
 func _toggle_quick_buttons(enabled: bool) -> void:
 	quick_hold_button.disabled = not enabled
 	quick_patrol_button.disabled = not enabled
-	quick_seek_button.disabled = not enabled
-	quick_defend_button.disabled = not enabled
-	quick_retreat_button.disabled = not enabled
 	set_anchor_here_button.disabled = not enabled
-	set_defend_here_button.disabled = not enabled
 	auto_patrol_ring_button.disabled = not enabled
 
 
@@ -272,17 +257,6 @@ func _on_set_anchor_here_pressed() -> void:
 	directives_changed.emit(game_map)
 
 
-func _on_set_defend_here_pressed() -> void:
-	var owner_key: String = _get_selected_owner_key_from_squad_tree()
-	if owner_key.is_empty() or not game_map:
-		return
-
-	game_map.set_owner_defend_from_centroid(owner_key)
-	_refresh_selected_state()
-	_refresh_squad_tree()
-	directives_changed.emit(game_map)
-
-
 func _on_auto_patrol_ring_pressed() -> void:
 	var owner_key: String = _get_selected_owner_key_from_squad_tree()
 	if owner_key.is_empty() or not game_map:
@@ -313,12 +287,6 @@ func _directive_label(directive: int) -> String:
 			return "Hold"
 		NPC_DIRECTIVE_STATE.Directive.PATROL:
 			return "Patrol"
-		NPC_DIRECTIVE_STATE.Directive.SEEK_AND_DESTROY:
-			return "Seek"
-		NPC_DIRECTIVE_STATE.Directive.DEFEND_POINT:
-			return "Defend"
-		NPC_DIRECTIVE_STATE.Directive.RETREAT_TO_SAFE_ZONE:
-			return "Retreat"
 		_:
 			return "Unknown"
 

@@ -148,21 +148,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Patrol"
 
-[node name="QuickSeek" type="Button" parent="TabContainer/Squads/QuickButtons"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Seek"
-
-[node name="QuickDefend" type="Button" parent="TabContainer/Squads/QuickButtons"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Defend"
-
-[node name="QuickRetreat" type="Button" parent="TabContainer/Squads/QuickButtons"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Retreat"
-
 [node name="AnchorButtons" type="HBoxContainer" parent="TabContainer/Squads"]
 layout_mode = 2
 
@@ -170,11 +155,6 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Set Anchor Here"
-
-[node name="SetDefendHere" type="Button" parent="TabContainer/Squads/AnchorButtons"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Set Defend Here"
 
 [node name="AutoPatrolRing" type="Button" parent="TabContainer/Squads/AnchorButtons"]
 layout_mode = 2

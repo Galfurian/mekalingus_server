@@ -640,19 +640,8 @@ func set_owner_anchor_from_centroid(owner_key: String) -> void:
 
 
 func set_owner_defend_from_centroid(owner_key: String) -> void:
-	if owner_key.is_empty():
-		return
-
-	var state: RefCounted = get_owner_directive_by_key(owner_key)
-	if not state:
-		return
-
-	var centroid: Vector2i = _compute_owner_anchor(owner_key)
-	if centroid == Vector2i.ZERO:
-		return
-
-	state.defend_position = centroid
-	owner_directives[owner_key] = state
+	# Defend has been merged into hold behavior.
+	set_owner_anchor_from_centroid(owner_key)
 
 
 func auto_generate_owner_patrol_ring_from_centroid(owner_key: String) -> void:
@@ -712,12 +701,17 @@ func _build_default_patrol_waypoints(anchor: Vector2i, leash_radius: int) -> Arr
 	if anchor == Vector2i.ZERO:
 		return waypoints
 
-	var patrol_radius: int = maxi(2, int(round(leash_radius * 0.75)))
+	var patrol_radius_x: int = maxi(int(map_width * 0.25), leash_radius * 2)
+	var patrol_radius_y: int = maxi(int(map_height * 0.25), leash_radius * 2)
 	var candidates: Array[Vector2i] = [
-		anchor + Vector2i(0, -patrol_radius),
-		anchor + Vector2i(patrol_radius, 0),
-		anchor + Vector2i(0, patrol_radius),
-		anchor + Vector2i(-patrol_radius, 0),
+		anchor + Vector2i(0, -patrol_radius_y),
+		anchor + Vector2i(int(round(patrol_radius_x * 0.7)), -int(round(patrol_radius_y * 0.7))),
+		anchor + Vector2i(patrol_radius_x, 0),
+		anchor + Vector2i(int(round(patrol_radius_x * 0.7)), int(round(patrol_radius_y * 0.7))),
+		anchor + Vector2i(0, patrol_radius_y),
+		anchor + Vector2i(-int(round(patrol_radius_x * 0.7)), int(round(patrol_radius_y * 0.7))),
+		anchor + Vector2i(-patrol_radius_x, 0),
+		anchor + Vector2i(-int(round(patrol_radius_x * 0.7)), -int(round(patrol_radius_y * 0.7))),
 	]
 
 	for point in candidates:

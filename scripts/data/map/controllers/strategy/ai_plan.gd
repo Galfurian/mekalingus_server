@@ -88,7 +88,7 @@ func is_complete() -> bool:
 	return false
 
 
-func generate_order() -> Order:
+func generate_order(reserved_tiles: Dictionary = {}) -> Order:
 	# Get the range modifier for the enemy unit.
 	var range_modifier = source.combatant.range_modifier
 	
@@ -103,28 +103,44 @@ func generate_order() -> Order:
 		var movement_speed: int = source.combatant.speed
 		# Get the module range.
 		var module_range = equipped_module.module.module_range + range_modifier
+		var is_enemy_target: bool = game_map.is_enemy_of(source, target)
+		var min_range: int = 0
+		if is_enemy_target:
+			min_range = AIUtils.get_offensive_min_range(module_range)
 		# Compute the distance to the target to determine if we need to move.
 		var distance = source.position.distance_to(target.position)
 		# Check if the target is in range of the module.
-		var target_in_range = (source == target) or (distance >= 0 and distance <= module_range)
+		var target_in_range = (source == target) or (distance >= min_range and distance <= module_range)
 		# If the target is out of range, we need to move to the target.
 		if not target_in_range:
 			if not source.can_move() or movement_speed <= 0:
 				completed = true
 				return null
+			AIUtils.set_reserved_tiles(reserved_tiles)
 			# This will keep track of the best tile to act from.
 			var target_tile: Vector2i = Vector2i.ZERO
 			# Check if the target is an enemy of the source.
-			if game_map.is_enemy_of(source, target):
+			if is_enemy_target:
 				# We need to find the best tile to act from.
-				target_tile = AIUtils.find_best_attack_tile(game_map, source, target, 0, module_range, movement_speed)
+				target_tile = AIUtils.find_best_attack_tile(
+					game_map,
+					source,
+					target,
+					min_range,
+					module_range,
+					movement_speed
+				)
 			else:
-				target_tile = AIUtils.find_closest_reachable_tile(game_map, source, target, 0, module_range, movement_speed)
-			# If the best tile is the same as the source position, we can't move, so we move randomly.
-			if target_tile == source.position:
-				target_tile = AIUtils.find_random_reachable_tile(game_map, source.position, movement_speed)
+				target_tile = AIUtils.find_closest_reachable_tile(
+					game_map,
+					source,
+					target,
+					0,
+					module_range,
+					movement_speed
+				)
 			# Move to the best tile to act from.
-			if target_tile == Vector2i.ZERO:
+			if target_tile == Vector2i.ZERO or target_tile == source.position:
 				return null
 			return MoveOrder.new(source, target_tile)
 		# Mark the plan as completed.

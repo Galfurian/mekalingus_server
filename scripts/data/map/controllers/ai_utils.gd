@@ -230,6 +230,14 @@ func is_equipped_module_available(combatant: CombatActor, equipped_module: Equip
 		return false
 	return true
 
+
+func get_offensive_min_range(module_range: int) -> int:
+	if module_range <= 1:
+		return 0
+	if module_range <= 3:
+		return 1
+	return 2
+
 func find_matching_modules(
 	combatant: CombatActor,
 	offensive: bool,
@@ -293,6 +301,10 @@ func get_distance(game_map, from: Vector2i, to: Vector2i) -> float:
 	return AIPathfinder.get_distance(game_map, from, to)
 
 
+func set_reserved_tiles(reserved_tiles: Dictionary) -> void:
+	AIPathfinder.set_reserved_tiles(reserved_tiles)
+
+
 func find_furthest_progress_along_path(
 	game_map,
 	start: Vector2i,
@@ -310,14 +322,7 @@ func find_closest_reachable_tile(
 	max_range: int,
 	max_movement: int
 ) -> Vector2i:
-	return AIPathfinder.find_closest_reachable_tile(
-		game_map,
-		source,
-		target,
-		min_range,
-		max_range,
-		max_movement
-	)
+	return AIPathfinder.find_closest_reachable_tile(game_map, source, target, min_range, max_range, max_movement)
 
 
 func find_best_attack_tile(
@@ -328,14 +333,7 @@ func find_best_attack_tile(
 	max_range: int,
 	max_movement: int
 ) -> Vector2i:
-	return AIPathfinder.find_best_attack_tile(
-		game_map,
-		source,
-		target,
-		min_range,
-		max_range,
-		max_movement
-	)
+	return AIPathfinder.find_best_attack_tile(game_map, source, target, min_range, max_range, max_movement)
 
 
 func find_random_reachable_tile(game_map, start: Vector2i, max_cost: int) -> Vector2i:

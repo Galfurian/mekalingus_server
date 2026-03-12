@@ -1,6 +1,12 @@
 class_name AIPathfinder
 extends RefCounted
 
+static var _reserved_tiles: Dictionary = {}
+
+
+static func set_reserved_tiles(reserved_tiles: Dictionary) -> void:
+	_reserved_tiles = reserved_tiles
+
 
 static func normalize_position(vector: Vector2i) -> Vector2:
 	"""
@@ -121,6 +127,8 @@ static func find_furthest_progress_along_path(
 		var tile = path[i]
 		if game_map.is_occupied(tile):
 			break
+		if _is_reserved_tile(tile, start):
+			break
 
 		var cost = game_map.get_movement_cost(tile)
 		if cost < 0 or total_cost + cost > max_movement:
@@ -145,6 +153,8 @@ static func find_closest_reachable_tile(
 	for tile in get_reachable_tiles(game_map, source.position, max_movement):
 		if game_map.is_occupied(tile):
 			continue
+		if _is_reserved_tile(tile, source.position):
+			continue
 
 		var distance = tile.distance_to(target.position)
 		if distance < min_range or distance > max_range:
@@ -157,7 +167,12 @@ static func find_closest_reachable_tile(
 	if best_tile != Vector2i.ZERO:
 		return best_tile
 
-	return find_furthest_progress_along_path(game_map, source.position, target.position, max_movement)
+	return find_furthest_progress_along_path(
+		game_map,
+		source.position,
+		target.position,
+		max_movement
+	)
 
 
 static func find_best_attack_tile(
@@ -170,9 +185,12 @@ static func find_best_attack_tile(
 ) -> Vector2i:
 	var best_tile := Vector2i.ZERO
 	var best_score := -INF
+	var ideal_range := maxf(float(min_range), float(max_range) - 0.5)
 
 	for tile in get_reachable_tiles(game_map, source.position, max_movement):
 		if game_map.is_occupied(tile):
+			continue
+		if _is_reserved_tile(tile, source.position):
 			continue
 
 		var distance = tile.distance_to(target.position)
@@ -181,10 +199,22 @@ static func find_best_attack_tile(
 
 		var move_cost = get_path_cost(game_map, get_shortest_path(game_map, source.position, tile))
 		var height_difference = game_map.get_tile_height(tile) - game_map.get_tile_height(target.position)
-		var ideal_range = float(max_range)
 		var range_penalty = abs(distance - ideal_range)
-		# Prefer standoff positions near max range; movement economy is secondary.
-		var score = -range_penalty * 10.0 - move_cost + height_difference * 2.0
+		var threat = AIThreatEvaluator.get_threat_level(game_map, tile, source)
+		var adjacent_enemies: int = _count_adjacent_enemies(game_map, source, tile)
+		var adjacent_allies: int = _count_adjacent_allies(game_map, source, tile)
+		var contact_penalty: float = 0.0
+		if distance <= 1.1 and max_range > 1:
+			contact_penalty = 30.0
+		# Strongly prefer safe standoff positions near ideal range.
+		var score = 0.0
+		score += -range_penalty * 14.0
+		score += -move_cost * 1.2
+		score += height_difference * 3.0
+		score += -threat * 0.08
+		score += -float(adjacent_enemies) * 9.0
+		score += -float(max(0, adjacent_allies - 1)) * 5.0
+		score += -contact_penalty
 		if score > best_score:
 			best_score = score
 			best_tile = tile
@@ -192,7 +222,8 @@ static func find_best_attack_tile(
 	if best_tile != Vector2i.ZERO:
 		return best_tile
 
-	return find_furthest_progress_along_path(game_map, source.position, target.position, max_movement)
+	# No suitable standoff tile available this turn: hold position instead of facehugging.
+	return source.position
 
 
 static func find_random_reachable_tile(game_map, start: Vector2i, max_cost: int) -> Vector2i:
@@ -204,3 +235,33 @@ static func find_random_reachable_tile(game_map, start: Vector2i, max_cost: int)
 	if valid_tiles.is_empty():
 		return Vector2i.ZERO
 	return valid_tiles.pick_random()
+
+
+static func _tile_key(tile: Vector2i) -> String:
+	return "%d,%d" % [tile.x, tile.y]
+
+
+static func _is_reserved_tile(tile: Vector2i, source_tile: Vector2i) -> bool:
+	if _reserved_tiles.is_empty():
+		return false
+	if tile == source_tile:
+		return false
+	return _reserved_tiles.has(_tile_key(tile))
+
+
+static func _count_adjacent_enemies(game_map, source, tile: Vector2i) -> int:
+	var count: int = 0
+	for enemy in AIUnitQueries.get_enemies_in_range(game_map, source, 9999):
+		if enemy and enemy.active and enemy.position.distance_to(tile) <= 1.5:
+			count += 1
+	return count
+
+
+static func _count_adjacent_allies(game_map, source, tile: Vector2i) -> int:
+	var count: int = 0
+	for ally in AIUnitQueries.get_allies_in_range(game_map, source, 9999):
+		if ally and ally.active and ally.position.distance_to(tile) <= 1.5:
+			count += 1
+	if source and source.position.distance_to(tile) <= 1.5:
+		count += 1
+	return count

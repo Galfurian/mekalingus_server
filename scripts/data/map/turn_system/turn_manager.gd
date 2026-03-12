@@ -71,6 +71,58 @@ func get_current_turn() -> int:
 	return _current_turn
 
 
+func get_turn_interval() -> float:
+	"""
+	Returns the current round duration in seconds.
+	"""
+	return _turn_interval
+
+
+func get_time_until_next_turn() -> float:
+	"""
+	Returns remaining time before the next automatic turn execution.
+	"""
+	if not _is_active:
+		return 0.0
+	return maxf(0.0, _turn_interval - _timer)
+
+
+func set_turn_interval(value: float) -> void:
+	"""
+	Sets the round duration (seconds), clamped to a safe lower bound.
+	"""
+	_turn_interval = maxf(0.1, value)
+
+
+func set_time_of_day_hours(hours: float) -> void:
+	"""
+	Sets the time of day by adjusting the current turn index within the day cycle.
+	"""
+	var normalized_hours: float = fposmod(hours, 24.0)
+	var normalized_day_fraction: float = normalized_hours / 24.0
+	var day_base: int = int(floor(float(_current_turn) / float(TURNS_PER_DAY))) * TURNS_PER_DAY
+	var day_turn: int = int(floor(normalized_day_fraction * float(TURNS_PER_DAY)))
+	day_turn = clampi(day_turn, 0, TURNS_PER_DAY - 1)
+	_current_turn = day_base + day_turn
+
+
+func step_once() -> void:
+	"""
+	Executes a single turn immediately, without waiting for the timer.
+	"""
+	if not game_map:
+		return
+
+	var was_active: bool = _is_active
+	if _is_active:
+		stop()
+
+	_execute_turn()
+
+	if was_active and game_map.has_hostile_pairs():
+		start()
+
+
 func is_active() -> bool:
 	"""
 	Returns whether the turn manager is active.
@@ -117,41 +169,45 @@ func tick(delta: float) -> void:
 	# If the timer exceeds the turn interval, execute the turn.
 	# This is the main loop for the turn manager.
 	if _timer >= _turn_interval:
-		# Reset the timer.
-		_timer = 0.0
-		# Emit the turn started signal.
-		on_turn_started.emit(_current_turn)
+		_execute_turn()
 
-		# 1) Generate AI orders for all AI-controlled combat entities.
-		game_map.ai_controller.generate_ai_orders()
-		
-		# 3.1) Process use of offensive module activations.
-		game_map.ai_controller.execute_offensive_module_orders()
-		# 3.2) Process use of utility module activations.
-		game_map.ai_controller.execute_utility_module_orders()
-		# 3.3) Check if any units are destroyed after executing the orders.
-		_erase_destroyed_units()
 
-		# 4) Process movement orders.
-		game_map.ai_controller.execute_move_orders()
+func _execute_turn() -> void:
+	# Reset the timer.
+	_timer = 0.0
+	# Emit the turn started signal.
+	on_turn_started.emit(_current_turn)
 
-		# 5.1) Regenerate all units.
-		_regenerate_units()
-		# 5.2) Update time-based effects.
-		_update_time_based_effects()
-		# 5.2) Check if any units are destroyed after executing the orders.
-		_erase_destroyed_units()
-		if not game_map.has_hostile_pairs():
-			_is_active = false
-			game_map.combat_logger.add_log(
-				Enums.LogType.SYSTEM,
-				"Combat ended on turn %d: no hostile units remain." % _current_turn,
-			)
+	# 1) Generate AI orders for all AI-controlled combat entities.
+	game_map.ai_controller.generate_ai_orders()
 
-		# Emit the turn ended signal.
-		on_turn_ended.emit(_current_turn)
-		# Increment the current turn.
-		_current_turn += 1
+	# 3.1) Process use of offensive module activations.
+	game_map.ai_controller.execute_offensive_module_orders()
+	# 3.2) Process use of utility module activations.
+	game_map.ai_controller.execute_utility_module_orders()
+	# 3.3) Check if any units are destroyed after executing the orders.
+	_erase_destroyed_units()
+
+	# 4) Process movement orders.
+	game_map.ai_controller.execute_move_orders()
+
+	# 5.1) Regenerate all units.
+	_regenerate_units()
+	# 5.2) Update time-based effects.
+	_update_time_based_effects()
+	# 5.2) Check if any units are destroyed after executing the orders.
+	_erase_destroyed_units()
+	if not game_map.has_hostile_pairs():
+		_is_active = false
+		game_map.combat_logger.add_log(
+			Enums.LogType.SYSTEM,
+			"Combat ended on turn %d: no hostile units remain." % _current_turn,
+		)
+
+	# Emit the turn ended signal.
+	on_turn_ended.emit(_current_turn)
+	# Increment the current turn.
+	_current_turn += 1
 
 
 static func format_pos_tag(pos: Vector2i) -> String:

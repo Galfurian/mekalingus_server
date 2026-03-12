@@ -57,9 +57,9 @@ func _get_effective_module_range() -> int:
 	return max(0, equipped_module.module.module_range + source.combatant.range_modifier)
 
 
-func _is_target_in_module_range(game_map) -> bool:
+func _is_target_in_module_range(_game_map) -> bool:
 	var effective_range: int = _get_effective_module_range()
-	var distance: float = AIUtils.get_distance(game_map, source.position, target.position)
+	var distance: float = source.position.distance_to(target.position)
 	return distance <= float(effective_range)
 
 

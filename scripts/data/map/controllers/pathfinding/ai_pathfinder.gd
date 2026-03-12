@@ -181,7 +181,7 @@ static func find_best_attack_tile(
 
 		var move_cost = get_path_cost(game_map, get_shortest_path(game_map, source.position, tile))
 		var height_difference = game_map.get_tile_height(tile) - game_map.get_tile_height(target.position)
-		var ideal_range = (min_range + max_range) / 2.0
+		var ideal_range = float(max_range)
 		var range_penalty = abs(distance - ideal_range)
 		var score = -move_cost - range_penalty + height_difference * 2.0
 		if score > best_score:

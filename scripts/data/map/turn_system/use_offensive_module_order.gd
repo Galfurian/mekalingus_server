@@ -31,13 +31,15 @@ func execute(game_map) -> bool:
 	if source_actor.is_dead() or target_actor.is_dead():
 		return false
 	if not _is_target_in_module_range(game_map):
+		var air_distance: float = source.position.distance_to(target.position)
 		_add_combat_log(
 			game_map,
-			"%s cannot use %s on %s (out of range: %d)" % [
+			"%s cannot use %s on %s (range: %d, distance: %.1f)" % [
 				source_actor.get_chat_tag(),
 				equipped_module.get_chat_tag(),
 				target_actor.get_chat_tag(),
 				_get_effective_module_range(),
+				air_distance,
 			],
 		)
 		return false

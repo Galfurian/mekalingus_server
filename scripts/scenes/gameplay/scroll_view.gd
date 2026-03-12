@@ -1,54 +1,101 @@
 extends ScrollContainer
 
-# Define the signal
-signal scrolled(scroll_up: bool, mouse_pos: Vector2)
+signal zoom_requested(scroll_up: bool, mouse_pos: Vector2)
+
+const DRAG_THRESHOLD: float = 5.0
+const WHEEL_SCROLL_STEP: int = 30
 
 var _is_dragging: bool = false
 var _drag_start_pos: Vector2 = Vector2.ZERO
 var _drag_start_scroll: Vector2 = Vector2.ZERO
-var _drag_threshold: float = 5.0
 
 func _ready():
 	set_mouse_filter(Control.MOUSE_FILTER_PASS)
 
-func _gui_input(event):
-	# Left-click drag for panning
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		_handle_mouse_button(event)
+		return
+
+	if event is InputEventMouseMotion:
+		_handle_mouse_motion(event)
+
+
+func _handle_mouse_button(event: InputEventMouseButton) -> void:
+	if event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
-			_is_dragging = true
-			_drag_start_pos = get_local_mouse_position()
-			_drag_start_scroll = Vector2(scroll_horizontal, scroll_vertical)
-			# Don't consume the event yet - let grid_container handle selection
+			_begin_drag()
 		else:
 			_is_dragging = false
-	elif event is InputEventMouseMotion and _is_dragging:
-		var current_pos = get_local_mouse_position()
-		var delta = current_pos - _drag_start_pos
-		# Only treat as drag if movement exceeds threshold
-		if delta.length() > _drag_threshold:
-			scroll_horizontal = int(_drag_start_scroll.x - delta.x)
-			scroll_vertical = int(_drag_start_scroll.y - delta.y)
-	# CTRL + Scroll for Zoom
-	elif event is InputEventMouseButton and Input.is_key_pressed(KEY_CTRL):
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			scrolled.emit(true, event.position)
+		return
+
+	if not event.pressed:
+		return
+
+	if event.ctrl_pressed:
+		if _emit_zoom_request(event):
 			accept_event()
-		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			scrolled.emit(false, event.position)
+		return
+
+	if event.shift_pressed:
+		if _apply_shift_scroll(event):
 			accept_event()
-	# SHIFT + Scroll for Horizontal Scrolling
-	elif event is InputEventMouseButton and Input.is_key_pressed(KEY_SHIFT):
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			scroll_horizontal -= 30
-			accept_event()
-		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			scroll_horizontal += 30
-			accept_event()
-	# Normal Scroll for Vertical Scrolling
-	elif event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			scroll_vertical -= 30
-			accept_event()
-		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			scroll_vertical += 30
-			accept_event()
+		return
+
+	if _apply_vertical_scroll(event):
+		accept_event()
+
+
+func _handle_mouse_motion(_event: InputEventMouseMotion) -> void:
+	if not _is_dragging:
+		return
+
+	var current_pos: Vector2 = get_local_mouse_position()
+	var delta: Vector2 = current_pos - _drag_start_pos
+	if delta.length() <= DRAG_THRESHOLD:
+		return
+
+	scroll_horizontal = int(_drag_start_scroll.x - delta.x)
+	scroll_vertical = int(_drag_start_scroll.y - delta.y)
+
+
+func _begin_drag() -> void:
+	_is_dragging = true
+	_drag_start_pos = get_local_mouse_position()
+	_drag_start_scroll = Vector2(scroll_horizontal, scroll_vertical)
+
+
+func _emit_zoom_request(event: InputEventMouseButton) -> bool:
+	if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+		zoom_requested.emit(true, event.position)
+		return true
+
+	if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+		zoom_requested.emit(false, event.position)
+		return true
+
+	return false
+
+
+func _apply_shift_scroll(event: InputEventMouseButton) -> bool:
+	if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+		scroll_horizontal -= WHEEL_SCROLL_STEP
+		return true
+
+	if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+		scroll_horizontal += WHEEL_SCROLL_STEP
+		return true
+
+	return false
+
+
+func _apply_vertical_scroll(event: InputEventMouseButton) -> bool:
+	if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+		scroll_vertical -= WHEEL_SCROLL_STEP
+		return true
+
+	if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+		scroll_vertical += WHEEL_SCROLL_STEP
+		return true
+
+	return false

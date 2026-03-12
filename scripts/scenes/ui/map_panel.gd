@@ -31,6 +31,8 @@ func _ready() -> void:
 		npc_directive_panel.ai_overlay_toggled.connect(_on_ai_overlay_toggled)
 	if map_hud and not map_hud.map_state_changed.is_connected(_on_map_hud_state_changed):
 		map_hud.map_state_changed.connect(_on_map_hud_state_changed)
+	if map_hud and npc_directive_panel:
+		map_hud.set_ai_overlay_enabled(npc_directive_panel.is_ai_overlay_enabled())
 	turn_management_panel.clear()
 	npc_directive_panel.clear()
 	#GameServer.start()

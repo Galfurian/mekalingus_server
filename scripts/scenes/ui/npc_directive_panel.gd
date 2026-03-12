@@ -299,6 +299,10 @@ func _on_overlay_toggled(enabled: bool) -> void:
 	ai_overlay_toggled.emit(enabled)
 
 
+func is_ai_overlay_enabled() -> bool:
+	return overlay_toggle and overlay_toggle.button_pressed
+
+
 func _reissue_ai_orders() -> void:
 	if not game_map or not game_map.ai_controller:
 		return

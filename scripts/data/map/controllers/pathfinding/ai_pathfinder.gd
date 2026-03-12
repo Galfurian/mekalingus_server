@@ -183,7 +183,8 @@ static func find_best_attack_tile(
 		var height_difference = game_map.get_tile_height(tile) - game_map.get_tile_height(target.position)
 		var ideal_range = float(max_range)
 		var range_penalty = abs(distance - ideal_range)
-		var score = -move_cost - range_penalty + height_difference * 2.0
+		# Prefer standoff positions near max range; movement economy is secondary.
+		var score = -range_penalty * 10.0 - move_cost + height_difference * 2.0
 		if score > best_score:
 			best_score = score
 			best_tile = tile

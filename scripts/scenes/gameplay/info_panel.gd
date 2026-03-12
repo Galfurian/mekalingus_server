@@ -26,6 +26,7 @@ var game_map: GameMap
 var entity: MapEntity
 var _slot_editor_rows: Dictionary = {}
 var _is_rebuilding_editors: bool = false
+var _last_selected_tab: int = 0
 
 # =============================================================================
 # COMPONENT REFERENCES
@@ -33,7 +34,9 @@ var _is_rebuilding_editors: bool = false
 
 @onready var entity_info = $EntityInspector/ScrollContainer/EntityInfo
 @onready var item_inspector = $EntityInspector/ItemInspector
-@onready var slot_editor_container = $EntityInspector/ItemInspector/SlotEditorScroll/SlotEditorContainer
+@onready var tabs = $EntityInspector/ItemInspector/Tabs
+@onready var slot_editor_container = $EntityInspector/ItemInspector/Tabs/Equipment/SlotEditorScroll/SlotEditorContainer
+@onready var plan_info = $EntityInspector/ItemInspector/Tabs/Plan/ScrollContainer/PlanInfo
 @onready var item_info = $EntityInspector/ItemInspector/ScrollContainer/ItemInfo
 
 # =============================================================================
@@ -51,7 +54,11 @@ func setup(p_game_map: GameMap) -> void:
 	# Connect the signals.
 	if not game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
 		game_map.turn_manager.on_turn_ended.connect(_on_turn_ended)
-
+	if not plan_info.meta_clicked.is_connected(_on_plan_meta_clicked):
+		plan_info.meta_clicked.connect(_on_plan_meta_clicked)
+	# Connect the tabs signal.
+	if not tabs.tab_changed.is_connected(_on_tab_changed):
+		tabs.tab_changed.connect(_on_tab_changed)
 
 func clear() -> void:
 	"""
@@ -66,6 +73,7 @@ func clear() -> void:
 	_clear_slot_editor_container()
 	_slot_editor_rows.clear()
 	entity_info.clear()
+	plan_info.clear()
 	item_info.clear()
 	item_inspector.visible = false
 
@@ -103,6 +111,7 @@ func update_panel() -> void:
 	_clear_slot_editor_container()
 	_slot_editor_rows.clear()
 	entity_info.clear()
+	plan_info.clear()
 	item_info.clear()
 	item_inspector.visible = false
 
@@ -110,8 +119,12 @@ func update_panel() -> void:
 		var map_combat_entity: MapCombatEntity = entity
 		_load_combat_entity_details(map_combat_entity)
 		item_inspector.visible = true
+		tabs.current_tab = _last_selected_tab
 		_rebuild_slot_editors(map_combat_entity.combatant)
+		_update_plan_tab(map_combat_entity)
 
+func _on_tab_changed(tab_index: int) -> void:
+	_last_selected_tab = tab_index
 
 # =============================================================================
 # ITEM SELECTION
@@ -402,6 +415,94 @@ func _apply_loadout_from_slot_editors(focus_slot: int, focus_row: int) -> void:
 			return
 
 	item_info.clear()
+
+
+func _update_plan_tab(map_entity: MapCombatEntity) -> void:
+	if not game_map or not map_entity:
+		plan_info.clear()
+		return
+
+	var plan: AIPlan = game_map.ai_controller.get_current_plan(map_entity)
+	if not plan:
+		plan_info.clear()
+		plan_info.append_text("[center][b]Plan[/b][/center]\nNo current plan.")
+		return
+
+	var s: String = "[center][b]Plan[/b][/center]\n"
+	s += "Intent    : %s\n" % AIPlan.Intent.keys()[plan.intent]
+	s += "Completed : %s\n" % str(plan.completed)
+	s += "Score     : %.2f\n" % plan.score
+
+	if plan.source and plan.source.combatant:
+		s += "Source    : [url=entity:%s]%s[/url]\n" % [
+			plan.source.combatant.uuid,
+			plan.source.combatant.get_chat_tag(),
+		]
+
+	if plan.target and plan.target.combatant:
+		s += "Target    : [url=entity:%s]%s[/url]\n" % [
+			plan.target.combatant.uuid,
+			plan.target.combatant.get_chat_tag(),
+		]
+
+	if plan.equipped_module and plan.equipped_module.validate():
+		var module_item: Item = plan.equipped_module.item
+		var module_name: String = plan.equipped_module.module.module_name
+		s += "Module    : [url=item:%s]%s[/url] -> %s\n" % [
+			module_item.uuid,
+			module_item.template.item_name,
+			module_name,
+		]
+
+	if plan.destination != Vector2i.ZERO:
+		s += "Move To   : %s\n" % GameMap.format_pos_tag(plan.destination)
+
+	if map_entity.position:
+		s += "Now At    : %s\n" % GameMap.format_pos_tag(map_entity.position)
+
+	if plan.target:
+		var distance: float = map_entity.position.distance_to(plan.target.position)
+		s += "Air Dist  : %.1f\n" % distance
+
+	plan_info.clear()
+	plan_info.append_text(s)
+
+
+func _on_plan_meta_clicked(meta: Variant) -> void:
+	if not game_map:
+		return
+
+	var meta_text: String = str(meta)
+	if meta_text.begins_with("item:"):
+		var item_uuid: String = meta_text.substr(5)
+		if not is_instance_valid(entity) or not is_instance_of(entity, MapCombatEntity):
+			return
+		for item: Item in (entity as MapCombatEntity).combatant.items:
+			if item and item.uuid == item_uuid:
+				_load_item_details(item)
+				return
+		return
+
+	if meta_text.begins_with("entity:"):
+		var entity_uuid: String = meta_text.substr(7)
+		var target_entity: MapEntity = game_map.get_entity(entity_uuid)
+		if target_entity:
+			set_entity(target_entity)
+		return
+
+	if meta_text.begins_with("pos:"):
+		var coord_text: String = meta_text.substr(4)
+		var coords: PackedStringArray = coord_text.split(",")
+		if coords.size() != 2:
+			return
+		var x: int = int(coords[0])
+		var y: int = int(coords[1])
+		if not is_instance_valid(entity) or not is_instance_of(entity, MapEntity):
+			return
+		# We cannot pan from this panel alone, so selecting nearest entity is most useful fallback.
+		var at_pos: MapEntity = game_map.get_entity_at(Vector2i(x, y))
+		if at_pos:
+			set_entity(at_pos)
 
 
 func _get_slot_color(slot: Enums.SlotType) -> Color:

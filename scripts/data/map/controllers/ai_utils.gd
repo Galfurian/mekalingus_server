@@ -181,11 +181,52 @@ func can_module_be_used_now(combatant: CombatActor, item: Item, module: ItemModu
 	"""
 	Checks if a module can be used based on its cooldown and power requirements.
 	"""
+	if not combatant or not item or not module:
+		return false
+	if not has_item_equipped(combatant, item):
+		return false
+	if not has_item_module(item, module):
+		return false
 	if module.passive:
+		return false
+	if not combatant.cooldown_manager:
 		return false
 	if combatant.cooldown_manager.is_on_cooldown(item, module):
 		return false
 	if combatant.power < module.power_on_use:
+		return false
+	return true
+
+func has_item_equipped(combatant: CombatActor, item: Item) -> bool:
+	if not combatant or not item:
+		return false
+	for equipped_item: Item in combatant.items:
+		if equipped_item == item:
+			return true
+		if equipped_item and equipped_item.uuid == item.uuid:
+			return true
+	return false
+
+
+func has_item_module(item: Item, module: ItemModule) -> bool:
+	if not item or not item.template or not module:
+		return false
+	for item_module: ItemModule in item.template.modules:
+		if item_module == module:
+			return true
+	return false
+
+
+func is_equipped_module_available(combatant: CombatActor, equipped_module: EquippedModule) -> bool:
+	if not combatant or not equipped_module:
+		return false
+	if not equipped_module.validate():
+		return false
+	if equipped_module.mek != combatant:
+		return false
+	if not has_item_equipped(combatant, equipped_module.item):
+		return false
+	if not has_item_module(equipped_module.item, equipped_module.module):
 		return false
 	return true
 

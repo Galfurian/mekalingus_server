@@ -45,8 +45,17 @@ func execute(_game_map) -> bool:
 
 
 func validate() -> bool:
-	push_warning("validate() not implemented in subclass: %s" % self)
-	return false
+	if not source or not target or not equipped_module:
+		return false
+	if not source.combatant or not target.combatant:
+		return false
+	if source.combatant.is_dead() or target.combatant.is_dead():
+		return false
+	if not AIUtils.is_equipped_module_available(source.combatant, equipped_module):
+		return false
+	if not AIUtils.can_module_be_used_now(source.combatant, equipped_module.item, equipped_module.module):
+		return false
+	return true
 
 
 func _to_string() -> String:

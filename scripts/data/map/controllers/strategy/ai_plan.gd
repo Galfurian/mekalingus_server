@@ -60,7 +60,11 @@ func is_valid() -> bool:
 	if intent == Intent.ATTACK or intent == Intent.SUPPORT:
 		if target == null or target.combatant.is_dead():
 			return false
-		if equipped_module == null or not AIUtils.can_module_be_used_now(source.combatant, equipped_module.item, equipped_module.module):
+		if equipped_module == null:
+			return false
+		if not AIUtils.is_equipped_module_available(source.combatant, equipped_module):
+			return false
+		if not AIUtils.can_module_be_used_now(source.combatant, equipped_module.item, equipped_module.module):
 			return false
 	if intent == Intent.RETREAT or intent == Intent.REPOSITION:
 		if destination == Vector2i.ZERO:

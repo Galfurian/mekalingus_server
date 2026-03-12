@@ -8,5 +8,9 @@
         "**/Thumbs.db": true,
         "**/*.gd.uid": true,
         "**/*.import": true
-    }
+    },
+    "[json]": {
+        "editor.wordWrapColumn": 80,
+        "editor.wordWrap": "wordWrapColumn"
+    }"
 }

@@ -36,9 +36,13 @@ visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ItemList" type="ItemList" parent="EntityInspector/ItemInspector"]
+[node name="SlotEditorScroll" type="ScrollContainer" parent="EntityInspector/ItemInspector"]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="SlotEditorContainer" type="VBoxContainer" parent="EntityInspector/ItemInspector/SlotEditorScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="ScrollContainer" type="ScrollContainer" parent="EntityInspector/ItemInspector"]
 layout_mode = 2

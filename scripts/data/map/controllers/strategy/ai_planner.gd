@@ -8,8 +8,13 @@ const RETREAT_INTENT_EVALUATOR = preload("res://scripts/data/map/controllers/str
 const REPOSITION_INTENT_EVALUATOR = preload("res://scripts/data/map/controllers/strategy/intents/ai_reposition_intent_evaluator.gd")
 
 
-func generate_plan(source, game_map, aggressiveness: float = 1.0) -> AIPlan:
-	var context := AIPlanningContext.new(source, game_map, aggressiveness)
+func generate_plan(
+	source,
+	game_map,
+	aggressiveness: float = 1.0,
+	turn_context: RefCounted = null
+) -> AIPlan:
+	var context := AIPlanningContext.new(source, game_map, aggressiveness, turn_context)
 	var plan := AIPlan.new(source, game_map)
 	var best_score := -INF
 	var evaluators: Array = [

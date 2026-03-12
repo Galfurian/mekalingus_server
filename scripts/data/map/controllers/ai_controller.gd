@@ -1,6 +1,8 @@
 class_name AIController
 extends Node
 
+const TURN_CONTEXT_SCRIPT = preload("res://scripts/data/map/controllers/strategy/ai_turn_context.gd")
+
 # =============================================================================
 # PROPERTIES
 # =============================================================================
@@ -20,6 +22,8 @@ var _use_utility_module_orders: Dictionary[String, UseUtilityModuleOrder] = {}
 var _move_orders: Dictionary[String, MoveOrder] = {}
 # Tiles reserved by queued movement to reduce allied collisions.
 var _reserved_move_tiles: Dictionary = {}
+# Turn-scoped cache to reduce repeated queries across unit planning.
+var _turn_context: RefCounted = null
 
 # =============================================================================
 # GENERIC FUNCTIONS
@@ -46,6 +50,7 @@ func clear() -> void:
 	"""
 	_current_plans.clear()
 	_reserved_move_tiles.clear()
+	_turn_context = null
 	_clear_orders()
 
 
@@ -188,7 +193,7 @@ func execute_move_orders() -> void:
 	_reserved_move_tiles.clear()
 
 
-func plan_for_unit(source: MapCombatEntity) -> void:
+func plan_for_unit(source: MapCombatEntity, turn_context: RefCounted = null) -> void:
 	"""
 	Generates a plan for the given unit if the current one is missing or no longer valid.
 	"""
@@ -202,8 +207,16 @@ func plan_for_unit(source: MapCombatEntity) -> void:
 		var aggressiveness: float = 1.0
 		if source.owner and source.owner.clan:
 			aggressiveness = source.owner.clan.aggressiveness
+		var planning_turn_context: RefCounted = turn_context
+		if not planning_turn_context:
+			planning_turn_context = _turn_context
 		# Generate the plan for the source unit.
-		var new_plan: AIPlan = _planner.generate_plan(source, game_map, aggressiveness)
+		var new_plan: AIPlan = _planner.generate_plan(
+			source,
+			game_map,
+			aggressiveness,
+			planning_turn_context
+		)
 		# Save the new plan.
 		_current_plans[source.combatant.uuid] = new_plan
 
@@ -298,6 +311,7 @@ func generate_ai_orders() -> void:
 	Generates and queues one order for each AI-controlled combat entity.
 	"""
 	_reserved_move_tiles.clear()
+	_turn_context = TURN_CONTEXT_SCRIPT.new(game_map)
 	game_map.advance_patrol_directives()
 	var units: Array[MapCombatEntity] = _iter_ai_controlled_entities()
 	units.sort_custom(func(a: MapCombatEntity, b: MapCombatEntity):
@@ -306,16 +320,12 @@ func generate_ai_orders() -> void:
 
 	for unit: MapCombatEntity in units:
 		# Generate or reuse the current plan.
-		plan_for_unit(unit)
+		plan_for_unit(unit, _turn_context)
 		# Generate the next order based on the current plan.
 		generate_orders_for_unit(unit)
 
+	_turn_context = null
 
-func generate_npc_orders() -> void:
-	"""
-	Backward-compatible wrapper; use generate_ai_orders() directly.
-	"""
-	generate_ai_orders()
 
 func _filter_order_with_dead_mek(_key: String, order) -> bool:
 	"""

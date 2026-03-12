@@ -31,8 +31,33 @@ static func get_units_in_range(
 	"""
 	Returns all units within the specified range of a position.
 	"""
+	return get_units_in_range_from_candidates(
+		game_map,
+		source,
+		position,
+		radius,
+		get_all_units(game_map),
+		include_allies,
+		include_enemies,
+		exclude_units
+	)
+
+
+static func get_units_in_range_from_candidates(
+	game_map,
+	source: MapCombatEntity,
+	position: Vector2i,
+	radius: int,
+	candidates: Array[MapCombatEntity],
+	include_allies: bool = true,
+	include_enemies: bool = true,
+	exclude_units: Array[MapCombatEntity] = []
+) -> Array[MapCombatEntity]:
+	"""
+	Returns all units within the specified range from pre-collected candidates.
+	"""
 	var units_in_range: Array[MapCombatEntity] = []
-	for entity: MapCombatEntity in get_all_units(game_map):
+	for entity: MapCombatEntity in candidates:
 		if entity == source:
 			continue
 		if entity in exclude_units:

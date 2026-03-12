@@ -5,6 +5,7 @@ extends RefCounted
 var source: MapCombatEntity
 var game_map
 var aggressiveness: float = 1.0
+var turn_context: RefCounted = null
 
 var _visible_enemies: Array[MapCombatEntity] = []
 var _visible_enemies_ready: bool = false
@@ -33,20 +34,29 @@ var _threat_cache: Dictionary = {}
 var _enemy_offensive_modules_cache: Dictionary = {}
 
 
-func _init(p_source: MapCombatEntity, p_game_map, p_aggressiveness: float) -> void:
+func _init(
+	p_source: MapCombatEntity,
+	p_game_map,
+	p_aggressiveness: float,
+	p_turn_context: RefCounted = null
+) -> void:
 	source = p_source
 	game_map = p_game_map
 	aggressiveness = p_aggressiveness
+	turn_context = p_turn_context
 
 
 func get_visible_enemies() -> Array[MapCombatEntity]:
 	if _visible_enemies_ready:
 		return _visible_enemies
-	_visible_enemies = AIUnitQueries.get_enemies_in_range(
-		game_map,
-		source,
-		game_map.DEFAULT_DETECTION_RANGE
-	)
+	if turn_context:
+		_visible_enemies = turn_context.get_visible_enemies(source, game_map.DEFAULT_DETECTION_RANGE)
+	else:
+		_visible_enemies = AIUnitQueries.get_enemies_in_range(
+			game_map,
+			source,
+			game_map.DEFAULT_DETECTION_RANGE
+		)
 	_visible_enemies_ready = true
 	return _visible_enemies
 
@@ -54,11 +64,11 @@ func get_visible_enemies() -> Array[MapCombatEntity]:
 func get_all_enemies() -> Array[MapCombatEntity]:
 	if _all_enemies_ready:
 		return _all_enemies
-	_all_enemies = AIUnitQueries.get_enemies_in_range(
-		game_map,
-		source,
-		AITuning.get_global_scan_radius(game_map)
-	)
+	var scan_radius: int = AITuning.get_global_scan_radius(game_map)
+	if turn_context:
+		_all_enemies = turn_context.get_all_enemies(source, scan_radius)
+	else:
+		_all_enemies = AIUnitQueries.get_enemies_in_range(game_map, source, scan_radius)
 	_all_enemies_ready = true
 	return _all_enemies
 
@@ -66,11 +76,11 @@ func get_all_enemies() -> Array[MapCombatEntity]:
 func get_allies() -> Array[MapCombatEntity]:
 	if _allies_ready:
 		return _allies
-	_allies = AIUnitQueries.get_allies_in_range(
-		game_map,
-		source,
-		AITuning.get_global_scan_radius(game_map)
-	)
+	var scan_radius: int = AITuning.get_global_scan_radius(game_map)
+	if turn_context:
+		_allies = turn_context.get_allies(source, scan_radius)
+	else:
+		_allies = AIUnitQueries.get_allies_in_range(game_map, source, scan_radius)
 	_allies_ready = true
 	return _allies
 
@@ -176,12 +186,16 @@ func _get_enemy_offensive_modules(enemy: MapCombatEntity) -> Array[EquippedModul
 	if _enemy_offensive_modules_cache.has(enemy_key):
 		return _enemy_offensive_modules_cache[enemy_key]
 
-	var modules: Array[EquippedModule] = AIUtils.find_matching_modules(
-		enemy.combatant,
-		true,
-		false,
-		false
-	)
+	var modules: Array[EquippedModule] = []
+	if turn_context:
+		modules = turn_context.get_offensive_modules_for(enemy)
+	else:
+		modules = AIUtils.find_matching_modules(
+			enemy.combatant,
+			true,
+			false,
+			false
+		)
 	_enemy_offensive_modules_cache[enemy_key] = modules
 	return modules
 

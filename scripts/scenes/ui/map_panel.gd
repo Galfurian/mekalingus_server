@@ -10,7 +10,6 @@ extends Node
 @onready var map_list = $LeftSidebarSplit/MapManagerSection/MapManagerInner/MapList
 
 @onready var map_size = $LeftSidebarSplit/MapManagerSection/MapManagerInner/HBoxContainer1/MapSize
-@onready var map_difficulty = $LeftSidebarSplit/MapManagerSection/MapManagerInner/HBoxContainer2/Difficulty
 @onready var map_biome = $LeftSidebarSplit/MapManagerSection/MapManagerInner/HBoxContainer3/Biome
 
 @onready var map_hud = $MapHud
@@ -30,11 +29,6 @@ func _ready() -> void:
 		npc_directive_panel.directives_changed.connect(_on_directives_changed)
 	if map_hud and not map_hud.map_state_changed.is_connected(_on_map_hud_state_changed):
 		map_hud.map_state_changed.connect(_on_map_hud_state_changed)
-	var index = 0
-	for difficulty_name in Enums.MapDifficulty:
-		map_difficulty.add_item(difficulty_name, index)
-		index += 1
-	map_difficulty.select(0)
 	turn_management_panel.clear()
 	npc_directive_panel.clear()
 	#GameServer.start()
@@ -99,8 +93,7 @@ func _on_generate_map():
 			map_uuid,
 			biome,
 			map_size.get_value(),
-			map_size.get_value(),
-			map_difficulty.get_selected_id()
+			map_size.get_value()
 		)
 		# Generate the map.
 		game_map.generate_map()

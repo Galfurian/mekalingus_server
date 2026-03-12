@@ -59,23 +59,6 @@ func _finalize():
 	print("Clan is being freed.")
 
 
-func generate_clan_starter_meks(count: int = 3) -> Array[Mek]:
-	"""
-	Generates a set of starter Meks for this clan.
-	The Meks will be based on the clan's preferred roles and allowed sizes,
-	using NOVICE difficulty power scaling.
-	@param count The number of starter Meks to generate (default: 3).
-	@return An array of generated Mek instances.
-	"""
-	var starter_meks: Array[Mek] = []
-	for i in count:
-		var role: Enums.MekRole = preferred_roles.pick_random()
-		var mek: Mek = LoadoutGenerator.generate_mek(Enums.MapDifficulty.NOVICE, role)
-		if mek:
-			starter_meks.append(mek)
-	return starter_meks
-
-
 # =============================================================================
 # SERIALIZATION
 # =============================================================================

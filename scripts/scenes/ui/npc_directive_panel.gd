@@ -2,8 +2,6 @@ extends VBoxContainer
 
 signal directives_changed(game_map: GameMap)
 
-const NPC_DIRECTIVE_STATE = preload("res://scripts/data/map/controllers/strategy/npc_directive_state.gd")
-
 @onready var owner_option: OptionButton = $TabContainer/Directive/Section/Inner/OwnerRow/OwnerOption
 @onready var directive_option: OptionButton = $TabContainer/Directive/Section/Inner/DirectiveRow/DirectiveOption
 @onready var compact_spin: SpinBox = $TabContainer/Directive/Section/Inner/CompactRow/CompactSpin
@@ -31,8 +29,8 @@ func _ready() -> void:
 	squad_tree.set_column_title(1, "Units")
 	squad_tree.set_column_title(2, "Directive")
 	squad_tree.set_column_title(3, "Center")
-	quick_hold_button.pressed.connect(func(): _apply_quick_directive(NPC_DIRECTIVE_STATE.Directive.HOLD_PERIMETER))
-	quick_patrol_button.pressed.connect(func(): _apply_quick_directive(NPC_DIRECTIVE_STATE.Directive.PATROL))
+	quick_hold_button.pressed.connect(func(): _apply_quick_directive(NpcDirectiveState.Directive.HOLD_PERIMETER))
+	quick_patrol_button.pressed.connect(func(): _apply_quick_directive(NpcDirectiveState.Directive.PATROL))
 	set_anchor_here_button.pressed.connect(_on_set_anchor_here_pressed)
 	auto_patrol_ring_button.pressed.connect(_on_auto_patrol_ring_pressed)
 	_populate_directive_options()
@@ -283,9 +281,9 @@ func _get_selected_owner_key_from_squad_tree() -> String:
 
 func _directive_label(directive: int) -> String:
 	match directive:
-		NPC_DIRECTIVE_STATE.Directive.HOLD_PERIMETER:
+		NpcDirectiveState.Directive.HOLD_PERIMETER:
 			return "Hold"
-		NPC_DIRECTIVE_STATE.Directive.PATROL:
+		NpcDirectiveState.Directive.PATROL:
 			return "Patrol"
 		_:
 			return "Unknown"

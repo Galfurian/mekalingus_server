@@ -10,16 +10,6 @@ enum GameMode {
 	CLAN_WAR, # Use clan logic exclusively
 }
 
-# Game difficulty levels.
-enum MapDifficulty {
-	NOVICE,  # Entry-level, forgiving challenges.
-	CADET,  # Beginner-friendly with slightly increased difficulty.
-	CHALLENGING,  # Provides a moderate level of challenge.
-	VETERAN,  # A tougher experience for skilled players.
-	ELITE,  # High difficulty with stronger enemies and tactics.
-	LEGENDARY,  # The toughest challenge, only for the most experienced players.
-}
-
 # Defines the mek size classes.
 enum MekSize {
 	LIGHT = 0,  # Fast, agile, lower durability.

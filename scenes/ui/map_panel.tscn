@@ -120,15 +120,6 @@ rounded = true
 [node name="HBoxContainer2" type="HBoxContainer" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner/HBoxContainer2"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Difficulty"
-
-[node name="Difficulty" type="OptionButton" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner/HBoxContainer2"]
-layout_mode = 2
-size_flags_horizontal = 3
-
 [node name="HBoxContainer3" type="HBoxContainer" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
 layout_mode = 2
 

@@ -9,7 +9,6 @@ extends Node
 # =============================================================================
 
 const DEFAULT_DETECTION_RANGE = 10
-const NPC_DIRECTIVE_STATE = preload("res://scripts/data/map/controllers/strategy/npc_directive_state.gd")
 
 # =====================================
 # STATIC INFORMATION
@@ -21,8 +20,6 @@ var map_uuid: String
 var map_width: int
 # Map height.
 var map_height: int
-# The map difficulty level.
-var map_difficulty: int
 # The type of game mode.
 var combat_rules: CombatRules = CombatRules.new()
 # Map terrain data, an array of integers that identify the type of terrain.
@@ -69,14 +66,12 @@ func _init(
 	p_map_biome: Biome,
 	p_map_width: int = 50,
 	p_map_height: int = 50,
-	p_map_difficulty: int = 0,
 	p_game_mode: Enums.GameMode = Enums.GameMode.FFA
 ) -> void:
 	map_uuid = p_map_uuid
 	map_width = p_map_width
 	map_height = p_map_height
 	map_biome = p_map_biome
-	map_difficulty = p_map_difficulty
 	combat_rules.set_game_mode(p_game_mode)
 	combat_logger.set_combat_preset()
 	chat_logger.set_chat_preset()
@@ -458,11 +453,6 @@ func remove_destroyed_units() -> void:
 	Utils.erase(player_units, Utils.filter(player_units, _filter_dead_unit))
 	Utils.erase(npc_units, Utils.filter(npc_units, _filter_dead_unit))
 
-
-func spawn_enemies_on_map(difficulty: int) -> void:
-	EnemySpawner.spawn_enemies_on_map(self, difficulty)
-
-
 func get_owner_key(p_owner: EntityOwner) -> String:
 	if not p_owner:
 		return ""
@@ -566,8 +556,8 @@ func get_owner_directive_by_key(
 	if owner_directives.has(owner_key):
 		return owner_directives[owner_key]
 
-	var state: RefCounted = NPC_DIRECTIVE_STATE.new()
-	state.directive = NPC_DIRECTIVE_STATE.Directive.HOLD_PERIMETER
+	var state: RefCounted = NpcDirectiveState.new()
+	state.directive = NpcDirectiveState.Directive.HOLD_PERIMETER
 	state.anchor_position = _compute_owner_anchor(owner_key)
 	if state.anchor_position == Vector2i.ZERO and fallback_anchor != Vector2i(-1, -1):
 		state.anchor_position = fallback_anchor
@@ -665,7 +655,7 @@ func auto_generate_owner_patrol_ring_from_centroid(owner_key: String) -> void:
 func advance_patrol_directives() -> void:
 	for owner_key in get_owner_keys(true):
 		var state: RefCounted = get_owner_directive_by_key(owner_key)
-		if not state or state.directive != NPC_DIRECTIVE_STATE.Directive.PATROL:
+		if not state or state.directive != NpcDirectiveState.Directive.PATROL:
 			continue
 
 		var entities: Array[MapCombatEntity] = get_owned_combat_entities_by_key(owner_key)
@@ -739,7 +729,7 @@ static func format_pos_tag(pos: Vector2i) -> String:
 
 static func from_dict(data: Dictionary) -> GameMap:
 	"""Loads map data from a dictionary."""
-	if not data.has_all(["map_uuid", "map_biome", "map_difficulty"]):
+	if not data.has_all(["map_uuid", "map_biome"]):
 		push_error("Invalid map data format!")
 		return null
 	if not data.has_all(["map_width", "map_height", "terrain_data"]):
@@ -754,7 +744,7 @@ static func from_dict(data: Dictionary) -> GameMap:
 		return null
 	
 	# Create the map instance.
-	var map = GameMap.new(data["map_uuid"], biome, data["map_width"], data["map_height"], data["map_difficulty"])
+	var map = GameMap.new(data["map_uuid"], biome, data["map_width"], data["map_height"])
 
 	# Load the map data.
 	map.terrain_data = Utils.deserialize_matrix(data["terrain_data"])
@@ -807,7 +797,7 @@ static func from_dict(data: Dictionary) -> GameMap:
 	map.owner_directives.clear()
 	for owner_key in data.get("owner_directives", {}):
 		var directive_data: Dictionary = data["owner_directives"][owner_key]
-		map.owner_directives[owner_key] = NPC_DIRECTIVE_STATE.from_dict(directive_data)
+		map.owner_directives[owner_key] = NpcDirectiveState.from_dict(directive_data)
 
 	# Update the AStar graph.
 	map.update_astar()
@@ -828,7 +818,6 @@ func to_dict() -> Dictionary:
 		"map_width": map_width,
 		"map_height": map_height,
 		"map_biome": map_biome.biome_name,
-		"map_difficulty": map_difficulty,
 		"terrain_data": Utils.serialize_matrix(terrain_data, map_width, map_height),
 		"npc_units": Utils.serialize_dict_of_objects(npc_units),
 		"player_units": Utils.serialize_dict_of_objects(player_units),

@@ -1,8 +1,6 @@
 class_name AIPlanner
 extends RefCounted
 
-const NPC_DIRECTIVE_STATE = preload("res://scripts/data/map/controllers/strategy/npc_directive_state.gd")
-
 # =============================================================================
 # PLAN GENERATION ENTRY POINT
 # =============================================================================
@@ -213,7 +211,7 @@ func _evaluate_reposition_intent(plan: AIPlan) -> AIPlan:
 	var score: float = 1.0
 
 	match state.directive:
-		NPC_DIRECTIVE_STATE.Directive.HOLD_PERIMETER:
+		NpcDirectiveState.Directive.HOLD_PERIMETER:
 			destination = _pick_destination_for_objective(
 				plan,
 				source,
@@ -226,7 +224,7 @@ func _evaluate_reposition_intent(plan: AIPlan) -> AIPlan:
 			)
 			score = 3.0
 
-		NPC_DIRECTIVE_STATE.Directive.PATROL:
+		NpcDirectiveState.Directive.PATROL:
 			var patrol_target: Vector2i = state.get_patrol_target()
 			destination = _pick_destination_for_objective(
 				plan,

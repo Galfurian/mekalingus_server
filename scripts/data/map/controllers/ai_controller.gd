@@ -18,6 +18,8 @@ var _use_offensive_module_orders: Dictionary[String, UseOffensiveModuleOrder] = 
 var _use_utility_module_orders: Dictionary[String, UseUtilityModuleOrder] = {}
 # The orders for movement.
 var _move_orders: Dictionary[String, MoveOrder] = {}
+# Tiles reserved by queued movement to reduce allied collisions.
+var _reserved_move_tiles: Dictionary = {}
 
 # =============================================================================
 # GENERIC FUNCTIONS
@@ -43,6 +45,7 @@ func clear() -> void:
 	Clears the internal state of the AI controller.
 	"""
 	_current_plans.clear()
+	_reserved_move_tiles.clear()
 	_clear_orders()
 
 
@@ -106,6 +109,7 @@ func queue_move_order(order: MoveOrder) -> void:
 	"""
 	if order:
 		_move_orders[order.source.combatant.uuid] = order
+		_reserved_move_tiles[_tile_key(order.destination)] = true
 
 
 func execute_utility_module_orders() -> void:
@@ -159,10 +163,40 @@ func execute_move_orders() -> void:
 		game_map.npc_units[unit_uuid].combatant.tiles_moved_last_turn = 0
 	for structure_uuid in game_map.structures:
 		game_map.structures[structure_uuid].combatant.tiles_moved_last_turn = 0
-	# Execute all queued movement orders.
-	for order in _move_orders.values():
-		order.execute(game_map)
+	_reserved_move_tiles.clear()
+	# Execute movement orders in descending plan-score order and revalidate just-in-time.
+	var source_ids: Array[String] = _move_orders.keys()
+	source_ids.sort_custom(func(a: String, b: String):
+		var score_a: float = _get_plan_score(a)
+		var score_b: float = _get_plan_score(b)
+		return score_a > score_b
+	)
+
+	for source_uuid: String in source_ids:
+		var order: MoveOrder = _move_orders.get(source_uuid, null)
+		if not order or not order.source or order.source.combatant.is_dead():
+			continue
+
+		# Replan this source against the latest board state to avoid stale face-to-face destinations.
+		_current_plans.erase(source_uuid)
+		plan_for_unit(order.source)
+		var refreshed_plan: AIPlan = _current_plans.get(source_uuid, null)
+		if not refreshed_plan or not refreshed_plan.is_valid() or refreshed_plan.is_complete():
+			continue
+
+		var next_order: Order = refreshed_plan.generate_order(_reserved_move_tiles)
+		if not next_order or not is_instance_of(next_order, MoveOrder):
+			continue
+
+		var next_move: MoveOrder = next_order
+		if next_move.destination == order.source.position:
+			continue
+
+		_reserved_move_tiles[_tile_key(next_move.destination)] = true
+		next_move.execute(game_map)
+
 	_move_orders.clear()
+	_reserved_move_tiles.clear()
 
 
 func plan_for_unit(source: MapCombatEntity) -> void:
@@ -213,7 +247,7 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 		return
 	
 	# Generate the order for the current plan.
-	var order: Order = current_plan.generate_order()
+	var order: Order = current_plan.generate_order(_reserved_move_tiles)
 	if not order:
 		return
 
@@ -274,7 +308,14 @@ func generate_ai_orders() -> void:
 	"""
 	Generates and queues one order for each AI-controlled combat entity.
 	"""
-	for unit: MapCombatEntity in _iter_ai_controlled_entities():
+	_reserved_move_tiles.clear()
+	game_map.advance_patrol_directives()
+	var units: Array[MapCombatEntity] = _iter_ai_controlled_entities()
+	units.sort_custom(func(a: MapCombatEntity, b: MapCombatEntity):
+		return a.combatant.evaluate_combat_power() > b.combatant.evaluate_combat_power()
+	)
+
+	for unit: MapCombatEntity in units:
 		# Generate or reuse the current plan.
 		game_map.ai_controller.plan_for_unit(unit)
 		# Generate the next order based on the current plan.
@@ -305,3 +346,15 @@ func _clear_orders() -> void:
 	_use_offensive_module_orders.clear()
 	_use_utility_module_orders.clear()
 	_move_orders.clear()
+	_reserved_move_tiles.clear()
+
+
+func _tile_key(tile: Vector2i) -> String:
+	return "%d,%d" % [tile.x, tile.y]
+
+
+func _get_plan_score(source_uuid: String) -> float:
+	var plan: AIPlan = _current_plans.get(source_uuid, null)
+	if not plan:
+		return -INF
+	return plan.score

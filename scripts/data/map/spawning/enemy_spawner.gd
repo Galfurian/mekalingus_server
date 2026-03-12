@@ -20,6 +20,8 @@ static func spawn_enemies_on_map(game_map, difficulty: int) -> void:
 		var clan: Clan = clans[i]
 		if not clan:
 			continue
+		var npc_name := NameGenerator.random_full_name()
+		var squad_owner: NPCOwned = NPCOwned.new(npc_name, clan)
 
 		var avg_size = _get_squad_size(difficulty)
 		var squad_size = randi_range(avg_size - 1, avg_size + 1)
@@ -39,8 +41,7 @@ static func spawn_enemies_on_map(game_map, difficulty: int) -> void:
 			var spawn_pos = spawn_points.pick_random()
 			spawn_points.erase(spawn_pos)
 
-			var npc_name := NameGenerator.random_full_name()
-			game_map.npc_units[mek.uuid] = MapMek.new(spawn_pos, NPCOwned.new(npc_name, clan), mek)
+			game_map.npc_units[mek.uuid] = MapMek.new(spawn_pos, squad_owner, mek)
 
 
 static func _get_enemy_squad_count(game_map, difficulty: int) -> int:

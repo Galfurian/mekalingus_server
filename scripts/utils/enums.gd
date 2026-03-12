@@ -103,3 +103,13 @@ enum MekRole {
 	ARTILLERY,
 	SUPPORT,
 }
+
+
+# Global behavior directives used by AI squads.
+enum NpcDirective {
+	HOLD_PERIMETER,
+	PATROL,
+	SEEK_AND_DESTROY,
+	DEFEND_POINT,
+	RETREAT_TO_SAFE_ZONE,
+}

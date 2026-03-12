@@ -9,6 +9,7 @@ extends Node
 # =============================================================================
 
 const DEFAULT_DETECTION_RANGE = 10
+const NPC_DIRECTIVE_STATE = preload("res://scripts/data/map/controllers/strategy/npc_directive_state.gd")
 
 # =====================================
 # STATIC INFORMATION
@@ -55,6 +56,8 @@ var astar: AStar2D = AStar2D.new()
 var ai_controller
 # The turn manager.
 var turn_manager
+# Per-owner squad directives.
+var owner_directives: Dictionary = {}
 
 # =============================================================================
 # GENERIC FUNCTIONS
@@ -108,6 +111,7 @@ func clear() -> void:
 	# Clear AI and turn systems.
 	ai_controller.clear()
 	turn_manager.clear()
+	owner_directives.clear()
 
 
 # =============================================================================
@@ -459,6 +463,167 @@ func spawn_enemies_on_map(difficulty: int) -> void:
 	EnemySpawner.spawn_enemies_on_map(self, difficulty)
 
 
+func get_owner_key(p_owner: EntityOwner) -> String:
+	if not p_owner:
+		return ""
+	if is_instance_of(p_owner, PlayerOwned):
+		return "player:%s" % p_owner.player.player_uuid
+	if is_instance_of(p_owner, NPCOwned):
+		return "npc:%s|%s" % [p_owner.npc_name, p_owner.clan.id]
+	return ""
+
+
+func get_owner_label(p_owner: EntityOwner) -> String:
+	if is_instance_of(p_owner, PlayerOwned):
+		return "Player: %s" % p_owner.player.player_name
+	if is_instance_of(p_owner, NPCOwned):
+		return "NPC: %s" % p_owner.npc_name
+	return "No Owner"
+
+
+func get_owner_keys(include_players: bool = true) -> Array[String]:
+	var keys: Dictionary[String, bool] = {}
+	for entity in npc_units.values():
+		if not entity or not entity.owner:
+			continue
+		keys[get_owner_key(entity.owner)] = true
+	for entity in structures.values():
+		if not entity or not entity.owner:
+			continue
+		keys[get_owner_key(entity.owner)] = true
+	if include_players:
+		for entity in player_units.values():
+			if not entity or not entity.owner:
+				continue
+			keys[get_owner_key(entity.owner)] = true
+
+	var owner_keys: Array[String] = []
+	for owner_key in keys.keys():
+		if owner_key.is_empty():
+			continue
+		owner_keys.append(owner_key)
+	owner_keys.sort()
+	return owner_keys
+
+
+func get_owned_combat_entities(p_owner: EntityOwner) -> Array[MapCombatEntity]:
+	return get_owned_combat_entities_by_key(get_owner_key(p_owner))
+
+
+func get_owned_combat_entities_by_key(owner_key: String) -> Array[MapCombatEntity]:
+	var entities: Array[MapCombatEntity] = []
+	if owner_key.is_empty():
+		return entities
+
+	for unit: MapCombatEntity in npc_units.values():
+		if unit and unit.active and get_owner_key(unit.owner) == owner_key:
+			entities.append(unit)
+	for unit: MapCombatEntity in player_units.values():
+		if unit and unit.active and get_owner_key(unit.owner) == owner_key:
+			entities.append(unit)
+	for structure: MapStructure in structures.values():
+		if structure and structure.active and get_owner_key(structure.owner) == owner_key:
+			entities.append(structure)
+
+	return entities
+
+
+func get_owner_directive(p_owner: EntityOwner, fallback_anchor: Vector2i = Vector2i(-1, -1)) -> RefCounted:
+	return get_owner_directive_by_key(get_owner_key(p_owner), fallback_anchor)
+
+
+func get_owner_directive_by_key(
+	owner_key: String,
+	fallback_anchor: Vector2i = Vector2i(-1, -1)
+) -> RefCounted:
+	if owner_key.is_empty():
+		return null
+
+	if owner_directives.has(owner_key):
+		return owner_directives[owner_key]
+
+	var state: RefCounted = NPC_DIRECTIVE_STATE.new()
+	state.directive = NPC_DIRECTIVE_STATE.Directive.HOLD_PERIMETER
+	state.anchor_position = _compute_owner_anchor(owner_key)
+	if state.anchor_position == Vector2i.ZERO and fallback_anchor != Vector2i(-1, -1):
+		state.anchor_position = fallback_anchor
+	state.defend_position = state.anchor_position
+	state.patrol_waypoints = _build_default_patrol_waypoints(state.anchor_position, state.leash_radius)
+	owner_directives[owner_key] = state
+	return state
+
+
+func set_owner_directive(p_owner: EntityOwner, directive: int) -> void:
+	set_owner_directive_by_key(get_owner_key(p_owner), directive)
+
+
+func set_owner_directive_by_key(owner_key: String, directive: int) -> void:
+	if owner_key.is_empty():
+		return
+	var state: RefCounted = get_owner_directive_by_key(owner_key)
+	if not state:
+		return
+	state.directive = directive
+	owner_directives[owner_key] = state
+
+
+func advance_patrol_directives() -> void:
+	for owner_key in get_owner_keys(true):
+		var state: RefCounted = get_owner_directive_by_key(owner_key)
+		if not state or state.directive != NPC_DIRECTIVE_STATE.Directive.PATROL:
+			continue
+
+		var entities: Array[MapCombatEntity] = get_owned_combat_entities_by_key(owner_key)
+		if entities.is_empty():
+			continue
+
+		var center: Vector2i = _compute_owner_anchor(owner_key)
+		var patrol_target: Vector2i = state.get_patrol_target()
+		if center.distance_to(patrol_target) <= 2.0:
+			state.advance_patrol()
+			owner_directives[owner_key] = state
+
+
+func _compute_owner_anchor(owner_key: String) -> Vector2i:
+	var entities: Array[MapCombatEntity] = get_owned_combat_entities_by_key(owner_key)
+	if entities.is_empty():
+		return Vector2i.ZERO
+
+	var sum_x: int = 0
+	var sum_y: int = 0
+	for entity: MapCombatEntity in entities:
+		sum_x += entity.position.x
+		sum_y += entity.position.y
+
+	return Vector2i(
+		int(round(float(sum_x) / entities.size())),
+		int(round(float(sum_y) / entities.size())),
+	)
+
+
+func _build_default_patrol_waypoints(anchor: Vector2i, leash_radius: int) -> Array[Vector2i]:
+	var waypoints: Array[Vector2i] = []
+	if anchor == Vector2i.ZERO:
+		return waypoints
+
+	var patrol_radius: int = maxi(2, int(round(leash_radius * 0.75)))
+	var candidates: Array[Vector2i] = [
+		anchor + Vector2i(0, -patrol_radius),
+		anchor + Vector2i(patrol_radius, 0),
+		anchor + Vector2i(0, patrol_radius),
+		anchor + Vector2i(-patrol_radius, 0),
+	]
+
+	for point in candidates:
+		if is_in_bounds(point):
+			waypoints.append(point)
+
+	if waypoints.is_empty():
+		waypoints.append(anchor)
+
+	return waypoints
+
+
 # =============================================================================
 # FORMATTING
 # =============================================================================
@@ -538,6 +703,12 @@ static func from_dict(data: Dictionary) -> GameMap:
 	map.combat_logger = MapLogger.from_dict(data.get("combat_logger", {}))
 	map.chat_logger = MapLogger.from_dict(data.get("chat_logger", {}))
 
+	# Load squad directives.
+	map.owner_directives.clear()
+	for owner_key in data.get("owner_directives", {}):
+		var directive_data: Dictionary = data["owner_directives"][owner_key]
+		map.owner_directives[owner_key] = NPC_DIRECTIVE_STATE.from_dict(directive_data)
+
 	# Update the AStar graph.
 	map.update_astar()
 
@@ -546,6 +717,12 @@ static func from_dict(data: Dictionary) -> GameMap:
 
 func to_dict() -> Dictionary:
 	"""Converts the map data into a dictionary for saving."""
+	var serialized_directives: Dictionary = {}
+	for owner_key in owner_directives.keys():
+		var state: RefCounted = owner_directives[owner_key]
+		if state:
+			serialized_directives[owner_key] = state.to_dict()
+
 	return {
 		"map_uuid": map_uuid,
 		"map_width": map_width,
@@ -559,4 +736,5 @@ func to_dict() -> Dictionary:
 		"pickups": Utils.serialize_dict_of_objects(pickups),
 		"combat_logger": combat_logger.to_dict(),
 		"chat_logger": chat_logger.to_dict(),
+		"owner_directives": serialized_directives,
 	}

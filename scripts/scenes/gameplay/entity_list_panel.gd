@@ -110,14 +110,54 @@ func _populate_all_trees() -> void:
 func _populate_tree(tree: Tree, entities: Array[MapEntity]) -> void:
 	tree.clear()
 	var root: TreeItem = tree.create_item()
+	if entities.is_empty():
+		return
 
-	entities.sort_custom(func(a: MapEntity, b: MapEntity): return _entity_sort_label(a) < _entity_sort_label(b))
+	var grouped_entities: Dictionary[String, Array] = {}
+	var group_labels: Dictionary[String, String] = {}
 
 	for entity: MapEntity in entities:
-		var item: TreeItem = tree.create_item(root)
-		item.set_text(0, _entity_sort_label(entity))
-		item.set_metadata(0, entity)
-		item.set_custom_color(0, _owner_color(entity))
+		var owner_key: String = _owner_group_key(entity)
+		if not grouped_entities.has(owner_key):
+			grouped_entities[owner_key] = []
+			group_labels[owner_key] = _owner_label(entity)
+		grouped_entities[owner_key].append(entity)
+
+	var owner_keys: Array[String] = grouped_entities.keys()
+	owner_keys.sort_custom(func(a: String, b: String):
+		return group_labels[a].to_lower() < group_labels[b].to_lower()
+	)
+
+	for owner_key in owner_keys:
+		var group_item: TreeItem = tree.create_item(root)
+		group_item.set_text(0, group_labels[owner_key])
+		group_item.set_custom_color(0, _owner_color(grouped_entities[owner_key][0]))
+
+		var group_entities: Array[MapEntity] = grouped_entities[owner_key]
+		group_entities.sort_custom(func(a: MapEntity, b: MapEntity):
+			return _entity_sort_label(a) < _entity_sort_label(b)
+		)
+
+		for entity: MapEntity in group_entities:
+			var item: TreeItem = tree.create_item(group_item)
+			item.set_text(0, _entity_child_label(entity))
+			item.set_metadata(0, entity)
+			item.set_custom_color(0, _owner_color(entity))
+
+
+func _owner_group_key(entity: MapEntity) -> String:
+	if not entity or not entity.owner:
+		return "none"
+	if game_map:
+		var owner_key: String = game_map.get_owner_key(entity.owner)
+		if not owner_key.is_empty():
+			return owner_key
+	return _owner_label(entity)
+
+
+func _entity_child_label(entity: MapEntity) -> String:
+	var name_label: String = _entity_name(entity)
+	return "%s  [%s]" % [name_label, str(entity.position)]
 
 
 func _owner_color(entity: MapEntity) -> Color:

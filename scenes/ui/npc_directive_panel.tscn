@@ -1,0 +1,117 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/scenes/ui/npc_directive_panel.gd" id="1_5d61b"]
+
+[node name="NpcDirectivePanel" type="VBoxContainer"]
+layout_mode = 2
+script = ExtResource("1_5d61b")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 2
+text = "NPC Directives"
+horizontal_alignment = 1
+
+[node name="Section" type="PanelContainer" parent="."]
+layout_mode = 2
+
+[node name="Inner" type="VBoxContainer" parent="Section"]
+layout_mode = 2
+
+[node name="OwnerRow" type="HBoxContainer" parent="Section/Inner"]
+layout_mode = 2
+
+[node name="OwnerLabel" type="Label" parent="Section/Inner/OwnerRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Squad"
+
+[node name="OwnerOption" type="OptionButton" parent="Section/Inner/OwnerRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DirectiveRow" type="HBoxContainer" parent="Section/Inner"]
+layout_mode = 2
+
+[node name="DirectiveLabel" type="Label" parent="Section/Inner/DirectiveRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Directive"
+
+[node name="DirectiveOption" type="OptionButton" parent="Section/Inner/DirectiveRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CompactRow" type="HBoxContainer" parent="Section/Inner"]
+layout_mode = 2
+
+[node name="CompactLabel" type="Label" parent="Section/Inner/CompactRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Compact Radius"
+
+[node name="CompactSpin" type="SpinBox" parent="Section/Inner/CompactRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 20.0
+step = 1.0
+value = 4.0
+rounded = true
+
+[node name="LeashRow" type="HBoxContainer" parent="Section/Inner"]
+layout_mode = 2
+
+[node name="LeashLabel" type="Label" parent="Section/Inner/LeashRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Leash Radius"
+
+[node name="LeashSpin" type="SpinBox" parent="Section/Inner/LeashRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 30.0
+step = 1.0
+value = 6.0
+rounded = true
+
+[node name="AnchorRow" type="HBoxContainer" parent="Section/Inner"]
+layout_mode = 2
+
+[node name="AnchorLabel" type="Label" parent="Section/Inner/AnchorRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Anchor"
+
+[node name="AnchorValue" type="Label" parent="Section/Inner/AnchorRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "-"
+horizontal_alignment = 2
+
+[node name="PatrolRow" type="HBoxContainer" parent="Section/Inner"]
+layout_mode = 2
+
+[node name="PatrolLabel" type="Label" parent="Section/Inner/PatrolRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Patrol Target"
+
+[node name="PatrolValue" type="Label" parent="Section/Inner/PatrolRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "-"
+horizontal_alignment = 2
+
+[node name="ButtonsRow" type="HBoxContainer" parent="Section/Inner"]
+layout_mode = 2
+
+[node name="ApplyButton" type="Button" parent="Section/Inner/ButtonsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Apply"
+
+[node name="ResetAnchorButton" type="Button" parent="Section/Inner/ButtonsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Reset Anchor"

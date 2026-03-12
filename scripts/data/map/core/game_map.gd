@@ -481,6 +481,30 @@ func get_owner_label(p_owner: EntityOwner) -> String:
 	return "No Owner"
 
 
+func get_owner_by_key(owner_key: String) -> EntityOwner:
+	if owner_key.is_empty():
+		return null
+
+	for unit: MapCombatEntity in npc_units.values():
+		if unit and unit.owner and get_owner_key(unit.owner) == owner_key:
+			return unit.owner
+	for unit: MapCombatEntity in player_units.values():
+		if unit and unit.owner and get_owner_key(unit.owner) == owner_key:
+			return unit.owner
+	for structure: MapStructure in structures.values():
+		if structure and structure.owner and get_owner_key(structure.owner) == owner_key:
+			return structure.owner
+
+	return null
+
+
+func get_owner_label_by_key(owner_key: String) -> String:
+	var found_owner: EntityOwner = get_owner_by_key(owner_key)
+	if not found_owner:
+		return owner_key
+	return get_owner_label(found_owner)
+
+
 func get_owner_keys(include_players: bool = true) -> Array[String]:
 	var keys: Dictionary[String, bool] = {}
 	for entity in npc_units.values():
@@ -564,6 +588,38 @@ func set_owner_directive_by_key(owner_key: String, directive: int) -> void:
 	if not state:
 		return
 	state.directive = directive
+	owner_directives[owner_key] = state
+
+
+func reset_owner_anchor(owner_key: String) -> void:
+	if owner_key.is_empty():
+		return
+
+	var state: RefCounted = get_owner_directive_by_key(owner_key)
+	if not state:
+		return
+
+	var new_anchor: Vector2i = _compute_owner_anchor(owner_key)
+	if new_anchor == Vector2i.ZERO:
+		return
+
+	state.anchor_position = new_anchor
+	state.defend_position = new_anchor
+	state.patrol_waypoints = _build_default_patrol_waypoints(new_anchor, state.leash_radius)
+	state.patrol_index = 0
+	owner_directives[owner_key] = state
+
+
+func refresh_owner_patrol_waypoints(owner_key: String) -> void:
+	if owner_key.is_empty():
+		return
+
+	var state: RefCounted = get_owner_directive_by_key(owner_key)
+	if not state:
+		return
+
+	state.patrol_waypoints = _build_default_patrol_waypoints(state.anchor_position, state.leash_radius)
+	state.patrol_index = 0
 	owner_directives[owner_key] = state
 
 

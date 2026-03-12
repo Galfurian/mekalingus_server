@@ -213,16 +213,16 @@ func _get_visual_profile(map_entity: MapEntity) -> Dictionary:
 
 	match map_mek.combatant.template.size:
 		Enums.MekSize.LIGHT:
-			profile["frame_ratio"] = 0.88
-			profile["icon_ratio"] = 0.70
+			profile["frame_ratio"] = 0.78
+			profile["icon_ratio"] = 0.60
 		Enums.MekSize.MEDIUM:
-			profile["frame_ratio"] = 0.92
-			profile["icon_ratio"] = 0.76
+			profile["frame_ratio"] = 0.90
+			profile["icon_ratio"] = 0.72
 		Enums.MekSize.HEAVY:
-			profile["frame_ratio"] = 1.02
-			profile["icon_ratio"] = 0.84
+			profile["frame_ratio"] = 1.10
+			profile["icon_ratio"] = 0.90
 		Enums.MekSize.COLOSSAL:
-			profile["frame_ratio"] = 1.14
-			profile["icon_ratio"] = 0.96
+			profile["frame_ratio"] = 1.32
+			profile["icon_ratio"] = 1.08
 
 	return profile

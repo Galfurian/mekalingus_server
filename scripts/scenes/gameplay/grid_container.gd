@@ -11,6 +11,8 @@ var grid_size: int
 # The sector size (in tiles).
 var sector_size: int
 
+func _ready():
+	set_mouse_filter(Control.MOUSE_FILTER_PASS)
 
 func setup(p_game_map: GameMap, p_grid_size: int, p_sector_size: int):
 	clear()
@@ -30,10 +32,7 @@ func clear():
 
 func _gui_input(event):
 	"""Detects mouse clicks and emits select/context actions for valid tiles."""
-	if event is InputEventMouseButton and event.pressed and (
-		event.button_index == MOUSE_BUTTON_LEFT
-		or event.button_index == MOUSE_BUTTON_RIGHT
-	):
+	if event is InputEventMouseButton and event.pressed:
 		# Get position relative to this Control.
 		var local_mouse_pos = get_local_mouse_position()
 		# Compute the selected cell based on the local mouse position.
@@ -50,5 +49,5 @@ func _gui_input(event):
 		):
 			if event.button_index == MOUSE_BUTTON_LEFT:
 				on_cell_selected.emit(selected_cell)
-			else:
+			elif event.button_index == MOUSE_BUTTON_RIGHT:
 				on_cell_context_requested.emit(selected_cell, event.global_position)

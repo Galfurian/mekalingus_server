@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bnn33gp188816" path="res://scripts/scenes/gameplay/grid_container.gd" id="2_05c1y"]
 [ext_resource type="Script" uid="uid://1eg80xm5luv3" path="res://scripts/scenes/gameplay/scroll_view.gd" id="2_74cwi"]
 [ext_resource type="Script" uid="uid://cvh6htuo8dxhl" path="res://scripts/scenes/gameplay/grid_drawer.gd" id="4_168ta"]
-[ext_resource type="Script" path="res://scripts/scenes/gameplay/icon_drawer.gd" id="5_74cwi"]
+[ext_resource type="Script" uid="uid://c5t04q78bcub0" path="res://scripts/scenes/gameplay/icon_drawer.gd" id="5_74cwi"]
 [ext_resource type="Material" uid="uid://lnfic5l3g0wf" path="res://shaders/time_of_day_shader_material.tres" id="5_e0tmq"]
 [ext_resource type="Script" uid="uid://cceblf0d0fnde" path="res://scripts/scenes/gameplay/time_of_day_overlay.gd" id="6_e0tmq"]
 

@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://cosbr482fkmyp" path="res://scenes/gameplay/InfoPanel.tscn" id="3_0206q"]
 [ext_resource type="PackedScene" uid="uid://cid4owatwb65x" path="res://scenes/gameplay/grid_map.tscn" id="3_vm2jc"]
 [ext_resource type="PackedScene" uid="uid://dj4n3b2k1m7pq" path="res://scenes/gameplay/entity_list_panel.tscn" id="4_g2adk"]
-[ext_resource type="PackedScene" path="res://scenes/gameplay/spawn_panel.tscn" id="5_spawn"]
+[ext_resource type="PackedScene" uid="uid://bnw3baaeo5u61" path="res://scenes/gameplay/spawn_panel.tscn" id="5_spawn"]
 
 [node name="MapHud" type="Control"]
 layout_mode = 3

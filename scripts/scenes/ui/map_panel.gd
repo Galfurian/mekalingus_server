@@ -209,7 +209,27 @@ func _on_map_turn_ended(_turn_number: int) -> void:
 
 
 func _on_map_hud_state_changed(game_map: GameMap) -> void:
-	_update_map_start_stop_state(game_map)
+	var selected_map: GameMap = _get_current_selected_map()
+	if selected_map:
+		_update_map_start_stop_state(selected_map)
+		call_deferred("_refresh_map_start_stop_state")
+		return
+
+	if game_map:
+		_update_map_start_stop_state(game_map)
+		call_deferred("_refresh_map_start_stop_state")
+		return
+
+	_update_map_start_stop_state(_observed_map)
+	call_deferred("_refresh_map_start_stop_state")
+
+
+func _refresh_map_start_stop_state() -> void:
+	var selected_map: GameMap = _get_current_selected_map()
+	if selected_map:
+		_update_map_start_stop_state(selected_map)
+		return
+	_update_map_start_stop_state(_observed_map)
 
 
 func _update_map_start_stop_state(game_map: GameMap) -> void:

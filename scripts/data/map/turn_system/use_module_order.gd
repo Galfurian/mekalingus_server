@@ -31,7 +31,7 @@ func _add_log(game_map, type: Enums.LogType, message: String) -> void:
 
 
 func _format_pos_tag(pos: Vector2i) -> String:
-	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
+	return MetaTag.pos_tag(pos)
 
 
 # =============================================================================

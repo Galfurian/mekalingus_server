@@ -53,7 +53,7 @@ func _add_log(message: String) -> void:
 
 
 func _format_pos_tag(pos: Vector2i) -> String:
-	return "[url=pos:%d,%d](%d,%d)[/url]" % [pos.x, pos.y, pos.x, pos.y]
+	return MetaTag.pos_tag(pos)
 
 
 func get_current_plan(source: MapCombatEntity) -> AIPlan:

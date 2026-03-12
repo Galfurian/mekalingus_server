@@ -22,7 +22,7 @@ func get_structure_name() -> String:
 
 
 func get_chat_tag() -> String:
-	return "[url=structure:" + uuid + "]" + get_structure_name() + "[/url]"
+	return MetaTag.structure_tag(uuid, get_structure_name())
 
 
 func get_icon_path() -> String:

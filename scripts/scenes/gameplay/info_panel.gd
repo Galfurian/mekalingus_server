@@ -54,8 +54,6 @@ func setup(p_game_map: GameMap) -> void:
 	# Connect the signals.
 	if not game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
 		game_map.turn_manager.on_turn_ended.connect(_on_turn_ended)
-	if not plan_info.meta_clicked.is_connected(_on_plan_meta_clicked):
-		plan_info.meta_clicked.connect(_on_plan_meta_clicked)
 	# Connect the tabs signal.
 	if not tabs.tab_changed.is_connected(_on_tab_changed):
 		tabs.tab_changed.connect(_on_tab_changed)
@@ -434,31 +432,30 @@ func _update_plan_tab(map_entity: MapCombatEntity) -> void:
 	s += "Score     : %.2f\n" % plan.score
 
 	if plan.source and plan.source.combatant:
-		s += "Source    : [url=entity:%s]%s[/url]\n" % [
+		s += "Source    : %s\n" % MetaTag.entity_tag(
 			plan.source.combatant.uuid,
-			plan.source.combatant.get_chat_tag(),
-		]
+			plan.source.combatant.get_chat_tag()
+		)
 
 	if plan.target and plan.target.combatant:
-		s += "Target    : [url=entity:%s]%s[/url]\n" % [
+		s += "Target    : %s\n" % MetaTag.entity_tag(
 			plan.target.combatant.uuid,
-			plan.target.combatant.get_chat_tag(),
-		]
+			plan.target.combatant.get_chat_tag()
+		)
 
 	if plan.equipped_module and plan.equipped_module.validate():
 		var module_item: Item = plan.equipped_module.item
 		var module_name: String = plan.equipped_module.module.module_name
-		s += "Module    : [url=item:%s]%s[/url] -> %s\n" % [
-			module_item.uuid,
-			module_item.template.item_name,
+		s += "Module    : %s -> %s\n" % [
+			MetaTag.item_tag(module_item.uuid, module_item.template.item_name),
 			module_name,
 		]
 
 	if plan.destination != Vector2i.ZERO:
-		s += "Move To   : %s\n" % GameMap.format_pos_tag(plan.destination)
+		s += "Move To   : %s\n" % MetaTag.pos_tag(plan.destination)
 
 	if map_entity.position:
-		s += "Now At    : %s\n" % GameMap.format_pos_tag(map_entity.position)
+		s += "Now At    : %s\n" % MetaTag.pos_tag(map_entity.position)
 
 	if plan.target:
 		var distance: float = map_entity.position.distance_to(plan.target.position)

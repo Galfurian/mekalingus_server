@@ -133,7 +133,7 @@ func get_chat_tag() -> String:
 	"""
 	Returns a chat tag for the Mek.
 	"""
-	return "[url=mek:" + uuid + "]" + get_mek_name() + "[/url]"
+	return MetaTag.mek_tag(uuid, get_mek_name())
 
 
 func get_icon_path() -> String:

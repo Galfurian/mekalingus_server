@@ -36,21 +36,28 @@ var _context_cell: Vector2i = Vector2i(-1, -1)
 
 func _ready():
 	"""Initializes the map HUD."""
-	grid_container.on_cell_selected.connect(_on_cell_selected)
-	grid_container.on_cell_context_requested.connect(_on_cell_context_requested)
-	combat_log.meta_clicked.connect(_on_log_meta_clicked)
-	scroll_view.zoom_requested.connect(_on_map_scrolled)
+	if not grid_container.on_cell_selected.is_connected(_on_cell_selected):
+		grid_container.on_cell_selected.connect(_on_cell_selected)
+	if not grid_container.on_cell_context_requested.is_connected(_on_cell_context_requested):
+		grid_container.on_cell_context_requested.connect(_on_cell_context_requested)
 	if not scroll_view.resized.is_connected(_on_scroll_view_resized):
 		scroll_view.resized.connect(_on_scroll_view_resized)
-	var viewport := get_viewport()
-	if viewport and not viewport.size_changed.is_connected(_on_viewport_size_changed):
-		viewport.size_changed.connect(_on_viewport_size_changed)
 	if not entity_list_panel.entity_selected.is_connected(_on_entity_list_entity_selected):
 		entity_list_panel.entity_selected.connect(_on_entity_list_entity_selected)
 	if not action_menu.id_pressed.is_connected(_on_action_menu_id_pressed):
 		action_menu.id_pressed.connect(_on_action_menu_id_pressed)
 	if not spawn_panel.spawn_requested.is_connected(_on_spawn_panel_spawn_requested):
 		spawn_panel.spawn_requested.connect(_on_spawn_panel_spawn_requested)
+	if not info_panel.plan_info.meta_clicked.is_connected(_on_meta_clicked):
+		info_panel.plan_info.meta_clicked.connect(_on_meta_clicked)
+	if not combat_log.meta_clicked.is_connected(_on_meta_clicked):
+		combat_log.meta_clicked.connect(_on_meta_clicked)
+	if not scroll_view.zoom_requested.is_connected(_on_map_scrolled):
+		scroll_view.zoom_requested.connect(_on_map_scrolled)
+	
+	var viewport := get_viewport()
+	if viewport and not viewport.size_changed.is_connected(_on_viewport_size_changed):
+		viewport.size_changed.connect(_on_viewport_size_changed)
 
 
 func setup(p_game_map: GameMap, p_grid_size: int = 50):
@@ -287,53 +294,87 @@ func _update_time_of_day() -> void:
 	time_label.text = "%02d:%02d" % [hours, minutes]
 
 
-func _on_log_meta_clicked(meta: String) -> void:
-	"""Handles meta clicks in the combat log."""
-	# Handle item link: item:<mek_uuid>:<item_uuid>
-	if meta.begins_with("item:"):
-		var parts = meta.substr(5).split(":")
-		if parts.size() != 2:
-			printerr("Invalid item meta format: ", meta)
-			return
-		var mek_uuid = parts[0]
-		var item_uuid = parts[1]
-		var entity = game_map.get_entity(mek_uuid)
-		if entity and is_instance_of(entity, MapMek):
-			selected_entity = entity
-			center_on(entity.position)
-			info_panel.set_entity(entity)
-			entity_list_panel.select_entity(entity)
-			info_panel.select_item_by_uuid(item_uuid)
-			grid_drawer.set_selected_entity(entity)
-		else:
-			printerr("Could not find valid Mek entity for item link: ", meta)
-	# Handle Mek link: mek:<mek_uuid>
-	elif meta.begins_with("mek:"):
-		var mek_uuid = meta.substr(4)
-		var entity = game_map.get_entity(mek_uuid)
-		if entity and is_instance_of(entity, MapMek):
-			selected_entity = entity
-			center_on(entity.position)
-			info_panel.set_entity(entity)
-			entity_list_panel.select_entity(entity)
-			grid_drawer.set_selected_entity(entity)
-		else:
-			printerr("Could not find valid Mek entity for mek link: ", meta)
-	elif meta.begins_with("pos:"):
-		var coord_text = meta.substr(4)
-		var coords = coord_text.split(",")
-		if coords.size() != 2:
-			printerr("Invalid position meta format: ", meta)
-			return
-		var x = int(coords[0])
-		var y = int(coords[1])
-		var target_pos = Vector2i(x, y)
+func _on_meta_clicked(meta: String) -> void:
+	"""Handles standardized metadata clicks from log and info panel."""
+	if not game_map:
+		return
+
+	var parsed: Dictionary = MetaTag.parse(meta)
+	if parsed.is_empty():
+		printerr("Unknown meta clicked: ", meta)
+		return
+
+	var meta_type: String = str(parsed.get("type", ""))
+	if meta_type == "pos":
+		var target_pos: Vector2i = parsed.get("position", Vector2i(-1, -1))
 		if game_map.is_in_bounds(target_pos):
 			center_on(target_pos)
 		else:
 			printerr("Position out of bounds: ", target_pos)
-	else:
-		printerr("Unknown meta clicked: ", meta)
+		return
+
+	if meta_type == "entity":
+		var clicked_entity_uuid: String = str(parsed.get("entity_uuid", ""))
+		if clicked_entity_uuid.is_empty():
+			printerr("Invalid entity meta format: ", meta)
+			return
+		var target_entity: MapEntity = game_map.get_entity(clicked_entity_uuid)
+		if target_entity:
+			_select_entity(target_entity)
+		else:
+			printerr("Could not find entity for meta link: ", meta)
+		return
+
+	if meta_type == "item":
+		var item_uuid: String = str(parsed.get("item_uuid", ""))
+		if item_uuid.is_empty():
+			printerr("Invalid item meta format: ", meta)
+			return
+
+		var item_owner_uuid: String = str(parsed.get("entity_uuid", ""))
+		var item_owner_entity: MapEntity = null
+		if not item_owner_uuid.is_empty():
+			item_owner_entity = game_map.get_entity(item_owner_uuid)
+		if not item_owner_entity:
+			item_owner_entity = _find_entity_by_item_uuid(item_uuid)
+
+		if item_owner_entity and is_instance_of(item_owner_entity, MapCombatEntity):
+			_select_entity(item_owner_entity)
+			info_panel.select_item_by_uuid(item_uuid)
+		else:
+			printerr("Could not find valid owner entity for item link: ", meta)
+
+
+func _select_entity(entity: MapEntity) -> void:
+	selected_entity = entity
+	center_on(entity.position)
+	info_panel.set_entity(entity)
+	entity_list_panel.select_entity(entity)
+	grid_drawer.set_selected_entity(entity)
+
+
+func _find_entity_by_item_uuid(item_uuid: String) -> MapEntity:
+	for map_entity: MapEntity in game_map.player_units.values():
+		if _entity_has_item_uuid(map_entity, item_uuid):
+			return map_entity
+	for map_entity: MapEntity in game_map.npc_units.values():
+		if _entity_has_item_uuid(map_entity, item_uuid):
+			return map_entity
+	for map_entity: MapEntity in game_map.structures.values():
+		if _entity_has_item_uuid(map_entity, item_uuid):
+			return map_entity
+	return null
+
+
+func _entity_has_item_uuid(map_entity: MapEntity, item_uuid: String) -> bool:
+	if not map_entity or not is_instance_of(map_entity, MapCombatEntity):
+		return false
+
+	for item: Item in (map_entity as MapCombatEntity).combatant.items:
+		if item and item.uuid == item_uuid:
+			return true
+
+	return false
 
 
 func _on_cell_selected(cell_position: Vector2i):

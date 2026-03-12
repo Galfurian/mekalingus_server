@@ -38,7 +38,7 @@ func get_chat_tag() -> String:
 	Returns a chat tag for the EquippedModule.
 	"""
 	if validate():
-		return "[url=item:%s:%s]%s[/url]" % [mek.uuid, item.uuid, module.module_name]
+		return MetaTag.item_tag(item.uuid, module.module_name, mek.uuid)
 	return ""
 
 

@@ -11,45 +11,53 @@ layout_mode = 2
 text = "NPC Directives"
 horizontal_alignment = 1
 
-[node name="Section" type="PanelContainer" parent="."]
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Directive" type="VBoxContainer" parent="TabContainer"]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="Section" type="PanelContainer" parent="TabContainer/Directive"]
 layout_mode = 2
 
-[node name="Inner" type="VBoxContainer" parent="Section"]
+[node name="Inner" type="VBoxContainer" parent="TabContainer/Directive/Section"]
 layout_mode = 2
 
-[node name="OwnerRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="OwnerRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
 layout_mode = 2
 
-[node name="OwnerLabel" type="Label" parent="Section/Inner/OwnerRow"]
+[node name="OwnerLabel" type="Label" parent="TabContainer/Directive/Section/Inner/OwnerRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Squad"
 
-[node name="OwnerOption" type="OptionButton" parent="Section/Inner/OwnerRow"]
+[node name="OwnerOption" type="OptionButton" parent="TabContainer/Directive/Section/Inner/OwnerRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="DirectiveRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="DirectiveRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
 layout_mode = 2
 
-[node name="DirectiveLabel" type="Label" parent="Section/Inner/DirectiveRow"]
+[node name="DirectiveLabel" type="Label" parent="TabContainer/Directive/Section/Inner/DirectiveRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Directive"
 
-[node name="DirectiveOption" type="OptionButton" parent="Section/Inner/DirectiveRow"]
+[node name="DirectiveOption" type="OptionButton" parent="TabContainer/Directive/Section/Inner/DirectiveRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CompactRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="CompactRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
 layout_mode = 2
 
-[node name="CompactLabel" type="Label" parent="Section/Inner/CompactRow"]
+[node name="CompactLabel" type="Label" parent="TabContainer/Directive/Section/Inner/CompactRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Compact Radius"
 
-[node name="CompactSpin" type="SpinBox" parent="Section/Inner/CompactRow"]
+[node name="CompactSpin" type="SpinBox" parent="TabContainer/Directive/Section/Inner/CompactRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 1.0
@@ -58,15 +66,15 @@ step = 1.0
 value = 4.0
 rounded = true
 
-[node name="LeashRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="LeashRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
 layout_mode = 2
 
-[node name="LeashLabel" type="Label" parent="Section/Inner/LeashRow"]
+[node name="LeashLabel" type="Label" parent="TabContainer/Directive/Section/Inner/LeashRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Leash Radius"
 
-[node name="LeashSpin" type="SpinBox" parent="Section/Inner/LeashRow"]
+[node name="LeashSpin" type="SpinBox" parent="TabContainer/Directive/Section/Inner/LeashRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 1.0
@@ -75,43 +83,82 @@ step = 1.0
 value = 6.0
 rounded = true
 
-[node name="AnchorRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="AnchorRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
 layout_mode = 2
 
-[node name="AnchorLabel" type="Label" parent="Section/Inner/AnchorRow"]
+[node name="AnchorLabel" type="Label" parent="TabContainer/Directive/Section/Inner/AnchorRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Anchor"
 
-[node name="AnchorValue" type="Label" parent="Section/Inner/AnchorRow"]
+[node name="AnchorValue" type="Label" parent="TabContainer/Directive/Section/Inner/AnchorRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "-"
 horizontal_alignment = 2
 
-[node name="PatrolRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="PatrolRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
 layout_mode = 2
 
-[node name="PatrolLabel" type="Label" parent="Section/Inner/PatrolRow"]
+[node name="PatrolLabel" type="Label" parent="TabContainer/Directive/Section/Inner/PatrolRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Patrol Target"
 
-[node name="PatrolValue" type="Label" parent="Section/Inner/PatrolRow"]
+[node name="PatrolValue" type="Label" parent="TabContainer/Directive/Section/Inner/PatrolRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "-"
 horizontal_alignment = 2
 
-[node name="ButtonsRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="ButtonsRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
 layout_mode = 2
 
-[node name="ApplyButton" type="Button" parent="Section/Inner/ButtonsRow"]
+[node name="ApplyButton" type="Button" parent="TabContainer/Directive/Section/Inner/ButtonsRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Apply"
 
-[node name="ResetAnchorButton" type="Button" parent="Section/Inner/ButtonsRow"]
+[node name="ResetAnchorButton" type="Button" parent="TabContainer/Directive/Section/Inner/ButtonsRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Reset Anchor"
+
+[node name="Squads" type="VBoxContainer" parent="TabContainer"]
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="SquadTree" type="Tree" parent="TabContainer/Squads"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 4
+column_titles_visible = true
+hide_root = true
+
+[node name="QuickButtons" type="HBoxContainer" parent="TabContainer/Squads"]
+layout_mode = 2
+
+[node name="QuickHold" type="Button" parent="TabContainer/Squads/QuickButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Hold"
+
+[node name="QuickPatrol" type="Button" parent="TabContainer/Squads/QuickButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Patrol"
+
+[node name="QuickSeek" type="Button" parent="TabContainer/Squads/QuickButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Seek"
+
+[node name="QuickDefend" type="Button" parent="TabContainer/Squads/QuickButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Defend"
+
+[node name="QuickRetreat" type="Button" parent="TabContainer/Squads/QuickButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Retreat"

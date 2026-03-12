@@ -133,7 +133,7 @@ func _populate_tree(tree: Tree, entities: Array[MapEntity]) -> void:
 		group_item.set_text(0, group_labels[owner_key])
 		group_item.set_custom_color(0, _owner_color(grouped_entities[owner_key][0]))
 
-		var group_entities: Array[MapEntity] = grouped_entities[owner_key]
+		var group_entities: Array[MapEntity] = _to_map_entity_array(grouped_entities[owner_key])
 		group_entities.sort_custom(func(a: MapEntity, b: MapEntity):
 			return _entity_sort_label(a) < _entity_sort_label(b)
 		)
@@ -143,6 +143,14 @@ func _populate_tree(tree: Tree, entities: Array[MapEntity]) -> void:
 			item.set_text(0, _entity_child_label(entity))
 			item.set_metadata(0, entity)
 			item.set_custom_color(0, _owner_color(entity))
+
+
+func _to_map_entity_array(raw_array: Array) -> Array[MapEntity]:
+	var result: Array[MapEntity] = []
+	for raw_item in raw_array:
+		if is_instance_of(raw_item, MapEntity):
+			result.append(raw_item)
+	return result
 
 
 func _owner_group_key(entity: MapEntity) -> String:

@@ -17,6 +17,7 @@ const BORDER_COLOR = Color(0.2, 0.2, 0.2, 1.0)
 var game_map: GameMap
 var grid_size: int
 var sector_size: int
+var padding_tiles: int
 var selected_entity: MapEntity
 
 # =============================================================================
@@ -24,10 +25,11 @@ var selected_entity: MapEntity
 # =============================================================================
 
 
-func setup(p_game_map: GameMap, p_grid_size: int, p_sector_size: int):
+func setup(p_game_map: GameMap, p_grid_size: int, p_sector_size: int, p_padding_tiles: int):
 	game_map = p_game_map
 	grid_size = p_grid_size
 	sector_size = p_sector_size
+	padding_tiles = p_padding_tiles
 	if not game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
 		game_map.turn_manager.on_turn_ended.connect(_on_turn_ended)
 	queue_redraw()
@@ -40,6 +42,7 @@ func clear() -> void:
 	game_map = null
 	grid_size = 0
 	sector_size = 0
+	padding_tiles = 0
 	selected_entity = null
 
 	queue_redraw()
@@ -58,8 +61,8 @@ func deselect_entity():
 
 
 func get_draw_offset() -> Vector2:
-	# Offset by one sector in each direction
-	return Vector2(sector_size * grid_size, sector_size * grid_size)
+	# Offset by the full outer padding in each direction.
+	return Vector2(padding_tiles * grid_size, padding_tiles * grid_size)
 
 
 func to_grid_position(map_position: Vector2) -> Vector2:
@@ -94,11 +97,11 @@ func _draw():
 			)
 	assert(game_map.map_width == game_map.map_height, "Map is not square!")
 	# Draw grid overlay (including extended grid lines).
-	for i in range(game_map.map_width + sector_size + sector_size):
+	for i in range(game_map.map_width + padding_tiles + padding_tiles):
 		if (i % sector_size) == 0:
 			var x_start = Vector2(i * grid_size, 0)
-			var x_end = Vector2(i * grid_size, (game_map.map_height + sector_size * 2) * grid_size)
+			var x_end = Vector2(i * grid_size, (game_map.map_height + padding_tiles * 2) * grid_size)
 			draw_line(x_start, x_end, MAJOR_GRID_COLOR, MAJOR_GRID_SIZE)
 			var y_start = Vector2(0, i * grid_size)
-			var y_end = Vector2((game_map.map_width + sector_size * 2) * grid_size, i * grid_size)
+			var y_end = Vector2((game_map.map_width + padding_tiles * 2) * grid_size, i * grid_size)
 			draw_line(y_start, y_end, MAJOR_GRID_COLOR, MAJOR_GRID_SIZE)

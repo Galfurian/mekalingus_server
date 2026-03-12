@@ -1,7 +1,7 @@
 extends ScrollContainer
 
 # Define the signal
-signal scrolled(scroll_up: bool)
+signal scrolled(scroll_up: bool, mouse_pos: Vector2)
 
 var _is_dragging: bool = false
 var _drag_start_pos: Vector2 = Vector2.ZERO
@@ -31,9 +31,9 @@ func _gui_input(event):
 	# CTRL + Scroll for Zoom
 	elif event is InputEventMouseButton and Input.is_key_pressed(KEY_CTRL):
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			scrolled.emit(true)
+			scrolled.emit(true, event.position)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			scrolled.emit(false)
+			scrolled.emit(false, event.position)
 	# SHIFT + Scroll for Horizontal Scrolling
 	elif event is InputEventMouseButton and Input.is_key_pressed(KEY_SHIFT):
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:

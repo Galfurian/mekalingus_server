@@ -66,8 +66,11 @@ static func _build_formation_targets(
 			return angle_a < angle_b
 		)
 
-		for tile: Vector2i in ring:
-			targets.append(tile)
+		var remaining: int = count - targets.size()
+		var take_count: int = mini(remaining, ring.size())
+		for index in range(take_count):
+			var ring_index: int = int(floor(float(index) * ring.size() / take_count))
+			targets.append(ring[ring_index])
 			if targets.size() >= count:
 				break
 

@@ -26,6 +26,8 @@ func _ready() -> void:
 	save_map.pressed.connect(_on_save_map)
 	load_map.pressed.connect(_on_load_map)
 	map_list.item_selected.connect(_on_map_selected)
+	if map_hud and not map_hud.map_state_changed.is_connected(_on_map_hud_state_changed):
+		map_hud.map_state_changed.connect(_on_map_hud_state_changed)
 	var index = 0
 	for difficulty_name in Enums.MapDifficulty:
 		map_difficulty.add_item(difficulty_name, index)
@@ -204,6 +206,10 @@ func _observe_map(game_map: GameMap) -> void:
 
 func _on_map_turn_ended(_turn_number: int) -> void:
 	_update_map_start_stop_state(_observed_map)
+
+
+func _on_map_hud_state_changed(game_map: GameMap) -> void:
+	_update_map_start_stop_state(game_map)
 
 
 func _update_map_start_stop_state(game_map: GameMap) -> void:

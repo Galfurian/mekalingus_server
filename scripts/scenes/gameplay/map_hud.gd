@@ -1,7 +1,10 @@
 extends Node
 
+signal map_state_changed(game_map: GameMap)
+
 # The size of sectors.
 const SECTOR_SIZE: int = 10
+const SCROLL_PADDING_TILES: int = 10
 const LEFT_PANEL_RATIO: float = 0.2
 const MENU_DELETE_ENTITY: int = 1
 const MENU_OPEN_SPAWN_PANEL: int = 2
@@ -48,11 +51,12 @@ func setup(p_game_map: GameMap, p_grid_size: int = 50):
 	# Set the variables.
 	game_map = p_game_map
 	grid_size = p_grid_size
+	var padding_tiles := _get_map_padding_tiles()
 	# Initialize all components with the chosen grid size
-	time_of_day_overlay.setup(p_game_map, grid_size, SECTOR_SIZE)
-	grid_container.setup(p_game_map, grid_size, SECTOR_SIZE)
-	grid_drawer.setup(p_game_map, grid_size, SECTOR_SIZE)
-	icon_drawer.setup(p_game_map, grid_size, SECTOR_SIZE)
+	time_of_day_overlay.setup(p_game_map, grid_size, padding_tiles)
+	grid_container.setup(p_game_map, grid_size, padding_tiles)
+	grid_drawer.setup(p_game_map, grid_size, SECTOR_SIZE, padding_tiles)
+	icon_drawer.setup(p_game_map, grid_size, padding_tiles)
 	info_panel.setup(p_game_map)
 	entity_list_panel.setup(p_game_map)
 	log_panel.setup(p_game_map)
@@ -87,27 +91,33 @@ func redraw(p_grid_size: int):
 		return
 	# Update the grid size.
 	grid_size = p_grid_size
+	var padding_tiles := _get_map_padding_tiles()
 	# Re-setup all components with the new grid size.
-	time_of_day_overlay.setup(game_map, grid_size, SECTOR_SIZE)
-	grid_container.setup(game_map, grid_size, SECTOR_SIZE)
-	grid_drawer.setup(game_map, grid_size, SECTOR_SIZE)
-	icon_drawer.setup(game_map, grid_size, SECTOR_SIZE)
+	time_of_day_overlay.setup(game_map, grid_size, padding_tiles)
+	grid_container.setup(game_map, grid_size, padding_tiles)
+	grid_drawer.setup(game_map, grid_size, SECTOR_SIZE, padding_tiles)
+	icon_drawer.setup(game_map, grid_size, padding_tiles)
+
+
+func _get_map_padding_tiles() -> int:
+	return SECTOR_SIZE + SCROLL_PADDING_TILES
 
 
 func center_on(position: Vector2i) -> void:
 	"""Centers the scroll view on the given tile position."""
 	if not game_map:
 		return
+	var padding_tiles := _get_map_padding_tiles()
 	# Convert tile coordinates to pixel coordinates.
-	var tile_pixel_pos = (position + Vector2i(SECTOR_SIZE, SECTOR_SIZE)) * grid_size
+	var tile_pixel_pos = (position + Vector2i(padding_tiles, padding_tiles)) * grid_size
 	# Get the size of the scroll viewport (i.e., the visible area).
 	var visible_size = scroll_view.get_size()
 	# Center position = move the scroll so the position is in the center of the screen.
 	var scroll_x = tile_pixel_pos.x - (visible_size.x / 2.) + (grid_size / 2.)
 	var scroll_y = tile_pixel_pos.y - (visible_size.y / 2.) + (grid_size / 2.)
 	# Compute the maximum scroll limits to prevent scrolling out of bounds.
-	var max_scroll_x = (game_map.map_width + SECTOR_SIZE * 2) * grid_size - visible_size.x
-	var max_scroll_y = (game_map.map_height + SECTOR_SIZE * 2) * grid_size - visible_size.y
+	var max_scroll_x = (game_map.map_width + padding_tiles * 2) * grid_size - visible_size.x
+	var max_scroll_y = (game_map.map_height + padding_tiles * 2) * grid_size - visible_size.y
 	# Apply clamped scrolling.
 	scroll_view.scroll_horizontal = clamp(scroll_x, 0, max_scroll_x)
 	scroll_view.scroll_vertical = clamp(scroll_y, 0, max_scroll_y)
@@ -117,13 +127,14 @@ func zoom_out():
 	"""Zooms out the map view."""
 	if not game_map:
 		return
+	var padding_tiles := _get_map_padding_tiles()
 
 	# Get the visible scroll area size.
 	var visible_size = scroll_view.get_size()
 
 	# Compute minimum grid size needed to fit the full map (including padding).
-	var total_tiles_x = game_map.map_width + SECTOR_SIZE
-	var total_tiles_y = game_map.map_height + SECTOR_SIZE
+	var total_tiles_x = game_map.map_width + padding_tiles * 2
+	var total_tiles_y = game_map.map_height + padding_tiles * 2
 	var min_grid_size_x = visible_size.x / total_tiles_x
 	var min_grid_size_y = visible_size.y / total_tiles_y
 
@@ -132,8 +143,8 @@ func zoom_out():
 	grid_size = max(1, floor(min_grid_size))
 
 	# Center the scroll view on the map.
-	scroll_view.scroll_horizontal = (SECTOR_SIZE * grid_size) / 2.0
-	scroll_view.scroll_vertical = (SECTOR_SIZE * grid_size) / 2.0
+	scroll_view.scroll_horizontal = (padding_tiles * grid_size) / 2.0
+	scroll_view.scroll_vertical = (padding_tiles * grid_size) / 2.0
 	
 	# Redraw with the new grid size.
 	redraw(grid_size)
@@ -273,6 +284,7 @@ func _delete_entity_at_context_cell() -> void:
 		grid_drawer.deselect_entity()
 
 	_refresh_entity_views()
+	map_state_changed.emit(game_map)
 
 
 func _open_spawn_panel_for_context_cell() -> void:
@@ -303,6 +315,7 @@ func _on_spawn_panel_spawn_requested(request: Dictionary) -> void:
 			OutpostSpawner.spawn(game_map, origin, request)
 
 	_refresh_entity_views()
+	map_state_changed.emit(game_map)
 
 
 func _refresh_entity_views() -> void:
@@ -311,17 +324,18 @@ func _refresh_entity_views() -> void:
 	entity_list_panel.refresh()
 
 
-func _on_map_scrolled(scroll_up: bool):
+func _on_map_scrolled(scroll_up: bool, mouse_pos: Vector2):
 	"""Handles map scrolling and zooming."""
 	if not game_map:
 		return
+	var padding_tiles := _get_map_padding_tiles()
 	# Store previous grid size before updating.
 	var old_grid_size = grid_size
 	# Get the size of the scroll viewport (i.e., visible area)
 	var visible_size = scroll_view.get_size()
 	# Full number of tiles that need to be visible, including sector borders
-	var total_tiles_x = game_map.map_width + SECTOR_SIZE * 2
-	var total_tiles_y = game_map.map_height + SECTOR_SIZE * 2
+	var total_tiles_x = game_map.map_width + padding_tiles * 2
+	var total_tiles_y = game_map.map_height + padding_tiles * 2
 	# Compute the minimum grid size that would fit the entire map (including sectors)
 	var min_grid_size_x = visible_size.x / total_tiles_x
 	var min_grid_size_y = visible_size.y / total_tiles_y
@@ -338,23 +352,20 @@ func _on_map_scrolled(scroll_up: bool):
 		grid_size -= 2
 	else:
 		return # No change needed
-	# Get mouse position inside the ScrollContainer.
-	var mouse_pos = scroll_view.get_local_mouse_position()
 	# Store previous scroll positions.
 	var old_scroll_h = scroll_view.scroll_horizontal
 	var old_scroll_v = scroll_view.scroll_vertical
+	# Keep the same world pixel under cursor after zoom.
+	var world_anchor: Vector2 = Vector2(old_scroll_h, old_scroll_v) + mouse_pos
 	# Apply the new zoom level to the map.
 	redraw(grid_size)
 	# Adjust scrolling to keep the zoom centered on the mouse position.
 	var scale_factor = float(grid_size) / float(old_grid_size)
-	var new_scroll_h = int(
-		old_scroll_h * scale_factor + mouse_pos.x * (scale_factor - 1)
-	)
-	var new_scroll_v = int(
-		old_scroll_v * scale_factor + mouse_pos.y * (scale_factor - 1)
-	)
+	var new_anchor: Vector2 = world_anchor * scale_factor
+	var new_scroll_h = int(round(new_anchor.x - mouse_pos.x))
+	var new_scroll_v = int(round(new_anchor.y - mouse_pos.y))
 	# Clamp to valid scroll range
-	var max_scroll_h = maxi(0, grid_container.size.x - scroll_view.get_size().x)
-	var max_scroll_v = maxi(0, grid_container.size.y - scroll_view.get_size().y)
+	var max_scroll_h = maxi(0, int(total_tiles_x * grid_size - visible_size.x))
+	var max_scroll_v = maxi(0, int(total_tiles_y * grid_size - visible_size.y))
 	scroll_view.scroll_horizontal = clampi(new_scroll_h, 0, max_scroll_h)
 	scroll_view.scroll_vertical = clampi(new_scroll_v, 0, max_scroll_v)

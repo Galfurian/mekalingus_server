@@ -8,26 +8,26 @@ signal on_cell_context_requested(cell_position: Vector2i, mouse_position: Vector
 var game_map: GameMap
 # The current grid size (in pixels).
 var grid_size: int
-# The sector size (in tiles).
-var sector_size: int
+# The outer scroll padding size (in tiles).
+var padding_tiles: int
 
 func _ready():
 	set_mouse_filter(Control.MOUSE_FILTER_PASS)
 
-func setup(p_game_map: GameMap, p_grid_size: int, p_sector_size: int):
+func setup(p_game_map: GameMap, p_grid_size: int, p_padding_tiles: int):
 	clear()
 	game_map = p_game_map
 	grid_size = p_grid_size
-	sector_size = p_sector_size
-	var tile_width = game_map.map_width + sector_size * 2
-	var tile_height = game_map.map_height + sector_size * 2
+	padding_tiles = p_padding_tiles
+	var tile_width = game_map.map_width + padding_tiles * 2
+	var tile_height = game_map.map_height + padding_tiles * 2
 	custom_minimum_size = Vector2(tile_width * grid_size, tile_height * grid_size)
 
 
 func clear():
 	game_map = null
 	grid_size = 0
-	sector_size = 0
+	padding_tiles = 0
 
 
 func _gui_input(event):
@@ -37,8 +37,8 @@ func _gui_input(event):
 		var local_mouse_pos = get_local_mouse_position()
 		# Compute the selected cell based on the local mouse position.
 		var selected_cell = Vector2i(
-			int(local_mouse_pos.x / grid_size) - sector_size,
-			int(local_mouse_pos.y / grid_size) - sector_size
+			int(local_mouse_pos.x / grid_size) - padding_tiles,
+			int(local_mouse_pos.y / grid_size) - padding_tiles
 		)
 		# Ensure the selected cell is within bounds.
 		if (

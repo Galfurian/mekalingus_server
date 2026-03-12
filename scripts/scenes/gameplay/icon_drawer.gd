@@ -18,7 +18,7 @@ const CLAN_FRAME_ALPHA = 0.48
 
 var game_map: GameMap
 var grid_size: int
-var sector_size: int
+var padding_tiles: int
 var entity_sprites: Dictionary
 var _texture_cache: Dictionary
 var _clan_frame_texture: Texture2D = null
@@ -28,11 +28,11 @@ var _clan_frame_texture: Texture2D = null
 # =============================================================================
 
 
-func setup(p_game_map: GameMap, p_grid_size: int, p_sector_size: int) -> void:
+func setup(p_game_map: GameMap, p_grid_size: int, p_padding_tiles: int) -> void:
 	clear()
 	game_map = p_game_map
 	grid_size = p_grid_size
-	sector_size = p_sector_size
+	padding_tiles = p_padding_tiles
 	if not game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
 		game_map.turn_manager.on_turn_ended.connect(_on_turn_ended)
 	update_icons()
@@ -44,7 +44,7 @@ func clear() -> void:
 
 	game_map = null
 	grid_size = 0
-	sector_size = 0
+	padding_tiles = 0
 	for sprite in entity_sprites.values():
 		sprite.queue_free()
 
@@ -80,8 +80,8 @@ func update_icons() -> void:
 		var map_entity: MapEntity = active_entities[entity_key]
 		var icon_position: Vector2i = map_entity.position
 		var center := Vector2(
-			(sector_size + icon_position.x + 0.5) * grid_size,
-			(sector_size + icon_position.y + 0.5) * grid_size
+			(padding_tiles + icon_position.x + 0.5) * grid_size,
+			(padding_tiles + icon_position.y + 0.5) * grid_size
 		)
 
 		var holder: Node2D

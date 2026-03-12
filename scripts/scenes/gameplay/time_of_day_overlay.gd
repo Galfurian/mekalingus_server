@@ -7,10 +7,10 @@ extends Node2D
 var game_map: GameMap
 # The current grid size (in pixels).
 var grid_size: int
-# The current size of a sector (in tiles).
-var sector_size: int
+# The outer scroll padding size (in tiles).
+var padding_tiles: int
 
-func setup(p_game_map: GameMap, p_grid_size: int, p_sector_size: int):
+func setup(p_game_map: GameMap, p_grid_size: int, p_padding_tiles: int):
 	"""
 	Sets up the grid with the given parameters.
 	"""
@@ -19,7 +19,7 @@ func setup(p_game_map: GameMap, p_grid_size: int, p_sector_size: int):
 	# Set the game map and parameters.
 	game_map = p_game_map
 	grid_size = p_grid_size
-	sector_size = p_sector_size
+	padding_tiles = p_padding_tiles
 	# Connect the turn ended signal to update the shader.
 	if not game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
 		game_map.turn_manager.on_turn_ended.connect(_on_turn_ended)
@@ -38,7 +38,7 @@ func clear():
 	# Clear all the parameters.
 	game_map = null
 	grid_size = 0
-	sector_size = 0
+	padding_tiles = 0
 	queue_redraw()
 
 func _on_turn_ended(_turn_number: int) -> void:
@@ -61,7 +61,7 @@ func _get_draw_offset() -> Vector2:
 	"""
 	Returns the offset of the grid overlay due to the border sector.
 	"""
-	return Vector2(sector_size * grid_size, sector_size * grid_size)
+	return Vector2(padding_tiles * grid_size, padding_tiles * grid_size)
 
 func _get_draw_size() -> Vector2:
 	"""

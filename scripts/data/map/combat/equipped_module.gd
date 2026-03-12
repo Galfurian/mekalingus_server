@@ -5,8 +5,8 @@ class_name EquippedModule extends RefCounted
 # MEMBER VARIABLES
 # =============================================================================
 
-# The Mek that has the module equipped.
-var mek: Mek
+# The combat actor that has the module equipped.
+var mek: CombatActor
 # The item that is equipped.
 var item: Item
 # The module of that item.
@@ -17,7 +17,7 @@ var module: ItemModule
 # =============================================================================
 
 
-func _init(p_mek: Mek, p_item: Item, p_module: ItemModule) -> void:
+func _init(p_mek: CombatActor, p_item: Item, p_module: ItemModule) -> void:
 	"""
 	Initializes the EquippedModule.
 	"""
@@ -46,4 +46,12 @@ func _to_string() -> String:
 	"""
 	Returns a string representation of the EquippedModule.
 	"""
-	return "%s: %s (%s)" % [mek.get_mek_name(), item.name, module.module_name]
+	var actor_name: String = "Unknown"
+	if validate():
+		if mek.has_method("get_mek_name"):
+			actor_name = str(mek.call("get_mek_name"))
+		elif not mek.alias.is_empty():
+			actor_name = mek.alias
+		else:
+			actor_name = mek.name
+	return "%s: %s (%s)" % [actor_name, item.name, module.module_name]

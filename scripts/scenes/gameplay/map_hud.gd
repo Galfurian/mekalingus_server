@@ -347,9 +347,14 @@ func _on_map_scrolled(scroll_up: bool):
 	redraw(grid_size)
 	# Adjust scrolling to keep the zoom centered on the mouse position.
 	var scale_factor = float(grid_size) / float(old_grid_size)
-	scroll_view.scroll_horizontal = int(
+	var new_scroll_h = int(
 		old_scroll_h * scale_factor + mouse_pos.x * (scale_factor - 1)
 	)
-	scroll_view.scroll_vertical = int(
+	var new_scroll_v = int(
 		old_scroll_v * scale_factor + mouse_pos.y * (scale_factor - 1)
 	)
+	# Clamp to valid scroll range
+	var max_scroll_h = maxi(0, grid_container.size.x - scroll_view.get_size().x)
+	var max_scroll_v = maxi(0, grid_container.size.y - scroll_view.get_size().y)
+	scroll_view.scroll_horizontal = clampi(new_scroll_h, 0, max_scroll_h)
+	scroll_view.scroll_vertical = clampi(new_scroll_v, 0, max_scroll_v)

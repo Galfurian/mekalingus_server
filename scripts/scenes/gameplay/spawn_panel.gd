@@ -296,21 +296,21 @@ func _get_selected_metadata(option: OptionButton) -> String:
 func _populate_loadout_options() -> void:
 	loadout_option.clear()
 	budget_loadout_option.clear()
-	loadout_option.add_item("None")
-	loadout_option.set_item_metadata(0, "none")
 	loadout_option.add_item("Random: Balanced")
-	loadout_option.set_item_metadata(1, "preset_balanced")
+	loadout_option.set_item_metadata(0, "preset_balanced")
 	loadout_option.add_item("Random: Offense")
-	loadout_option.set_item_metadata(2, "preset_offense")
+	loadout_option.set_item_metadata(1, "preset_offense")
 	loadout_option.add_item("Random: Defense")
-	loadout_option.set_item_metadata(3, "preset_defense")
+	loadout_option.set_item_metadata(2, "preset_defense")
 	loadout_option.add_item("Random: Utility")
-	loadout_option.set_item_metadata(4, "preset_utility")
+	loadout_option.set_item_metadata(3, "preset_utility")
+	loadout_option.add_item("None")
+	loadout_option.set_item_metadata(4, "none")
 	loadout_option.select(0)
 	for index in range(loadout_option.item_count):
 		budget_loadout_option.add_item(loadout_option.get_item_text(index))
 		budget_loadout_option.set_item_metadata(index, loadout_option.get_item_metadata(index))
-	budget_loadout_option.select(1)
+	budget_loadout_option.select(0)
 
 
 func _populate_squad_modes() -> void:

@@ -3,12 +3,18 @@ extends RefCounted
 
 enum Intent { NONE, ATTACK, SUPPORT, RETREAT, REPOSITION }
 
-# ========== PLAN STATE ==========
+# Plan lifecycle state.
+enum Status { NONE, PLANNED, ORDER_QUEUED, EXECUTING, COMPLETED }
+
+# ========== PLAN STATE ===========
 
 # Defines the high-level goal of the plan.
 var intent: Intent = Intent.NONE
-# Check if the plan is complete.
+# A status enum describing where the plan currently stands.
+var status: Status = Status.NONE
+# Deprecated boolean for backwards compatibility.
 var completed: bool = false
+
 
 # ========== PLAN DATA ==========
 
@@ -24,13 +30,18 @@ var destination: Vector2i
 var equipped_module: EquippedModule = null
 # The priority ranking assigned during planning.
 var score: float = 0.0
+func set_status(val: Status) -> void:
+	status = val
+	completed = status == Status.COMPLETED
 
+func get_status() -> Status:
+	return status
 # ========== CORE METHODS ==========
 
 
 func _init(p_source, p_game_map) -> void:
 	intent = Intent.NONE
-	completed = false
+	set_status(Status.PLANNED)
 
 	game_map = p_game_map
 
@@ -48,31 +59,36 @@ func _format_pos_tag(pos: Vector2i) -> String:
 func is_valid() -> bool:
 	if source == null or source.combatant.is_dead():
 		return false
+
+	var valid: bool = true
 	if intent == Intent.ATTACK or intent == Intent.SUPPORT:
-		if target == null or target.combatant.is_dead():
-			return false
-		if equipped_module == null:
-			return false
-		if not AIUtils.is_equipped_module_available(source.combatant, equipped_module):
-			return false
-		if not AIUtils.can_module_be_used_now(
-			source.combatant, equipped_module.item, equipped_module.module
-		):
-			return false
-	if intent == Intent.RETREAT or intent == Intent.REPOSITION:
-		if destination == Vector2i.ZERO:
-			return false
-	if is_complete():
+		valid = target != null and not target.combatant.is_dead()
+		if valid:
+			valid = equipped_module != null
+		if valid:
+			valid = AIUtils.is_equipped_module_available(source.combatant, equipped_module)
+		if valid:
+			valid = AIUtils.can_module_be_used_now(
+				source.combatant, equipped_module.item, equipped_module.module
+			)
+	elif intent == Intent.RETREAT or intent == Intent.REPOSITION:
+		valid = destination != Vector2i.ZERO
+
+	if not valid:
 		return false
-	return true
+
+	return not is_complete()
 
 
 func is_complete() -> bool:
+	# A plan is considered complete once it has generated an order
+	# (for combat plans) or the unit has arrived (movement plans).
 	if intent == Intent.NONE:
 		return true
-	if completed:
+	if status == Status.ORDER_QUEUED or status == Status.COMPLETED:
 		return true
 	if intent == Intent.ATTACK or intent == Intent.SUPPORT:
+		# If the module is on cooldown (meaning the order executed), treat as complete.
 		if (
 			equipped_module
 			and source.combatant.cooldown_manager.is_on_cooldown(
@@ -82,6 +98,7 @@ func is_complete() -> bool:
 			return true
 	if intent == Intent.RETREAT or intent == Intent.REPOSITION:
 		if source.position == destination:
+			status = Status.COMPLETED
 			return true
 	return false
 
@@ -107,9 +124,7 @@ func generate_order(reserved_tiles: Dictionary = {}) -> Order:
 
 
 func _generate_combat_order(reserved_tiles: Dictionary) -> Order:
-	if not target:
-		return null
-	if not equipped_module:
+	if not target or not equipped_module:
 		return null
 
 	var movement_speed: int = source.combatant.speed
@@ -124,24 +139,25 @@ func _generate_combat_order(reserved_tiles: Dictionary) -> Order:
 	var target_in_range: bool = (
 		(source == target) or (distance >= min_range and distance <= module_range)
 	)
+	var order: Order = null
 	if target_in_range:
-		completed = true
+		set_status(Status.ORDER_QUEUED)
 		if is_enemy_target:
-			return UseOffensiveModuleOrder.new(source, target, equipped_module)
-		return UseUtilityModuleOrder.new(source, target, equipped_module)
-
-	if not source.can_move() or movement_speed <= 0:
-		completed = true
+			order = UseOffensiveModuleOrder.new(source, target, equipped_module)
+		else:
+			order = UseUtilityModuleOrder.new(source, target, equipped_module)
+	elif not source.can_move() or movement_speed <= 0:
+		set_status(Status.COMPLETED)
 		return null
+	else:
+		AIPathfinder.set_reserved_tiles(reserved_tiles)
+		var target_tile: Vector2i = _find_combat_approach_tile(
+			is_enemy_target, module_range, min_range, movement_speed
+		)
+		if not (target_tile == Vector2i.ZERO or target_tile == source.position):
+			order = MoveOrder.new(source, target_tile)
 
-	AIPathfinder.set_reserved_tiles(reserved_tiles)
-	var target_tile: Vector2i = _find_combat_approach_tile(
-		is_enemy_target, module_range, min_range, movement_speed
-	)
-	if target_tile == Vector2i.ZERO or target_tile == source.position:
-		return null
-
-	return MoveOrder.new(source, target_tile)
+	return order
 
 
 func _find_combat_approach_tile(
@@ -164,7 +180,10 @@ func _generate_move_order_for_destination() -> Order:
 
 
 func _to_string() -> String:
-	var s := "AIPlan(intent=%s, completed=%s" % [AIPlan.Intent.keys()[intent], str(completed)]
+	var s := "AIPlan(intent=%s, status=%s" % [
+		AIPlan.Intent.keys()[intent],
+		AIPlan.Status.keys()[status],
+	]
 	if source:
 		s += ", source=%s" % source.combatant.get_chat_tag()
 	if target:

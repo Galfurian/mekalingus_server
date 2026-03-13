@@ -120,7 +120,9 @@ func step_once() -> void:
 
 	_execute_turn()
 
-	if was_active and game_map.has_hostile_pairs():
+	# Preserve whatever run/paused state was in effect before stepping. This allows stepping through
+	# turns even when there are no hostiles.
+	if was_active:
 		start()
 
 
@@ -204,7 +206,13 @@ func _execute_turn() -> void:
 	# Increment the current turn.
 	_current_turn += 1
 
-	if not game_map.has_hostile_pairs():
+	# Always precompute plans for the next turn so the UI can display intent, even when there are no
+	# hostile pairs remaining. This keeps the AI plan cache up to date for the next step.
+	if game_map and game_map.ai_controller:
+		game_map.ai_controller.precompute_next_turn_plans()
+
+	var combat_continues: bool = game_map.has_hostile_pairs()
+	if not combat_continues:
 		_is_active = false
 		(
 			game_map

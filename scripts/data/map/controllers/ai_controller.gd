@@ -231,6 +231,13 @@ func plan_for_unit(source: MapCombatEntity, turn_context: RefCounted = null) -> 
 		# If the plan is valid, no need to re-plan.
 		if current_plan and current_plan.is_valid():
 			return
+		# If we have a plan but it is no longer valid, log it so we know why
+		# the AI had to regenerate.
+		if current_plan and not current_plan.is_valid():
+			_add_log(
+				"%s cached plan invalidated; regenerating: %s"
+				% [source.combatant.get_chat_tag(), str(current_plan)]
+			)
 		# Get the clan aggressiveness and generate a plan.
 		var aggressiveness: float = 1.0
 		if source.owner and source.owner.clan:
@@ -379,6 +386,37 @@ func generate_ai_orders() -> void:
 		plan_for_unit(unit, _turn_context)
 		# Generate the next order based on the current plan.
 		generate_orders_for_unit(unit)
+
+	_turn_context = null
+
+
+func precompute_next_turn_plans() -> void:
+	"""
+	Precomputes plans for the upcoming turn.
+
+	This is intended to populate the plan cache after the current turn
+	finishes so UI can display what the AI intends to do next.
+	"""
+	if not game_map:
+		return
+
+	_reserved_move_tiles.clear()
+	_turn_context = AITurnContext.new(game_map)
+
+	for unit: MapCombatEntity in _iter_ai_controlled_entities():
+		var previous_plan: AIPlan = get_current_plan(unit)
+		plan_for_unit(unit, _turn_context)
+		var next_plan: AIPlan = get_current_plan(unit)
+		if (
+			next_plan
+			and next_plan.is_valid()
+			and not next_plan.is_complete()
+			and next_plan != previous_plan
+		):
+			_add_log(
+				"%s precomputed next-turn plan: %s" %
+				[unit.combatant.get_chat_tag(), str(next_plan)]
+			)
 
 	_turn_context = null
 

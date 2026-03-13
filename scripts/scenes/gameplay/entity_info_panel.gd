@@ -23,11 +23,11 @@ func display_combat_entity(map_entity: MapCombatEntity) -> void:
 
 	text += "Clan    : " + map_entity.owner.clan.clan_name + "\n"
 	if is_instance_of(actor, Mek):
-		text += "Power   : " + str((actor as Mek).evaluate_mek_power()) + "\n"
-		text += "Size    : "
+		text += "Combat Power : " + str((actor as Mek).evaluate_mek_power()) + "\n"
+		text += "Size         : "
 		text += Utils.enum_to_string(Enums.EntitySize, (actor as Mek).template.size) + "\n"
 	else:
-		text += "Power   : " + str(actor.evaluate_combat_power()) + "\n"
+		text += "Combat Power : " + str(actor.evaluate_combat_power()) + "\n"
 
 	text += "Health  : " + UIColor.apply("health", "%3d" % actor.health) + " / "
 	text += UIColor.apply("health", "%3d" % actor.max_health)

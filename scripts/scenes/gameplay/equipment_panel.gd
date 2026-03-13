@@ -123,7 +123,12 @@ func _create_slot_editor_row(
 	popup.clear()
 	popup.add_item("None", 0)
 	popup.set_item_metadata(0, "")
+
+	var available_power: int = _available_power_for_slot(current_item)
 	for template: ItemTemplate in templates:
+		# Filter out templates that exceed currently available power.
+		if template.base_power_usage > available_power:
+			continue
 		popup.add_item(template.item_name)
 		popup.set_item_metadata(popup.item_count - 1, template.id)
 	popup.id_pressed.connect(func(item_id: int):
@@ -197,6 +202,26 @@ func _build_slot_capacities(actor: CombatActor, equipped_by_slot: Dictionary) ->
 			free_slots = max(0, int(actor.slots[slot_type]))
 		capacities[slot_type] = equipped_count + free_slots
 	return capacities
+
+
+func _available_power_for_slot(current_item: Item) -> int:
+	"""Returns how much power is available for selecting a new item in this slot.
+
+	This excludes the power cost of the currently-equipped item in the slot so
+	the user can freely swap without being blocked by a removed item's cost.
+	"""
+	if not _actor:
+		return 0
+
+	var used_power: int = 0
+	for item in _actor.items:
+		if not item or not item.template:
+			continue
+		if item == current_item:
+			continue
+		used_power += int(item.template.base_power_usage)
+
+	return max(0, _actor.max_power - used_power)
 
 
 func _as_item_template_array(raw_array: Array) -> Array[ItemTemplate]:

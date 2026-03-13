@@ -9,7 +9,7 @@
         "power": 400,
         "power_generation": 120,
 		"speed": 0,
-		"slots": [0, 1, 0, 1],
+		"slots": [0, 5, 2, 1],
 		"structure_type": "hunting",
 		"passable": false,
 		"icon": "structures/basic_turret.jpeg"

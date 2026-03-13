@@ -1,6 +1,5 @@
 extends ScrollContainer
 
-
 @onready var entity_info: RichTextLabel = $EntityInfo
 
 
@@ -17,25 +16,22 @@ func display_combat_entity(map_entity: MapCombatEntity) -> void:
 	var text: String = "[center][b]" + _combatant_name(actor) + "[/b][/center]\n"
 
 	if is_instance_of(map_entity.owner, PlayerOwned):
-		text += "Player  : " + map_entity.owner.player.player_name + "\n"
+		text += "Player       : " + map_entity.owner.player.player_name + "\n"
 	elif is_instance_of(map_entity.owner, NPCOwned):
-		text += "NPC     : " + map_entity.owner.npc_name + "\n"
+		text += "NPC          : " + map_entity.owner.npc_name + "\n"
 
-	text += "Clan    : " + map_entity.owner.clan.clan_name + "\n"
-	if is_instance_of(actor, Mek):
-		text += "Combat Power : " + str((actor as Mek).evaluate_mek_power()) + "\n"
-		text += "Size         : "
-		text += Utils.enum_to_string(Enums.EntitySize, (actor as Mek).template.size) + "\n"
-	else:
-		text += "Combat Power : " + str(actor.evaluate_combat_power()) + "\n"
+	text += "Clan         : " + map_entity.owner.clan.clan_name + "\n"
+	text += "Combat Power : " + str(actor.evaluate_combat_power()) + "\n"
+	text += "Size         : "
+	text += Utils.enum_to_string(Enums.EntitySize, actor.template.size) + "\n"
 
-	text += "Health  : " + UIColor.apply("health", "%3d" % actor.health) + " / "
+	text += "Health       : " + UIColor.apply("health", "%3d" % actor.health) + " / "
 	text += UIColor.apply("health", "%3d" % actor.max_health)
 	if actor.health_generation > 0:
 		text += " [" + UIColor.apply("health", "%3d" % actor.health_generation) + "]"
 	text += "\n"
 
-	text += "Armor   : " + UIColor.apply("armor", "%3d" % actor.armor) + " / "
+	text += "Armor        : " + UIColor.apply("armor", "%3d" % actor.armor) + " / "
 	text += UIColor.apply("armor", "%3d" % actor.max_armor)
 	if actor.armor_generation > 0:
 		text += " ["
@@ -43,7 +39,7 @@ func display_combat_entity(map_entity: MapCombatEntity) -> void:
 		text += "]"
 	text += "\n"
 
-	text += "Shield  : " + UIColor.apply("shield", "%3d" % actor.shield) + " / "
+	text += "Shield       : " + UIColor.apply("shield", "%3d" % actor.shield) + " / "
 	text += UIColor.apply("shield", "%3d" % actor.max_shield)
 	if actor.shield_generation > 0:
 		text += " ["
@@ -51,7 +47,7 @@ func display_combat_entity(map_entity: MapCombatEntity) -> void:
 		text += "]"
 	text += "\n"
 
-	text += "Power   : " + UIColor.apply("power", "%3d" % actor.power) + " / "
+	text += "Power        : " + UIColor.apply("power", "%3d" % actor.power) + " / "
 	text += UIColor.apply("power", "%3d" % actor.max_power)
 	if actor.power_generation > 0:
 		text += " ["
@@ -59,24 +55,46 @@ func display_combat_entity(map_entity: MapCombatEntity) -> void:
 		text += "]"
 	text += "\n"
 
-	text += "Speed   : " + UIColor.apply("speed", "%3d" % actor.speed) + "\n"
-	text += "Damage reductions :\n"
-	text += "    all       : "
-	text += UIColor.apply("damage_reduction", "%3d" % actor.damage_reduction_all) + "\n"
-	text += "    kinetic   : "
-	text += UIColor.apply("damage_reduction", "%3d" % actor.damage_reduction_kinetic) + "\n"
-	text += "    energy    : "
-	text += UIColor.apply("damage_reduction", "%3d" % actor.damage_reduction_energy) + "\n"
-	text += "    explosive : "
-	text += UIColor.apply("damage_reduction", "%3d" % actor.damage_reduction_explosive) + "\n"
-	text += "    plasma    : "
-	text += UIColor.apply("damage_reduction", "%3d" % actor.damage_reduction_plasma) + "\n"
-	text += "    corrosive : "
-	text += UIColor.apply("damage_reduction", "%3d" % actor.damage_reduction_corrosive)
-	text += "\n"
-
+	text += "Speed        : " + UIColor.apply("speed", "%3d" % actor.speed) + "\n"
+	text += "[center][b]Damage Reduction[/b][/center]\n"
+	text += _build_damage_reduction_line(actor)
 	entity_info.clear()
 	entity_info.append_text(text)
+
+
+func _build_damage_reduction_line(actor: CombatActor) -> String:
+	var icon_map := {
+		"KINETIC": "res://assets/tileset/ui/damage/damage_kinetic.png",
+		"ENERGY": "res://assets/tileset/ui/damage/damage_energy.png",
+		"EXPLOSIVE": "res://assets/tileset/ui/damage/damage_explosive.png",
+		"PLASMA": "res://assets/tileset/ui/damage/damage_plasma.png",
+		"CORROSIVE": "res://assets/tileset/ui/damage/damage_corrosive.png",
+		"ALL": "res://assets/tileset/ui/damage/damage_all.png",
+	}
+	var values := {
+		"ALL": actor.damage_reduction_all,
+		"KINETIC": actor.damage_reduction_kinetic,
+		"ENERGY": actor.damage_reduction_energy,
+		"EXPLOSIVE": actor.damage_reduction_explosive,
+		"PLASMA": actor.damage_reduction_plasma,
+		"CORROSIVE": actor.damage_reduction_corrosive,
+	}
+	var hint_map := {
+		"ALL": "All types of damage reduction.",
+		"KINETIC": "Kinetic damage reduction.",
+		"ENERGY": "Energy damage reduction.",
+		"EXPLOSIVE": "Explosive damage reduction.",
+		"PLASMA": "Plasma damage reduction.",
+		"CORROSIVE": "Corrosive damage reduction.",
+	}
+
+	var line := "[center]"
+	for key in ["ALL", "KINETIC", "ENERGY", "EXPLOSIVE", "PLASMA", "CORROSIVE"]:
+		line += "[hint=" + hint_map[key] + "]"
+		line += "[img={16}x{16}]" + icon_map[key] + "[/img] "
+		var value: int = int(values[key])
+		line += UIColor.apply("damage_reduction", "%+d" % value) + "[/hint]  "
+	return line.strip_edges() + "[/center]\n"
 
 
 func _combatant_name(actor: CombatActor) -> String:

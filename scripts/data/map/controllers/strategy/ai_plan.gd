@@ -134,7 +134,7 @@ func _generate_combat_order(reserved_tiles: Dictionary) -> Order:
 		completed = true
 		return null
 
-	AIUtils.set_reserved_tiles(reserved_tiles)
+	AIPathfinder.set_reserved_tiles(reserved_tiles)
 	var target_tile: Vector2i = _find_combat_approach_tile(
 		is_enemy_target,
 		module_range,
@@ -154,7 +154,7 @@ func _find_combat_approach_tile(
 	movement_speed: int
 ) -> Vector2i:
 	if is_enemy_target:
-		return AIUtils.find_best_attack_tile(
+		return AIPathfinder.find_best_attack_tile(
 			game_map,
 			source,
 			target,
@@ -163,7 +163,7 @@ func _find_combat_approach_tile(
 			movement_speed
 		)
 
-	return AIUtils.find_closest_reachable_tile(
+	return AIPathfinder.find_closest_reachable_tile(
 		game_map,
 		source,
 		target,

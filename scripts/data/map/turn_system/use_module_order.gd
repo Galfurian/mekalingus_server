@@ -96,7 +96,7 @@ func _apply_damage_effect(game_map, effect: ItemEffect) -> void:
 	# Handle AREA damage.
 	elif effect.target_area():
 		var center = target if effect.center_on_target else source
-		var affected = AIUtils.get_units_in_range(game_map,
+		var affected = AIUnitQueries.get_units_in_range(game_map,
 			source, center.position, effect.radius, true, true
 		)
 		for entity in affected:
@@ -145,7 +145,7 @@ func _apply_repair_effect(game_map, effect: ItemEffect) -> void:
 		var center = target if effect.center_on_target else source
 		var include_allies = effect.target_ally() or effect.target_self()
 		var include_enemies = effect.target_enemy()
-		var affected = AIUtils.get_units_in_range(game_map,
+		var affected = AIUnitQueries.get_units_in_range(game_map,
 			source, center.position, effect.radius, include_allies, include_enemies, []
 		)
 		for entity in affected:
@@ -193,7 +193,7 @@ func _apply_modifier_effect(game_map, effect: ItemEffect) -> void:
 		var center = target if effect.center_on_target else source
 		var include_allies = effect.target_ally() or effect.target_self()
 		var include_enemies = effect.target_enemy()
-		var affected = AIUtils.get_units_in_range(game_map,
+		var affected = AIUnitQueries.get_units_in_range(game_map,
 			source, center.position, effect.radius, include_allies, include_enemies, [source]
 		)
 		for entity in affected:

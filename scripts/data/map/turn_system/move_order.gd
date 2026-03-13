@@ -43,7 +43,7 @@ func execute(game_map) -> bool:
 
 	var start_pos = source.position
 
-	var path = AIUtils.get_shortest_path(game_map, start_pos, destination)
+	var path = AIPathfinder.get_shortest_path(game_map, start_pos, destination)
 
 	if path.is_empty() or path.size() <= 1:
 		# No movement possible.

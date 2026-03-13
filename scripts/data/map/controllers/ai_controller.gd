@@ -96,6 +96,7 @@ func queue_offensive_module_order(order: UseOffensiveModuleOrder) -> void:
 	"""
 	if order:
 		_use_offensive_module_orders[order.source.combatant.uuid] = order
+		_add_log("Queued offensive order: %s" % str(order))
 
 
 func queue_utility_module_order(order: UseUtilityModuleOrder) -> void:
@@ -104,6 +105,7 @@ func queue_utility_module_order(order: UseUtilityModuleOrder) -> void:
 	"""
 	if order:
 		_use_utility_module_orders[order.source.combatant.uuid] = order
+		_add_log("Queued utility order: %s" % str(order))
 
 
 func queue_move_order(order: MoveOrder) -> void:
@@ -113,6 +115,7 @@ func queue_move_order(order: MoveOrder) -> void:
 	if order:
 		_move_orders[order.source.combatant.uuid] = order
 		_reserved_move_tiles[_tile_key(order.destination)] = true
+		_add_log("Queued move order: %s" % str(order))
 
 
 func execute_utility_module_orders() -> void:
@@ -125,6 +128,11 @@ func execute_utility_module_orders() -> void:
 			continue
 		if order.validate():
 			order.execute(game_map)
+			_add_log("Executed utility order: %s" % str(order))
+			var plan: AIPlan = get_current_plan(order.source)
+			if plan:
+				plan.set_status(AIPlan.Status.COMPLETED)
+				_add_log("Plan completed: %s" % str(plan))
 			continue
 		_add_log(
 			(
@@ -150,6 +158,11 @@ func execute_offensive_module_orders() -> void:
 			continue
 		if order.validate():
 			order.execute(game_map)
+			_add_log("Executed offensive order: %s" % str(order))
+			var plan: AIPlan = get_current_plan(order.source)
+			if plan:
+				plan.set_status(AIPlan.Status.COMPLETED)
+				_add_log("Plan completed: %s" % str(plan))
 			continue
 		_add_log(
 			(
@@ -191,12 +204,18 @@ func execute_move_orders() -> void:
 		if not order or not order.source or order.source.combatant.is_dead():
 			continue
 		if order.destination == order.source.position:
+			_add_log("Skipped move order (already at destination): %s" % str(order))
 			continue
 		if game_map.is_occupied(order.destination):
+			_add_log("Skipped move order (destination occupied): %s" % str(order))
 			continue
 
 		_reserved_move_tiles[_tile_key(order.destination)] = true
 		order.execute(game_map)
+		_add_log("Executed move order: %s" % str(order))
+		var plan: AIPlan = get_current_plan(order.source)
+		if plan and plan.is_complete():
+			_add_log("Plan completed: %s" % str(plan))
 
 	_move_orders.clear()
 	_reserved_move_tiles.clear()

@@ -231,9 +231,13 @@ func plan_for_unit(source: MapCombatEntity, turn_context: RefCounted = null) -> 
 		# If the plan is valid, no need to re-plan.
 		if current_plan and current_plan.is_valid():
 			return
-		# If we have a plan but it is no longer valid, log it so we know why
-		# the AI had to regenerate.
-		if current_plan and not current_plan.is_valid():
+		# If the previous plan is complete, it's expected to be replaced next turn.
+		if current_plan and current_plan.is_complete():
+			_add_log(
+				"%s completed plan; computing next plan" % source.combatant.get_chat_tag()
+			)
+		# If we have a plan but it is invalid for any other reason, log it.
+		elif current_plan and not current_plan.is_valid():
 			_add_log(
 				"%s cached plan invalidated; regenerating: %s"
 				% [source.combatant.get_chat_tag(), str(current_plan)]

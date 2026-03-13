@@ -223,7 +223,20 @@ func can_module_be_used_now(combatant: CombatActor, item: Item, module: ItemModu
 		return false
 	if combatant.cooldown_manager.is_on_cooldown(item, module):
 		return false
-	if combatant.power < module.power_on_use:
+
+	# Structures consume their base power usage immediately when equipping items,
+	# but should still be able to use their modules if they have sufficient total
+	# power capacity. Use max_power for structures so weapon modules are not
+	# excluded just because the structure has "spent" its base equipment power.
+	var available_power: int = combatant.power
+	if is_instance_of(combatant, Structure):
+		var reserved: int = 0
+		for equipped_item in combatant.items:
+			if equipped_item and equipped_item.template:
+				reserved += int(equipped_item.template.base_power_usage)
+		available_power += reserved
+
+	if available_power < module.power_on_use:
 		return false
 	return true
 

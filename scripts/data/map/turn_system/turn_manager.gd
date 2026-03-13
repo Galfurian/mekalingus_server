@@ -201,15 +201,15 @@ func _execute_turn() -> void:
 	# 5.2) Check if any units are destroyed after executing the orders.
 	_erase_destroyed_units()
 
-	# Emit the turn ended signal.
-	on_turn_ended.emit(_current_turn)
-	# Increment the current turn.
-	_current_turn += 1
-
 	# Always precompute plans for the next turn so the UI can display intent, even when there are no
 	# hostile pairs remaining. This keeps the AI plan cache up to date for the next step.
 	if game_map and game_map.ai_controller:
 		game_map.ai_controller.precompute_next_turn_plans()
+
+	# Emit the turn ended signal.
+	on_turn_ended.emit(_current_turn)
+	# Increment the current turn.
+	_current_turn += 1
 
 	var combat_continues: bool = game_map.has_hostile_pairs()
 	if not combat_continues:

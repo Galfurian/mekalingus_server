@@ -36,21 +36,27 @@ size_flags_stretch_ratio = 0.2
 
 [node name="InfoPanel" parent="RootSplit/MainSplit/LeftSidePanel" instance=ExtResource("3_0206q")]
 layout_mode = 2
-size_flags_stretch_ratio = 0.6
-
-[node name="EntityListPanel" parent="RootSplit/MainSplit/LeftSidePanel" instance=ExtResource("4_g2adk")]
-layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.4
 
 [node name="GridMap" parent="RootSplit/MainSplit" instance=ExtResource("3_vm2jc")]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="LogPanel" parent="RootSplit" instance=ExtResource("3_7afkc")]
+[node name="BottomSplit" type="HSplitContainer" parent="RootSplit"]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.25
+
+[node name="EntityListPanel" parent="RootSplit/BottomSplit" instance=ExtResource("4_g2adk")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.35
+
+[node name="LogPanel" parent="RootSplit/BottomSplit" instance=ExtResource("3_7afkc")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.65
 
 [node name="ActionMenu" type="PopupMenu" parent="."]
 

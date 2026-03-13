@@ -27,11 +27,15 @@ var _anchor_pick_mode_enabled: bool = false
 @onready var grid_container = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer
 @onready var grid_drawer = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer/GridDrawer
 @onready var icon_drawer = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer/IconDrawer
-@onready var time_of_day_overlay = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer/TimeOfDayOverlay
-@onready var combat_log = $RootSplit/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
+@onready var time_of_day_overlay = (
+	$RootSplit/MainSplit/GridMap/ScrollView/GridContainer/TimeOfDayOverlay
+)
+@onready var combat_log = (
+	$RootSplit/BottomSplit/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
+)
 @onready var info_panel = $RootSplit/MainSplit/LeftSidePanel/InfoPanel
-@onready var entity_list_panel = $RootSplit/MainSplit/LeftSidePanel/EntityListPanel
-@onready var log_panel = $RootSplit/LogPanel
+@onready var entity_list_panel = $RootSplit/BottomSplit/EntityListPanel
+@onready var log_panel = $RootSplit/BottomSplit/LogPanel
 @onready var time_label = $RootSplit/MainSplit/GridMap/TimeLabel
 @onready var spawn_panel = $SpawnPanel
 
@@ -56,7 +60,7 @@ func _ready():
 		combat_log.meta_clicked.connect(_on_meta_clicked)
 	if not scroll_view.zoom_requested.is_connected(_on_map_scrolled):
 		scroll_view.zoom_requested.connect(_on_map_scrolled)
-	
+
 	var viewport := get_viewport()
 	if viewport and not viewport.size_changed.is_connected(_on_viewport_size_changed):
 		viewport.size_changed.connect(_on_viewport_size_changed)
@@ -269,8 +273,16 @@ func _clamp_horizontal_focus_to_map() -> void:
 	var map_left_px: float = float(padding_tiles * grid_size)
 	var map_right_px: float = map_left_px + float(game_map.map_width * grid_size)
 	var half_view_w: float = visible_size.x / 2.0
-	var min_focus_scroll_h: int = clampi(int(floor(map_left_px - half_view_w)), 0, content_max_scroll_h)
-	var max_focus_scroll_h: int = clampi(int(ceil(map_right_px - half_view_w)), 0, content_max_scroll_h)
+	var min_focus_scroll_h: int = clampi(
+		int(floor(map_left_px - half_view_w)),
+		0,
+		content_max_scroll_h
+	)
+	var max_focus_scroll_h: int = clampi(
+		int(ceil(map_right_px - half_view_w)),
+		0,
+		content_max_scroll_h
+	)
 
 	if min_focus_scroll_h > max_focus_scroll_h:
 		# View is wider than map body: keep body centered.

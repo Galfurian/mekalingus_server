@@ -122,6 +122,7 @@ func _on_directives_changed(game_map: GameMap) -> void:
 		npc_directive_panel.refresh_state()
 		map_hud.entity_list_panel.refresh()
 		map_hud.refresh_ai_overlay()
+		map_hud.info_panel.update_panel()
 
 
 func _on_ai_overlay_toggled(enabled: bool) -> void:

@@ -17,12 +17,14 @@ var active_effects: Array[ActiveEffect] = []
 # INITIALIZATION
 # =============================================================================
 
+
 func _init(p_actor) -> void:
 	"""
 	Initializes the effect manager with the owner actor.
 	"""
 	self.actor = p_actor
 	active_effects = []
+
 
 # =============================================================================
 # EFFECT MANAGEMENT
@@ -67,6 +69,7 @@ func remove_all_effects() -> void:
 	for effect in active_effects:
 		effect.effect.toggle_effect(actor, false)
 	active_effects.clear()
+
 
 # =============================================================================
 # QUERIES: GENERAL
@@ -133,6 +136,22 @@ func get_dot_damage_by_type() -> Dictionary:
 		var dmg_type = effect.effect.damage_type
 		breakdown[dmg_type] = breakdown.get(dmg_type, 0) + effect.effect.amount
 	return breakdown
+
+
+func should_refresh_dot(new_effect: ItemEffect) -> bool:
+	"""Returns true when applying a new DOT would extend its remaining duration.
+
+	This is used to avoid wasting attacks on DOTs that are already active and last
+	as long or longer than the new effect.
+	"""
+	if new_effect.type != Enums.EffectType.DAMAGE_OVER_TIME:
+		return false
+
+	for effect in get_dot_effects():
+		if effect.effect.damage_type == new_effect.damage_type:
+			if effect.remaining_duration >= new_effect.duration:
+				return false
+	return true
 
 
 # =============================================================================

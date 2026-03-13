@@ -1,7 +1,6 @@
 class_name AITuning
 extends RefCounted
 
-
 const FALLBACK_GLOBAL_SCAN_RADIUS: int = 256
 const GLOBAL_SCAN_RADIUS_MARGIN: int = 4
 const RETREAT_HEALTH_THRESHOLD: float = 0.5

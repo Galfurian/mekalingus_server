@@ -2,9 +2,6 @@ class_name AIRepositionIntentEvaluator
 extends RefCounted
 
 
-const PLAN_BUILDER = preload("res://scripts/data/map/controllers/strategy/ai_plan_builder.gd")
-
-
 static func evaluate(context: AIPlanningContext) -> AIPlan:
 	var source: MapCombatEntity = context.source
 	if not source.can_move():
@@ -59,7 +56,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	if destination == Vector2i.ZERO or destination == source.position:
 		return null
 
-	return PLAN_BUILDER.build_plan(
+	return AIPlanBuilder.build_plan(
 		context,
 		AIPlan.Intent.REPOSITION,
 		score,

@@ -2,26 +2,19 @@ class_name AIRetreatIntentEvaluator
 extends RefCounted
 
 
-const PLAN_BUILDER = preload("res://scripts/data/map/controllers/strategy/ai_plan_builder.gd")
-
-
 static func evaluate(context: AIPlanningContext) -> AIPlan:
 	var source: MapCombatEntity = context.source
 	if not source.can_move():
 		return null
 
 	var max_survivability: float = float(
-		source.combatant.max_health
-		+ source.combatant.max_armor
-		+ source.combatant.max_shield
+		source.combatant.max_health + source.combatant.max_armor + source.combatant.max_shield
 	)
 	if max_survivability <= 0:
 		return null
 
 	var current_survivability: float = float(
-		source.combatant.health
-		+ source.combatant.armor
-		+ source.combatant.shield
+		source.combatant.health + source.combatant.armor + source.combatant.shield
 	)
 	var health_ratio: float = current_survivability / max_survivability
 	var current_threat: float = context.get_threat(source.position)
@@ -48,9 +41,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 
 	for equipped_module: EquippedModule in context.get_utility_modules():
 		var utility_score: float = AIUtils.score_utility_module_on_target(
-			equipped_module.module,
-			source,
-			source
+			equipped_module.module, source, source
 		)
 		if utility_score > best_module_score:
 			best_module_score = utility_score
@@ -60,11 +51,6 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		return null
 
 	var retreat_score: float = clamp(100.0 - best_score, 0.0, 100.0)
-	return PLAN_BUILDER.build_plan(
-		context,
-		AIPlan.Intent.RETREAT,
-		retreat_score,
-		source,
-		best_equipped_module,
-		best_tile
+	return AIPlanBuilder.build_plan(
+		context, AIPlan.Intent.RETREAT, retreat_score, source, best_equipped_module, best_tile
 	)

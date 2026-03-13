@@ -1,16 +1,9 @@
 class_name AIPlan
 extends RefCounted
 
-enum Intent {
-	NONE,
-	ATTACK,
-	SUPPORT,
-	RETREAT,
-	REPOSITION
-}
+enum Intent { NONE, ATTACK, SUPPORT, RETREAT, REPOSITION }
 
 # ========== PLAN STATE ==========
-
 
 # Defines the high-level goal of the plan.
 var intent: Intent = Intent.NONE
@@ -18,7 +11,6 @@ var intent: Intent = Intent.NONE
 var completed: bool = false
 
 # ========== PLAN DATA ==========
-
 
 # The game map associated with this plan.
 var game_map
@@ -33,7 +25,6 @@ var equipped_module: EquippedModule = null
 # The priority ranking assigned during planning.
 var score: float = 0.0
 
-
 # ========== CORE METHODS ==========
 
 
@@ -42,7 +33,7 @@ func _init(p_source, p_game_map) -> void:
 	completed = false
 
 	game_map = p_game_map
-	
+
 	source = p_source
 	target = null
 	destination = Vector2i.ZERO
@@ -64,7 +55,9 @@ func is_valid() -> bool:
 			return false
 		if not AIUtils.is_equipped_module_available(source.combatant, equipped_module):
 			return false
-		if not AIUtils.can_module_be_used_now(source.combatant, equipped_module.item, equipped_module.module):
+		if not AIUtils.can_module_be_used_now(
+			source.combatant, equipped_module.item, equipped_module.module
+		):
 			return false
 	if intent == Intent.RETREAT or intent == Intent.REPOSITION:
 		if destination == Vector2i.ZERO:
@@ -80,7 +73,12 @@ func is_complete() -> bool:
 	if completed:
 		return true
 	if intent == Intent.ATTACK or intent == Intent.SUPPORT:
-		if equipped_module and source.combatant.cooldown_manager.is_on_cooldown(equipped_module.item, equipped_module.module):
+		if (
+			equipped_module
+			and source.combatant.cooldown_manager.is_on_cooldown(
+				equipped_module.item, equipped_module.module
+			)
+		):
 			return true
 	if intent == Intent.RETREAT or intent == Intent.REPOSITION:
 		if source.position == destination:
@@ -123,7 +121,9 @@ func _generate_combat_order(reserved_tiles: Dictionary) -> Order:
 		min_range = AIUtils.get_offensive_min_range(module_range)
 
 	var distance: float = source.position.distance_to(target.position)
-	var target_in_range: bool = (source == target) or (distance >= min_range and distance <= module_range)
+	var target_in_range: bool = (
+		(source == target) or (distance >= min_range and distance <= module_range)
+	)
 	if target_in_range:
 		completed = true
 		if is_enemy_target:
@@ -136,10 +136,7 @@ func _generate_combat_order(reserved_tiles: Dictionary) -> Order:
 
 	AIPathfinder.set_reserved_tiles(reserved_tiles)
 	var target_tile: Vector2i = _find_combat_approach_tile(
-		is_enemy_target,
-		module_range,
-		min_range,
-		movement_speed
+		is_enemy_target, module_range, min_range, movement_speed
 	)
 	if target_tile == Vector2i.ZERO or target_tile == source.position:
 		return null
@@ -148,28 +145,15 @@ func _generate_combat_order(reserved_tiles: Dictionary) -> Order:
 
 
 func _find_combat_approach_tile(
-	is_enemy_target: bool,
-	module_range: int,
-	min_range: int,
-	movement_speed: int
+	is_enemy_target: bool, module_range: int, min_range: int, movement_speed: int
 ) -> Vector2i:
 	if is_enemy_target:
 		return AIPathfinder.find_best_attack_tile(
-			game_map,
-			source,
-			target,
-			min_range,
-			module_range,
-			movement_speed
+			game_map, source, target, min_range, module_range, movement_speed
 		)
 
 	return AIPathfinder.find_closest_reachable_tile(
-		game_map,
-		source,
-		target,
-		0,
-		module_range,
-		movement_speed
+		game_map, source, target, 0, module_range, movement_speed
 	)
 
 
@@ -177,6 +161,7 @@ func _generate_move_order_for_destination() -> Order:
 	if destination == Vector2i.ZERO:
 		return null
 	return MoveOrder.new(source, destination)
+
 
 func _to_string() -> String:
 	var s := "AIPlan(intent=%s, completed=%s" % [AIPlan.Intent.keys()[intent], str(completed)]

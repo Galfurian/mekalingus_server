@@ -2,9 +2,6 @@ class_name AISupportIntentEvaluator
 extends RefCounted
 
 
-const PLAN_BUILDER = preload("res://scripts/data/map/controllers/strategy/ai_plan_builder.gd")
-
-
 static func evaluate(context: AIPlanningContext) -> AIPlan:
 	var source: MapCombatEntity = context.source
 	var best_score := -INF
@@ -18,9 +15,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 				continue
 
 			var score: float = AIUtils.score_utility_module_on_target(
-				equipped_module.module,
-				source,
-				target
+				equipped_module.module, source, target
 			)
 			if source == target:
 				score *= 1.5
@@ -33,7 +28,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	if not best_target:
 		return null
 
-	return PLAN_BUILDER.build_plan(
+	return AIPlanBuilder.build_plan(
 		context,
 		AIPlan.Intent.SUPPORT,
 		clamp(best_score, 0, 100),

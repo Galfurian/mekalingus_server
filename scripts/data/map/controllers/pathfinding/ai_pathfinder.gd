@@ -73,7 +73,9 @@ static func get_reachable_tiles(game_map, start: Vector2i, max_cost: int) -> Arr
 	"""
 	Returns all reachable tiles from a starting position within a given cost.
 	"""
-	var reachable_with_cost: Array[Dictionary] = get_reachable_tiles_with_cost(game_map, start, max_cost)
+	var reachable_with_cost: Array[Dictionary] = get_reachable_tiles_with_cost(
+		game_map, start, max_cost
+	)
 	var reachable: Array[Vector2i] = []
 	for entry: Dictionary in reachable_with_cost:
 		reachable.append(entry.tile)
@@ -81,9 +83,7 @@ static func get_reachable_tiles(game_map, start: Vector2i, max_cost: int) -> Arr
 
 
 static func get_reachable_tiles_with_cost(
-	game_map,
-	start: Vector2i,
-	max_cost: int
+	game_map, start: Vector2i, max_cost: int
 ) -> Array[Dictionary]:
 	"""
 	Returns reachable tiles with their path cost using a single frontier traversal.
@@ -93,8 +93,8 @@ static func get_reachable_tiles_with_cost(
 	if not game_map.astar.has_point(start_id):
 		return reachable
 
-	var frontier: Array[Dictionary] = [{ "id": start_id, "cost": 0.0 }]
-	var best_cost_by_id: Dictionary = { start_id: 0.0 }
+	var frontier: Array[Dictionary] = [{"id": start_id, "cost": 0.0}]
+	var best_cost_by_id: Dictionary = {start_id: 0.0}
 
 	while not frontier.is_empty():
 		var current_index: int = 0
@@ -122,15 +122,20 @@ static func get_reachable_tiles_with_cost(
 				continue
 
 			best_cost_by_id[neighbor_id] = next_cost
-			frontier.append({ "id": neighbor_id, "cost": next_cost })
+			frontier.append({"id": neighbor_id, "cost": next_cost})
 
 	for id in best_cost_by_id.keys():
 		if id == start_id:
 			continue
-		reachable.append({
-			"tile": _astar_id_to_tile(game_map, id),
-			"cost": best_cost_by_id[id],
-		})
+		(
+			reachable
+			. append(
+				{
+					"tile": _astar_id_to_tile(game_map, id),
+					"cost": best_cost_by_id[id],
+				}
+			)
+		)
 
 	return reachable
 
@@ -146,10 +151,7 @@ static func get_distance(game_map, from: Vector2i, to: Vector2i) -> float:
 
 
 static func find_furthest_progress_along_path(
-	game_map,
-	start: Vector2i,
-	target: Vector2i,
-	max_movement: int
+	game_map, start: Vector2i, target: Vector2i, max_movement: int
 ) -> Vector2i:
 	"""
 	Returns the farthest tile along the path toward the target that the unit
@@ -178,12 +180,7 @@ static func find_furthest_progress_along_path(
 
 
 static func find_closest_reachable_tile(
-	game_map,
-	source,
-	target,
-	min_range: int,
-	max_range: int,
-	max_movement: int
+	game_map, source, target, min_range: int, max_range: int, max_movement: int
 ) -> Vector2i:
 	var best_tile := Vector2i.ZERO
 	var shortest_distance := INF
@@ -207,41 +204,26 @@ static func find_closest_reachable_tile(
 		return best_tile
 
 	return find_furthest_progress_along_path(
-		game_map,
-		source.position,
-		target.position,
-		max_movement
+		game_map, source.position, target.position, max_movement
 	)
 
 
 static func find_best_attack_tile(
-	game_map,
-	source,
-	target,
-	min_range: int,
-	max_range: int,
-	max_movement: int
+	game_map, source, target, min_range: int, max_range: int, max_movement: int
 ) -> Vector2i:
 	var best_tile := Vector2i.ZERO
 	var best_score := -INF
 	var ideal_range := maxf(float(min_range), float(max_range) - 0.5)
 	var enemies: Array[MapCombatEntity] = AIUnitQueries.get_enemies_in_range(
-		game_map,
-		source,
-		AITuning.get_global_scan_radius(game_map)
+		game_map, source, AITuning.get_global_scan_radius(game_map)
 	)
 	var allies: Array[MapCombatEntity] = AIUnitQueries.get_allies_in_range(
-		game_map,
-		source,
-		AITuning.get_global_scan_radius(game_map)
+		game_map, source, AITuning.get_global_scan_radius(game_map)
 	)
 	var enemy_modules_cache: Dictionary = {}
 	for enemy: MapCombatEntity in enemies:
 		enemy_modules_cache[enemy.combatant.uuid] = AIUtils.find_matching_modules(
-			enemy.combatant,
-			true,
-			false,
-			false
+			enemy.combatant, true, false, false
 		)
 
 	for entry: Dictionary in get_reachable_tiles_with_cost(game_map, source.position, max_movement):
@@ -256,12 +238,12 @@ static func find_best_attack_tile(
 		if distance < min_range or distance > max_range:
 			continue
 
-		var height_difference = game_map.get_tile_height(tile) - game_map.get_tile_height(target.position)
+		var height_difference = (
+			game_map.get_tile_height(tile) - game_map.get_tile_height(target.position)
+		)
 		var range_penalty = abs(distance - ideal_range)
 		var threat: float = AIThreatEvaluator.get_threat_level_from_enemy_cache(
-			tile,
-			enemies,
-			enemy_modules_cache
+			tile, enemies, enemy_modules_cache
 		)
 		var adjacent_enemies: int = _count_adjacent_entities(enemies, tile)
 		var adjacent_allies: int = _count_adjacent_entities(allies, tile)

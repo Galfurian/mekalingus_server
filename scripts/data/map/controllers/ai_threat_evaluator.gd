@@ -7,17 +7,12 @@ static func get_threat_level(game_map, tile: Vector2i, source: MapCombatEntity) 
 	Estimates how dangerous it would be to stand on this tile.
 	"""
 	var enemies: Array[MapCombatEntity] = AIUnitQueries.get_enemies_in_range(
-		game_map,
-		source,
-		AITuning.get_global_scan_radius(game_map)
+		game_map, source, AITuning.get_global_scan_radius(game_map)
 	)
 	var modules_cache: Dictionary = {}
 	for enemy: MapCombatEntity in enemies:
 		modules_cache[enemy.combatant.uuid] = AIUtils.find_matching_modules(
-			enemy.combatant,
-			true,
-			false,
-			false
+			enemy.combatant, true, false, false
 		)
 
 	return get_threat_level_from_enemy_cache(tile, enemies, modules_cache)
@@ -26,7 +21,7 @@ static func get_threat_level(game_map, tile: Vector2i, source: MapCombatEntity) 
 static func get_threat_level_from_enemy_cache(
 	tile: Vector2i,
 	enemies: Array[MapCombatEntity],
-	enemy_modules_cache: Dictionary
+	enemy_modules_cache: Dictionary,
 ) -> float:
 	var threat_score := 0.0
 
@@ -65,15 +60,13 @@ static func can_reach_target_this_turn(
 	target: MapCombatEntity,
 	range_min: int,
 	range_max: int,
-	max_movement: int
+	max_movement: int,
 ) -> bool:
 	"""
 	Determines if the source can reach a tile from which it can attack the target this turn.
 	"""
 	var reachable_tiles: Array[Vector2i] = AIPathfinder.get_reachable_tiles(
-		game_map,
-		source.position,
-		max_movement
+		game_map, source.position, max_movement
 	)
 	for tile: Vector2i in reachable_tiles:
 		if game_map.is_occupied(tile):

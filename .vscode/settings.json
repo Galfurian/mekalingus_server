@@ -12,5 +12,9 @@
     "[json]": {
         "editor.wordWrapColumn": 80,
         "editor.wordWrap": "wordWrapColumn"
-    }"
+    },
+    "[gdscript]": {
+        "rewrap.reformat": true,
+        "rewrap.wrappingColumn": 100
+    }
 }

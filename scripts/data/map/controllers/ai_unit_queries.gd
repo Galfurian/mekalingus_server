@@ -66,7 +66,7 @@ static func get_units_in_range_from_candidates(
 			continue
 		if include_allies and not game_map.is_enemy_of(source, entity):
 			units_in_range.append(entity)
-		elif include_enemies and game_map.is_enemy_of(source, entity):
+		if include_enemies and game_map.is_enemy_of(source, entity):
 			units_in_range.append(entity)
 	return units_in_range
 
@@ -75,30 +75,46 @@ static func get_enemies_in_range(
 	game_map,
 	source: MapCombatEntity,
 	radius: int,
-	exclude_units: Array[MapCombatEntity] = []
+	exclude_units: Array[MapCombatEntity] = [],
 ) -> Array[MapCombatEntity]:
 	"""
 	Returns all enemy units within a specified range of the source unit.
 	"""
-	return get_units_in_range(game_map, source, source.position, radius, false, true, exclude_units)
+	return get_units_in_range(
+		game_map,
+		source,
+		source.position,
+		radius,
+		false,
+		true,
+		exclude_units,
+	)
 
 
 static func get_allies_in_range(
 	game_map,
 	source: MapCombatEntity,
 	radius: int,
-	exclude_units: Array[MapCombatEntity] = []
+	exclude_units: Array[MapCombatEntity] = [],
 ) -> Array[MapCombatEntity]:
 	"""
 	Returns all ally units within a specified range of the source unit.
 	"""
-	return get_units_in_range(game_map, source, source.position, radius, true, false, exclude_units)
+	return get_units_in_range(
+		game_map,
+		source,
+		source.position,
+		radius,
+		true,
+		false,
+		exclude_units,
+	)
 
 
 static func get_most_vulnerable_enemy(
 	game_map,
 	source: MapCombatEntity,
-	max_distance: int
+	max_distance: int,
 ) -> MapCombatEntity:
 	"""
 	Returns the enemy with the lowest combined survivability ratio within range.
@@ -107,8 +123,12 @@ static func get_most_vulnerable_enemy(
 	var lowest_score := INF
 
 	for enemy in get_units_in_range(game_map, source, source.position, max_distance, false, true):
-		var current_total = float(enemy.combatant.health + enemy.combatant.armor + enemy.combatant.shield)
-		var max_total = float(enemy.combatant.max_health + enemy.combatant.max_armor + enemy.combatant.max_shield)
+		var current_total = float(
+			enemy.combatant.health + enemy.combatant.armor + enemy.combatant.shield
+		)
+		var max_total = float(
+			enemy.combatant.max_health + enemy.combatant.max_armor + enemy.combatant.max_shield
+		)
 		if max_total <= 0:
 			continue
 

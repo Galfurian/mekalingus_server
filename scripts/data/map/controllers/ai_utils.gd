@@ -4,6 +4,7 @@ extends Node
 # PRIORITY CALCULATION FUNCTIONS
 # =====================================================================
 
+
 func evaluate_utility_effect_priority(target: MapCombatEntity, effect: ItemEffect) -> int:
 	"""
 	Calculates a priority score for a specific effect on a specific target.
@@ -99,54 +100,86 @@ func evaluate_offensive_effect_priority(target: MapCombatEntity, effect: ItemEff
 	elif target.combatant.armor < target.combatant.max_armor * 0.5:
 		priority += 2
 
-	# Factor 3: Effect-Specific Logic
-	
-	match effect.type:
-		Enums.EffectType.DAMAGE:
-			# Scale based on raw damage amount.
-			priority += clamp(effect.amount / 10.0, 1, 10)
+	# Factor 3: Effect-Specific Logic.
 
-		Enums.EffectType.DAMAGE_OVER_TIME:
-			var existing_effects: Array[ActiveEffect] = target.combatant.active_effect_manager.get_effects_by_type(effect.type)
-			if existing_effects.size() > 0:
-				# If the target already has this effect, prioritize it based on
-				# how much time it has left.
-				for existing_effect: ActiveEffect in existing_effects:
-					priority -= 10.0 * (1 - (existing_effect.effect.duration - existing_effect.remaining_duration))
-			else:
-				# Scale based on damage per second and duration.
-				priority += clamp((effect.amount * effect.duration) / 5.0, 1, 8)
+	if effect.type == Enums.EffectType.DAMAGE:
+		# Scale based on raw damage amount.
+		priority += clamp(effect.amount / 10.0, 1, 10)
 
-		Enums.EffectType.ACCURACY_MODIFIER, Enums.EffectType.RANGE_MODIFIER, Enums.EffectType.COOLDOWN_MODIFIER:
-			if effect.amount < 0: priority += clamp(abs(effect.amount), 4, 16)
+	elif effect.type == Enums.EffectType.DAMAGE_OVER_TIME:
+		# Prefer refreshing a DOT only if it will extend the remaining duration.
+		if not target.combatant.active_effect_manager.should_refresh_dot(effect):
+			priority -= 8
+		else:
+			# Scale based on damage per second and duration.
+			priority += clamp((effect.amount * effect.duration) / 5.0, 1, 8)
 
-		Enums.EffectType.POWER_MODIFIER, Enums.EffectType.HEALTH_MODIFIER, Enums.EffectType.ARMOR_MODIFIER, Enums.EffectType.SHIELD_MODIFIER:
-			if effect.amount < 0: priority += clamp(abs(effect.amount), 1, 8)
-
-		Enums.EffectType.SPEED_MODIFIER:
-			if effect.amount < 0: priority += clamp(abs(effect.amount), 4, 16)
-
-		Enums.EffectType.HEALTH_REGEN, Enums.EffectType.SHIELD_REGEN, Enums.EffectType.ARMOR_REGEN, Enums.EffectType.POWER_REGEN:
-			if effect.amount < 0: priority += clamp(abs(effect.amount), 3, 12)
-
-		Enums.EffectType.DAMAGE_REDUCTION_ALL:
-			if effect.amount < 0: priority += clamp(abs(effect.amount), 3, 12)
-
-		Enums.EffectType.DAMAGE_REDUCTION_KINETIC, Enums.EffectType.DAMAGE_REDUCTION_ENERGY, Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE, Enums.EffectType.DAMAGE_REDUCTION_PLASMA, Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE:
-			if effect.amount < 0: priority += clamp(abs(effect.amount), 2, 8)
-
-		# Ignore healing, or buffs (they should never appear here).
-		_:
-			priority += 0
+	elif (
+		effect.type
+		in [
+			Enums.EffectType.ACCURACY_MODIFIER,
+			Enums.EffectType.RANGE_MODIFIER,
+			Enums.EffectType.COOLDOWN_MODIFIER,
+		]
+	):
+		# Higher priority for debuffs, scaled by amount.
+		if effect.amount < 0:
+			priority += clamp(abs(effect.amount), 4, 16)
+	elif (
+		effect.type
+		in [
+			Enums.EffectType.POWER_MODIFIER,
+			Enums.EffectType.HEALTH_MODIFIER,
+			Enums.EffectType.ARMOR_MODIFIER,
+			Enums.EffectType.SHIELD_MODIFIER,
+		]
+	):
+		# Moderate priority for debuffs, scaled by amount.
+		if effect.amount < 0:
+			priority += clamp(abs(effect.amount), 2, 8)
+	elif effect.type == Enums.EffectType.SPEED_MODIFIER:
+		# High priority for speed debuffs, scaled by amount.
+		if effect.amount < 0:
+			priority += clamp(abs(effect.amount), 4, 16)
+	elif (
+		effect.type
+		in [
+			Enums.EffectType.HEALTH_REGEN,
+			Enums.EffectType.SHIELD_REGEN,
+			Enums.EffectType.ARMOR_REGEN,
+			Enums.EffectType.POWER_REGEN,
+		]
+	):
+		# Moderate priority for regeneration reduction, scaled by amount.
+		if effect.amount < 0:
+			priority += clamp(abs(effect.amount), 3, 12)
+	elif effect.type == Enums.EffectType.DAMAGE_REDUCTION_ALL:
+		# Moderate priority for damage reduction debuffs, scaled by amount.
+		if effect.amount < 0:
+			priority += clamp(abs(effect.amount), 3, 12)
+	elif (
+		effect.type
+		in [
+			Enums.EffectType.DAMAGE_REDUCTION_KINETIC,
+			Enums.EffectType.DAMAGE_REDUCTION_ENERGY,
+			Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE,
+			Enums.EffectType.DAMAGE_REDUCTION_PLASMA,
+			Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE,
+		]
+	):
+		# Lower priority for specific damage reduction debuffs, scaled by amount.
+		if effect.amount < 0:
+			priority += clamp(abs(effect.amount), 2, 8)
+	else:
+		# Default case for any other effect types (shouldn't happen for offensive modules).
+		priority += 0
 
 	# Cap to prevent over-prioritization.
 	return clamp(priority, 0, 25)
 
 
 func score_utility_module_on_target(
-	module: ItemModule,
-	source: MapCombatEntity,
-	target: MapCombatEntity
+	module: ItemModule, source: MapCombatEntity, target: MapCombatEntity
 ) -> int:
 	"""
 	Calculates the total priority score for a module on a target.
@@ -177,25 +210,23 @@ func score_offensive_module_on_target(module: ItemModule, target: MapCombatEntit
 # MODULE FILTERING FUNCTIONS
 # =====================================================================
 
+
 func can_module_be_used_now(combatant: CombatActor, item: Item, module: ItemModule) -> bool:
 	"""
 	Checks if a module can be used based on its cooldown and power requirements.
 	"""
 	if not combatant or not item or not module:
 		return false
-	if not has_item_equipped(combatant, item):
+	if not has_item_equipped(combatant, item) or not has_item_module(item, module):
 		return false
-	if not has_item_module(item, module):
-		return false
-	if module.passive:
-		return false
-	if not combatant.cooldown_manager:
+	if module.passive or not combatant.cooldown_manager:
 		return false
 	if combatant.cooldown_manager.is_on_cooldown(item, module):
 		return false
 	if combatant.power < module.power_on_use:
 		return false
 	return true
+
 
 func has_item_equipped(combatant: CombatActor, item: Item) -> bool:
 	if not combatant or not item:
@@ -238,11 +269,12 @@ func get_offensive_min_range(module_range: int) -> int:
 		return 1
 	return 2
 
+
 func find_matching_modules(
 	combatant: CombatActor,
 	offensive: bool,
 	include_passive: bool,
-	include_on_cooldown: bool
+	include_on_cooldown: bool,
 ) -> Array[EquippedModule]:
 	"""
 	Returns a list of modules matching the requested type (offensive or utility).
@@ -268,9 +300,3 @@ func find_matching_modules(
 			# Add the module if all checks passed.
 			matching_modules.append(EquippedModule.new(combatant, item, module))
 	return matching_modules
-
-# =====================================================================
-# UNIT UTILITY FUNCTIONS
-# =====================================================================
-
-

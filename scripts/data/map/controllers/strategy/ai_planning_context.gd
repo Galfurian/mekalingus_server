@@ -1,7 +1,6 @@
 class_name AIPlanningContext
 extends RefCounted
 
-
 var source: MapCombatEntity
 var game_map
 var aggressiveness: float = 1.0
@@ -50,12 +49,12 @@ func get_visible_enemies() -> Array[MapCombatEntity]:
 	if _visible_enemies_ready:
 		return _visible_enemies
 	if turn_context:
-		_visible_enemies = turn_context.get_visible_enemies(source, game_map.DEFAULT_DETECTION_RANGE)
+		_visible_enemies = turn_context.get_visible_enemies(
+			source, game_map.DEFAULT_DETECTION_RANGE
+		)
 	else:
 		_visible_enemies = AIUnitQueries.get_enemies_in_range(
-			game_map,
-			source,
-			game_map.DEFAULT_DETECTION_RANGE
+			game_map, source, game_map.DEFAULT_DETECTION_RANGE
 		)
 	_visible_enemies_ready = true
 	return _visible_enemies
@@ -95,12 +94,7 @@ func get_allies_with_self() -> Array[MapCombatEntity]:
 func get_offensive_modules() -> Array[EquippedModule]:
 	if _offensive_modules_ready:
 		return _offensive_modules
-	_offensive_modules = AIUtils.find_matching_modules(
-		source.combatant,
-		true,
-		false,
-		false
-	)
+	_offensive_modules = AIUtils.find_matching_modules(source.combatant, true, false, false)
 	_offensive_modules_ready = true
 	return _offensive_modules
 
@@ -108,12 +102,7 @@ func get_offensive_modules() -> Array[EquippedModule]:
 func get_utility_modules() -> Array[EquippedModule]:
 	if _utility_modules_ready:
 		return _utility_modules
-	_utility_modules = AIUtils.find_matching_modules(
-		source.combatant,
-		false,
-		false,
-		false
-	)
+	_utility_modules = AIUtils.find_matching_modules(source.combatant, false, false, false)
 	_utility_modules_ready = true
 	return _utility_modules
 
@@ -122,9 +111,7 @@ func get_reachable_tiles() -> Array[Vector2i]:
 	if _reachable_tiles_ready:
 		return _reachable_tiles
 	_reachable_tiles = AIPathfinder.get_reachable_tiles(
-		game_map,
-		source.position,
-		source.combatant.speed
+		game_map, source.position, source.combatant.speed
 	)
 	_reachable_tiles_ready = true
 	return _reachable_tiles
@@ -155,8 +142,7 @@ func get_squad_center(fallback: Vector2i) -> Vector2i:
 		sum_y += entity.position.y
 
 	_squad_center_cache = Vector2i(
-		int(round(float(sum_x) / entities.size())),
-		int(round(float(sum_y) / entities.size()))
+		int(round(float(sum_x) / entities.size())), int(round(float(sum_y) / entities.size()))
 	)
 	_squad_center_ready = true
 	return _squad_center_cache
@@ -172,9 +158,7 @@ func get_threat(tile: Vector2i) -> float:
 		enemy_modules_cache[enemy.combatant.uuid] = _get_enemy_offensive_modules(enemy)
 
 	var threat_score: float = AIThreatEvaluator.get_threat_level_from_enemy_cache(
-		tile,
-		get_all_enemies(),
-		enemy_modules_cache
+		tile, get_all_enemies(), enemy_modules_cache
 	)
 
 	_threat_cache[key] = threat_score
@@ -190,12 +174,7 @@ func _get_enemy_offensive_modules(enemy: MapCombatEntity) -> Array[EquippedModul
 	if turn_context:
 		modules = turn_context.get_offensive_modules_for(enemy)
 	else:
-		modules = AIUtils.find_matching_modules(
-			enemy.combatant,
-			true,
-			false,
-			false
-		)
+		modules = AIUtils.find_matching_modules(enemy.combatant, true, false, false)
 	_enemy_offensive_modules_cache[enemy_key] = modules
 	return modules
 

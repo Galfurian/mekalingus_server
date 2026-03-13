@@ -1,18 +1,15 @@
 class_name NpcDirectiveState
 extends RefCounted
 
-
 enum Directive {
 	HOLD_PERIMETER,
 	PATROL,
 }
 
-
 enum PatrolType {
 	CIRCLE,
 	MAP_BORDER,
 }
-
 
 var directive: int = Directive.HOLD_PERIMETER
 var anchor_position: Vector2i = Vector2i.ZERO
@@ -38,9 +35,7 @@ static func from_dict(data: Dictionary) -> NpcDirectiveState:
 	state.anchor_position = Utils.deserialize_position(data.get("anchor_position", [0, 0]))
 	state.patrol_index = max(0, int(data.get("patrol_index", 0)))
 	state.patrol_type = clampi(
-		int(data.get("patrol_type", PatrolType.CIRCLE)),
-		PatrolType.CIRCLE,
-		PatrolType.MAP_BORDER
+		int(data.get("patrol_type", PatrolType.CIRCLE)), PatrolType.CIRCLE, PatrolType.MAP_BORDER
 	)
 	state.compact_radius = maxi(1, int(data.get("compact_radius", 4)))
 	state.leash_radius = maxi(1, int(data.get("leash_radius", 6)))

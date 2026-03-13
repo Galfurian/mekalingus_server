@@ -1,8 +1,6 @@
 class_name AIController
 extends Node
 
-const TURN_CONTEXT_SCRIPT = preload("res://scripts/data/map/controllers/strategy/ai_turn_context.gd")
-
 # =============================================================================
 # PROPERTIES
 # =============================================================================
@@ -128,7 +126,12 @@ func execute_utility_module_orders() -> void:
 		if order.validate():
 			order.execute(game_map)
 			continue
-		_add_log("%s order invalidated before execution; replanning." % order.source.combatant.get_chat_tag())
+		_add_log(
+			(
+				"%s order invalidated before execution; replanning."
+				% order.source.combatant.get_chat_tag()
+			)
+		)
 		var replacement: Order = _reissue_order_for_source(order.source)
 		if replacement and is_instance_of(replacement, UseUtilityModuleOrder):
 			replacement.execute(game_map)
@@ -148,7 +151,12 @@ func execute_offensive_module_orders() -> void:
 		if order.validate():
 			order.execute(game_map)
 			continue
-		_add_log("%s order invalidated before execution; replanning." % order.source.combatant.get_chat_tag())
+		_add_log(
+			(
+				"%s order invalidated before execution; replanning."
+				% order.source.combatant.get_chat_tag()
+			)
+		)
 		var replacement: Order = _reissue_order_for_source(order.source)
 		if replacement and is_instance_of(replacement, UseOffensiveModuleOrder):
 			replacement.execute(game_map)
@@ -171,10 +179,11 @@ func execute_move_orders() -> void:
 	_reserved_move_tiles.clear()
 	# Execute movement orders in descending plan-score order and revalidate just-in-time.
 	var source_ids: Array[String] = _move_orders.keys()
-	source_ids.sort_custom(func(a: String, b: String):
-		var score_a: float = _get_plan_score(a)
-		var score_b: float = _get_plan_score(b)
-		return score_a > score_b
+	source_ids.sort_custom(
+		func(a: String, b: String):
+			var score_a: float = _get_plan_score(a)
+			var score_b: float = _get_plan_score(b)
+			return score_a > score_b
 	)
 
 	for source_uuid: String in source_ids:
@@ -212,10 +221,7 @@ func plan_for_unit(source: MapCombatEntity, turn_context: RefCounted = null) -> 
 			planning_turn_context = _turn_context
 		# Generate the plan for the source unit.
 		var new_plan: AIPlan = _planner.generate_plan(
-			source,
-			game_map,
-			aggressiveness,
-			planning_turn_context
+			source, game_map, aggressiveness, planning_turn_context
 		)
 		# Save the new plan.
 		_current_plans[source.combatant.uuid] = new_plan
@@ -229,7 +235,7 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 	if source.combatant.is_dead():
 		# If the unit is dead, no order can be generated.
 		return
-	
+
 	# Ensure the unit has a current plan, or regenerate if needed.
 	plan_for_unit(source)
 
@@ -238,7 +244,9 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 
 	# If no plan is available or invalid, attempt to regenerate.
 	if not current_plan or not current_plan.is_valid():
-		_add_log("%s plan was missing or invalid; regenerating..." % source.combatant.get_chat_tag())
+		_add_log(
+			"%s plan was missing or invalid; regenerating..." % source.combatant.get_chat_tag()
+		)
 		_current_plans.erase(source.combatant.uuid)
 		plan_for_unit(source)
 		current_plan = get_current_plan(source)
@@ -251,11 +259,16 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 	# If the plan is already complete, there's nothing left to do this turn.
 	if current_plan.is_complete():
 		return
-	
+
 	# Generate the order for the current plan.
 	var order: Order = current_plan.generate_order(_reserved_move_tiles)
 	if not order:
-		_add_log("%s plan generated no order; attempting one replan pass." % source.combatant.get_chat_tag())
+		_add_log(
+			(
+				"%s plan generated no order; attempting one replan pass."
+				% source.combatant.get_chat_tag()
+			)
+		)
 		_current_plans.erase(source.combatant.uuid)
 		plan_for_unit(source)
 		current_plan = get_current_plan(source)
@@ -266,7 +279,12 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 			_add_log("%s has no actionable order this turn." % source.combatant.get_chat_tag())
 		return
 
-	_add_log("%s generated order for plan %s : %s" % [source.combatant.get_chat_tag(), str(current_plan), str(order)])
+	_add_log(
+		(
+			"%s generated order for plan %s : %s"
+			% [source.combatant.get_chat_tag(), str(current_plan), str(order)]
+		)
+	)
 	_queue_generated_order(order)
 
 
@@ -297,10 +315,15 @@ func _reissue_order_for_source(source: MapCombatEntity) -> Order:
 		return null
 	var replacement: Order = refreshed_plan.generate_order()
 	if replacement:
-		_add_log("%s regenerated order after invalidation: %s" % [
-			source.combatant.get_chat_tag(),
-			str(replacement),
-		])
+		_add_log(
+			(
+				"%s regenerated order after invalidation: %s"
+				% [
+					source.combatant.get_chat_tag(),
+					str(replacement),
+				]
+			)
+		)
 	return replacement
 
 
@@ -324,11 +347,12 @@ func generate_ai_orders() -> void:
 	Generates and queues one order for each AI-controlled combat entity.
 	"""
 	_reserved_move_tiles.clear()
-	_turn_context = TURN_CONTEXT_SCRIPT.new(game_map)
+	_turn_context = AITurnContext.new(game_map)
 	game_map.advance_patrol_directives()
 	var units: Array[MapCombatEntity] = _iter_ai_controlled_entities()
-	units.sort_custom(func(a: MapCombatEntity, b: MapCombatEntity):
-		return a.combatant.evaluate_combat_power() > b.combatant.evaluate_combat_power()
+	units.sort_custom(
+		func(a: MapCombatEntity, b: MapCombatEntity):
+			return a.combatant.evaluate_combat_power() > b.combatant.evaluate_combat_power()
 	)
 
 	for unit: MapCombatEntity in units:

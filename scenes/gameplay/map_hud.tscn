@@ -16,7 +16,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_daorq")
 
-[node name="RootSplit" type="VSplitContainer" parent="."]
+[node name="RootSplit" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -26,6 +26,7 @@ grow_vertical = 2
 
 [node name="MainSplit" type="HSplitContainer" parent="RootSplit"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="LeftSidePanel" type="VSplitContainer" parent="RootSplit/MainSplit"]
@@ -36,27 +37,28 @@ size_flags_stretch_ratio = 0.2
 
 [node name="InfoPanel" parent="RootSplit/MainSplit/LeftSidePanel" instance=ExtResource("3_0206q")]
 layout_mode = 2
-size_flags_vertical = 3
 
-[node name="GridMap" parent="RootSplit/MainSplit" instance=ExtResource("3_vm2jc")]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="BottomSplit" type="HSplitContainer" parent="RootSplit"]
+[node name="EntityListPanel" parent="RootSplit/MainSplit/LeftSidePanel" instance=ExtResource("4_g2adk")]
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.25
-
-[node name="EntityListPanel" parent="RootSplit/BottomSplit" instance=ExtResource("4_g2adk")]
-layout_mode = 2
-size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.35
 
-[node name="LogPanel" parent="RootSplit/BottomSplit" instance=ExtResource("3_7afkc")]
+[node name="MapLogSplit" type="VSplitContainer" parent="RootSplit/MainSplit"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.65
+size_flags_stretch_ratio = 0.8
+
+[node name="GridMap" parent="RootSplit/MainSplit/MapLogSplit" instance=ExtResource("3_vm2jc")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LogPanel" parent="RootSplit/MainSplit/MapLogSplit" instance=ExtResource("3_7afkc")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.35
 
 [node name="ActionMenu" type="PopupMenu" parent="."]
 

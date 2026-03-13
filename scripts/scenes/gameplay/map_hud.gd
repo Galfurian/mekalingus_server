@@ -23,20 +23,24 @@ var _anchor_pick_mode_enabled: bool = false
 
 @onready var action_menu = $ActionMenu
 @onready var main_split = $RootSplit/MainSplit
-@onready var scroll_view = $RootSplit/MainSplit/GridMap/ScrollView
-@onready var grid_container = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer
-@onready var grid_drawer = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer/GridDrawer
-@onready var icon_drawer = $RootSplit/MainSplit/GridMap/ScrollView/GridContainer/IconDrawer
+@onready var scroll_view = $RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView
+@onready var grid_container = $RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView/GridContainer
+@onready var grid_drawer = (
+	$RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView/GridContainer/GridDrawer
+)
+@onready var icon_drawer = (
+	$RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView/GridContainer/IconDrawer
+)
 @onready var time_of_day_overlay = (
-	$RootSplit/MainSplit/GridMap/ScrollView/GridContainer/TimeOfDayOverlay
+	$RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView/GridContainer/TimeOfDayOverlay
 )
 @onready var combat_log = (
-	$RootSplit/BottomSplit/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
+	$RootSplit/MainSplit/MapLogSplit/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
 )
 @onready var info_panel = $RootSplit/MainSplit/LeftSidePanel/InfoPanel
-@onready var entity_list_panel = $RootSplit/BottomSplit/EntityListPanel
-@onready var log_panel = $RootSplit/BottomSplit/LogPanel
-@onready var time_label = $RootSplit/MainSplit/GridMap/TimeLabel
+@onready var entity_list_panel = $RootSplit/MainSplit/LeftSidePanel/EntityListPanel
+@onready var log_panel = $RootSplit/MainSplit/MapLogSplit/LogPanel
+@onready var time_label = $RootSplit/MainSplit/MapLogSplit/GridMap/TimeLabel
 @onready var spawn_panel = $SpawnPanel
 
 

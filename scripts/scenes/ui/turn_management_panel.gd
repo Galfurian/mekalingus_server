@@ -2,6 +2,8 @@ extends VBoxContainer
 
 signal turn_controls_changed(game_map: GameMap)
 
+var game_map: GameMap = null
+
 @onready var status_label: Label = $Section/Inner/StatusRow/StatusValue
 @onready var turn_label: Label = $Section/Inner/TurnRow/TurnValue
 @onready var countdown_label: Label = $Section/Inner/CountdownRow/CountdownValue
@@ -12,8 +14,6 @@ signal turn_controls_changed(game_map: GameMap)
 @onready var apply_daytime_button: Button = $Section/Inner/DaytimeRow/ApplyDaytime
 @onready var weather_value: Label = $Future/FutureInner/WeatherRow/WeatherValue
 @onready var temperature_value: Label = $Future/FutureInner/TemperatureRow/TemperatureValue
-
-var game_map: GameMap = null
 
 
 func _ready() -> void:
@@ -58,14 +58,13 @@ func refresh_state() -> void:
 		return
 
 	var turn_manager: TurnManager = game_map.turn_manager
-	var has_combat: bool = game_map.has_hostile_pairs()
 	var is_active: bool = turn_manager.is_active()
 
 	status_label.text = "Running" if is_active else "Paused"
 	turn_label.text = str(turn_manager.get_current_turn())
 	start_stop_button.text = "Stop" if is_active else "Start"
-	start_stop_button.disabled = not has_combat
-	step_button.disabled = not has_combat
+	start_stop_button.disabled = false
+	step_button.disabled = false
 	interval_spin.editable = true
 	apply_daytime_button.disabled = false
 	daytime_spin.editable = true
@@ -129,9 +128,6 @@ func _on_turn_ended(_turn_number: int) -> void:
 func _on_start_stop_pressed() -> void:
 	if not game_map:
 		return
-	if not game_map.has_hostile_pairs():
-		refresh_state()
-		return
 
 	var turn_manager: TurnManager = game_map.turn_manager
 	if turn_manager.is_active():
@@ -145,9 +141,6 @@ func _on_start_stop_pressed() -> void:
 
 func _on_step_pressed() -> void:
 	if not game_map:
-		return
-	if not game_map.has_hostile_pairs():
-		refresh_state()
 		return
 
 	game_map.turn_manager.step_once()

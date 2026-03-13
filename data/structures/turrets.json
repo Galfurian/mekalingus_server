@@ -1,13 +1,13 @@
 {
 	"turret_basic": {
 		"name": "Basic Turret",
-		"size": "Medium",
+		"size": "Light",
 		"health": 140,
 		"armor": 45,
 		"shield": 20,
 		"shield_generation": 2,
-		"power": 80,
-		"power_generation": 6,
+		"power": 260,
+		"power_generation": 68,
 		"speed": 0,
 		"slots": [1, 0, 0, 0],
 		"structure_type": "combat",

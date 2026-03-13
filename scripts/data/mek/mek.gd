@@ -52,71 +52,6 @@ func rebuild_combat_state():
 
 
 # =============================================================================
-# ITEMS
-# =============================================================================
-
-
-func can_equip_item(item: Item) -> bool:
-	"""Checks if the item can be equipped."""
-	return slots[item.template.slot] > 0 and max_power > item.template.base_power_usage
-
-
-func add_item(item: Item) -> bool:
-	"""Attempts to equip an item if a slot is available."""
-	if can_equip_item(item):
-		items.append(item)
-		items.sort_custom(Item.compare_items)
-		slots[item.template.slot] -= 1
-		_enable_item_passive_modifiers(item)
-		return true
-	return false
-
-
-func remove_item(item: Item) -> bool:
-	"""Removes an equipped item, freeing up the slot."""
-	if item in items:
-		items.erase(item)
-		items.sort_custom(Item.compare_items)
-		slots[item.template.slot] += 1
-		_disable_item_passive_modifiers(item)
-		return true
-	return false
-
-
-func get_item(item_uuid: String) -> Variant:
-	"""Retrieves an equipped item by UUID."""
-	for entry in items:
-		if entry.uuid == item_uuid:
-			return entry
-	return null
-
-
-func clear_items() -> void:
-	"""
-	Safely removes and frees all items currently equipped on this Mek.
-	Ensures no memory leaks or dangling references remain.
-	"""
-	for item in items:
-		# Free the UUID if tracked
-		GameServer.free_uuid(item.uuid)
-	items.clear()
-
-
-# =============================================================================
-# POWER COMPUTATION
-# =============================================================================
-
-
-func evaluate_mek_power() -> float:
-	"""
-	Computes the total power level of the Mek instance based on:
-	- Power contribution of equipped items.
-	- Base stats retrieved from the MekTemplate.
-	"""
-	return evaluate_combat_power()
-
-
-# =============================================================================
 # SERIALIZATION
 # =============================================================================
 
@@ -128,6 +63,7 @@ func get_mek_name() -> String:
 	if alias.is_empty():
 		return template.mek_name
 	return alias
+
 
 func get_chat_tag() -> String:
 	"""

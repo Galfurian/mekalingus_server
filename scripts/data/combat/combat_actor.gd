@@ -222,8 +222,8 @@ func repair_from_effect(effect: ItemEffect) -> Dictionary:
 			restored = adjust_armor(effect.amount)
 			stat = "armor"
 		_:
-			return { "stat": "unknown", "amount": 0 }
-	return { "stat": stat, "amount": restored }
+			return {"stat": "unknown", "amount": 0}
+	return {"stat": stat, "amount": restored}
 
 
 func apply_regen_effects() -> void:
@@ -239,3 +239,71 @@ func apply_regen_effects() -> void:
 				adjust_armor(effect.effect.amount)
 			Enums.EffectType.POWER_REGEN:
 				adjust_power(effect.effect.amount)
+
+
+# =============================================================================
+# EQUIPMENT MANAGEMENT
+# =============================================================================
+
+
+func can_equip_item(item: Item) -> bool:
+	"""Checks if the item can be equipped.
+
+	This checks slot availability and whether the combat actor has enough power
+	available to power the item.
+	"""
+	if not item or not item.template:
+		return false
+	if item.template.slot < 0 or item.template.slot >= slots.size():
+		return false
+	if slots[item.template.slot] <= 0:
+		return false
+
+	# Compute how much power remains after accounting for already-equipped items.
+	# This ensures structures can still equip/use their weapon modules even though
+	# their "current" power may be reduced by base item power costs.
+	var used_power: int = 0
+	for equipped_item in items:
+		if equipped_item and equipped_item.template:
+			used_power += int(equipped_item.template.base_power_usage)
+
+	var available_power: int = max_power - used_power
+	return available_power >= int(item.template.base_power_usage)
+
+
+func add_item(item: Item) -> bool:
+	"""Attempts to equip an item if a slot is available."""
+	if can_equip_item(item):
+		items.append(item)
+		items.sort_custom(Item.compare_items)
+		slots[item.template.slot] -= 1
+		_enable_item_passive_modifiers(item)
+		return true
+	return false
+
+
+func remove_item(item: Item) -> bool:
+	"""Removes an equipped item, freeing up the slot."""
+	if item in items:
+		items.erase(item)
+		items.sort_custom(Item.compare_items)
+		slots[item.template.slot] += 1
+		_disable_item_passive_modifiers(item)
+		return true
+	return false
+
+
+func get_item(item_uuid: String) -> Variant:
+	"""Retrieves an equipped item by UUID."""
+	for entry in items:
+		if entry.uuid == item_uuid:
+			return entry
+	return null
+
+
+func clear_items() -> void:
+	"""Safely removes and frees all items currently equipped."""
+	for item in items:
+		# Free the UUID if tracked
+		GameServer.free_uuid(item.uuid)
+	items.clear()

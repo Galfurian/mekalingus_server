@@ -23,6 +23,9 @@ var _reserved_move_tiles: Dictionary = {}
 # Turn-scoped cache to reduce repeated queries across unit planning.
 var _turn_context: RefCounted = null
 
+# Enable AI action recovery (replan & reissue) when orders become invalid mid-turn.
+const ENABLE_ACTION_RECOVERY: bool = true
+
 # =============================================================================
 # GENERIC FUNCTIONS
 # =============================================================================
@@ -96,7 +99,7 @@ func queue_offensive_module_order(order: UseOffensiveModuleOrder) -> void:
 	"""
 	if order:
 		_use_offensive_module_orders[order.source.combatant.uuid] = order
-		_add_log("Queued offensive order: %s" % str(order))
+		_add_log("Queued: %s" % str(order))
 
 
 func queue_utility_module_order(order: UseUtilityModuleOrder) -> void:
@@ -105,7 +108,7 @@ func queue_utility_module_order(order: UseUtilityModuleOrder) -> void:
 	"""
 	if order:
 		_use_utility_module_orders[order.source.combatant.uuid] = order
-		_add_log("Queued utility order: %s" % str(order))
+		_add_log("Queued: %s" % str(order))
 
 
 func queue_move_order(order: MoveOrder) -> void:
@@ -115,7 +118,31 @@ func queue_move_order(order: MoveOrder) -> void:
 	if order:
 		_move_orders[order.source.combatant.uuid] = order
 		_reserved_move_tiles[_tile_key(order.destination)] = true
-		_add_log("Queued move order: %s" % str(order))
+		_add_log("Queued: %s" % str(order))
+
+
+func _process_order_with_recovery(order: Order, expected_type: Object) -> void:
+	"""Executes an order and optionally reissues it if invalid."""
+	if not order or not is_instance_of(order, expected_type):
+		return
+
+	if order.validate():
+		order.execute(game_map)
+		_add_log("Executed: %s" % str(order))
+	else:
+		_add_log("Invalid: %s" % str(order))
+		if ENABLE_ACTION_RECOVERY:
+			var replacement: Order = _reissue_order_for_source(order.source)
+			if replacement:
+				if is_instance_of(replacement, expected_type):
+					replacement.execute(game_map)
+					_add_log("Executed replacement: %s" % str(replacement))
+				elif replacement:
+					_queue_generated_order(replacement)
+
+	var plan: AIPlan = get_current_plan(order.source)
+	if plan and plan.is_complete():
+		_add_log("Completed: %s" % str(plan))
 
 
 func execute_utility_module_orders() -> void:
@@ -126,25 +153,7 @@ func execute_utility_module_orders() -> void:
 		var order: UseUtilityModuleOrder = _use_utility_module_orders[source_uuid]
 		if not order:
 			continue
-		if order.validate():
-			order.execute(game_map)
-			_add_log("Executed utility order: %s" % str(order))
-			var plan: AIPlan = get_current_plan(order.source)
-			if plan:
-				plan.set_status(AIPlan.Status.COMPLETED)
-				_add_log("Plan completed: %s" % str(plan))
-			continue
-		_add_log(
-			(
-				"%s order invalidated before execution; replanning."
-				% order.source.combatant.get_chat_tag()
-			)
-		)
-		var replacement: Order = _reissue_order_for_source(order.source)
-		if replacement and is_instance_of(replacement, UseUtilityModuleOrder):
-			replacement.execute(game_map)
-		elif replacement:
-			_queue_generated_order(replacement)
+		_process_order_with_recovery(order, UseUtilityModuleOrder)
 	_use_utility_module_orders.clear()
 
 
@@ -156,26 +165,36 @@ func execute_offensive_module_orders() -> void:
 		var order: UseOffensiveModuleOrder = _use_offensive_module_orders[source_uuid]
 		if not order:
 			continue
-		if order.validate():
-			order.execute(game_map)
-			_add_log("Executed offensive order: %s" % str(order))
-			var plan: AIPlan = get_current_plan(order.source)
-			if plan:
-				plan.set_status(AIPlan.Status.COMPLETED)
-				_add_log("Plan completed: %s" % str(plan))
-			continue
-		_add_log(
-			(
-				"%s order invalidated before execution; replanning."
-				% order.source.combatant.get_chat_tag()
-			)
-		)
-		var replacement: Order = _reissue_order_for_source(order.source)
-		if replacement and is_instance_of(replacement, UseOffensiveModuleOrder):
-			replacement.execute(game_map)
-		elif replacement:
-			_queue_generated_order(replacement)
+		_process_order_with_recovery(order, UseOffensiveModuleOrder)
 	_use_offensive_module_orders.clear()
+
+
+func _process_move_order_with_recovery(order: MoveOrder) -> void:
+	"""Executes a move order, with optional recovery when it becomes invalid."""
+	if not order or not order.source or order.source.combatant.is_dead():
+		return
+
+	if order.destination == order.source.position:
+		_add_log("Skipped move order (already at destination): %s" % str(order))
+		return
+
+	if game_map.is_occupied(order.destination):
+		_add_log("Skipped move order (destination occupied): %s" % str(order))
+		if ENABLE_ACTION_RECOVERY:
+			var replacement: Order = _reissue_order_for_source(order.source)
+			if replacement and is_instance_of(replacement, MoveOrder):
+				_process_move_order_with_recovery(replacement)
+			elif replacement:
+				_queue_generated_order(replacement)
+		return
+
+	_reserved_move_tiles[_tile_key(order.destination)] = true
+	order.execute(game_map)
+	_add_log("Executed: %s" % str(order))
+
+	var plan: AIPlan = get_current_plan(order.source)
+	if plan and plan.is_complete():
+		_add_log("Completed: %s" % str(plan))
 
 
 func execute_move_orders() -> void:
@@ -201,21 +220,7 @@ func execute_move_orders() -> void:
 
 	for source_uuid: String in source_ids:
 		var order: MoveOrder = _move_orders.get(source_uuid, null)
-		if not order or not order.source or order.source.combatant.is_dead():
-			continue
-		if order.destination == order.source.position:
-			_add_log("Skipped move order (already at destination): %s" % str(order))
-			continue
-		if game_map.is_occupied(order.destination):
-			_add_log("Skipped move order (destination occupied): %s" % str(order))
-			continue
-
-		_reserved_move_tiles[_tile_key(order.destination)] = true
-		order.execute(game_map)
-		_add_log("Executed move order: %s" % str(order))
-		var plan: AIPlan = get_current_plan(order.source)
-		if plan and plan.is_complete():
-			_add_log("Plan completed: %s" % str(plan))
+		_process_move_order_with_recovery(order)
 
 	_move_orders.clear()
 	_reserved_move_tiles.clear()
@@ -231,16 +236,13 @@ func plan_for_unit(source: MapCombatEntity, turn_context: RefCounted = null) -> 
 		# If the plan is valid, no need to re-plan.
 		if current_plan and current_plan.is_valid():
 			return
-		# If the previous plan is complete, it's expected to be replaced next turn.
-		if current_plan and current_plan.is_complete():
-			_add_log(
-				"%s completed plan; computing next plan" % source.combatant.get_chat_tag()
-			)
 		# If we have a plan but it is invalid for any other reason, log it.
-		elif current_plan and not current_plan.is_valid():
+		if current_plan and not current_plan.is_valid() and not current_plan.is_complete():
 			_add_log(
-				"%s cached plan invalidated; regenerating: %s"
-				% [source.combatant.get_chat_tag(), str(current_plan)]
+				(
+					"%s cached plan invalidated; regenerating: %s"
+					% [source.combatant.get_chat_tag(), str(current_plan)]
+				)
 			)
 		# Get the clan aggressiveness and generate a plan.
 		var aggressiveness: float = 1.0
@@ -418,8 +420,10 @@ func precompute_next_turn_plans() -> void:
 			and next_plan != previous_plan
 		):
 			_add_log(
-				"%s precomputed next-turn plan: %s" %
-				[unit.combatant.get_chat_tag(), str(next_plan)]
+				(
+					"%s precomputed next-turn plan: %s"
+					% [unit.combatant.get_chat_tag(), str(next_plan)]
+				)
 			)
 
 	_turn_context = null

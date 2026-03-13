@@ -70,12 +70,17 @@ text = "Biome"
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Generate" type="Button" parent="Section/Inner"]
+[node name="ControlButtons" type="HBoxContainer" parent="Section/Inner"]
 layout_mode = 2
+
+[node name="Generate" type="Button" parent="Section/Inner/ControlButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Generate"
 
-[node name="Delete" type="Button" parent="Section/Inner"]
+[node name="Delete" type="Button" parent="Section/Inner/ControlButtons"]
 layout_mode = 2
+size_flags_horizontal = 3
 text = "Delete"
 
 [node name="MapList" type="ItemList" parent="Section/Inner"]

@@ -4,11 +4,11 @@ signal map_selection_changed(game_map: GameMap)
 
 @onready var save_map: Button = $Section/Inner/StorageButtons/SaveMap
 @onready var load_map: Button = $Section/Inner/StorageButtons/LoadMap
-@onready var generate: Button = $Section/Inner/Generate
-@onready var delete: Button = $Section/Inner/Delete
 @onready var map_list: ItemList = $Section/Inner/MapList
 @onready var map_size: SpinBox = $Section/Inner/HBoxContainer1/MapSize
 @onready var map_biome: OptionButton = $Section/Inner/HBoxContainer3/Biome
+@onready var generate: Button = $Section/Inner/ControlButtons/Generate
+@onready var delete: Button = $Section/Inner/ControlButtons/Delete
 
 
 func _ready() -> void:

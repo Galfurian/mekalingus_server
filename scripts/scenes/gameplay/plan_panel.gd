@@ -26,9 +26,10 @@ func display_plan(game_map: GameMap, map_entity: MapCombatEntity) -> void:
 			)
 		return
 
+
 	var text: String = "[center][b]Plan[/b][/center]\n"
 	text += "Intent    : %s\n" % AIPlan.Intent.keys()[plan.intent]
-	text += "Completed : %s\n" % str(plan.completed)
+	text += "Status    : %s\n" % AIPlan.Status.keys()[plan.status]
 	text += "Score     : %.2f\n" % plan.score
 
 	if plan.source and plan.source.combatant:

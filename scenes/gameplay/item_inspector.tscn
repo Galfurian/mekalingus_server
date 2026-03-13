@@ -1,0 +1,34 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/scenes/gameplay/item_inspector.gd" id="1_inspector"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/equipment_panel.tscn" id="2_equipment"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/plan_panel.tscn" id="3_plan"]
+
+[node name="ItemInspector" type="VSplitContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("1_inspector")
+
+[node name="Tabs" type="TabContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="Equipment" parent="Tabs" instance=ExtResource("2_equipment")]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="Plan" parent="Tabs" instance=ExtResource("3_plan")]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemInfo" type="RichTextLabel" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3

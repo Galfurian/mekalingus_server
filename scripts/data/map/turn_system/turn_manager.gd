@@ -47,12 +47,13 @@ func _init(p_game_map, p_turn_interval: float = 1.0) -> void:
 	"""
 	# Initialize the game map.
 	game_map = p_game_map
-	
+
 	# Initialize the internal state.
 	_current_turn = int(TURNS_PER_DAY / 2.0)
 	_is_active = false
 	_timer = 0.0
 	_turn_interval = p_turn_interval
+
 
 func get_time_of_day() -> float:
 	"""
@@ -197,17 +198,22 @@ func _execute_turn() -> void:
 	_update_time_based_effects()
 	# 5.2) Check if any units are destroyed after executing the orders.
 	_erase_destroyed_units()
-	if not game_map.has_hostile_pairs():
-		_is_active = false
-		game_map.combat_logger.add_log(
-			Enums.LogType.SYSTEM,
-			"Combat ended on turn %d: no hostile units remain." % _current_turn,
-		)
 
 	# Emit the turn ended signal.
 	on_turn_ended.emit(_current_turn)
 	# Increment the current turn.
 	_current_turn += 1
+
+	if not game_map.has_hostile_pairs():
+		_is_active = false
+		(
+			game_map
+			. combat_logger
+			. add_log(
+				Enums.LogType.SYSTEM,
+				"Combat ended on turn %d: no hostile units remain." % _current_turn,
+			)
+		)
 
 
 static func format_pos_tag(pos: Vector2i) -> String:
@@ -255,12 +261,18 @@ func _update_time_based_effects() -> void:
 		# Process time-based effects like DOT, HOT, buffs.
 		var dot_result: Dictionary = unit.combatant.take_dot_damage()
 		if dot_result.total > 0:
-			game_map.combat_logger.add_log(Enums.LogType.ATTACK, "%s suffers DOT -> %d shield, %d armor, %d health" % [
-				unit.combatant.get_chat_tag(),
-				dot_result.shield,
-				dot_result.armor,
-				dot_result.health])
+			game_map.combat_logger.add_log(
+				Enums.LogType.ATTACK,
+				(
+					"%s suffers DOT -> %d shield, %d armor, %d health"
+					% [
+						unit.combatant.get_chat_tag(),
+						dot_result.shield,
+						dot_result.armor,
+						dot_result.health
+					]
+				)
+			)
 		unit.combatant.apply_regen_effects()
 		unit.combatant.active_effect_manager.decrement_durations()
 		unit.combatant.cooldown_manager.decrement_cooldowns()
-

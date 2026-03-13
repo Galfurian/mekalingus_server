@@ -4,18 +4,18 @@ extends Node
 
 # The type of game mode.
 enum GameMode {
-	FFA, # Free-for-all, every player/NPC for themselves.
-	COOP, # Players versus AI-controlled enemies.
-	TEAM, # Teams of NPCs and Players versus each other.
-	CLAN_WAR, # Use clan logic exclusively
+	FFA,  # Free-for-all, every player/NPC for themselves.
+	COOP,  # Players versus AI-controlled enemies.
+	TEAM,  # Teams of NPCs and Players versus each other.
+	CLAN_WAR,  # Use clan logic exclusively
 }
 
-# Defines the mek size classes.
-enum MekSize {
-	LIGHT = 0,  # Fast, agile, lower durability.
-	MEDIUM = 1,  # Balanced performance.
-	HEAVY = 2,  # High durability, slower movement.
-	COLOSSAL = 3,  # Super-heavy, extreme durability, slowest movement.
+# Defines the entity size categories, which can influence stats and behavior.
+enum EntitySize {
+	LIGHT = 0,
+	MEDIUM = 1,
+	HEAVY = 2,
+	COLOSSAL = 3,
 }
 
 # Defines the types of slots available on a mek.
@@ -93,7 +93,6 @@ enum MekRole {
 	ARTILLERY,
 	SUPPORT,
 }
-
 
 # Global behavior directives used by AI squads.
 enum NpcDirective {

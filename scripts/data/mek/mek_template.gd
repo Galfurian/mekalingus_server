@@ -13,7 +13,7 @@ var id: String
 # The name of the Mek.
 var mek_name: String
 # The size category of the Mek, affecting mobility and load capacity.
-var size: Enums.MekSize
+var size: Enums.EntitySize
 # The base health of the Mek, determining its durability.
 var health: int
 # The base armor value, reducing incoming kinetic and explosive damage.
@@ -95,7 +95,7 @@ func from_dict(data: Dictionary):
 		return
 
 	mek_name = data["name"]
-	size = Utils.string_to_enum(Enums.MekSize, data["size"])
+	size = Utils.string_to_enum(Enums.EntitySize, data["size"])
 	health = int(data.get("health", 0))
 	armor = int(data.get("armor", 0))
 	shield = int(data.get("shield", 0))
@@ -112,7 +112,7 @@ func to_dict() -> Dictionary:
 	return {
 		"id": id,
 		"name": mek_name,
-		"size": Utils.enum_to_string(Enums.MekSize, size),
+		"size": Utils.enum_to_string(Enums.EntitySize, size),
 		"health": health,
 		"armor": armor,
 		"shield": shield,

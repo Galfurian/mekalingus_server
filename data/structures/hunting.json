@@ -1,6 +1,7 @@
 {
 	"hnt_bait_pylon": {
 		"name": "Bait Pylon",
+		"size": "Medium",
 		"health": 135,
 		"armor": 40,
 		"shield": 12,
@@ -15,6 +16,7 @@
 	},
 	"hnt_tracking_array": {
 		"name": "Tracking Array",
+		"size": "Medium",
 		"health": 150,
 		"armor": 44,
 		"shield": 18,
@@ -29,6 +31,7 @@
 	},
 	"hnt_harpoon_battery": {
 		"name": "Harpoon Battery",
+		"size": "Medium",
 		"health": 170,
 		"armor": 56,
 		"shield": 14,

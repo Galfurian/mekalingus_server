@@ -86,7 +86,7 @@ static func _build_budget_squad(request: Dictionary) -> Array[Dictionary]:
 	var allowed_sizes_raw: Array = request.get("squad_allowed_sizes", [])
 	var allowed_sizes: Array[int] = []
 	for size_name in allowed_sizes_raw:
-		var enum_value: Variant = Utils.string_to_enum(Enums.MekSize, str(size_name))
+		var enum_value: Variant = Utils.string_to_enum(Enums.EntitySize, str(size_name))
 		if enum_value != null:
 			allowed_sizes.append(int(enum_value))
 

@@ -5,13 +5,6 @@ class_name TurnManager
 extends Node
 
 # ====================================================================
-# CONSTANTS
-# ====================================================================
-
-# The maximum number of turns in a day.
-const TURNS_PER_DAY: int = 48
-
-# ====================================================================
 # SIGNALS
 # ====================================================================
 
@@ -19,6 +12,13 @@ const TURNS_PER_DAY: int = 48
 signal on_turn_started(turn_number: int)
 # Emitted when the turn is ended.
 signal on_turn_ended(turn_number: int)
+
+# ====================================================================
+# CONSTANTS
+# ====================================================================
+
+# The maximum number of turns in a day.
+const TURNS_PER_DAY: int = 48
 
 # ===================================================================
 # PROPERTIES

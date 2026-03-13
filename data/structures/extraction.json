@@ -1,6 +1,7 @@
 {
 	"ext_drill_rig": {
 		"name": "Drill Rig",
+		"size": "Medium",
 		"health": 210,
 		"armor": 70,
 		"shield": 10,
@@ -15,6 +16,7 @@
 	},
 	"ext_refinery_node": {
 		"name": "Refinery Node",
+		"size": "Medium",
 		"health": 170,
 		"armor": 52,
 		"shield": 20,
@@ -29,6 +31,7 @@
 	},
 	"ext_salvage_compactor": {
 		"name": "Salvage Compactor",
+		"size": "Medium",
 		"health": 160,
 		"armor": 50,
 		"shield": 18,

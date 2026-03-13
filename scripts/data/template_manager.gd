@@ -25,7 +25,7 @@ var biomes: Dictionary[String, Biome]
 # Dictionary to store power stats per slot type.
 var slot_power_stats: Dictionary[Enums.SlotType, Dictionary]
 # Dictionary to store power stats per mek size.
-var mek_power_stats: Dictionary[Enums.MekSize, Dictionary]
+var mek_power_stats: Dictionary[Enums.EntitySize, Dictionary]
 
 # =============================================================================
 # GENERAL
@@ -177,10 +177,10 @@ func compute_mek_power_stats_per_size() -> Dictionary:
 	mek_power_stats.clear()
 	# Initialize grouping structure.
 	var size_groups := {
-		Enums.MekSize.LIGHT: [],
-		Enums.MekSize.MEDIUM: [],
-		Enums.MekSize.HEAVY: [],
-		Enums.MekSize.COLOSSAL: []
+		Enums.EntitySize.LIGHT: [],
+		Enums.EntitySize.MEDIUM: [],
+		Enums.EntitySize.HEAVY: [],
+		Enums.EntitySize.COLOSSAL: []
 	}
 	# Gather power values by size.
 	for mek_template in mek_templates.values():

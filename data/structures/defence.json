@@ -1,7 +1,8 @@
 {
 	"def_wall_segment": {
 		"name": "Wall Segment",
-		"health": 280,
+		"size": "Medium",
+		"health": 480,
 		"armor": 96,
 		"shield": 0,
 		"shield_generation": 0,
@@ -15,7 +16,8 @@
 	},
 	"def_gate_segment": {
 		"name": "Gate Segment",
-		"health": 210,
+		"size": "Medium",
+		"health": 440,
 		"armor": 72,
 		"shield": 0,
 		"shield_generation": 0,
@@ -29,6 +31,7 @@
 	},
 	"def_guard_tower": {
 		"name": "Guard Tower",
+		"size": "Medium",
 		"health": 190,
 		"armor": 62,
 		"shield": 22,

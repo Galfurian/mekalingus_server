@@ -223,20 +223,20 @@ func _populate_templates() -> void:
 	var entity_type: String = _get_selected_metadata(entity_type_option)
 	if entity_type == "mek":
 		var grouped: Dictionary = {
-			Enums.MekSize.LIGHT: [],
-			Enums.MekSize.MEDIUM: [],
-			Enums.MekSize.HEAVY: [],
-			Enums.MekSize.COLOSSAL: [],
+			Enums.EntitySize.LIGHT: [],
+			Enums.EntitySize.MEDIUM: [],
+			Enums.EntitySize.HEAVY: [],
+			Enums.EntitySize.COLOSSAL: [],
 		}
 		for template_id: String in TemplateManager.mek_templates.keys():
 			var template: MekTemplate = TemplateManager.mek_templates[template_id]
 			grouped[template.size].append({ "id": template_id, "name": template.mek_name })
 
 		var size_order: Array[int] = [
-			Enums.MekSize.LIGHT,
-			Enums.MekSize.MEDIUM,
-			Enums.MekSize.HEAVY,
-			Enums.MekSize.COLOSSAL,
+			Enums.EntitySize.LIGHT,
+			Enums.EntitySize.MEDIUM,
+			Enums.EntitySize.HEAVY,
+			Enums.EntitySize.COLOSSAL,
 		]
 		var added_group: bool = false
 		for size_class: int in size_order:

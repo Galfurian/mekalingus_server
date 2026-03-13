@@ -9,7 +9,7 @@ func generate_plan(
 	turn_context: RefCounted = null,
 ) -> AIPlan:
 	var context := AIPlanningContext.new(source, game_map, aggressiveness, turn_context)
-	var plan := AIPlan.new(source, game_map)
+	var plan: AIPlan = null
 	var best_score := -INF
 	var evaluators: Array = [
 		AIAttackIntentEvaluator,

@@ -1,6 +1,7 @@
 {
 	"turret_basic": {
 		"name": "Basic Turret",
+		"size": "Medium",
 		"health": 140,
 		"armor": 45,
 		"shield": 20,

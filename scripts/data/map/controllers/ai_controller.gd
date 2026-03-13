@@ -2,6 +2,13 @@ class_name AIController
 extends Node
 
 # =============================================================================
+# CONSTANTS
+# =============================================================================
+
+# Enable AI action recovery (replan & reissue) when orders become invalid mid-turn.
+const ENABLE_ACTION_RECOVERY: bool = true
+
+# =============================================================================
 # PROPERTIES
 # =============================================================================
 
@@ -22,9 +29,6 @@ var _move_orders: Dictionary[String, MoveOrder] = {}
 var _reserved_move_tiles: Dictionary = {}
 # Turn-scoped cache to reduce repeated queries across unit planning.
 var _turn_context: RefCounted = null
-
-# Enable AI action recovery (replan & reissue) when orders become invalid mid-turn.
-const ENABLE_ACTION_RECOVERY: bool = true
 
 # =============================================================================
 # GENERIC FUNCTIONS
@@ -226,37 +230,35 @@ func execute_move_orders() -> void:
 	_reserved_move_tiles.clear()
 
 
-func plan_for_unit(source: MapCombatEntity, turn_context: RefCounted = null) -> void:
+func plan_for_unit(source: MapCombatEntity) -> void:
 	"""
 	Generates a plan for the given unit if the current one is missing or no longer valid.
 	"""
-	if source.combatant.is_alive():
-		# Check if we already have a valid plan.
-		var current_plan: AIPlan = get_current_plan(source)
-		# If the plan is valid, no need to re-plan.
-		if current_plan and current_plan.is_valid():
-			return
-		# If we have a plan but it is invalid for any other reason, log it.
-		if current_plan and not current_plan.is_valid() and not current_plan.is_complete():
-			_add_log(
-				(
-					"%s cached plan invalidated; regenerating: %s"
-					% [source.combatant.get_chat_tag(), str(current_plan)]
-				)
-			)
-		# Get the clan aggressiveness and generate a plan.
-		var aggressiveness: float = 1.0
-		if source.owner and source.owner.clan:
-			aggressiveness = source.owner.clan.aggressiveness
-		var planning_turn_context: RefCounted = turn_context
-		if not planning_turn_context:
-			planning_turn_context = _turn_context
-		# Generate the plan for the source unit.
-		var new_plan: AIPlan = _planner.generate_plan(
-			source, game_map, aggressiveness, planning_turn_context
-		)
-		# Save the new plan.
-		_current_plans[source.combatant.uuid] = new_plan
+	# If the unit is dead, no order can be generated.
+	if not source.combatant.is_alive():
+		return
+
+	# Check if we already have a valid plan.
+	var current_plan: AIPlan = get_current_plan(source)
+
+	# If the plan is valid, no need to re-plan.
+	if current_plan and current_plan.is_valid():
+		return
+
+	# Get the clan aggressiveness and generate a plan.
+	var aggressiveness: float = 1.0
+	if source.owner and source.owner.clan:
+		aggressiveness = source.owner.clan.aggressiveness
+
+	# Generate the plan for the source unit.
+	var new_plan: AIPlan = _planner.generate_plan(source, game_map, aggressiveness, _turn_context)
+
+	if not new_plan or not new_plan.is_valid():
+		return
+	# Save the new plan.
+	_current_plans[source.combatant.uuid] = new_plan
+
+	_add_log("Planned: %s" % str(new_plan))
 
 
 func generate_orders_for_unit(source: MapCombatEntity) -> void:
@@ -264,8 +266,8 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 	Generates an order for the given unit based on its current plan.
 	If the plan is invalid or has been completed, re-planning may occur.
 	"""
+	# If the unit is dead, no order can be generated.
 	if source.combatant.is_dead():
-		# If the unit is dead, no order can be generated.
 		return
 
 	# Ensure the unit has a current plan, or regenerate if needed.
@@ -274,18 +276,8 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 	# Retrieve the current plan from the cache.
 	var current_plan: AIPlan = get_current_plan(source)
 
-	# If no plan is available or invalid, attempt to regenerate.
-	if not current_plan or not current_plan.is_valid():
-		_add_log(
-			"%s plan was missing or invalid; regenerating..." % source.combatant.get_chat_tag()
-		)
-		_current_plans.erase(source.combatant.uuid)
-		plan_for_unit(source)
-		current_plan = get_current_plan(source)
-
 	# If still no valid plan, we cannot generate an order.
 	if not current_plan or not current_plan.is_valid():
-		_add_log("%s could not generate a valid plan." % source.combatant.get_chat_tag())
 		return
 
 	# If the plan is already complete, there's nothing left to do this turn.
@@ -311,12 +303,7 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 			_add_log("%s has no actionable order this turn." % source.combatant.get_chat_tag())
 		return
 
-	_add_log(
-		(
-			"%s generated order for plan %s : %s"
-			% [source.combatant.get_chat_tag(), str(current_plan), str(order)]
-		)
-	)
+	_add_log("New order: %s" % str(order))
 	_queue_generated_order(order)
 
 
@@ -389,7 +376,7 @@ func generate_ai_orders() -> void:
 
 	for unit: MapCombatEntity in units:
 		# Generate or reuse the current plan.
-		plan_for_unit(unit, _turn_context)
+		plan_for_unit(unit)
 		# Generate the next order based on the current plan.
 		generate_orders_for_unit(unit)
 
@@ -410,21 +397,7 @@ func precompute_next_turn_plans() -> void:
 	_turn_context = AITurnContext.new(game_map)
 
 	for unit: MapCombatEntity in _iter_ai_controlled_entities():
-		var previous_plan: AIPlan = get_current_plan(unit)
-		plan_for_unit(unit, _turn_context)
-		var next_plan: AIPlan = get_current_plan(unit)
-		if (
-			next_plan
-			and next_plan.is_valid()
-			and not next_plan.is_complete()
-			and next_plan != previous_plan
-		):
-			_add_log(
-				(
-					"%s precomputed next-turn plan: %s"
-					% [unit.combatant.get_chat_tag(), str(next_plan)]
-				)
-			)
+		plan_for_unit(unit)
 
 	_turn_context = null
 

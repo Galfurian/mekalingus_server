@@ -25,7 +25,7 @@ func display_combat_entity(map_entity: MapCombatEntity) -> void:
 	if is_instance_of(actor, Mek):
 		text += "Power   : " + str((actor as Mek).evaluate_mek_power()) + "\n"
 		text += "Size    : "
-		text += Utils.enum_to_string(Enums.MekSize, (actor as Mek).template.size) + "\n"
+		text += Utils.enum_to_string(Enums.EntitySize, (actor as Mek).template.size) + "\n"
 	else:
 		text += "Power   : " + str(actor.evaluate_combat_power()) + "\n"
 

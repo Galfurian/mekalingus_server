@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bnw3baaeo5u61"]
+[gd_scene load_steps=3 format=3 uid="uid://bnw3baaeo5u61"]
 
 [ext_resource type="Script" uid="uid://ba0jwmx0v6kg6" path="res://scripts/scenes/gameplay/spawn_panel.gd" id="1"]
+[ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_8r2pv"]
 
 [node name="SpawnPanel" type="PopupPanel"]
 size = Vector2i(660, 400)
@@ -29,6 +30,7 @@ theme_override_constants/separation = 8
 [node name="Title" type="Label" parent="MarginContainer/Root"]
 layout_mode = 2
 text = "Spawn Configuration"
+label_settings = ExtResource("2_8r2pv")
 
 [node name="TargetRow" type="HBoxContainer" parent="MarginContainer/Root"]
 layout_mode = 2
@@ -69,6 +71,7 @@ theme_override_constants/separation = 6
 [node name="LeftTitle" type="Label" parent="MarginContainer/Root/Panels/Left"]
 layout_mode = 2
 text = "Owner"
+label_settings = ExtResource("2_8r2pv")
 
 [node name="LeftForm" type="GridContainer" parent="MarginContainer/Root/Panels/Left"]
 layout_mode = 2
@@ -123,6 +126,7 @@ theme_override_constants/separation = 6
 [node name="RightTitle" type="Label" parent="MarginContainer/Root/Panels/Right"]
 layout_mode = 2
 text = "Content"
+label_settings = ExtResource("2_8r2pv")
 
 [node name="SingleForm" type="GridContainer" parent="MarginContainer/Root/Panels/Right"]
 layout_mode = 2

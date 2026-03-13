@@ -40,13 +40,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		NpcDirectiveState.Directive.PATROL:
 			var patrol_target: Vector2i = state.get_patrol_target()
 			destination = _pick_destination_for_objective(
-				context,
-				squad_center,
-				patrol_target,
-				Vector2i.ZERO,
-				0,
-				state.compact_radius,
-				false
+				context, squad_center, patrol_target, Vector2i.ZERO, 0, state.compact_radius, false
 			)
 			score = AITuning.REPOSITION_PATROL_SCORE
 
@@ -57,12 +51,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		return null
 
 	return AIPlanBuilder.build_plan(
-		context,
-		AIPlan.Intent.REPOSITION,
-		score,
-		null,
-		null,
-		destination
+		context, AIPlan.Intent.REPOSITION, score, null, null, destination
 	)
 
 

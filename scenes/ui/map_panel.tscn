@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://dkiovd48dvjqd"]
+[gd_scene load_steps=6 format=3 uid="uid://dkiovd48dvjqd"]
 
 [ext_resource type="Script" uid="uid://i5ni28pfxmft" path="res://scripts/scenes/ui/map_panel.gd" id="1_54ar7"]
 [ext_resource type="PackedScene" uid="uid://bic16d6uw0g6y" path="res://scenes/gameplay/map_hud.tscn" id="2_5xqg1"]
 [ext_resource type="PackedScene" uid="uid://dt3nhvenrb57r" path="res://scenes/ui/turn_management_panel.tscn" id="3_j4d32"]
-[ext_resource type="PackedScene" path="res://scenes/ui/npc_directive_panel.tscn" id="4_nk2qv"]
+[ext_resource type="PackedScene" uid="uid://dct1pd3p6nlaa" path="res://scenes/ui/map_management_panel.tscn" id="4_1a3kf"]
+[ext_resource type="PackedScene" uid="uid://coanqrlt58aby" path="res://scenes/ui/npc_directive_panel.tscn" id="4_nk2qv"]
 
 [node name="MapPanel" type="HSplitContainer"]
 anchors_preset = 15
@@ -18,7 +19,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.25
 
-[node name="TopControlsSplit" type="VSplitContainer" parent="LeftSidebarSplit"]
+[node name="TopControlsSplit" type="VBoxContainer" parent="LeftSidebarSplit"]
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -26,19 +27,7 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="TurnInner" type="VBoxContainer" parent="LeftSidebarSplit/TopControlsSplit/TurnSection"]
-layout_mode = 2
-
-[node name="TurnHeader" type="Label" parent="LeftSidebarSplit/TopControlsSplit/TurnSection/TurnInner"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Turn Control"
-horizontal_alignment = 1
-
-[node name="TurnSeparator" type="HSeparator" parent="LeftSidebarSplit/TopControlsSplit/TurnSection/TurnInner"]
-layout_mode = 2
-
-[node name="TurnManagementPanel" parent="LeftSidebarSplit/TopControlsSplit/TurnSection/TurnInner" instance=ExtResource("3_j4d32")]
+[node name="TurnManagementPanel" parent="LeftSidebarSplit/TopControlsSplit/TurnSection" instance=ExtResource("3_j4d32")]
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -46,104 +35,16 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="DirectiveInner" type="VBoxContainer" parent="LeftSidebarSplit/TopControlsSplit/DirectiveSection"]
-layout_mode = 2
-
-[node name="DirectiveHeader" type="Label" parent="LeftSidebarSplit/TopControlsSplit/DirectiveSection/DirectiveInner"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "NPC Directives"
-horizontal_alignment = 1
-
-[node name="DirectiveSeparator" type="HSeparator" parent="LeftSidebarSplit/TopControlsSplit/DirectiveSection/DirectiveInner"]
-layout_mode = 2
-
-[node name="NpcDirectivePanel" parent="LeftSidebarSplit/TopControlsSplit/DirectiveSection/DirectiveInner" instance=ExtResource("4_nk2qv")]
+[node name="NpcDirectivePanel" parent="LeftSidebarSplit/TopControlsSplit/DirectiveSection" instance=ExtResource("4_nk2qv")]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="MapManagerSection" type="PanelContainer" parent="LeftSidebarSplit"]
+[node name="MapManagerSection" type="PanelContainer" parent="LeftSidebarSplit/TopControlsSplit"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="MapManagerInner" type="VBoxContainer" parent="LeftSidebarSplit/MapManagerSection"]
+[node name="MapManagementPanel" parent="LeftSidebarSplit/TopControlsSplit/MapManagerSection" instance=ExtResource("4_1a3kf")]
 layout_mode = 2
-
-[node name="StorageHeader" type="Label" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Map Storage"
-horizontal_alignment = 1
-
-[node name="StorageSeparator" type="HSeparator" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
-layout_mode = 2
-
-[node name="StorageButtons" type="HBoxContainer" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
-layout_mode = 2
-
-[node name="SaveMap" type="Button" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner/StorageButtons"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Save Map"
-
-[node name="LoadMap" type="Button" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner/StorageButtons"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Load Map"
-
-[node name="GeneratorHeader" type="Label" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Map Generator"
-horizontal_alignment = 1
-
-[node name="GeneratorSeparator" type="HSeparator" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
-layout_mode = 2
-
-[node name="HBoxContainer1" type="HBoxContainer" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner/HBoxContainer1"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Size"
-
-[node name="MapSize" type="SpinBox" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner/HBoxContainer1"]
-layout_mode = 2
-size_flags_horizontal = 3
-min_value = 10.0
-max_value = 300.0
-step = 10.0
-value = 50.0
-rounded = true
-
-[node name="HBoxContainer2" type="HBoxContainer" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
-layout_mode = 2
-
-[node name="HBoxContainer3" type="HBoxContainer" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner/HBoxContainer3"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Biome"
-
-[node name="Biome" type="OptionButton" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner/HBoxContainer3"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="Generate" type="Button" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
-layout_mode = 2
-text = "Generate"
-
-[node name="Delete" type="Button" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
-layout_mode = 2
-text = "Delete"
-
-[node name="MapList" type="ItemList" parent="LeftSidebarSplit/MapManagerSection/MapManagerInner"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
 
 [node name="MapHud" parent="." instance=ExtResource("2_5xqg1")]
 layout_mode = 2

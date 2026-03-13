@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://coanqrlt58aby"]
+[gd_scene load_steps=3 format=3 uid="uid://coanqrlt58aby"]
 
 [ext_resource type="Script" uid="uid://bkkfw46aeoxtj" path="res://scripts/scenes/ui/npc_directive_panel.gd" id="1_5d61b"]
+[ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_yonrf"]
 
 [node name="NpcDirectivePanel" type="VBoxContainer"]
 script = ExtResource("1_5d61b")
@@ -8,6 +9,7 @@ script = ExtResource("1_5d61b")
 [node name="Title" type="Label" parent="."]
 layout_mode = 2
 text = "NPC Directives"
+label_settings = ExtResource("2_yonrf")
 horizontal_alignment = 1
 
 [node name="OverlayToggle" type="CheckButton" parent="."]

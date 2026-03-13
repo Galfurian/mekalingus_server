@@ -1,0 +1,84 @@
+[gd_scene load_steps=3 format=3 uid="uid://dct1pd3p6nlaa"]
+
+[ext_resource type="Script" uid="uid://qjanx1ebljvc" path="res://scripts/scenes/ui/map_management_panel.gd" id="1_ap83w"]
+[ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_i8oxt"]
+
+[node name="MapManagementPanel" type="VBoxContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_ap83w")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Map Control"
+label_settings = ExtResource("2_i8oxt")
+horizontal_alignment = 1
+
+[node name="Section" type="PanelContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Inner" type="VBoxContainer" parent="Section"]
+layout_mode = 2
+
+[node name="StorageButtons" type="HBoxContainer" parent="Section/Inner"]
+layout_mode = 2
+
+[node name="SaveMap" type="Button" parent="Section/Inner/StorageButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Save Map"
+
+[node name="LoadMap" type="Button" parent="Section/Inner/StorageButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Load Map"
+
+[node name="GeneratorSeparator" type="HSeparator" parent="Section/Inner"]
+layout_mode = 2
+
+[node name="HBoxContainer1" type="HBoxContainer" parent="Section/Inner"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Section/Inner/HBoxContainer1"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Size"
+
+[node name="MapSize" type="SpinBox" parent="Section/Inner/HBoxContainer1"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 10.0
+max_value = 300.0
+step = 10.0
+value = 50.0
+rounded = true
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Section/Inner"]
+layout_mode = 2
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="Section/Inner"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Section/Inner/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Biome"
+
+[node name="Biome" type="OptionButton" parent="Section/Inner/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Generate" type="Button" parent="Section/Inner"]
+layout_mode = 2
+text = "Generate"
+
+[node name="Delete" type="Button" parent="Section/Inner"]
+layout_mode = 2
+text = "Delete"
+
+[node name="MapList" type="ItemList" parent="Section/Inner"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3

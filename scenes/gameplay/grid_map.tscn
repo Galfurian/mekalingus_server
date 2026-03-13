@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://cid4owatwb65x"]
+[gd_scene load_steps=8 format=3 uid="uid://cid4owatwb65x"]
 
 [ext_resource type="Script" uid="uid://bnn33gp188816" path="res://scripts/scenes/gameplay/grid_container.gd" id="2_05c1y"]
 [ext_resource type="Script" uid="uid://1eg80xm5luv3" path="res://scripts/scenes/gameplay/scroll_view.gd" id="2_74cwi"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://c5t04q78bcub0" path="res://scripts/scenes/gameplay/icon_drawer.gd" id="5_74cwi"]
 [ext_resource type="Material" uid="uid://lnfic5l3g0wf" path="res://shaders/time_of_day_shader_material.tres" id="5_e0tmq"]
 [ext_resource type="Script" uid="uid://cceblf0d0fnde" path="res://scripts/scenes/gameplay/time_of_day_overlay.gd" id="6_e0tmq"]
+[ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="7_168ta"]
 
 [node name="GridMap" type="PanelContainer"]
 anchors_preset = 15
@@ -38,3 +39,4 @@ layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 0
 text = "00:00"
+label_settings = ExtResource("7_168ta")

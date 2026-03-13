@@ -118,11 +118,12 @@
             3,
             2
         ],
-        "icon": "meks/mek.png"
+        "icon": "meks/heavy/hmek006.png"
     },
     "hmek007": {
         "name": "Crimson Juggernaut",
         "description": "A terrifying siege unit designed to break enemy lines with overwhelming force.",
+        "appearance": "A heavily armored mech with a design that emphasizes its role as a siege unit. It has thick armor plates in a crimson red finish, accented with black highlights. The Crimson Juggernaut is equipped with powerful weaponry and a robust frame, making it a formidable presence on the battlefield.",
         "size": "Heavy",
         "health": 362,
         "armor": 238,
@@ -137,11 +138,12 @@
             4,
             2
         ],
-        "icon": "meks/mek.png"
+        "icon": "meks/heavy/hmek007.png"
     },
     "hmek008": {
         "name": "Vanguard Behemoth",
         "description": "A defensive stronghold, built to withstand relentless attacks and outlast any opponent.",
+        "appearance": "A heavily armored mech with a design that emphasizes its role as a defensive unit. It has thick armor plates in a steel gray finish, accented with red highlights. The Vanguard Behemoth is equipped with powerful weaponry and a robust frame, making it a formidable presence on the battlefield.",
         "size": "Heavy",
         "health": 388,
         "armor": 250,

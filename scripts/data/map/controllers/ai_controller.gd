@@ -255,7 +255,15 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 	# Generate the order for the current plan.
 	var order: Order = current_plan.generate_order(_reserved_move_tiles)
 	if not order:
-		_add_log("%s plan could not generate an order" % source.combatant.get_chat_tag())
+		_add_log("%s plan generated no order; attempting one replan pass." % source.combatant.get_chat_tag())
+		_current_plans.erase(source.combatant.uuid)
+		plan_for_unit(source)
+		current_plan = get_current_plan(source)
+		if current_plan and current_plan.is_valid() and not current_plan.is_complete():
+			order = current_plan.generate_order(_reserved_move_tiles)
+		if not order:
+			_current_plans.erase(source.combatant.uuid)
+			_add_log("%s has no actionable order this turn." % source.combatant.get_chat_tag())
 		return
 
 	_add_log("%s generated order for plan %s : %s" % [source.combatant.get_chat_tag(), str(current_plan), str(order)])

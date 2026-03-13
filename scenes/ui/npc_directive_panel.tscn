@@ -54,6 +54,18 @@ text = "Directive"
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="PatrolTypeRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
+layout_mode = 2
+
+[node name="PatrolTypeLabel" type="Label" parent="TabContainer/Directive/Section/Inner/PatrolTypeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Patrol Type"
+
+[node name="PatrolTypeOption" type="OptionButton" parent="TabContainer/Directive/Section/Inner/PatrolTypeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="CompactRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
 layout_mode = 2
 
@@ -125,12 +137,12 @@ text = "Apply"
 [node name="ResetAnchorButton" type="Button" parent="TabContainer/Directive/Section/Inner/ButtonsRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Reset Anchor"
+text = "Set Anchor"
 
 [node name="ResetAllButton" type="Button" parent="TabContainer/Directive/Section/Inner/ButtonsRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Reset All"
+text = "Clear All Directives"
 
 [node name="Squads" type="VBoxContainer" parent="TabContainer"]
 layout_mode = 2
@@ -163,7 +175,7 @@ layout_mode = 2
 [node name="SetAnchorHere" type="Button" parent="TabContainer/Squads/AnchorButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Set Anchor Here"
+text = "Set Anchor"
 
 [node name="AutoPatrolRing" type="Button" parent="TabContainer/Squads/AnchorButtons"]
 layout_mode = 2

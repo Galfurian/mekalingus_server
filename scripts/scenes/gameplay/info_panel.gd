@@ -423,7 +423,10 @@ func _update_plan_tab(map_entity: MapCombatEntity) -> void:
 	var plan: AIPlan = game_map.ai_controller.get_current_plan(map_entity)
 	if not plan:
 		plan_info.clear()
-		plan_info.append_text("[center][b]Plan[/b][/center]\nNo current plan.")
+		if map_entity.owner and map_entity.owner.is_player():
+			plan_info.append_text("[center][b]Plan[/b][/center]\nPlayer-controlled unit (no AI plan).")
+		else:
+			plan_info.append_text("[center][b]Plan[/b][/center]\nNo current plan (no actionable order).")
 		return
 
 	var s: String = "[center][b]Plan[/b][/center]\n"

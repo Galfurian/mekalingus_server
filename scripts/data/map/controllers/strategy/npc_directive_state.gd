@@ -8,10 +8,17 @@ enum Directive {
 }
 
 
+enum PatrolType {
+	CIRCLE,
+	MAP_BORDER,
+}
+
+
 var directive: int = Directive.HOLD_PERIMETER
 var anchor_position: Vector2i = Vector2i.ZERO
 var patrol_waypoints: Array[Vector2i] = []
 var patrol_index: int = 0
+var patrol_type: int = PatrolType.CIRCLE
 var compact_radius: int = 4
 var leash_radius: int = 6
 var aggressiveness_override: float = -1.0
@@ -30,6 +37,11 @@ static func from_dict(data: Dictionary) -> NpcDirectiveState:
 	)
 	state.anchor_position = Utils.deserialize_position(data.get("anchor_position", [0, 0]))
 	state.patrol_index = max(0, int(data.get("patrol_index", 0)))
+	state.patrol_type = clampi(
+		int(data.get("patrol_type", PatrolType.CIRCLE)),
+		PatrolType.CIRCLE,
+		PatrolType.MAP_BORDER
+	)
 	state.compact_radius = maxi(1, int(data.get("compact_radius", 4)))
 	state.leash_radius = maxi(1, int(data.get("leash_radius", 6)))
 	state.aggressiveness_override = float(data.get("aggressiveness_override", -1.0))
@@ -56,6 +68,7 @@ func to_dict() -> Dictionary:
 		"anchor_position": Utils.serialize_position(anchor_position),
 		"patrol_waypoints": serialized_waypoints,
 		"patrol_index": patrol_index,
+		"patrol_type": patrol_type,
 		"compact_radius": compact_radius,
 		"leash_radius": leash_radius,
 		"aggressiveness_override": aggressiveness_override,

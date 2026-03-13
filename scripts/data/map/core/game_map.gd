@@ -561,7 +561,11 @@ func get_owner_directive_by_key(
 	state.anchor_position = _compute_owner_anchor(owner_key)
 	if state.anchor_position == Vector2i.ZERO and fallback_anchor != Vector2i(-1, -1):
 		state.anchor_position = fallback_anchor
-	state.patrol_waypoints = _build_default_patrol_waypoints(state.anchor_position, state.leash_radius)
+	state.patrol_waypoints = _build_patrol_waypoints(
+		state.anchor_position,
+		state.leash_radius,
+		state.patrol_type
+	)
 	owner_directives[owner_key] = state
 	return state
 
@@ -593,7 +597,11 @@ func reset_owner_anchor(owner_key: String) -> void:
 		return
 
 	state.anchor_position = new_anchor
-	state.patrol_waypoints = _build_default_patrol_waypoints(new_anchor, state.leash_radius)
+	state.patrol_waypoints = _build_patrol_waypoints(
+		new_anchor,
+		state.leash_radius,
+		state.patrol_type
+	)
 	state.patrol_index = 0
 	owner_directives[owner_key] = state
 
@@ -606,8 +614,31 @@ func refresh_owner_patrol_waypoints(owner_key: String) -> void:
 	if not state:
 		return
 
-	state.patrol_waypoints = _build_default_patrol_waypoints(state.anchor_position, state.leash_radius)
+	state.patrol_waypoints = _build_patrol_waypoints(
+		state.anchor_position,
+		state.leash_radius,
+		state.patrol_type
+	)
 	state.patrol_index = 0
+	owner_directives[owner_key] = state
+
+
+func set_owner_anchor(owner_key: String, anchor: Vector2i, rebuild_patrol: bool = true) -> void:
+	if owner_key.is_empty() or not is_in_bounds(anchor):
+		return
+
+	var state: RefCounted = get_owner_directive_by_key(owner_key)
+	if not state:
+		return
+
+	state.anchor_position = anchor
+	if rebuild_patrol:
+		state.patrol_waypoints = _build_patrol_waypoints(
+			anchor,
+			state.leash_radius,
+			state.patrol_type
+		)
+		state.patrol_index = 0
 	owner_directives[owner_key] = state
 
 
@@ -640,7 +671,12 @@ func auto_generate_owner_patrol_ring_from_centroid(owner_key: String) -> void:
 		return
 
 	state.anchor_position = centroid
-	state.patrol_waypoints = _build_default_patrol_waypoints(centroid, state.leash_radius)
+	state.patrol_type = NpcDirectiveState.PatrolType.CIRCLE
+	state.patrol_waypoints = _build_patrol_waypoints(
+		centroid,
+		state.leash_radius,
+		state.patrol_type
+	)
 	state.patrol_index = 0
 	owner_directives[owner_key] = state
 
@@ -683,27 +719,66 @@ func _compute_owner_anchor(owner_key: String) -> Vector2i:
 	)
 
 
-func _build_default_patrol_waypoints(anchor: Vector2i, leash_radius: int) -> Array[Vector2i]:
+func _build_patrol_waypoints(anchor: Vector2i, leash_radius: int, patrol_type: int) -> Array[Vector2i]:
+	match patrol_type:
+		NpcDirectiveState.PatrolType.MAP_BORDER:
+			return _build_border_patrol_waypoints(anchor)
+		_:
+			return _build_circle_patrol_waypoints(anchor, leash_radius)
+
+
+func _build_circle_patrol_waypoints(anchor: Vector2i, leash_radius: int) -> Array[Vector2i]:
 	var waypoints: Array[Vector2i] = []
 	if anchor == Vector2i.ZERO:
 		return waypoints
 
-	var patrol_radius_x: int = maxi(int(map_width * 0.25), leash_radius * 2)
-	var patrol_radius_y: int = maxi(int(map_height * 0.25), leash_radius * 2)
+	var patrol_radius_x: int = maxi(1, leash_radius)
+	var patrol_radius_y: int = maxi(1, leash_radius)
 	var candidates: Array[Vector2i] = [
 		anchor + Vector2i(0, -patrol_radius_y),
-		anchor + Vector2i(int(round(patrol_radius_x * 0.7)), -int(round(patrol_radius_y * 0.7))),
+		anchor + Vector2i(maxi(1, int(round(patrol_radius_x * 0.7))), -maxi(1, int(round(patrol_radius_y * 0.7)))),
 		anchor + Vector2i(patrol_radius_x, 0),
-		anchor + Vector2i(int(round(patrol_radius_x * 0.7)), int(round(patrol_radius_y * 0.7))),
+		anchor + Vector2i(maxi(1, int(round(patrol_radius_x * 0.7))), maxi(1, int(round(patrol_radius_y * 0.7)))),
 		anchor + Vector2i(0, patrol_radius_y),
-		anchor + Vector2i(-int(round(patrol_radius_x * 0.7)), int(round(patrol_radius_y * 0.7))),
+		anchor + Vector2i(-maxi(1, int(round(patrol_radius_x * 0.7))), maxi(1, int(round(patrol_radius_y * 0.7)))),
 		anchor + Vector2i(-patrol_radius_x, 0),
-		anchor + Vector2i(-int(round(patrol_radius_x * 0.7)), -int(round(patrol_radius_y * 0.7))),
+		anchor + Vector2i(-maxi(1, int(round(patrol_radius_x * 0.7))), -maxi(1, int(round(patrol_radius_y * 0.7)))),
 	]
 
 	for point in candidates:
 		if is_in_bounds(point):
 			waypoints.append(point)
+
+	if waypoints.is_empty():
+		waypoints.append(anchor)
+
+	return waypoints
+
+
+func _build_border_patrol_waypoints(anchor: Vector2i) -> Array[Vector2i]:
+	var waypoints: Array[Vector2i] = []
+	if map_width <= 0 or map_height <= 0:
+		return waypoints
+
+	var corners: Array[Vector2i] = [
+		Vector2i(0, 0),
+		Vector2i(map_width - 1, 0),
+		Vector2i(map_width - 1, map_height - 1),
+		Vector2i(0, map_height - 1),
+	]
+
+	var start_index: int = 0
+	var best_distance: float = INF
+	for i in range(corners.size()):
+		var distance: float = corners[i].distance_to(anchor)
+		if distance < best_distance:
+			best_distance = distance
+			start_index = i
+
+	for i in range(corners.size()):
+		var waypoint: Vector2i = corners[(start_index + i) % corners.size()]
+		if not waypoints.has(waypoint):
+			waypoints.append(waypoint)
 
 	if waypoints.is_empty():
 		waypoints.append(anchor)

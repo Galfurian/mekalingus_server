@@ -29,10 +29,15 @@ func _ready() -> void:
 		npc_directive_panel.directives_changed.connect(_on_directives_changed)
 	if npc_directive_panel and not npc_directive_panel.ai_overlay_toggled.is_connected(_on_ai_overlay_toggled):
 		npc_directive_panel.ai_overlay_toggled.connect(_on_ai_overlay_toggled)
+	if npc_directive_panel and not npc_directive_panel.anchor_pick_mode_changed.is_connected(_on_anchor_pick_mode_changed):
+		npc_directive_panel.anchor_pick_mode_changed.connect(_on_anchor_pick_mode_changed)
 	if map_hud and not map_hud.map_state_changed.is_connected(_on_map_hud_state_changed):
 		map_hud.map_state_changed.connect(_on_map_hud_state_changed)
+	if map_hud and not map_hud.map_cell_clicked.is_connected(_on_map_cell_clicked):
+		map_hud.map_cell_clicked.connect(_on_map_cell_clicked)
 	if map_hud and npc_directive_panel:
 		map_hud.set_ai_overlay_enabled(npc_directive_panel.is_ai_overlay_enabled())
+		map_hud.set_anchor_pick_mode_enabled(npc_directive_panel.is_anchor_pick_mode_enabled())
 	turn_management_panel.clear()
 	npc_directive_panel.clear()
 	#GameServer.start()
@@ -212,3 +217,13 @@ func _on_directives_changed(game_map: GameMap) -> void:
 func _on_ai_overlay_toggled(enabled: bool) -> void:
 	if map_hud:
 		map_hud.set_ai_overlay_enabled(enabled)
+
+
+func _on_anchor_pick_mode_changed(enabled: bool) -> void:
+	if map_hud:
+		map_hud.set_anchor_pick_mode_enabled(enabled)
+
+
+func _on_map_cell_clicked(cell_position: Vector2i) -> void:
+	if npc_directive_panel:
+		npc_directive_panel.apply_anchor_from_map(cell_position)

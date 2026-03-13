@@ -2,11 +2,13 @@ extends VBoxContainer
 
 signal directives_changed(game_map: GameMap)
 signal ai_overlay_toggled(enabled: bool)
+signal anchor_pick_mode_changed(enabled: bool)
 
 const DEFAULT_AI_OVERLAY_ENABLED: bool = false
 
 @onready var owner_option: OptionButton = $TabContainer/Directive/Section/Inner/OwnerRow/OwnerOption
 @onready var directive_option: OptionButton = $TabContainer/Directive/Section/Inner/DirectiveRow/DirectiveOption
+@onready var patrol_type_option: OptionButton = $TabContainer/Directive/Section/Inner/PatrolTypeRow/PatrolTypeOption
 @onready var compact_spin: SpinBox = $TabContainer/Directive/Section/Inner/CompactRow/CompactSpin
 @onready var leash_spin: SpinBox = $TabContainer/Directive/Section/Inner/LeashRow/LeashSpin
 @onready var anchor_value: Label = $TabContainer/Directive/Section/Inner/AnchorRow/AnchorValue
@@ -23,12 +25,14 @@ const DEFAULT_AI_OVERLAY_ENABLED: bool = false
 @onready var auto_patrol_ring_button: Button = $TabContainer/Squads/AnchorButtons/AutoPatrolRing
 
 var game_map: GameMap = null
+var _anchor_pick_mode: bool = false
+var _anchor_pick_owner_key: String = ""
 
 
 func _ready() -> void:
 	owner_option.item_selected.connect(_on_owner_selected)
 	apply_button.pressed.connect(_on_apply_pressed)
-	reset_anchor_button.pressed.connect(_on_reset_anchor_pressed)
+	reset_anchor_button.pressed.connect(_on_set_anchor_pressed)
 	reset_all_button.pressed.connect(_on_reset_all_pressed)
 	overlay_toggle.toggled.connect(_on_overlay_toggled)
 	squad_tree.item_selected.connect(_on_squad_tree_item_selected)
@@ -41,6 +45,8 @@ func _ready() -> void:
 	set_anchor_here_button.pressed.connect(_on_set_anchor_here_pressed)
 	auto_patrol_ring_button.pressed.connect(_on_auto_patrol_ring_pressed)
 	_populate_directive_options()
+	_populate_patrol_type_options()
+	_set_anchor_pick_mode(false)
 	overlay_toggle.button_pressed = DEFAULT_AI_OVERLAY_ENABLED
 	ai_overlay_toggled.emit(overlay_toggle.button_pressed)
 	clear()
@@ -56,6 +62,7 @@ func setup(p_game_map: GameMap) -> void:
 func clear() -> void:
 	game_map = null
 	owner_option.clear()
+	patrol_type_option.disabled = true
 	directive_option.disabled = true
 	compact_spin.editable = false
 	leash_spin.editable = false
@@ -67,6 +74,7 @@ func clear() -> void:
 	if squad_tree:
 		squad_tree.clear()
 	_toggle_quick_buttons(false)
+	_set_anchor_pick_mode(false)
 
 
 func refresh_state() -> void:
@@ -82,6 +90,12 @@ func _populate_directive_options() -> void:
 	directive_option.clear()
 	directive_option.add_item("Hold")
 	directive_option.add_item("Patrol")
+
+
+func _populate_patrol_type_options() -> void:
+	patrol_type_option.clear()
+	patrol_type_option.add_item("Circle")
+	patrol_type_option.add_item("Map Border")
 
 
 func _refresh_owner_options() -> void:
@@ -108,6 +122,7 @@ func _refresh_owner_options() -> void:
 
 func _refresh_selected_state() -> void:
 	if not game_map or owner_option.item_count <= 0:
+		patrol_type_option.disabled = true
 		directive_option.disabled = true
 		compact_spin.editable = false
 		leash_spin.editable = false
@@ -131,6 +146,8 @@ func _refresh_selected_state() -> void:
 	reset_all_button.disabled = false
 
 	directive_option.select(int(state.directive))
+	patrol_type_option.disabled = false
+	patrol_type_option.select(int(state.patrol_type))
 	compact_spin.set_value_no_signal(state.compact_radius)
 	leash_spin.set_value_no_signal(state.leash_radius)
 	anchor_value.text = "(%d, %d)" % [state.anchor_position.x, state.anchor_position.y]
@@ -153,12 +170,11 @@ func _on_apply_pressed() -> void:
 		return
 
 	state.directive = directive_option.get_selected()
+	state.patrol_type = patrol_type_option.get_selected()
 	state.compact_radius = maxi(1, int(compact_spin.value))
 	state.leash_radius = maxi(1, int(leash_spin.value))
-	if state.patrol_waypoints.is_empty():
-		game_map.refresh_owner_patrol_waypoints(owner_key)
-	else:
-		game_map.owner_directives[owner_key] = state
+	game_map.owner_directives[owner_key] = state
+	game_map.refresh_owner_patrol_waypoints(owner_key)
 	_reissue_ai_orders()
 
 	_refresh_selected_state()
@@ -166,16 +182,19 @@ func _on_apply_pressed() -> void:
 	_refresh_squad_tree()
 
 
-func _on_reset_anchor_pressed() -> void:
+func _on_set_anchor_pressed() -> void:
 	if not game_map or owner_option.item_count <= 0:
 		return
 
 	var owner_key: String = str(owner_option.get_item_metadata(owner_option.get_selected()))
-	game_map.reset_owner_anchor(owner_key)
-	_reissue_ai_orders()
-	_refresh_selected_state()
-	directives_changed.emit(game_map)
-	_refresh_squad_tree()
+	if owner_key.is_empty():
+		return
+
+	if _anchor_pick_mode and _anchor_pick_owner_key == owner_key:
+		_set_anchor_pick_mode(false)
+		return
+
+	_set_anchor_pick_mode(true, owner_key)
 
 
 func _on_reset_all_pressed() -> void:
@@ -183,6 +202,7 @@ func _on_reset_all_pressed() -> void:
 		return
 
 	game_map.clear_all_owner_directives()
+	_set_anchor_pick_mode(false)
 	_reissue_ai_orders()
 	_refresh_owner_options()
 	_refresh_selected_state()
@@ -276,11 +296,11 @@ func _on_set_anchor_here_pressed() -> void:
 	if owner_key.is_empty() or not game_map:
 		return
 
-	game_map.set_owner_anchor_from_centroid(owner_key)
-	_reissue_ai_orders()
-	_refresh_selected_state()
-	_refresh_squad_tree()
-	directives_changed.emit(game_map)
+	if _anchor_pick_mode and _anchor_pick_owner_key == owner_key:
+		_set_anchor_pick_mode(false)
+		return
+
+	_set_anchor_pick_mode(true, owner_key)
 
 
 func _on_auto_patrol_ring_pressed() -> void:
@@ -303,11 +323,43 @@ func is_ai_overlay_enabled() -> bool:
 	return overlay_toggle and overlay_toggle.button_pressed
 
 
+func apply_anchor_from_map(cell_position: Vector2i) -> bool:
+	if not game_map or not _anchor_pick_mode:
+		return false
+	if _anchor_pick_owner_key.is_empty() or not game_map.is_in_bounds(cell_position):
+		_set_anchor_pick_mode(false)
+		return false
+
+	game_map.set_owner_anchor(_anchor_pick_owner_key, cell_position, true)
+	_set_anchor_pick_mode(false)
+	_reissue_ai_orders()
+	_refresh_selected_state()
+	_refresh_squad_tree()
+	directives_changed.emit(game_map)
+	return true
+
+
+func is_anchor_pick_mode_enabled() -> bool:
+	return _anchor_pick_mode
+
+
 func _reissue_ai_orders() -> void:
 	if not game_map or not game_map.ai_controller:
 		return
 	game_map.ai_controller.clear()
 	game_map.ai_controller.generate_ai_orders()
+
+
+func _set_anchor_pick_mode(enabled: bool, owner_key: String = "") -> void:
+	_anchor_pick_mode = enabled and not owner_key.is_empty()
+	_anchor_pick_owner_key = owner_key if _anchor_pick_mode else ""
+
+	if reset_anchor_button:
+		reset_anchor_button.text = "Cancel Anchor Pick" if _anchor_pick_mode else "Set Anchor"
+	if set_anchor_here_button:
+		set_anchor_here_button.text = "Cancel Anchor Pick" if _anchor_pick_mode else "Set Anchor"
+
+	anchor_pick_mode_changed.emit(_anchor_pick_mode)
 
 
 func _get_selected_owner_key_from_owner_option() -> String:

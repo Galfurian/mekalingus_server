@@ -26,12 +26,15 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 
 	match state.directive:
 		NpcDirectiveState.Directive.HOLD_PERIMETER:
+			var hold_anchor: Vector2i = state.anchor_position
+			if hold_anchor == Vector2i.ZERO:
+				hold_anchor = squad_center
 			destination = _pick_destination_for_objective(
 				context,
-				squad_center,
-				squad_center,
-				squad_center,
-				maxi(1, state.compact_radius + 1),
+				hold_anchor,
+				hold_anchor,
+				hold_anchor,
+				maxi(1, state.leash_radius),
 				state.compact_radius,
 				true
 			)

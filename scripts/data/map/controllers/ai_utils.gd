@@ -79,9 +79,15 @@ func evaluate_offensive_effect_priority(target: MapCombatEntity, effect: ItemEff
 	"""
 	var priority = 0
 
-	# Factor 1: Threat level by size (larger = more threatening)
+	# Factor 1: Threat level by size (larger = more threatening).
+	# Mek templates have a size; structures do not, so we safely fall back.
+	var target_size: int = 1
+	if target.combatant is Mek:
+		var mek: Mek = target.combatant
+		if mek.template and mek.template.has_property("size"):
+			target_size = int(mek.template.size)
 
-	priority += (target.combatant.template.size + 1) * (target.combatant.template.size + 1)
+	priority += (target_size + 1) * (target_size + 1)
 
 	# Factor 2: Target state sensitivity.
 

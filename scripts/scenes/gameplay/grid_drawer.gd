@@ -13,6 +13,8 @@ const AI_MOVE_LINE_COLOR = Color(0.2, 0.9, 1.0, 0.85)
 const AI_MOVE_DOT_COLOR = Color(0.1, 0.95, 0.8, 0.95)
 const AI_ATTACK_ARC_COLOR = Color(1.0, 0.4, 0.25, 0.9)
 const AI_ATTACK_TARGET_DOT_COLOR = Color(1.0, 0.25, 0.25, 0.95)
+const AI_FRIENDLY_ARC_COLOR = Color(0.3, 1.0, 0.3, 0.9)
+const AI_FRIENDLY_TARGET_DOT_COLOR = Color(0.5, 1.0, 0.5, 0.95)
 const PATROL_PATH_COLOR = Color(0.9, 0.3, 1.0, 0.7)
 const PATROL_WAYPOINT_DOT_COLOR = Color(0.95, 0.5, 1.0, 0.9)
 const AI_LINE_WIDTH = 3.0
@@ -113,7 +115,9 @@ func _draw():
 	for i in range(game_map.map_width + padding_tiles + padding_tiles):
 		if (i % sector_size) == 0:
 			var x_start = Vector2(i * grid_size, 0)
-			var x_end = Vector2(i * grid_size, (game_map.map_height + padding_tiles * 2) * grid_size)
+			var x_end = Vector2(
+				i * grid_size, (game_map.map_height + padding_tiles * 2) * grid_size
+			)
 			draw_line(x_start, x_end, MAJOR_GRID_COLOR, MAJOR_GRID_SIZE)
 			var y_start = Vector2(0, i * grid_size)
 			var y_end = Vector2((game_map.map_width + padding_tiles * 2) * grid_size, i * grid_size)
@@ -159,11 +163,23 @@ func _draw_ai_plan_for_entity(entity: MapCombatEntity) -> void:
 		draw_circle(destination_center, maxf(3.0, grid_size * 0.16), AI_MOVE_DOT_COLOR)
 		return
 
-	if (plan.intent == AIPlan.Intent.ATTACK or plan.intent == AIPlan.Intent.SUPPORT) and plan.target:
+	if (
+		(plan.intent == AIPlan.Intent.ATTACK or plan.intent == AIPlan.Intent.SUPPORT)
+		and plan.target
+	):
 		var target_center: Vector2 = _tile_center(plan.target.position)
+		var is_enemy_target: bool = game_map.is_enemy_of(entity, plan.target)
+		var arc_color: Color
+		var dot_color: Color
+		if is_enemy_target:
+			arc_color = AI_ATTACK_ARC_COLOR
+			dot_color = AI_ATTACK_TARGET_DOT_COLOR
+		else:
+			arc_color = AI_FRIENDLY_ARC_COLOR
+			dot_color = AI_FRIENDLY_TARGET_DOT_COLOR
 		if _plan_target_in_range(plan):
-			_draw_attack_arc(source_center, target_center)
-			draw_circle(target_center, maxf(3.0, grid_size * 0.15), AI_ATTACK_TARGET_DOT_COLOR)
+			_draw_attack_arc(source_center, target_center, arc_color)
+			draw_circle(target_center, maxf(3.0, grid_size * 0.15), dot_color)
 			return
 
 		var next_step: Vector2i = _compute_approach_tile(plan)
@@ -179,7 +195,9 @@ func _compute_approach_tile(plan: AIPlan) -> Vector2i:
 		return Vector2i.ZERO
 
 	var source: MapCombatEntity = plan.source
-	var module_range: int = plan.equipped_module.module.module_range + source.combatant.range_modifier
+	var module_range: int = (
+		plan.equipped_module.module.module_range + source.combatant.range_modifier
+	)
 	var movement_speed: int = source.combatant.speed
 	var is_enemy_target: bool = game_map.is_enemy_of(source, plan.target)
 
@@ -187,21 +205,11 @@ func _compute_approach_tile(plan: AIPlan) -> Vector2i:
 	if is_enemy_target:
 		var min_range: int = AIUtils.get_offensive_min_range(module_range)
 		return AIPathfinder.find_best_attack_tile(
-			game_map,
-			source,
-			plan.target,
-			min_range,
-			module_range,
-			movement_speed
+			game_map, source, plan.target, min_range, module_range, movement_speed
 		)
 
 	return AIPathfinder.find_closest_reachable_tile(
-		game_map,
-		source,
-		plan.target,
-		0,
-		module_range,
-		movement_speed
+		game_map, source, plan.target, 0, module_range, movement_speed
 	)
 
 
@@ -210,7 +218,9 @@ func _plan_target_in_range(plan: AIPlan) -> bool:
 		return false
 
 	var source: MapCombatEntity = plan.source
-	var module_range: int = plan.equipped_module.module.module_range + source.combatant.range_modifier
+	var module_range: int = (
+		plan.equipped_module.module.module_range + source.combatant.range_modifier
+	)
 	var min_range: int = 0
 	if game_map.is_enemy_of(source, plan.target):
 		min_range = AIUtils.get_offensive_min_range(module_range)
@@ -219,7 +229,7 @@ func _plan_target_in_range(plan: AIPlan) -> bool:
 	return source == plan.target or (distance >= min_range and distance <= module_range)
 
 
-func _draw_attack_arc(start: Vector2, end: Vector2) -> void:
+func _draw_attack_arc(start: Vector2, end: Vector2, color: Color) -> void:
 	var direction: Vector2 = end - start
 	if direction.length() <= 0.01:
 		return
@@ -236,7 +246,7 @@ func _draw_attack_arc(start: Vector2, end: Vector2) -> void:
 		var point: Vector2 = inv_t * inv_t * start + 2.0 * inv_t * t * control + t * t * end
 		points.append(point)
 
-	draw_polyline(points, AI_ATTACK_ARC_COLOR, AI_LINE_WIDTH, true)
+	draw_polyline(points, color, AI_LINE_WIDTH, true)
 
 
 func _tile_center(tile: Vector2i) -> Vector2:

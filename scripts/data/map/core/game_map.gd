@@ -455,6 +455,7 @@ func remove_destroyed_units() -> void:
 	# Erase the dead units from the game map.
 	Utils.erase(player_units, Utils.filter(player_units, _filter_dead_unit))
 	Utils.erase(npc_units, Utils.filter(npc_units, _filter_dead_unit))
+	Utils.erase(structures, Utils.filter(structures, _filter_dead_unit))
 
 func get_owner_key(p_owner: EntityOwner) -> String:
 	if not p_owner:

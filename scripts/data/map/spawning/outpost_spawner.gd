@@ -1,7 +1,6 @@
 class_name OutpostSpawner
 extends RefCounted
 
-
 const ZONE_IDS := ["nw", "ne", "sw", "se"]
 
 
@@ -13,16 +12,11 @@ static func spawn(game_map: GameMap, origin: Vector2i, request: Dictionary) -> v
 
 	var outpost_type: String = str(request.get("outpost_type", "military"))
 	var outpost_size: String = str(request.get("outpost_size", "small"))
-	# Spread only expands the outer buffer/perimeter radius, not the internal zone grid size.
-	var spread: int = max(1, int(request.get("outpost_spread", 2)))
 	var add_defenses: bool = bool(request.get("outpost_add_defenses", true))
 	var add_walls: bool = bool(request.get("outpost_add_walls", false))
-	var require_clearance: bool = bool(request.get("outpost_require_clearance", false))
-	if outpost_type == "military":
-		require_clearance = false
 
 	var zone_dimension: int = _get_zone_dimension(outpost_size)
-	var footprint_radius: int = _get_footprint_radius(zone_dimension, spread)
+	var footprint_radius: int = _get_footprint_radius(zone_dimension)
 
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _build_outpost_seed(origin, outpost_type, outpost_size)
@@ -53,14 +47,14 @@ static func spawn(game_map: GameMap, origin: Vector2i, request: Dictionary) -> v
 		var entity_request: Dictionary = placement.get("entity", {})
 		if tile == Vector2i(-1, -1) or entity_request.is_empty():
 			continue
-		if not _can_place_structure_tile(game_map, tile, used_tiles, 1 if require_clearance else 0):
+		if not _can_place_structure_tile(game_map, tile, used_tiles):
 			continue
 
 		used_tiles.append(tile)
 		SingleEntitySpawner.spawn_structure(game_map, tile, entity_request, entity_owner)
 
 	if add_walls:
-		_spawn_perimeter(game_map, origin, footprint_radius + 1, entity_owner, used_tiles)
+		_spawn_perimeter(game_map, origin, footprint_radius, entity_owner, used_tiles)
 
 
 static func _get_zone_dimension(outpost_size: String) -> int:
@@ -75,10 +69,8 @@ static func _get_zone_dimension(outpost_size: String) -> int:
 			return 2
 
 
-static func _get_footprint_radius(zone_dimension: int, spread: int) -> int:
-	# Base radius wraps a 2x2 / 3x3 / 4x4 quadrant layout plus one empty border ring,
-	# then spread can add additional empty padding around that footprint.
-	return zone_dimension * 2 + 1 + max(0, spread - 2)
+static func _get_footprint_radius(zone_dimension: int) -> int:
+	return zone_dimension * 2 + 1
 
 
 static func _build_outpost_seed(
@@ -127,41 +119,49 @@ static func _build_zone_grid(
 
 static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dictionary:
 	var default_specs: Dictionary = {
-		"nw": {
+		"nw":
+		{
 			"role": "support",
 			"type": "logistics",
 			"subtypes": ["cache", "intel"],
-			"doctrine": {
+			"doctrine":
+			{
 				"small": {"cache": 1, "intel": 1},
 				"medium": {"cache": 2, "intel": 2},
 				"large": {"cache": 3, "intel": 3},
 			},
 		},
-		"ne": {
+		"ne":
+		{
 			"role": "production",
 			"type": "production",
 			"subtypes": ["fabrication", "munitions", "energy"],
-			"doctrine": {
+			"doctrine":
+			{
 				"small": {"fabrication": 1, "munitions": 1},
 				"medium": {"fabrication": 2, "munitions": 1, "energy": 1},
 				"large": {"fabrication": 3, "munitions": 2, "energy": 1},
 			},
 		},
-		"sw": {
+		"sw":
+		{
 			"role": "production",
 			"type": "extraction",
 			"subtypes": ["drilling", "refining", "surveying"],
-			"doctrine": {
+			"doctrine":
+			{
 				"small": {"drilling": 1, "refining": 1},
 				"medium": {"drilling": 2, "refining": 1, "surveying": 1},
 				"large": {"drilling": 3, "refining": 2, "surveying": 2},
 			},
 		},
-		"se": {
+		"se":
+		{
 			"role": "production",
 			"type": "production",
 			"subtypes": ["assembly", "fabrication", "energy"],
-			"doctrine": {
+			"doctrine":
+			{
 				"small": {"assembly": 1, "fabrication": 1},
 				"medium": {"assembly": 2, "fabrication": 1, "energy": 1},
 				"large": {"assembly": 3, "fabrication": 2, "energy": 1},
@@ -175,7 +175,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 				"role": "support",
 				"type": "logistics",
 				"subtypes": ["cache", "intel"],
-				"doctrine": {
+				"doctrine":
+				{
 					"small": {"cache": 1, "intel": 1},
 					"medium": {"cache": 2, "intel": 2},
 					"large": {"cache": 3, "intel": 3},
@@ -185,7 +186,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 				"role": "production",
 				"type": "production",
 				"subtypes": ["munitions", "energy", "fabrication"],
-				"doctrine": {
+				"doctrine":
+				{
 					"small": {"munitions": 1, "energy": 1},
 					"medium": {"munitions": 2, "energy": 1, "fabrication": 1},
 					"large": {"munitions": 3, "energy": 2, "fabrication": 1},
@@ -195,7 +197,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 				"role": "production",
 				"type": "extraction",
 				"subtypes": ["refining", "drilling", "surveying"],
-				"doctrine": {
+				"doctrine":
+				{
 					"small": {"drilling": 1, "refining": 1},
 					"medium": {"drilling": 2, "refining": 1, "surveying": 1},
 					"large": {"drilling": 3, "refining": 2, "surveying": 2},
@@ -205,7 +208,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 				"role": "production",
 				"type": "production",
 				"subtypes": ["assembly", "fabrication", "munitions"],
-				"doctrine": {
+				"doctrine":
+				{
 					"small": {"assembly": 1, "fabrication": 1},
 					"medium": {"assembly": 2, "fabrication": 1, "munitions": 1},
 					"large": {"assembly": 3, "fabrication": 2, "munitions": 1},
@@ -216,7 +220,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 				"role": "production",
 				"type": "extraction",
 				"subtypes": ["drilling", "refining", "surveying"],
-				"doctrine": {
+				"doctrine":
+				{
 					"small": {"drilling": 1, "surveying": 1},
 					"medium": {"drilling": 2, "surveying": 1, "refining": 1},
 					"large": {"drilling": 3, "surveying": 2, "refining": 2},
@@ -226,7 +231,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 				"role": "production",
 				"type": "production",
 				"subtypes": ["fabrication", "energy", "assembly"],
-				"doctrine": {
+				"doctrine":
+				{
 					"small": {"fabrication": 1, "energy": 1},
 					"medium": {"fabrication": 2, "energy": 1, "assembly": 1},
 					"large": {"fabrication": 3, "energy": 2, "assembly": 1},
@@ -236,7 +242,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 				"role": "production",
 				"type": "production",
 				"subtypes": ["munitions", "assembly", "fabrication"],
-				"doctrine": {
+				"doctrine":
+				{
 					"small": {"assembly": 1, "munitions": 1},
 					"medium": {"assembly": 2, "munitions": 1, "fabrication": 1},
 					"large": {"assembly": 3, "munitions": 2, "fabrication": 1},
@@ -246,7 +253,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 				"role": "support",
 				"type": "logistics",
 				"subtypes": ["intel", "cache"],
-				"doctrine": {
+				"doctrine":
+				{
 					"small": {"intel": 1, "cache": 1},
 					"medium": {"intel": 2, "cache": 2},
 					"large": {"intel": 3, "cache": 3},
@@ -257,7 +265,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 				"role": "production",
 				"type": "extraction",
 				"subtypes": ["salvaging", "surveying", "drilling"],
-				"doctrine": {
+				"doctrine":
+				{
 					"small": {"salvaging": 1, "surveying": 1},
 					"medium": {"salvaging": 2, "surveying": 1, "drilling": 1},
 					"large": {"salvaging": 3, "surveying": 2, "drilling": 2},
@@ -267,7 +276,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 				"role": "support",
 				"type": "logistics",
 				"subtypes": ["intel", "cache"],
-				"doctrine": {
+				"doctrine":
+				{
 					"small": {"intel": 1, "cache": 1},
 					"medium": {"intel": 2, "cache": 2},
 					"large": {"intel": 3, "cache": 3},
@@ -277,7 +287,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 				"role": "production",
 				"type": "production",
 				"subtypes": ["assembly", "fabrication", "energy"],
-				"doctrine": {
+				"doctrine":
+				{
 					"small": {"assembly": 1, "energy": 1},
 					"medium": {"assembly": 2, "energy": 1, "fabrication": 1},
 					"large": {"assembly": 3, "energy": 2, "fabrication": 1},
@@ -287,7 +298,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 				"role": "production",
 				"type": "extraction",
 				"subtypes": ["salvaging", "refining"],
-				"doctrine": {
+				"doctrine":
+				{
 					"small": {"salvaging": 1, "refining": 1},
 					"medium": {"salvaging": 2, "refining": 1, "drilling": 1},
 					"large": {"salvaging": 3, "refining": 2, "drilling": 1},
@@ -299,7 +311,8 @@ static func _build_zone_specs(outpost_type: String, add_defenses: bool) -> Dicti
 			"role": "defense",
 			"type": "defense",
 			"subtypes": ["tower", "turret"],
-			"doctrine": {
+			"doctrine":
+			{
 				"small": {"tower": 1, "turret": 2},
 				"medium": {"tower": 2, "turret": 3},
 				"large": {"tower": 3, "turret": 5},
@@ -385,9 +398,12 @@ static func _collect_templates_by_subtype(
 	var templates_by_subtype: Dictionary = {}
 	for subtype_value in structure_subtypes:
 		var subtype: String = str(subtype_value)
-		var ids: Array[String] = SingleEntitySpawner.get_structure_template_ids_by_type(
-			structure_type,
-			subtype,
+		var ids: Array[String] = (
+			SingleEntitySpawner
+			. get_structure_template_ids_by_type(
+				structure_type,
+				subtype,
+			)
 		)
 		templates_by_subtype[subtype] = _dedupe_ids(ids)
 	return templates_by_subtype
@@ -521,17 +537,20 @@ static func _dedupe_ids(ids: Array[String]) -> Array[String]:
 
 static func _zone_target_count(outpost_size: String, role: String, zone_capacity: int) -> int:
 	var per_size_map: Dictionary = {
-		"small": {
+		"small":
+		{
 			"defense": 3,
 			"production": 2,
 			"support": 2,
 		},
-		"medium": {
+		"medium":
+		{
 			"defense": 5,
 			"production": 4,
 			"support": 4,
 		},
-		"large": {
+		"large":
+		{
 			"defense": 8,
 			"production": 7,
 			"support": 6,
@@ -599,7 +618,9 @@ static func _build_perimeter_ring(origin: Vector2i, radius: int) -> Array[Vector
 
 
 static func _can_place_structure_tile(
-	game_map: GameMap, tile: Vector2i, used_tiles: Array[Vector2i], clearance_radius: int
+	game_map: GameMap,
+	tile: Vector2i,
+	used_tiles: Array[Vector2i],
 ) -> bool:
 	if not game_map.is_in_bounds(tile):
 		return false
@@ -607,19 +628,6 @@ static func _can_place_structure_tile(
 		return false
 	if tile in used_tiles:
 		return false
-
-	if clearance_radius <= 0:
-		return true
-
-	for x in range(tile.x - clearance_radius, tile.x + clearance_radius + 1):
-		for y in range(tile.y - clearance_radius, tile.y + clearance_radius + 1):
-			var neighbor := Vector2i(x, y)
-			if neighbor == tile:
-				continue
-			if not game_map.is_in_bounds(neighbor):
-				continue
-			if neighbor in used_tiles or game_map.is_occupied(neighbor):
-				return false
 	return true
 
 

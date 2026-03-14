@@ -9,6 +9,7 @@ extends Node
 # =============================================================================
 
 const DEFAULT_DETECTION_RANGE = 10
+const DIRECTIVE_PLANNER_SCRIPT = preload("res://scripts/data/map/turn_system/directive_planner.gd")
 
 # =====================================
 # STATIC INFORMATION
@@ -53,6 +54,8 @@ var astar: AStar2D = AStar2D.new()
 var ai_controller
 # The turn manager.
 var turn_manager
+# The directive planner.
+var directive_planner: RefCounted
 # Per-owner squad directives.
 var owner_directives: Dictionary = {}
 
@@ -77,6 +80,7 @@ func _init(
 	chat_logger.set_chat_preset()
 	ai_controller = AIController.new(self)
 	turn_manager = TurnManager.new(self)
+	directive_planner = DIRECTIVE_PLANNER_SCRIPT.new(self)
 
 
 func generate_map() -> void:
@@ -554,24 +558,7 @@ func get_owner_directive_by_key(
 	owner_key: String,
 	fallback_anchor: Vector2i = Vector2i(-1, -1)
 ) -> RefCounted:
-	if owner_key.is_empty():
-		return null
-
-	if owner_directives.has(owner_key):
-		return owner_directives[owner_key]
-
-	var state: RefCounted = NpcDirectiveState.new()
-	state.directive = NpcDirectiveState.Directive.HOLD_PERIMETER
-	state.anchor_position = _compute_owner_anchor(owner_key)
-	if state.anchor_position == Vector2i.ZERO and fallback_anchor != Vector2i(-1, -1):
-		state.anchor_position = fallback_anchor
-	state.patrol_waypoints = _build_patrol_waypoints(
-		state.anchor_position,
-		state.leash_radius,
-		state.patrol_type
-	)
-	owner_directives[owner_key] = state
-	return state
+	return directive_planner.get_owner_directive_by_key(owner_key, fallback_anchor)
 
 
 func set_owner_directive(p_owner: EntityOwner, directive: int) -> void:
@@ -579,245 +566,35 @@ func set_owner_directive(p_owner: EntityOwner, directive: int) -> void:
 
 
 func set_owner_directive_by_key(owner_key: String, directive: int) -> void:
-	if owner_key.is_empty():
-		return
-	var state: RefCounted = get_owner_directive_by_key(owner_key)
-	if not state:
-		return
-	state.directive = directive
-	owner_directives[owner_key] = state
+	directive_planner.set_owner_directive_by_key(owner_key, directive)
 
 
 func reset_owner_anchor(owner_key: String) -> void:
-	if owner_key.is_empty():
-		return
-
-	var state: RefCounted = get_owner_directive_by_key(owner_key)
-	if not state:
-		return
-
-	var new_anchor: Vector2i = _compute_owner_anchor(owner_key)
-	if new_anchor == Vector2i.ZERO:
-		return
-
-	state.anchor_position = new_anchor
-	state.patrol_waypoints = _build_patrol_waypoints(
-		new_anchor,
-		state.leash_radius,
-		state.patrol_type
-	)
-	state.patrol_index = 0
-	owner_directives[owner_key] = state
+	directive_planner.reset_owner_anchor(owner_key)
 
 
 func refresh_owner_patrol_waypoints(owner_key: String) -> void:
-	if owner_key.is_empty():
-		return
-
-	var state: RefCounted = get_owner_directive_by_key(owner_key)
-	if not state:
-		return
-
-	state.patrol_waypoints = _build_patrol_waypoints(
-		state.anchor_position,
-		state.leash_radius,
-		state.patrol_type
-	)
-	state.patrol_index = 0
-	owner_directives[owner_key] = state
+	directive_planner.refresh_owner_patrol_waypoints(owner_key)
 
 
 func set_owner_anchor(owner_key: String, anchor: Vector2i, rebuild_patrol: bool = true) -> void:
-	if owner_key.is_empty() or not is_in_bounds(anchor):
-		return
-
-	var state: RefCounted = get_owner_directive_by_key(owner_key)
-	if not state:
-		return
-
-	state.anchor_position = anchor
-	if rebuild_patrol:
-		state.patrol_waypoints = _build_patrol_waypoints(
-			anchor,
-			state.leash_radius,
-			state.patrol_type
-		)
-		state.patrol_index = 0
-	owner_directives[owner_key] = state
+	directive_planner.set_owner_anchor(owner_key, anchor, rebuild_patrol)
 
 
 func set_owner_anchor_from_centroid(owner_key: String) -> void:
-	if owner_key.is_empty():
-		return
-
-	var state: RefCounted = get_owner_directive_by_key(owner_key)
-	if not state:
-		return
-
-	var centroid: Vector2i = _compute_owner_anchor(owner_key)
-	if centroid == Vector2i.ZERO:
-		return
-
-	state.anchor_position = centroid
-	owner_directives[owner_key] = state
+	directive_planner.set_owner_anchor_from_centroid(owner_key)
 
 
 func auto_generate_owner_patrol_ring_from_centroid(owner_key: String) -> void:
-	if owner_key.is_empty():
-		return
-
-	var state: RefCounted = get_owner_directive_by_key(owner_key)
-	if not state:
-		return
-
-	var centroid: Vector2i = _compute_owner_anchor(owner_key)
-	if centroid == Vector2i.ZERO:
-		return
-
-	state.anchor_position = centroid
-	state.patrol_type = NpcDirectiveState.PatrolType.CIRCLE
-	state.patrol_waypoints = _build_patrol_waypoints(
-		centroid,
-		state.leash_radius,
-		state.patrol_type
-	)
-	state.patrol_index = 0
-	owner_directives[owner_key] = state
+	directive_planner.auto_generate_owner_patrol_ring_from_centroid(owner_key)
 
 
 func clear_all_owner_directives() -> void:
-	owner_directives.clear()
+	directive_planner.clear_all_owner_directives()
 
 
 func advance_patrol_directives() -> void:
-	for owner_key in get_owner_keys(true):
-		var state: RefCounted = get_owner_directive_by_key(owner_key)
-		if not state or state.directive != NpcDirectiveState.Directive.PATROL:
-			continue
-
-		var entities: Array[MapCombatEntity] = get_owned_combat_entities_by_key(owner_key)
-		if entities.is_empty():
-			continue
-
-		var center: Vector2i = _compute_owner_anchor(owner_key)
-		var patrol_target: Vector2i = state.get_patrol_target()
-		if center.distance_to(patrol_target) <= 2.0:
-			state.advance_patrol()
-			owner_directives[owner_key] = state
-
-
-func _compute_owner_anchor(owner_key: String) -> Vector2i:
-	var entities: Array[MapCombatEntity] = get_owned_combat_entities_by_key(owner_key)
-	if entities.is_empty():
-		return Vector2i.ZERO
-
-	var sum_x: int = 0
-	var sum_y: int = 0
-	for entity: MapCombatEntity in entities:
-		sum_x += entity.position.x
-		sum_y += entity.position.y
-
-	return Vector2i(
-		int(round(float(sum_x) / entities.size())),
-		int(round(float(sum_y) / entities.size())),
-	)
-
-
-func _build_patrol_waypoints(anchor: Vector2i, leash_radius: int, patrol_type: int) -> Array[Vector2i]:
-	match patrol_type:
-		NpcDirectiveState.PatrolType.SQUARE:
-			return _build_square_patrol_waypoints(anchor, leash_radius)
-		NpcDirectiveState.PatrolType.MAP_BORDER:
-			return _build_border_patrol_waypoints(anchor, leash_radius)
-		_:
-			return _build_circle_patrol_waypoints(anchor, leash_radius)
-
-
-func _build_circle_patrol_waypoints(anchor: Vector2i, leash_radius: int) -> Array[Vector2i]:
-	var waypoints: Array[Vector2i] = []
-	if anchor == Vector2i.ZERO:
-		return waypoints
-
-	var patrol_radius_x: int = maxi(1, leash_radius)
-	var patrol_radius_y: int = maxi(1, leash_radius)
-	var candidates: Array[Vector2i] = [
-		anchor + Vector2i(0, -patrol_radius_y),
-		anchor + Vector2i(maxi(1, int(round(patrol_radius_x * 0.7))), -maxi(1, int(round(patrol_radius_y * 0.7)))),
-		anchor + Vector2i(patrol_radius_x, 0),
-		anchor + Vector2i(maxi(1, int(round(patrol_radius_x * 0.7))), maxi(1, int(round(patrol_radius_y * 0.7)))),
-		anchor + Vector2i(0, patrol_radius_y),
-		anchor + Vector2i(-maxi(1, int(round(patrol_radius_x * 0.7))), maxi(1, int(round(patrol_radius_y * 0.7)))),
-		anchor + Vector2i(-patrol_radius_x, 0),
-		anchor + Vector2i(-maxi(1, int(round(patrol_radius_x * 0.7))), -maxi(1, int(round(patrol_radius_y * 0.7)))),
-	]
-
-	for point in candidates:
-		if is_in_bounds(point):
-			waypoints.append(point)
-
-	if waypoints.is_empty():
-		waypoints.append(anchor)
-
-	return waypoints
-
-
-func _build_square_patrol_waypoints(anchor: Vector2i, half_side: int) -> Array[Vector2i]:
-	var waypoints: Array[Vector2i] = []
-	if anchor == Vector2i.ZERO:
-		return waypoints
-
-	var r: int = maxi(1, half_side)
-	var candidates: Array[Vector2i] = [
-		anchor + Vector2i(0, -r),
-		anchor + Vector2i(r, -r),
-		anchor + Vector2i(r, 0),
-		anchor + Vector2i(r, r),
-		anchor + Vector2i(0, r),
-		anchor + Vector2i(-r, r),
-		anchor + Vector2i(-r, 0),
-		anchor + Vector2i(-r, -r),
-	]
-
-	for point in candidates:
-		if is_in_bounds(point):
-			waypoints.append(point)
-
-	if waypoints.is_empty():
-		waypoints.append(anchor)
-
-	return waypoints
-
-
-func _build_border_patrol_waypoints(anchor: Vector2i, padding: int = 0) -> Array[Vector2i]:
-	var waypoints: Array[Vector2i] = []
-	if map_width <= 0 or map_height <= 0:
-		return waypoints
-
-	var pad: int = clampi(padding, 0, int(mini(map_width, map_height) * 0.5) - 1)
-	var corners: Array[Vector2i] = [
-		Vector2i(pad, pad),
-		Vector2i(map_width - 1 - pad, pad),
-		Vector2i(map_width - 1 - pad, map_height - 1 - pad),
-		Vector2i(pad, map_height - 1 - pad),
-	]
-
-	var start_index: int = 0
-	var best_distance: float = INF
-	for i in range(corners.size()):
-		var distance: float = corners[i].distance_to(anchor)
-		if distance < best_distance:
-			best_distance = distance
-			start_index = i
-
-	for i in range(corners.size()):
-		var waypoint: Vector2i = corners[(start_index + i) % corners.size()]
-		if not waypoints.has(waypoint):
-			waypoints.append(waypoint)
-
-	if waypoints.is_empty():
-		waypoints.append(anchor)
-
-	return waypoints
+	directive_planner.advance_patrol_directives()
 
 
 # =============================================================================

@@ -432,16 +432,19 @@ func has_hostile_pairs() -> bool:
 	"""
 	Returns true if at least one pair of living combat entities can attack each other.
 	"""
-	var alive_units: Array[MapCombatEntity] = []
+	var alive_entities: Array[MapCombatEntity] = []
 	for unit: MapCombatEntity in player_units.values():
 		if unit and unit.combatant and unit.combatant.is_alive():
-			alive_units.append(unit)
+			alive_entities.append(unit)
 	for unit: MapCombatEntity in npc_units.values():
 		if unit and unit.combatant and unit.combatant.is_alive():
-			alive_units.append(unit)
-	for i in range(alive_units.size()):
-		for j in range(i + 1, alive_units.size()):
-			if is_enemy_of(alive_units[i], alive_units[j]):
+			alive_entities.append(unit)
+	for structure: MapStructure in structures.values():
+		if structure and structure.is_alive():
+			alive_entities.append(structure)
+	for i in range(alive_entities.size()):
+		for j in range(i + 1, alive_entities.size()):
+			if is_enemy_of(alive_entities[i], alive_entities[j]):
 				return true
 	return false
 

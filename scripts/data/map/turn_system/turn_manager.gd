@@ -27,6 +27,9 @@ const TURNS_PER_DAY: int = 48
 # The game map associated with this turn manager.
 var game_map: Object
 
+# The starting turn index for the day cycle. This allows the time of day to be set by adjusting the
+# starting turn.
+var _turn_offset: int
 # The current turn number.
 var _current_turn: int
 # Controls the execute of the turn manager.
@@ -48,8 +51,10 @@ func _init(p_game_map, p_turn_interval: float = 1.0) -> void:
 	# Initialize the game map.
 	game_map = p_game_map
 
+	_turn_offset = int(TURNS_PER_DAY / 2.0)
+
 	# Initialize the internal state.
-	_current_turn = int(TURNS_PER_DAY / 2.0)
+	_current_turn = 1
 	_is_active = false
 	_timer = 0.0
 	_turn_interval = p_turn_interval
@@ -62,7 +67,7 @@ func get_time_of_day() -> float:
 	if not game_map:
 		return 0.0
 	# Calculate the time of day based on the current turn.
-	return (_current_turn % TURNS_PER_DAY) / float(TURNS_PER_DAY)
+	return ((_turn_offset + _current_turn) % TURNS_PER_DAY) / float(TURNS_PER_DAY)
 
 
 func get_current_turn() -> int:
@@ -70,6 +75,13 @@ func get_current_turn() -> int:
 	Returns the current turn number.
 	"""
 	return _current_turn
+
+
+func get_current_day() -> int:
+	"""
+	Returns the current day number based on the current turn.
+	"""
+	return int(floor(float(_turn_offset + _current_turn) / float(TURNS_PER_DAY)))
 
 
 func get_turn_interval() -> float:
@@ -101,7 +113,9 @@ func set_time_of_day_hours(hours: float) -> void:
 	"""
 	var normalized_hours: float = fposmod(hours, 24.0)
 	var normalized_day_fraction: float = normalized_hours / 24.0
-	var day_base: int = int(floor(float(_current_turn) / float(TURNS_PER_DAY))) * TURNS_PER_DAY
+	var day_base: int = (
+		int(floor(float(_turn_offset + _current_turn) / float(TURNS_PER_DAY))) * TURNS_PER_DAY
+	)
 	var day_turn: int = int(floor(normalized_day_fraction * float(TURNS_PER_DAY)))
 	day_turn = clampi(day_turn, 0, TURNS_PER_DAY - 1)
 	_current_turn = day_base + day_turn

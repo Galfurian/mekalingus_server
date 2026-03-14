@@ -13,6 +13,7 @@ static func spawn(game_map: GameMap, origin: Vector2i, request: Dictionary) -> v
 
 	var outpost_type: String = str(request.get("outpost_type", "military"))
 	var outpost_size: String = str(request.get("outpost_size", "small"))
+	# Spread only expands the outer buffer/perimeter radius, not the internal zone grid size.
 	var spread: int = max(1, int(request.get("outpost_spread", 2)))
 	var add_defenses: bool = bool(request.get("outpost_add_defenses", true))
 	var add_walls: bool = bool(request.get("outpost_add_walls", false))
@@ -75,6 +76,8 @@ static func _get_zone_dimension(outpost_size: String) -> int:
 
 
 static func _get_footprint_radius(zone_dimension: int, spread: int) -> int:
+	# Base radius wraps a 2x2 / 3x3 / 4x4 quadrant layout plus one empty border ring,
+	# then spread can add additional empty padding around that footprint.
 	return zone_dimension * 2 + 1 + max(0, spread - 2)
 
 
@@ -410,7 +413,11 @@ static func _build_zone_template_plan(
 	var doctrine: Dictionary = doctrine_by_size.get(outpost_size, {})
 
 	for subtype in doctrine.keys():
-		var ids: Array[String] = templates_by_subtype.get(str(subtype), [])
+		var ids: Array[String] = []
+		var raw_ids: Variant = templates_by_subtype.get(str(subtype), null)
+		if raw_ids is Array:
+			for entry in raw_ids:
+				ids.append(str(entry))
 		if ids.is_empty():
 			continue
 

@@ -49,5 +49,39 @@
 		"structure_sub_type": "salvaging",
 		"passable": false,
 		"icon": "structures/extraction/salvage_processor.png"
+	},
+	"ore_survey_node": {
+		"name": "Ore Survey Node",
+		"appearance": "A compact sensor mast cluster mounted over a reinforced base. It uses rotating scanner rings and exposed relay cabling to map rich extraction seams.",
+		"size": "Medium",
+		"health": 150,
+		"armor": 44,
+		"shield": 24,
+		"shield_generation": 3,
+		"power": 320,
+		"power_generation": 90,
+		"speed": 0,
+		"slots": [0, 0, 0, 2],
+		"structure_type": "extraction",
+		"structure_sub_type": "surveying",
+		"passable": false,
+		"icon": "structures/extraction/ore_survey_node.png"
+	},
+	"ore_washer": {
+		"name": "Ore Washer",
+		"appearance": "A heavy refining basin with layered filtration drums, intake grates, and broad slurry channels built into an armored frame.",
+		"size": "Medium",
+		"health": 190,
+		"armor": 60,
+		"shield": 20,
+		"shield_generation": 2,
+		"power": 420,
+		"power_generation": 130,
+		"speed": 0,
+		"slots": [0, 0, 0, 3],
+		"structure_type": "extraction",
+		"structure_sub_type": "refining",
+		"passable": false,
+		"icon": "structures/extraction/ore_washer.png"
 	}
 }

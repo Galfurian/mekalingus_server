@@ -97,8 +97,14 @@ func _show_item_details(item: Item) -> void:
 	text += "\n[center][b]Modules[/b][/center]\n"
 	text += "[indent]"
 	for module in item.template.modules:
+		var remaining_cooldown := _get_remaining_module_cooldown(item, module)
+		var is_on_cooldown := remaining_cooldown > 0
 		var module_line: String = "|"
-		module_line += "[b]" + module.module_name + "[/b] "
+		if is_on_cooldown:
+			module_line += "[color=#cf7a7a][b][s]" + module.module_name + "[/s][/b][/color] "
+			module_line += "[color=#cf7a7a](CD " + str(remaining_cooldown) + "t)[/color] "
+		else:
+			module_line += "[b]" + module.module_name + "[/b] "
 		module_line += "("
 		module_line += UIColor.apply("module_type", "Passive" if module.passive else "Active")
 		module_line += ")"
@@ -112,6 +118,10 @@ func _show_item_details(item: Item) -> void:
 			if module.cooldown > 0:
 				active_line += " | Cooldown: "
 				active_line += UIColor.apply("cooldown", str(module.cooldown))
+				if is_on_cooldown:
+					active_line += " | [color=#cf7a7a]Cooling Down[/color]"
+				else:
+					active_line += " | [color=#9fb3c8]Ready[/color]"
 			if module.module_range > 0:
 				active_line += " | Range: "
 				active_line += UIColor.apply("module_range", str(module.module_range))
@@ -165,3 +175,13 @@ func _show_item_details(item: Item) -> void:
 	text += "[/indent]"
 	item_info.clear()
 	item_info.append_text(text)
+
+
+func _get_remaining_module_cooldown(item: Item, module: ItemModule) -> int:
+	if not is_instance_valid(_entity):
+		return 0
+	if not is_instance_valid(_entity.combatant):
+		return 0
+	if not _entity.combatant.cooldown_manager:
+		return 0
+	return _entity.combatant.cooldown_manager.get_remaining_cooldown(item, module)

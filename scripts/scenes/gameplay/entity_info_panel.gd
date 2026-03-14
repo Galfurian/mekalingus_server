@@ -56,10 +56,45 @@ func display_combat_entity(map_entity: MapCombatEntity) -> void:
 	text += "\n"
 
 	text += "Speed        : " + UIColor.apply("speed", "%3d" % actor.speed) + "\n"
+	text += _build_active_effects_section(actor)
 	text += "[center][b]Damage Reduction[/b][/center]\n"
 	text += _build_damage_reduction_line(actor)
 	entity_info.clear()
 	entity_info.append_text(text)
+
+
+func _build_active_effects_section(actor: CombatActor) -> String:
+	var section := "[center][b]Active Effects[/b][/center]\n"
+	if not actor.active_effect_manager or actor.active_effect_manager.active_effects.is_empty():
+		return section + "[center][i]None[/i][/center]\n"
+
+	for active: ActiveEffect in actor.active_effect_manager.active_effects:
+		section += _build_active_effect_line(active) + "\n"
+
+	return section
+
+
+func _build_active_effect_line(active: ActiveEffect) -> String:
+	var effect_label: String = active.effect.get_effect_type_label()
+	var amount_text: String = "%+d" % active.effect.amount
+	var line := "- "
+	line += UIColor.apply("effect_type", effect_label)
+	line += " " + UIColor.apply("effect_amount", amount_text)
+
+	if active.effect.is_damage() or active.effect.is_dot():
+		var damage_type_name: String = Utils.enum_to_string(
+			Enums.DamageType,
+			active.effect.damage_type
+		)
+		line += " " + UIColor.apply("damage_type", "[" + damage_type_name + "]")
+
+	if active.remaining_duration > 0:
+		line += " (" + str(active.remaining_duration) + "t)"
+
+	if active.effect.chance < 100:
+		line += " @" + str(active.effect.chance) + "%"
+
+	return line
 
 
 func _build_damage_reduction_line(actor: CombatActor) -> String:

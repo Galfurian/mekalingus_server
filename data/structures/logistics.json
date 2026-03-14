@@ -32,5 +32,39 @@
 		"structure_sub_type": "intel",
 		"passable": false,
 		"icon": "structures/logistics/unlocked_terminal.png"
+	},
+	"relay_uplink": {
+		"name": "Relay Uplink",
+		"appearance": "A hardened communications pylon with dish arrays, signal amplifiers, and shielded data conduits mounted on a compact armored base.",
+		"size": "Medium",
+		"health": 165,
+		"armor": 52,
+		"shield": 24,
+		"shield_generation": 3,
+		"power": 140,
+		"power_generation": 12,
+		"speed": 0,
+		"slots": [0, 0, 0, 2],
+		"structure_type": "logistics",
+		"structure_sub_type": "intel",
+		"passable": false,
+		"icon": "structures/logistics/relay_uplink.png"
+	},
+	"cargo_stacker": {
+		"name": "Cargo Stacker",
+		"appearance": "A modular storage frame with stacked armored containers, loading rails, and reinforced locking brackets for high-density supply storage.",
+		"size": "Medium",
+		"health": 175,
+		"armor": 55,
+		"shield": 16,
+		"shield_generation": 2,
+		"power": 100,
+		"power_generation": 8,
+		"speed": 0,
+		"slots": [0, 0, 0, 2],
+		"structure_type": "logistics",
+		"structure_sub_type": "cache",
+		"passable": false,
+		"icon": "structures/logistics/cargo_stacker.png"
 	}
 }

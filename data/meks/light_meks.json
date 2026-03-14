@@ -2,7 +2,7 @@
 	"lmek001": {
 		"name": "Iron Striker",
 		"description": "A durable frontline skirmisher, designed to withstand heavy fire while delivering precise counterattacks.",
-		"appearance": "A bulky mech with reinforced armor plating. It features a sturdy frame with angular armor plates, giving it a rugged and battle-hardened look. Material color is steel gray with red accents.",
+		"appearance": "A four-legged combat chassis with broad, plated limbs and a reinforced central torso. Its gray armor is accented with red stenciled numbering and exposed hydraulic actuators.",
 		"size": "Light",
 		"health": 115,
 		"armor": 75,
@@ -22,7 +22,7 @@
 	"lmek002": {
 		"name": "Shadow Phantom",
 		"description": "A nimble infiltrator, utilizing high mobility and evasive tactics to strike from the shadows and disappear.",
-		"appearance": "A sleek and agile mech with a streamlined design. It has a dark, matte black finish with glowing blue accents. The mech's limbs are slender and flexible, allowing for swift movements and quick strikes.",
+		"appearance": "A sleek two-legged frame with narrow limbs and a compact torso. Matte black armor panels feature subtle blue lighting strips and a slender sensor mast.",
 		"size": "Light",
 		"health": 100,
 		"armor": 38,
@@ -42,7 +42,7 @@
 	"lmek003": {
 		"name": "Specter Shadow",
 		"description": "A stealth-oriented combat unit with enhanced shielding, excelling in rapid ambushes and energy-based assaults.",
-		"appearance": "A shadowy mech with a mysterious aura, featuring darkened plating and adaptive camouflage. The Specter Shadow is equipped with advanced stealth systems and a high-capacity energy weapon for devastating surprise attacks.",
+		"appearance": "A tracked crawler base with a low, angular body and armored side flanges. Its dark paint has adaptive panels that reduce its visual signature.",
 		"size": "Light",
 		"health": 100,
 		"armor": 50,
@@ -62,7 +62,7 @@
 	"lmek004": {
 		"name": "Storm Dancer",
 		"description": "A lightning-fast skirmisher designed for hit-and-run tactics.",
-		"appearance": "A nimble mech with a streamlined design and a vibrant color scheme. It features a sleek frame with integrated thrusters and a high-speed propulsion system. The Storm Dancer is equipped with a rapid-fire energy weapon and a close-quarters combat blade, making it effective in both ranged and melee engagements.",
+		"appearance": "A light two-legged runner with a narrow torso and integrated thruster pods. Its armor is finished in electric blue with white racing stripes.",
 		"size": "Light",
 		"health": 112,
 		"armor": 38,
@@ -82,7 +82,7 @@
 	"lmek005": {
 		"name": "Blitz Warden",
 		"description": "A rapid assault unit with reinforced kinetic shielding for fast engagements.",
-		"appearance": "A compact mech with a rugged design and reinforced armor plating. It features a sturdy frame with integrated shielding systems and a balanced distribution of weight for optimal mobility. The Blitz Warden is equipped with a versatile weapon system, including a rapid-fire energy rifle and a close-quarters combat blade, making it effective in both ranged and melee engagements.",
+		"appearance": "A four-legged combat frame with a wide stance and heavy armor panels. Its surface is marked with hazard striping and embeds a glowing shield emitter in the torso.",
 		"size": "Light",
 		"health": 106,
 		"armor": 38,
@@ -102,7 +102,7 @@
 	"lmek006": {
 		"name": "Striker Talon",
 		"description": "A high-mobility scout mech equipped with precision strike capabilities.",
-		"appearance": "A sleek and agile mech with a streamlined design. It has a dark, matte black finish with glowing blue accents. The mech's limbs are slender and flexible, allowing for swift movements and quick strikes.",
+		"appearance": "A two-legged mech with three articulated arms mounted on its torso. Its dark gray armor is accented with neon blue highlights and reinforced limb joints.",
 		"size": "Light",
 		"health": 119,
 		"armor": 44,
@@ -122,7 +122,7 @@
 	"lmek007": {
 		"name": "Falcon Edge",
 		"description": "A lightweight recon unit with superior speed and evasion capabilities.",
-		"appearance": "A sleek mech with a streamlined design and a vibrant color scheme. It features a lightweight frame with integrated thrusters and a high-speed propulsion system. The Falcon Edge is equipped with a rapid-fire energy weapon and a close-quarters combat blade, making it effective in both ranged and melee engagements.",
+		"appearance": "A slender chassis with four articulated supports and retractable stabilizers, topped by a tall sensor mast. Its white-and-teal plated hull is polished to a sheen, conveying high-end reconnaissance hardware.",
 		"size": "Light",
 		"health": 94,
 		"armor": 38,
@@ -142,7 +142,7 @@
 	"lmek008": {
 		"name": "Viper Stride",
 		"description": "An aggressive interceptor equipped with reactive plating and short-range weaponry.",
-		"appearance": "A sleek mech with a streamlined design and a vibrant color scheme. It features a lightweight frame with integrated thrusters and a high-speed propulsion system. The Viper Stride is equipped with a rapid-fire energy weapon and a close-quarters combat blade, making it effective in both ranged and melee engagements.",
+		"appearance": "A four-legged assault frame with a segmented torso and a raised sensor mast. Its green armor panels are ribbed and edged in black for a tactical look.",
 		"size": "Light",
 		"health": 125,
 		"armor": 44,
@@ -162,7 +162,7 @@
 	"lmek009": {
 		"name": "Ghost Mirage",
 		"description": "A stealthy hunter capable of slipping past enemy defenses unnoticed.",
-		"appearance": "A shadowy mech with a mysterious aura, featuring darkened plating and adaptive camouflage. The Ghost Mirage is equipped with advanced stealth systems and a high-capacity energy weapon for devastating surprise attacks.",
+		"appearance": "A tracked crawler with a compact, faceted hull and integrated sensor slits. Its adaptive camo coating shifts subtly in hue and is accented by discrete optical strips.",
 		"size": "Light",
 		"health": 106,
 		"armor": 44,
@@ -182,7 +182,7 @@
 	"lmek010": {
 		"name": "Raptor Fang",
 		"description": "A fast-moving combat unit specialized in precision flanking maneuvers.",
-		"appearance": "A sleek mech with a streamlined design and a vibrant color scheme. It features a lightweight frame with integrated thrusters and a high-speed propulsion system. The Raptor Fang is equipped with a rapid-fire energy weapon and a close-quarters combat blade, making it effective in both ranged and melee engagements.",
+		"appearance": "A two-legged skimmer with four arms mounted on its torso and a streamlined, angular hull. Its orange-and-black paint is broken by tactical markings and exposed cooling vents.",
 		"size": "Light",
 		"health": 112,
 		"armor": 38,

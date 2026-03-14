@@ -99,7 +99,8 @@ func apply_anchor_from_map(cell_position: Vector2i) -> bool:
 		return false
 
 	var state := (
-		game_map.get_owner_directive_by_key(_anchor_pick_owner_key) as NpcDirectiveState
+		game_map.directive_planner.get_owner_directive_by_key(_anchor_pick_owner_key)
+		as NpcDirectiveState
 	)
 	if not state:
 		_set_anchor_pick_mode(false)
@@ -128,7 +129,7 @@ func apply_anchor_from_map(cell_position: Vector2i) -> bool:
 			state.leash_radius = spread
 			state.patrol_type = _get_selected_patrol_type()
 			game_map.owner_directives[_anchor_pick_owner_key] = state
-			game_map.refresh_owner_patrol_waypoints(_anchor_pick_owner_key)
+			game_map.directive_planner.refresh_owner_patrol_waypoints(_anchor_pick_owner_key)
 		_:
 			_set_anchor_pick_mode(false)
 			return false
@@ -214,7 +215,8 @@ func _on_patrol_pressed() -> void:
 	# MAP_BORDER patrol applies immediately — no anchor click needed
 	if border_button.button_pressed:
 		var state := (
-			game_map.get_owner_directive_by_key(owner_key) as NpcDirectiveState
+			game_map.directive_planner.get_owner_directive_by_key(owner_key)
+			as NpcDirectiveState
 		)
 		if state:
 			var spread: int = maxi(1, int(spread_spin.value))
@@ -223,7 +225,7 @@ func _on_patrol_pressed() -> void:
 			state.leash_radius = spread
 			state.compact_radius = spread
 			game_map.owner_directives[owner_key] = state
-			game_map.refresh_owner_patrol_waypoints(owner_key)
+			game_map.directive_planner.refresh_owner_patrol_waypoints(owner_key)
 			_reissue_ai_orders()
 			_refresh_squad_tree()
 			directives_changed.emit(game_map)
@@ -236,9 +238,9 @@ func _on_patrol_pressed() -> void:
 func _on_cancel_all_pressed() -> void:
 	if not game_map:
 		return
-	game_map.clear_all_owner_directives()
+	game_map.directive_planner.clear_all_owner_directives()
 	for owner_key: String in game_map.get_owner_keys(false):
-		game_map.set_owner_directive_by_key(
+		game_map.directive_planner.set_owner_directive_by_key(
 			owner_key, NpcDirectiveState.Directive.HOLD_PERIMETER
 		)
 	_set_anchor_pick_mode(false)
@@ -302,7 +304,8 @@ func _refresh_squad_tree() -> void:
 		if entities.is_empty():
 			continue
 		var state := (
-			game_map.get_owner_directive_by_key(owner_key) as NpcDirectiveState
+			game_map.directive_planner.get_owner_directive_by_key(owner_key)
+			as NpcDirectiveState
 		)
 		var centroid: Vector2i = _compute_centroid(entities)
 		var row: TreeItem = squad_tree.create_item(root)
@@ -325,7 +328,8 @@ func _refresh_spread_from_selection() -> void:
 		spread_spin.set_value_no_signal(DEFAULT_SPREAD)
 		return
 	var state := (
-		game_map.get_owner_directive_by_key(owner_key) as NpcDirectiveState
+		game_map.directive_planner.get_owner_directive_by_key(owner_key)
+		as NpcDirectiveState
 	)
 	if not state:
 		spread_spin.set_value_no_signal(DEFAULT_SPREAD)

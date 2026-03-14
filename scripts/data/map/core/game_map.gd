@@ -55,7 +55,7 @@ var ai_controller
 # The turn manager.
 var turn_manager
 # The directive planner.
-var directive_planner: RefCounted
+var directive_planner
 # Per-owner squad directives.
 var owner_directives: Dictionary = {}
 
@@ -548,53 +548,6 @@ func get_owned_combat_entities_by_key(owner_key: String) -> Array[MapCombatEntit
 			entities.append(structure)
 
 	return entities
-
-
-func get_owner_directive(p_owner: EntityOwner, fallback_anchor: Vector2i = Vector2i(-1, -1)) -> RefCounted:
-	return get_owner_directive_by_key(get_owner_key(p_owner), fallback_anchor)
-
-
-func get_owner_directive_by_key(
-	owner_key: String,
-	fallback_anchor: Vector2i = Vector2i(-1, -1)
-) -> RefCounted:
-	return directive_planner.get_owner_directive_by_key(owner_key, fallback_anchor)
-
-
-func set_owner_directive(p_owner: EntityOwner, directive: int) -> void:
-	set_owner_directive_by_key(get_owner_key(p_owner), directive)
-
-
-func set_owner_directive_by_key(owner_key: String, directive: int) -> void:
-	directive_planner.set_owner_directive_by_key(owner_key, directive)
-
-
-func reset_owner_anchor(owner_key: String) -> void:
-	directive_planner.reset_owner_anchor(owner_key)
-
-
-func refresh_owner_patrol_waypoints(owner_key: String) -> void:
-	directive_planner.refresh_owner_patrol_waypoints(owner_key)
-
-
-func set_owner_anchor(owner_key: String, anchor: Vector2i, rebuild_patrol: bool = true) -> void:
-	directive_planner.set_owner_anchor(owner_key, anchor, rebuild_patrol)
-
-
-func set_owner_anchor_from_centroid(owner_key: String) -> void:
-	directive_planner.set_owner_anchor_from_centroid(owner_key)
-
-
-func auto_generate_owner_patrol_ring_from_centroid(owner_key: String) -> void:
-	directive_planner.auto_generate_owner_patrol_ring_from_centroid(owner_key)
-
-
-func clear_all_owner_directives() -> void:
-	directive_planner.clear_all_owner_directives()
-
-
-func advance_patrol_directives() -> void:
-	directive_planner.advance_patrol_directives()
 
 
 # =============================================================================

@@ -367,7 +367,7 @@ func generate_ai_orders() -> void:
 	"""
 	_reserved_move_tiles.clear()
 	_turn_context = AITurnContext.new(game_map)
-	game_map.advance_patrol_directives()
+	game_map.directive_planner.advance_patrol_directives()
 	var units: Array[MapCombatEntity] = _iter_ai_controlled_entities()
 	units.sort_custom(
 		func(a: MapCombatEntity, b: MapCombatEntity):

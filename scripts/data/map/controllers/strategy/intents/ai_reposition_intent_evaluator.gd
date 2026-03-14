@@ -13,7 +13,10 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	if owner_key.is_empty():
 		return null
 
-	var state: RefCounted = context.game_map.get_owner_directive(source.owner, source.position)
+	var state: RefCounted = context.game_map.directive_planner.get_owner_directive_by_key(
+		owner_key,
+		source.position
+	)
 	if not state:
 		return null
 

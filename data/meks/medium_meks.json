@@ -2,7 +2,7 @@
     "mmek001": {
         "name": "Storm Striker",
         "description": "A well-balanced assault unit, combining agility with reliable defenses, perfect for leading rapid engagements.",
-        "appearance": "A sleek, medium-sized mech with a dynamic design that emphasizes both speed and durability. Its armor patterns are electric blue with silver accents, and it features integrated energy conduits.",
+        "appearance": "A two-legged mech with a compact torso and twin forearms, featuring electric blue armor panels and exposed energy conduits. Its sleek form balances mobility with reinforced joint housings.",
         "size": "Medium",
         "health": 150,
         "armor": 50,
@@ -22,7 +22,7 @@
     "mmek002": {
         "name": "Titan Vanguard",
         "description": "A heavily armored frontline warrior, built to soak up enemy fire while delivering devastating counterattacks.",
-        "appearance": "A robust and imposing mech with a bulky frame designed for maximum protection. It features reinforced armor plating in a dark gray color scheme with red highlights, and its silhouette is reminiscent of a tank.",
+        "appearance": "A four-legged combat chassis with thick, layered armor plates and reinforced limb actuators. Its dark gray exterior is accented with red warning markings and heavy weapon mounts.",
         "size": "Medium",
         "health": 188,
         "armor": 100,
@@ -42,7 +42,7 @@
     "mmek003": {
         "name": "Iron Reaver",
         "description": "A relentless brawler equipped with reinforced plating and heavy-hitting firepower.",
-        "appearance": "A rugged and aggressive mech with a design that emphasizes brute strength. It has thick armor plates in a gunmetal gray finish, accented with orange highlights. The Iron Reaver is built for close-quarters combat, featuring heavy weapon mounts and a menacing stance.",
+        "appearance": "A two-legged mech with four heavy arms mounted on its broad torso, each reinforced for close-quarters impact. Gunmetal gray armor is trimmed in orange, with visible hydraulic pistons and shock absorbers.",
         "size": "Medium",
         "health": 200,
         "armor": 112,
@@ -62,7 +62,7 @@
     "mmek004": {
         "name": "Phantom Breaker",
         "description": "A tactical disruptor, using energy-based attacks to weaken enemy defenses before striking hard.",
-        "appearance": "A sleek and agile mech with a design that emphasizes speed and precision. Its body is covered in dark gray armor with glowing blue energy conduits, and it features a distinctive hood that enhances its stealth capabilities.",
+        "appearance": "A two-legged frame with dual arms, wrapped in dark gray armor and lit by blue energy conduits. A tapered hood houses advanced sensors and keeps a low profile.",
         "size": "Medium",
         "health": 175,
         "armor": 75,
@@ -82,7 +82,7 @@
     "mmek005": {
         "name": "Thunder Sentinel",
         "description": "A steadfast defender designed for prolonged engagements, featuring adaptive shielding and high endurance.",
-        "appearance": "A sturdy mech with a design that emphasizes durability and resilience. Its armor is a deep blue with golden accents, and it features a reinforced frame that can withstand significant damage.",
+        "appearance": "A four-legged defense platform with a broad torso and reinforced armor panels. Deep blue plating is accented by gold trim, and a central shield emitter is housed in a reinforced dome.",
         "size": "Medium",
         "health": 212,
         "armor": 94,
@@ -102,7 +102,7 @@
     "mmek006": {
         "name": "Ember Warden",
         "description": "A siege specialist armed with incendiary weaponry, ideal for sustained area denial.",
-        "appearance": "A formidable mech with a design that emphasizes its role as a siege weapon. It is clad in heavy armor with a distinctive red and black color scheme, and it features powerful incendiary launchers.",
+        "appearance": "A tracked crawler base supporting a tall turret tower with integrated incendiary launchers. Heavy red and black armor plates protect its ammunition feed and combustion chambers.",
         "size": "Medium",
         "health": 162,
         "armor": 62,
@@ -122,7 +122,7 @@
     "mmek007": {
         "name": "Shadow Bastion",
         "description": "A versatile combat platform capable of adapting to multiple roles with advanced energy defenses.",
-        "appearance": "A mysterious mech with a design that blends stealth and power. The Shadow Bastion is covered in dark armor with subtle glowing patterns, and it features a hood that can obscure its presence.",
+        "appearance": "A two-legged mech with four arms clustered around its torso, each arm designed for modular tool or weapon mounts. Dark armor has subtle glowing patterns, and a sloped hood conceals advanced sensors.",
         "size": "Medium",
         "health": 188,
         "armor": 88,
@@ -142,7 +142,7 @@
     "mmek008": {
         "name": "Cyclone Hunter",
         "description": "A high-speed interceptor that excels at chasing down vulnerable targets and evading counterattacks.",
-        "appearance": "A sleek and aerodynamic mech designed for speed and agility. The Cyclone Hunter features a streamlined frame with a vibrant green and black color scheme, and it is equipped with advanced thrusters for rapid movement.",
+        "appearance": "A two-legged runner with integrated thruster pods and a narrow torso. Its green-and-black armor plates are aerodynamically sculpted, with visible cooling channels along its limbs.",
         "size": "Medium",
         "health": 150,
         "armor": 50,
@@ -162,7 +162,7 @@
     "mmek009": {
         "name": "Avalanche Titan",
         "description": "A mid-weight powerhouse capable of weathering storms of firepower and striking back with force.",
-        "appearance": "A robust mech with a design that emphasizes its role as a heavy hitter. It has thick armor plates in a steel gray finish, accented with blue highlights. The Avalanche Titan is built for sustained combat, featuring powerful weapon systems and a formidable presence.",
+        "appearance": "A four-legged heavy chassis with thick armor plates and reinforced limb joints. Steel gray panels are accented with blue highlights, and multiple weapon mounts extend from its broad torso.",
         "size": "Medium",
         "health": 225,
         "armor": 125,
@@ -182,7 +182,7 @@
     "mmek010": {
         "name": "Nova Lancer",
         "description": "A cutting-edge energy-based Mek with powerful shield regeneration and precision-strike weaponry.",
-        "appearance": "An energy-based combat unit. The Nova Lancer features sleek armor with a white and blue color scheme, and it is equipped with advanced energy weapons and a high-tech energy shield system.",
+        "appearance": "A two-legged mech with four auxiliary arms for weapon mounts and a compact energy core in its torso. Its white-and-blue armor features glowing power conduits and shield emitters.",
         "size": "Medium",
         "health": 175,
         "armor": 62,

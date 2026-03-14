@@ -1,6 +1,7 @@
 {
-	"ext_drill_rig": {
+	"drill_rig": {
 		"name": "Drill Rig",
+		"appearance": "A bulky, industrial rig with a reinforced frame, exposed mechanical arms, and glowing vent panels. Its drill assembly protrudes from the front, surrounded by armored plating and hydraulic tubing.",
 		"size": "Medium",
 		"health": 210,
 		"armor": 70,
@@ -11,11 +12,13 @@
 		"speed": 0,
 		"slots": [0, 0, 0, 3],
 		"structure_type": "extraction",
+		"structure_sub_type": "drilling",
 		"passable": false,
 		"icon": "structures/basic_turret.jpeg"
 	},
-	"ext_refinery_node": {
+	"refinery_node": {
 		"name": "Refinery Node",
+		"appearance": "A compact processing node with stacked, modular tanks and a ring of coolant conduits. Its matte gray casing is punctuated by glowing circuit accents and vented exhaust panels.",
 		"size": "Medium",
 		"health": 170,
 		"armor": 52,
@@ -26,11 +29,13 @@
 		"speed": 0,
 		"slots": [0, 0, 0, 2],
 		"structure_type": "extraction",
+		"structure_sub_type": "refining",
 		"passable": false,
 		"icon": "structures/basic_turret.jpeg"
 	},
-	"ext_salvage_compactor": {
-		"name": "Salvage Compactor",
+	"salvage_processor": {
+		"name": "Salvage Processor",
+		"appearance": "A rugged processing unit with a wide intake funnel, conveyor loops, and plated armor panels. Its exterior shows welded seams, grated vents, and caution stripe markings along the edges.",
 		"size": "Medium",
 		"health": 160,
 		"armor": 50,
@@ -41,6 +46,7 @@
 		"speed": 0,
 		"slots": [1, 0, 0, 2],
 		"structure_type": "extraction",
+		"structure_sub_type": "salvaging",
 		"passable": false,
 		"icon": "structures/basic_turret.jpeg"
 	}

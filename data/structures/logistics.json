@@ -1,0 +1,36 @@
+{
+	"secure_cache": {
+		"name": "Secure Cache",
+		"appearance": "A compact, armored cache unit with reinforced plating, a low-profile chassis, and a recessed access hatch framed by glowing status lights.",
+		"size": "Medium",
+		"health": 145,
+		"armor": 46,
+		"shield": 16,
+		"shield_generation": 2,
+		"power": 80,
+		"power_generation": 6,
+		"speed": 0,
+		"slots": [0, 0, 0, 2],
+		"structure_type": "logistics",
+		"structure_sub_type": "cache",
+		"passable": false,
+		"icon": "structures/basic_turret.jpeg"
+	},
+	"recovery_terminal": {
+		"name": "Recovery Terminal",
+		"appearance": "A sleek terminal with a curved interface panel, illuminated display ring, and reinforced base plate, built to withstand harsh environments.",
+		"size": "Medium",
+		"health": 155,
+		"armor": 48,
+		"shield": 20,
+		"shield_generation": 2,
+		"power": 88,
+		"power_generation": 7,
+		"speed": 0,
+		"slots": [1, 0, 0, 2],
+		"structure_type": "logistics",
+		"structure_sub_type": "intel",
+		"passable": false,
+		"icon": "structures/basic_turret.jpeg"
+	}
+}

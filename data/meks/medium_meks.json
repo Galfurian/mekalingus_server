@@ -2,7 +2,7 @@
     "mmek001": {
         "name": "Storm Striker",
         "description": "A well-balanced assault unit, combining agility with reliable defenses, perfect for leading rapid engagements.",
-        "appearance": "A two-legged mech with a compact torso and twin forearms, featuring electric blue armor panels and exposed energy conduits. Its sleek form balances mobility with reinforced joint housings.",
+        "appearance": "A two-legged assault frame with twin forearms and a compact, forward-leaning torso. Electric-blue armor wraps exposed conduit channels and reinforced hip joints.",
         "size": "Medium",
         "health": 150,
         "armor": 50,
@@ -22,7 +22,7 @@
     "mmek002": {
         "name": "Titan Vanguard",
         "description": "A heavily armored frontline warrior, built to soak up enemy fire while delivering devastating counterattacks.",
-        "appearance": "A four-legged combat chassis with thick, layered armor plates and reinforced limb actuators. Its dark gray exterior is accented with red warning markings and heavy weapon mounts.",
+        "appearance": "A four-legged line chassis with slab armor on each limb and oversized shoulder housings. Dark gray plating carries red warning bars around fixed hardpoint collars.",
         "size": "Medium",
         "health": 188,
         "armor": 100,
@@ -42,7 +42,7 @@
     "mmek003": {
         "name": "Iron Reaver",
         "description": "A relentless brawler equipped with reinforced plating and heavy-hitting firepower.",
-        "appearance": "A two-legged mech with four heavy arms mounted on its broad torso, each reinforced for close-quarters impact. Gunmetal gray armor is trimmed in orange, with visible hydraulic pistons and shock absorbers.",
+        "appearance": "A two-legged breacher body with four heavy arms mounted in a stacked torso rack. Gunmetal plates with orange trim expose thick piston tubes and impact dampers.",
         "size": "Medium",
         "health": 200,
         "armor": 112,
@@ -62,7 +62,7 @@
     "mmek004": {
         "name": "Phantom Breaker",
         "description": "A tactical disruptor, using energy-based attacks to weaken enemy defenses before striking hard.",
-        "appearance": "A two-legged frame with dual arms, wrapped in dark gray armor and lit by blue energy conduits. A tapered hood houses advanced sensors and keeps a low profile.",
+        "appearance": "A two-legged disruptor frame with dual arms and a tapered chest cowl. Dark graphite armor is cut by bright blue conduit traces and recessed sensor windows.",
         "size": "Medium",
         "health": 175,
         "armor": 75,
@@ -82,7 +82,7 @@
     "mmek005": {
         "name": "Thunder Sentinel",
         "description": "A steadfast defender designed for prolonged engagements, featuring adaptive shielding and high endurance.",
-        "appearance": "A four-legged defense platform with a broad torso and reinforced armor panels. Deep blue plating is accented by gold trim, and a central shield emitter is housed in a reinforced dome.",
+        "appearance": "A four-legged anchor platform with a broad core block and overlaid defensive plating. Deep blue armor with gold edging surrounds a dome-capped shield node.",
         "size": "Medium",
         "health": 212,
         "armor": 94,
@@ -102,7 +102,7 @@
     "mmek006": {
         "name": "Ember Warden",
         "description": "A siege specialist armed with incendiary weaponry, ideal for sustained area denial.",
-        "appearance": "A tracked crawler base supporting a tall turret tower with integrated incendiary launchers. Heavy red and black armor plates protect its ammunition feed and combustion chambers.",
+        "appearance": "A four-legged siege rig with a tall rotary turret spine and boxed launcher casings. Red and black armor shells cover feed belts, igniter ports, and thermal baffles.",
         "size": "Medium",
         "health": 162,
         "armor": 62,
@@ -122,7 +122,7 @@
     "mmek007": {
         "name": "Shadow Bastion",
         "description": "A versatile combat platform capable of adapting to multiple roles with advanced energy defenses.",
-        "appearance": "A two-legged mech with four arms clustered around its torso, each arm designed for modular tool or weapon mounts. Dark armor has subtle glowing patterns, and a sloped hood conceals advanced sensors.",
+        "appearance": "A two-legged modular frame with four arms arranged around a square equipment bay. Dark armor shows faint geometric glow lines beneath a sloped sensor hood.",
         "size": "Medium",
         "health": 188,
         "armor": 88,
@@ -142,7 +142,7 @@
     "mmek008": {
         "name": "Cyclone Hunter",
         "description": "A high-speed interceptor that excels at chasing down vulnerable targets and evading counterattacks.",
-        "appearance": "A two-legged runner with integrated thruster pods and a narrow torso. Its green-and-black armor plates are aerodynamically sculpted, with visible cooling channels along its limbs.",
+        "appearance": "A two-legged velocity frame with integrated thrust nacelles and a narrow center mass. Green and black shell plating uses vented fins and longitudinal cooling grooves.",
         "size": "Medium",
         "health": 150,
         "armor": 50,
@@ -162,7 +162,7 @@
     "mmek009": {
         "name": "Avalanche Titan",
         "description": "A mid-weight powerhouse capable of weathering storms of firepower and striking back with force.",
-        "appearance": "A four-legged heavy chassis with thick armor plates and reinforced limb joints. Steel gray panels are accented with blue highlights, and multiple weapon mounts extend from its broad torso.",
+        "appearance": "A four-legged bulwark chassis with dense armor blocks and reinforced knee bearings. Steel-gray plates with blue accents surround a broad torso lined with mount rails.",
         "size": "Medium",
         "health": 225,
         "armor": 125,
@@ -182,7 +182,7 @@
     "mmek010": {
         "name": "Nova Lancer",
         "description": "A cutting-edge energy-based Mek with powerful shield regeneration and precision-strike weaponry.",
-        "appearance": "A two-legged mech with four auxiliary arms for weapon mounts and a compact energy core in its torso. Its white-and-blue armor features glowing power conduits and shield emitters.",
+        "appearance": "A two-legged reactor frame with four auxiliary arms docked around a compact core chamber. White and cobalt armor panels are threaded with luminous power trunks and shield emitters.",
         "size": "Medium",
         "health": 175,
         "armor": 62,

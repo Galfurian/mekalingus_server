@@ -20,7 +20,8 @@ ICON_STYLE = (
     "no text, no background, "
     "transparent background, "
     "no hand-held items, "
-    "128x128 icon"
+    "128x128 icon,"
+    "square border around each icon"
 )
 
 
@@ -39,7 +40,7 @@ def generate_prompt(
     # Mek
     if entity_type == "mech":
         size = entity_data["size"].lower()
-        subject = f"{size}-class combat mech '{entity_name}', "
+        subject = f"{size.upper()}-class combat mech '{entity_name}'"
     # Weapon
     elif entity_type == "weapons":
         slot_type = entity_data["slot"].lower()
@@ -52,11 +53,13 @@ def generate_prompt(
     elif entity_type == "structure":
         size = entity_data["size"].lower()
         structure_type = entity_data["structure_type"].lower()
-        subject = f"{size} {structure_type} sci-fi structure '{entity_name}'"
+        structure_sub_type = entity_data["structure_sub_type"].lower()
+        subject = f"{size} {structure_type} ({structure_sub_type}) sci-fi structure '{entity_name}'"
     else:
         subject = f"sci-fi entity '{entity_name}'"
 
-    prompt = f"{entity_name} ({entity_id})\n{ICON_STYLE}, {subject}. {appearance}"
+    # prompt = f"{entity_name} ({entity_id})\n{ICON_STYLE}, {subject}. {appearance}"
+    prompt = f"{entity_name} ({entity_id})\n{subject}. {appearance}"
     return prompt
 
 
@@ -103,6 +106,8 @@ def main():
 
         print(prompt)
         print()
+    print(f"Use this style: {ICON_STYLE}.")
+    print()
 
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@
 		"structure_type": "defense",
 		"structure_sub_type": "wall",
 		"passable": false,
-		"icon": "structures/wall_segment.png"
+		"icon": "structures/defense/wall_segment.png"
 	},
 	"gate_segment": {
 		"name": "Gate Segment",
@@ -41,7 +41,7 @@
 		"structure_type": "defense",
 		"structure_sub_type": "gate",
 		"passable": true,
-		"icon": "structures/gate_segment.png"
+		"icon": "structures/defense/gate_segment.png"
 	},
 	"guard_tower": {
 		"name": "Guard Tower",
@@ -63,7 +63,7 @@
 		"structure_type": "defense",
 		"structure_sub_type": "tower",
 		"passable": false,
-		"icon": "structures/guard_tower.png"
+		"icon": "structures/defense/guard_tower.png"
 	},
 	"light_turret_mk1": {
 		"name": "Light Turret Mk1",
@@ -85,7 +85,7 @@
 		"structure_type": "defense",
 		"structure_sub_type": "turret",
 		"passable": false,
-		"icon": "structures/light_turret_mk1.png"
+		"icon": "structures/defense/light_turret_mk1.png"
 	},
 	"light_turret_mk2": {
 		"name": "Light Turret Mk2",
@@ -107,7 +107,7 @@
 		"structure_type": "defense",
 		"structure_sub_type": "turret",
 		"passable": false,
-		"icon": "structures/light_turret_mk2.png"
+		"icon": "structures/defense/light_turret_mk2.png"
 	},
 	"medium_turret_mk1": {
 		"name": "Medium Turret Mk1",
@@ -129,7 +129,7 @@
 		"structure_type": "defense",
 		"structure_sub_type": "turret",
 		"passable": false,
-		"icon": "structures/medium_turret_mk1.png"
+		"icon": "structures/defense/medium_turret_mk1.png"
 	},
 	"medium_turret_mk2": {
 		"name": "Medium Turret Mk2",
@@ -151,7 +151,7 @@
 		"structure_type": "defense",
 		"structure_sub_type": "turret",
 		"passable": false,
-		"icon": "structures/medium_turret_mk2.png"
+		"icon": "structures/defense/medium_turret_mk2.png"
 	},
 	"heavy_turret_mk1": {
 		"name": "Heavy Turret Mk1",
@@ -173,7 +173,7 @@
 		"structure_type": "defense",
 		"structure_sub_type": "turret",
 		"passable": false,
-		"icon": "structures/heavy_turret_mk1.png"
+		"icon": "structures/defense/heavy_turret_mk1.png"
 	},
 	"heavy_turret_mk2": {
 		"name": "Heavy Turret Mk2",
@@ -195,7 +195,7 @@
 		"structure_type": "defense",
 		"structure_sub_type": "turret",
 		"passable": false,
-		"icon": "structures/heavy_turret_mk2.png"
+		"icon": "structures/defense/heavy_turret_mk2.png"
 	},
 	"light_support_turret": {
 		"name": "Light Support Turret",
@@ -217,7 +217,7 @@
 		"structure_type": "defense",
 		"structure_sub_type": "turret",
 		"passable": false,
-		"icon": "structures/light_support_turret.png"
+		"icon": "structures/defense/light_support_turret.png"
 	},
 	"medium_support_turret": {
 		"name": "Medium Support Turret",
@@ -239,7 +239,7 @@
 		"structure_type": "defense",
 		"structure_sub_type": "turret",
 		"passable": false,
-		"icon": "structures/medium_support_turret.png"
+		"icon": "structures/defense/medium_support_turret.png"
 	},
 	"heavy_support_turret": {
 		"name": "Heavy Support Turret",
@@ -261,6 +261,6 @@
 		"structure_type": "defense",
 		"structure_sub_type": "turret",
 		"passable": false,
-		"icon": "structures/heavy_support_turret.png"
+		"icon": "structures/defense/heavy_support_turret.png"
 	}
 }

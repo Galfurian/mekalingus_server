@@ -2,7 +2,7 @@
 	"lmek001": {
 		"name": "Iron Striker",
 		"description": "A durable frontline skirmisher, designed to withstand heavy fire while delivering precise counterattacks.",
-		"appearance": "A four-legged combat chassis with broad, plated limbs and a reinforced central torso. Its gray armor is accented with red stenciled numbering and exposed hydraulic actuators.",
+		"appearance": "A four-legged brace frame with thick knee guards and a compact reactor torso. Flat gray plating is broken by red stencils, rivet seams, and exposed hydraulic lines.",
 		"size": "Light",
 		"health": 115,
 		"armor": 75,
@@ -22,7 +22,7 @@
 	"lmek002": {
 		"name": "Shadow Phantom",
 		"description": "A nimble infiltrator, utilizing high mobility and evasive tactics to strike from the shadows and disappear.",
-		"appearance": "A sleek two-legged frame with narrow limbs and a compact torso. Matte black armor panels feature subtle blue lighting strips and a slender sensor mast.",
+		"appearance": "A two-legged infiltration rig with narrow shin assemblies and a tucked shoulder profile. Matte black armor is edged with dim blue trace lights and a retractable sensor spine.",
 		"size": "Light",
 		"health": 100,
 		"armor": 38,
@@ -42,7 +42,7 @@
 	"lmek003": {
 		"name": "Specter Shadow",
 		"description": "A stealth-oriented combat unit with enhanced shielding, excelling in rapid ambushes and energy-based assaults.",
-		"appearance": "A tracked crawler base with a low, angular body and armored side flanges. Its dark paint has adaptive panels that reduce its visual signature.",
+		"appearance": "A low four-legged mech frame with beveled side armor and a wedge-shaped command hull. Its charcoal coating carries adaptive matte tiles and recessed optic slits.",
 		"size": "Light",
 		"health": 100,
 		"armor": 50,
@@ -62,7 +62,7 @@
 	"lmek004": {
 		"name": "Storm Dancer",
 		"description": "A lightning-fast skirmisher designed for hit-and-run tactics.",
-		"appearance": "A light two-legged runner with a narrow torso and integrated thruster pods. Its armor is finished in electric blue with white racing stripes.",
+		"appearance": "A two-legged sprint chassis with rear vector pods and slim hip actuators. Electric-blue bodywork uses white banding across the chest and thigh panels.",
 		"size": "Light",
 		"health": 112,
 		"armor": 38,
@@ -82,7 +82,7 @@
 	"lmek005": {
 		"name": "Blitz Warden",
 		"description": "A rapid assault unit with reinforced kinetic shielding for fast engagements.",
-		"appearance": "A four-legged combat frame with a wide stance and heavy armor panels. Its surface is marked with hazard striping and embeds a glowing shield emitter in the torso.",
+		"appearance": "A four-legged shield carrier with a broad belly frame and overbuilt shoulder blocks. Yellow hazard paint cuts across dark plates around a recessed torso projector.",
 		"size": "Light",
 		"health": 106,
 		"armor": 38,
@@ -102,7 +102,7 @@
 	"lmek006": {
 		"name": "Striker Talon",
 		"description": "A high-mobility scout mech equipped with precision strike capabilities.",
-		"appearance": "A two-legged mech with three articulated arms mounted on its torso. Its dark gray armor is accented with neon blue highlights and reinforced limb joints.",
+		"appearance": "A two-legged scout frame mounting three articulated arms around a narrow chest core. Dark graphite armor includes neon blue edge lighting and reinforced ankle gimbals.",
 		"size": "Light",
 		"health": 119,
 		"armor": 44,
@@ -122,7 +122,7 @@
 	"lmek007": {
 		"name": "Falcon Edge",
 		"description": "A lightweight recon unit with superior speed and evasion capabilities.",
-		"appearance": "A slender chassis with four articulated supports and retractable stabilizers, topped by a tall sensor mast. Its white-and-teal plated hull is polished to a sheen, conveying high-end reconnaissance hardware.",
+		"appearance": "A four-legged recon lattice with telescoping stabilizers and a tall sensor mast. White ceramic armor with teal insets sits over clean panel lines and exposed antenna banks.",
 		"size": "Light",
 		"health": 94,
 		"armor": 38,
@@ -142,7 +142,7 @@
 	"lmek008": {
 		"name": "Viper Stride",
 		"description": "An aggressive interceptor equipped with reactive plating and short-range weaponry.",
-		"appearance": "A four-legged assault frame with a segmented torso and a raised sensor mast. Its green armor panels are ribbed and edged in black for a tactical look.",
+		"appearance": "A four-legged interceptor frame with a segmented mid-body and offset shoulder vanes. Ribbed green plating is outlined in black around clustered intake vents.",
 		"size": "Light",
 		"health": 125,
 		"armor": 44,
@@ -162,7 +162,7 @@
 	"lmek009": {
 		"name": "Ghost Mirage",
 		"description": "A stealthy hunter capable of slipping past enemy defenses unnoticed.",
-		"appearance": "A tracked crawler with a compact, faceted hull and integrated sensor slits. Its adaptive camo coating shifts subtly in hue and is accented by discrete optical strips.",
+		"appearance": "A compact two-legged mech body with faceted armor cheeks and flush-mounted sensor channels. Adaptive camouflage film shifts between slate tones while narrow optical bars pulse softly.",
 		"size": "Light",
 		"health": 106,
 		"armor": 44,
@@ -182,7 +182,7 @@
 	"lmek010": {
 		"name": "Raptor Fang",
 		"description": "A fast-moving combat unit specialized in precision flanking maneuvers.",
-		"appearance": "A two-legged skimmer with four arms mounted on its torso and a streamlined, angular hull. Its orange-and-black paint is broken by tactical markings and exposed cooling vents.",
+		"appearance": "A two-legged skimmer frame with four torso-mounted arms and swept side stabilizers. Orange and black armor carries tactical numerals, vent grilles, and exposed coolant piping.",
 		"size": "Light",
 		"health": 112,
 		"armor": 38,

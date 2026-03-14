@@ -2,7 +2,7 @@
     "hmek001": {
         "name": "Titan Hammer",
         "description": "A frontline juggernaut armed with immense firepower and reinforced armor plating.",
-        "appearance": "A two-legged heavy mech with thick, layered armor plates and oversized actuator housings. Its steel-gray surfaces are accented with black trim and reinforced hand assemblies.",
+        "appearance": "A two-legged heavyweight frame with oversized actuator drums and layered chest armor. Steel-gray plating with black trim wraps reinforced manipulator assemblies.",
         "size": "Heavy",
         "health": 312,
         "armor": 188,
@@ -22,7 +22,7 @@
     "hmek002": {
         "name": "Dread Bastion",
         "description": "A fortress on legs, designed to absorb immense damage while controlling the battlefield.",
-        "appearance": "A four-legged heavy chassis with thick armored limbs and a massive central torso. Its matte dark finish is accentuated with red warning stripes and multiple reinforced weapon hardpoints.",
+        "appearance": "A four-legged fortress chassis with thick limb casings and a high-volume central hull. Matte obsidian armor is marked with red caution bands around reinforced hardpoint rings.",
         "size": "Heavy",
         "health": 375,
         "armor": 325,
@@ -43,7 +43,7 @@
     "hmek003": {
         "name": "Thunder Colossus",
         "description": "A walking artillery platform capable of unleashing devastating long-range barrages.",
-        "appearance": "A tracked artillery platform with a broad armored chassis and multiple large-caliber weapon mounts. Its rugged industrial styling includes dark gray plating and yellow hazard striping.",
+        "appearance": "A four-legged bombardment frame with a broad armored deck and stacked long-gun mounts. Dark gray industrial plating is segmented by yellow service stencils and gantry rails.",
         "size": "Heavy",
         "health": 475,
         "armor": 175,
@@ -63,7 +63,7 @@
     "hmek004": {
         "name": "Goliath Enforcer",
         "description": "An elite suppression unit, built for enduring engagements and area control.",
-        "appearance": "A four-legged assault frame with reinforced leg actuators and a broad torso mounting multiple weapon hard points. Steel gray armor is accented with red combat striping and heavily layered plating.",
+        "appearance": "A four-legged suppression frame with reinforced hip blocks and a broad command torso. Steel-gray plate stacks with red combat bands cover clustered weapon sockets.",
         "size": "Heavy",
         "health": 338,
         "armor": 200,
@@ -83,7 +83,7 @@
     "hmek005": {
         "name": "Onyx Warlord",
         "description": "A relentless war machine, engineered for brutal assaults and frontline dominance.",
-        "appearance": "A two-legged heavy assault mech with four reinforced arms and a glossy black finish. Red accent lines highlight its aggressive silhouette and heavy armor plating.",
+        "appearance": "A two-legged assault body carrying four reinforced arms around a deep chest cavity. Gloss-black armor with crimson seam lights creates a hard-edged, plated profile.",
         "size": "Heavy",
         "health": 350,
         "armor": 212,
@@ -103,7 +103,7 @@
     "hmek006": {
         "name": "Hellstorm Titan",
         "description": "A walking inferno, equipped with flame-based weaponry for area-wide destruction.",
-        "appearance": "A four-legged heavy platform with a reinforced chassis and integrated flamethrower mounts. Its armor plates are finished in red and orange, with visible heat vents around its weapon systems.",
+        "appearance": "A four-legged incendiary platform with a reinforced spine and integrated burner housings. Red-orange armor shells are perforated by thermal louvers and exhaust chimneys.",
         "size": "Heavy",
         "health": 288,
         "armor": 162,
@@ -123,7 +123,7 @@
     "hmek007": {
         "name": "Crimson Juggernaut",
         "description": "A terrifying siege unit designed to break enemy lines with overwhelming force.",
-        "appearance": "A four-legged siege chassis with thick crimson armor plating and reinforced limb joints. Black accent panels surround heavy weapon mounts and structural supports.",
+        "appearance": "A four-legged breach chassis with thick crimson slab armor and overbuilt joint collars. Black interlock panels frame heavy mount pylons and structural braces.",
         "size": "Heavy",
         "health": 362,
         "armor": 238,
@@ -143,7 +143,7 @@
     "hmek008": {
         "name": "Vanguard Behemoth",
         "description": "A defensive stronghold, built to withstand relentless attacks and outlast any opponent.",
-        "appearance": "A four-legged defensive platform with heavy armor plating and a low, wide torso. Its steel-gray surfaces are accented with red markings and multiple defensive hardpoints.",
+        "appearance": "A four-legged bastion platform with a low, wide hull and layered anti-impact plating. Steel-gray armor carries red identification marks around recessed defensive ports.",
         "size": "Heavy",
         "health": 388,
         "armor": 250,
@@ -158,12 +158,12 @@
             3,
             3
         ],
-        "icon": "meks/mek.png"
+        "icon": "meks/heavby/hmek008.png"
     },
     "hmek009": {
         "name": "Storm Leviathan",
         "description": "A towering battlefield menace, combining energy-based offense with unmatched resilience.",
-        "appearance": "A tracked heavyweight frame with a tall, armored superstructure and integrated energy weapon arrays. Its hull features reinforced plating and glowing energy conduits.",
+        "appearance": "A four-legged energy frame with a tall superstructure and side-mounted array housings. Reinforced plate belts surround luminous conduit spines and shield manifolds.",
         "size": "Heavy",
         "health": 325,
         "armor": 175,
@@ -178,12 +178,12 @@
             2,
             2
         ],
-        "icon": "meks/mek.png"
+        "icon": "meks/heavy/hmek009.png"
     },
     "hmek010": {
         "name": "Iron Tyrant",
         "description": "A walking war fortress, capable of crushing enemies with relentless firepower and impenetrable armor.",
-        "appearance": "A four-legged juggernaut with a massive armored torso and multiple weapon mounts. Its heavy plates are layered for maximum protection, and its joints are reinforced with thick actuator housings.",
+        "appearance": "A four-legged warframe with a massive armored trunk and stacked mount architecture. Dense plate layers and thick actuator housings give it a rigid fortress silhouette.",
         "size": "Heavy",
         "health": 400,
         "armor": 262,
@@ -198,6 +198,6 @@
             4,
             3
         ],
-        "icon": "meks/mek.png"
+        "icon": "meks/heavy/hmek010.png"
     }
 }

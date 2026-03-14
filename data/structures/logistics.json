@@ -14,10 +14,10 @@
 		"structure_type": "logistics",
 		"structure_sub_type": "cache",
 		"passable": false,
-		"icon": "structures/basic_turret.jpeg"
+		"icon": "structures/logistics/secure_cache.png"
 	},
-	"recovery_terminal": {
-		"name": "Recovery Terminal",
+	"unlocked_terminal": {
+		"name": "Unlocked Terminal",
 		"appearance": "A sleek terminal with a curved interface panel, illuminated display ring, and reinforced base plate, built to withstand harsh environments.",
 		"size": "Medium",
 		"health": 155,
@@ -31,6 +31,6 @@
 		"structure_type": "logistics",
 		"structure_sub_type": "intel",
 		"passable": false,
-		"icon": "structures/basic_turret.jpeg"
+		"icon": "structures/logistics/unlocked_terminal.png"
 	}
 }

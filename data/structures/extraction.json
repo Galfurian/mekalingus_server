@@ -14,7 +14,7 @@
 		"structure_type": "extraction",
 		"structure_sub_type": "drilling",
 		"passable": false,
-		"icon": "structures/basic_turret.jpeg"
+		"icon": "structures/extraction/drill_rig.png"
 	},
 	"refinery_node": {
 		"name": "Refinery Node",
@@ -31,7 +31,7 @@
 		"structure_type": "extraction",
 		"structure_sub_type": "refining",
 		"passable": false,
-		"icon": "structures/basic_turret.jpeg"
+		"icon": "structures/extraction/refinery_node.png"
 	},
 	"salvage_processor": {
 		"name": "Salvage Processor",
@@ -48,6 +48,6 @@
 		"structure_type": "extraction",
 		"structure_sub_type": "salvaging",
 		"passable": false,
-		"icon": "structures/basic_turret.jpeg"
+		"icon": "structures/extraction/salvage_processor.png"
 	}
 }

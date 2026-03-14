@@ -22,10 +22,7 @@ static func spawn(game_map: GameMap, origin: Vector2i, request: Dictionary) -> v
 
 
 static func find_nearest_free_tile(
-	game_map: GameMap,
-	origin: Vector2i,
-	entity_type: String,
-	excluded: Array[Vector2i] = []
+	game_map: GameMap, origin: Vector2i, entity_type: String, excluded: Array[Vector2i] = []
 ) -> Vector2i:
 	if can_spawn_entity_type_at(game_map, origin, entity_type) and not origin in excluded:
 		return origin
@@ -45,10 +42,7 @@ static func find_nearest_free_tile(
 
 
 static func find_spawn_tiles(
-	game_map: GameMap,
-	origin: Vector2i,
-	quantity: int,
-	entity_type: String
+	game_map: GameMap, origin: Vector2i, quantity: int, entity_type: String
 ) -> Array[Vector2i]:
 	var tiles: Array[Vector2i] = []
 	for _i in range(quantity):
@@ -60,9 +54,7 @@ static func find_spawn_tiles(
 
 
 static func can_spawn_entity_type_at(
-	game_map: GameMap,
-	position: Vector2i,
-	entity_type: String
+	game_map: GameMap, position: Vector2i, entity_type: String
 ) -> bool:
 	if not game_map.is_in_bounds(position):
 		return false
@@ -97,10 +89,7 @@ static func build_owner_from_request(request: Dictionary, index: int) -> EntityO
 
 
 static func spawn_mek(
-	game_map: GameMap,
-	position: Vector2i,
-	request: Dictionary,
-	entity_owner: EntityOwner
+	game_map: GameMap, position: Vector2i, request: Dictionary, entity_owner: EntityOwner
 ) -> void:
 	var template_id: String = str(request.get("template_id", ""))
 	var template: MekTemplate = TemplateManager.get_mek_template(template_id)
@@ -120,10 +109,7 @@ static func spawn_mek(
 
 
 static func spawn_structure(
-	game_map: GameMap,
-	position: Vector2i,
-	request: Dictionary,
-	entity_owner: EntityOwner
+	game_map: GameMap, position: Vector2i, request: Dictionary, entity_owner: EntityOwner
 ) -> void:
 	var template_id: String = str(request.get("template_id", ""))
 	var template: StructureTemplate = TemplateManager.get_structure_template(template_id)
@@ -138,7 +124,9 @@ static func spawn_structure(
 	var is_blocking: bool = not template.passable
 	if request.has("blocking_override"):
 		is_blocking = bool(request["blocking_override"])
-	var map_structure: MapStructure = MapStructure.new(position, entity_owner, structure, is_blocking)
+	var map_structure: MapStructure = MapStructure.new(
+		position, entity_owner, structure, is_blocking
+	)
 	game_map.structures[structure.uuid] = map_structure
 
 
@@ -161,9 +149,9 @@ static func apply_random_loadout(actor: CombatActor, loadout: String = "preset_b
 		for tmpl: ItemTemplate in TemplateManager.item_templates.values():
 			if tmpl.slot == slot_type:
 				var weight: int = _preset_weight_for_item(tmpl, preset)
-				weighted.append({ "template": tmpl, "weight": weight + randi() % 3 })
-		weighted.sort_custom(func(a: Dictionary, b: Dictionary):
-			return int(a["weight"]) > int(b["weight"])
+				weighted.append({"template": tmpl, "weight": weight + randi() % 3})
+		weighted.sort_custom(
+			func(a: Dictionary, b: Dictionary): return int(a["weight"]) > int(b["weight"])
 		)
 		var fill: int = mini(slots_available, weighted.size())
 		for index in range(fill):
@@ -171,12 +159,16 @@ static func apply_random_loadout(actor: CombatActor, loadout: String = "preset_b
 	actor.rebuild_combat_state()
 
 
-static func get_structure_template_ids_by_type(structure_type: String) -> Array[String]:
+static func get_structure_template_ids_by_type(
+	structure_type: String,
+	structure_subtype: String = "",
+) -> Array[String]:
 	var ids: Array[String] = []
 	for template_id: String in TemplateManager.structure_templates.keys():
 		var template: StructureTemplate = TemplateManager.structure_templates[template_id]
 		if template and template.structure_type == structure_type:
-			ids.append(template_id)
+			if structure_subtype == "" or template.structure_sub_type == structure_subtype:
+				ids.append(template_id)
 	return ids
 
 

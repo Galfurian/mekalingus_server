@@ -7,7 +7,7 @@ var game_map: GameMap
 @onready var all_tree: Tree = $TabContainer/All/AllTree
 @onready var mek_tree: Tree = $TabContainer/Meks/MekTree
 @onready var structure_tree: Tree = $TabContainer/Structures/StructureTree
-@onready var loot_tree: Tree = $TabContainer/Loot/LootTree
+@onready var logistics_tree: Tree = $TabContainer/Logistics/LogisticsTree
 
 
 func setup(p_game_map: GameMap) -> void:
@@ -29,8 +29,8 @@ func clear() -> void:
 		mek_tree.clear()
 	if structure_tree:
 		structure_tree.clear()
-	if loot_tree:
-		loot_tree.clear()
+	if logistics_tree:
+		logistics_tree.clear()
 
 
 func refresh() -> void:
@@ -59,7 +59,7 @@ func _on_turn_ended(_turn_number: int) -> void:
 
 
 func _all_trees() -> Array[Tree]:
-	return [all_tree, mek_tree, structure_tree, loot_tree]
+	return [all_tree, mek_tree, structure_tree, logistics_tree]
 
 
 func _connect_tree_signals() -> void:
@@ -69,15 +69,15 @@ func _connect_tree_signals() -> void:
 		mek_tree.item_selected.connect(_on_mek_tree_item_selected)
 	if not structure_tree.item_selected.is_connected(_on_structure_tree_item_selected):
 		structure_tree.item_selected.connect(_on_structure_tree_item_selected)
-	if not loot_tree.item_selected.is_connected(_on_loot_tree_item_selected):
-		loot_tree.item_selected.connect(_on_loot_tree_item_selected)
+	if not logistics_tree.item_selected.is_connected(_on_logistics_tree_item_selected):
+		logistics_tree.item_selected.connect(_on_logistics_tree_item_selected)
 
 
 func _populate_all_trees() -> void:
 	var all_entities: Array[MapEntity] = []
 	var mek_entities: Array[MapEntity] = []
 	var structure_entities: Array[MapEntity] = []
-	var loot_entities: Array[MapEntity] = []
+	var logistics_entities: Array[MapEntity] = []
 
 	for entity: MapCombatEntity in game_map.player_units.values():
 		if entity and entity.active:
@@ -99,12 +99,12 @@ func _populate_all_trees() -> void:
 	for entity: MapPickup in game_map.pickups.values():
 		if entity and entity.active:
 			all_entities.append(entity)
-			loot_entities.append(entity)
+			logistics_entities.append(entity)
 
 	_populate_tree(all_tree, all_entities)
 	_populate_tree(mek_tree, mek_entities)
 	_populate_tree(structure_tree, structure_entities)
-	_populate_tree(loot_tree, loot_entities)
+	_populate_tree(logistics_tree, logistics_entities)
 
 
 func _populate_tree(tree: Tree, entities: Array[MapEntity]) -> void:
@@ -191,8 +191,8 @@ func _owner_label(entity: MapEntity) -> String:
 func _entity_name(entity: MapEntity) -> String:
 	if is_instance_of(entity, MapPickup):
 		if entity.item_data.has("item_id"):
-			return "Loot: " + str(entity.item_data["item_id"])
-		return "Loot"
+			return "Logistics: " + str(entity.item_data["item_id"])
+		return "Logistics"
 
 	if is_instance_of(entity, MapCombatEntity):
 		return _combatant_display_name(entity.combatant)
@@ -224,8 +224,8 @@ func _on_structure_tree_item_selected() -> void:
 	_emit_selected_from_tree(structure_tree)
 
 
-func _on_loot_tree_item_selected() -> void:
-	_emit_selected_from_tree(loot_tree)
+func _on_logistics_tree_item_selected() -> void:
+	_emit_selected_from_tree(logistics_tree)
 
 
 func _emit_selected_from_tree(tree: Tree) -> void:

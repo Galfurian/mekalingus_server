@@ -27,7 +27,9 @@ static func spawn(game_map: GameMap, origin: Vector2i, request: Dictionary) -> v
 	var footprint_radius: int = _get_footprint_radius(outpost_size, spread)
 	var used_tiles: Array[Vector2i] = []
 
-	var core_targets: Array[Vector2i] = _build_core_targets(origin, core_units.size(), footprint_radius)
+	var core_targets: Array[Vector2i] = _build_core_targets(
+		origin, core_units.size(), footprint_radius
+	)
 	for index in range(core_units.size()):
 		var tile: Vector2i = _find_structure_tile_near_target(
 			game_map,
@@ -43,17 +45,11 @@ static func spawn(game_map: GameMap, origin: Vector2i, request: Dictionary) -> v
 
 	if not defense_units.is_empty():
 		var defense_targets: Array[Vector2i] = _build_defense_targets(
-			origin,
-			defense_units.size(),
-			footprint_radius
+			origin, defense_units.size(), footprint_radius
 		)
 		for index in range(defense_units.size()):
 			var tile: Vector2i = _find_structure_tile_near_target(
-				game_map,
-				defense_targets[index],
-				used_tiles,
-				0,
-				2
+				game_map, defense_targets[index], used_tiles, 0, 2
 			)
 			if tile == Vector2i(-1, -1):
 				continue
@@ -65,9 +61,7 @@ static func spawn(game_map: GameMap, origin: Vector2i, request: Dictionary) -> v
 
 
 static func _build_outpost_blueprint(
-	outpost_type: String,
-	outpost_size: String,
-	add_defenses: bool
+	outpost_type: String, outpost_size: String, add_defenses: bool
 ) -> Dictionary:
 	var core_count_map: Dictionary = {
 		"small": 2,
@@ -82,16 +76,14 @@ static func _build_outpost_blueprint(
 	var core_count: int = int(core_count_map.get(outpost_size, 2))
 	var defense_count: int = int(defense_count_map.get(outpost_size, 2))
 
-	var primary_structure_type: String = "combat"
+	var primary_structure_type: String = "defense"
 	match outpost_type:
 		"industrial":
 			primary_structure_type = "extraction"
 		"salvage":
-			primary_structure_type = "loot"
-		"hunting":
-			primary_structure_type = "hunting"
+			primary_structure_type = "logistics"
 		_:
-			primary_structure_type = "combat"
+			primary_structure_type = "defense"
 
 	var primary_templates: Array[String] = SingleEntitySpawner.get_structure_template_ids_by_type(
 		primary_structure_type
@@ -99,35 +91,40 @@ static func _build_outpost_blueprint(
 	if primary_templates.is_empty():
 		primary_templates = SingleEntitySpawner.get_structure_template_ids_by_type("extraction")
 	if primary_templates.is_empty():
-		primary_templates = SingleEntitySpawner.get_structure_template_ids_by_type("combat")
+		primary_templates = SingleEntitySpawner.get_structure_template_ids_by_type("defense")
 
 	var core_units: Array[Dictionary] = []
 	for _i in range(core_count):
 		var template_id: String = SingleEntitySpawner.pick_random_id(primary_templates)
 		if template_id.is_empty():
 			continue
-		core_units.append({
-			"entity_type": "structure",
-			"template_id": template_id,
-			"loadout": "preset_utility",
-		})
+		(
+			core_units
+			. append(
+				{
+					"entity_type": "structure",
+					"template_id": template_id,
+					"loadout": "preset_utility",
+				}
+			)
+		)
 
 	var defense_units: Array[Dictionary] = []
 	if add_defenses:
-		var defense_templates: Array[String] = SingleEntitySpawner.get_structure_template_ids_by_type(
-			"defense"
+		var defense_templates: Array[String] = (
+			SingleEntitySpawner.get_structure_template_ids_by_type("defense", "tower")
+			+ SingleEntitySpawner.get_structure_template_ids_by_type("defense", "turret")
 		)
-		if defense_templates.is_empty():
-			defense_templates = SingleEntitySpawner.get_structure_template_ids_by_type("combat")
 		for _j in range(defense_count):
-			var defense_id: String = SingleEntitySpawner.pick_random_id(defense_templates)
-			if defense_id.is_empty():
+			var entity_id: String = SingleEntitySpawner.pick_random_id(defense_templates)
+			if entity_id.is_empty():
 				continue
-			defense_units.append({
+			var defense_entity: Dictionary = {
 				"entity_type": "structure",
-				"template_id": defense_id,
-				"loadout": "preset_offense",
-			})
+				"template_id": entity_id,
+				"loadout": "preset_defense",
+			}
+			defense_units.append(defense_entity)
 
 	return {
 		"core_units": core_units,
@@ -145,9 +142,7 @@ static func _get_footprint_radius(outpost_size: String, spread: int) -> int:
 
 
 static func _build_core_targets(
-	origin: Vector2i,
-	count: int,
-	footprint_radius: int
+	origin: Vector2i, count: int, footprint_radius: int
 ) -> Array[Vector2i]:
 	var targets: Array[Vector2i] = []
 	if count <= 0:
@@ -172,9 +167,7 @@ static func _build_core_targets(
 
 
 static func _build_defense_targets(
-	origin: Vector2i,
-	count: int,
-	footprint_radius: int
+	origin: Vector2i, count: int, footprint_radius: int
 ) -> Array[Vector2i]:
 	var perimeter: Array[Vector2i] = _build_perimeter_ring(origin, footprint_radius)
 	var targets: Array[Vector2i] = []
@@ -220,10 +213,7 @@ static func _find_structure_tile_near_target(
 
 
 static func _can_place_structure_tile(
-	game_map: GameMap,
-	tile: Vector2i,
-	used_tiles: Array[Vector2i],
-	clearance_radius: int
+	game_map: GameMap, tile: Vector2i, used_tiles: Array[Vector2i], clearance_radius: int
 ) -> bool:
 	if not game_map.is_in_bounds(tile):
 		return false
@@ -254,8 +244,12 @@ static func _spawn_perimeter(
 	entity_owner: EntityOwner,
 	used_tiles: Array[Vector2i]
 ) -> void:
-	var wall_ids: Array[String] = SingleEntitySpawner.get_structure_template_ids_by_type("wall")
-	var gate_ids: Array[String] = SingleEntitySpawner.get_structure_template_ids_by_type("gate")
+	var wall_ids: Array[String] = SingleEntitySpawner.get_structure_template_ids_by_type(
+		"defense", "wall"
+	)
+	var gate_ids: Array[String] = SingleEntitySpawner.get_structure_template_ids_by_type(
+		"defense", "gate"
+	)
 	if wall_ids.is_empty() and gate_ids.is_empty():
 		return
 
@@ -279,8 +273,5 @@ static func _spawn_perimeter(
 			continue
 		used_tiles.append(tile)
 		SingleEntitySpawner.spawn_structure(
-			game_map,
-			tile,
-			{ "template_id": template_id, "loadout": "none" },
-			entity_owner
+			game_map, tile, {"template_id": template_id, "loadout": "none"}, entity_owner
 		)

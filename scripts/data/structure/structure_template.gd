@@ -27,6 +27,8 @@ var slots: Array[int]
 var icon: String
 # The type of the Structure.
 var structure_type: String
+# The subtype of the Structure, used for more specific categorization.
+var structure_sub_type: String
 # Whether the Structure is passable by other entities.
 var passable: bool
 
@@ -62,6 +64,7 @@ func from_dict(data: Dictionary):
 	slots = Utils.to_array_int(data.get("slots", []))
 	icon = data.get("icon", "")
 	structure_type = str(data.get("structure_type", "generic"))
+	structure_sub_type = str(data.get("structure_sub_type", "generic"))
 	passable = bool(data.get("passable", false))
 
 
@@ -80,5 +83,6 @@ func to_dict() -> Dictionary:
 		"slots": slots,
 		"icon": icon,
 		"structure_type": structure_type,
+		"structure_sub_type": structure_sub_type,
 		"passable": passable,
 	}

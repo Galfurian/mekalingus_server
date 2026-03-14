@@ -9,44 +9,69 @@ var _game_map: GameMap = null
 @onready var spawn_mode_option: OptionButton = $MarginContainer/Root/SpawnModeRow/SpawnModeOption
 # Left panel — Owner
 @onready var clan_option: OptionButton = $MarginContainer/Root/Panels/Left/LeftForm/ClanOption
-@onready var owner_type_option: OptionButton = $MarginContainer/Root/Panels/Left/LeftForm/OwnerTypeOption
-@onready var npc_commander_label: Label = $MarginContainer/Root/Panels/Left/LeftForm/NpcCommanderLabel
-@onready var npc_commander_option: OptionButton = $MarginContainer/Root/Panels/Left/LeftForm/NpcCommanderOption
+@onready
+var owner_type_option: OptionButton = $MarginContainer/Root/Panels/Left/LeftForm/OwnerTypeOption
+@onready
+var npc_commander_label: Label = $MarginContainer/Root/Panels/Left/LeftForm/NpcCommanderLabel
+@onready
+var npc_commander_option: OptionButton = $MarginContainer/Root/Panels/Left/LeftForm/NpcCommanderOption
 @onready var npc_name_label: Label = $MarginContainer/Root/Panels/Left/LeftForm/NpcNameLabel
 @onready var npc_name_edit: LineEdit = $MarginContainer/Root/Panels/Left/LeftForm/NpcNameEdit
 @onready var player_label: Label = $MarginContainer/Root/Panels/Left/LeftForm/PlayerLabel
 @onready var player_option: OptionButton = $MarginContainer/Root/Panels/Left/LeftForm/PlayerOption
 # Right panel — Content
-@onready var entity_type_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/EntityTypeOption
-@onready var template_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/TemplateOption
+@onready
+var entity_type_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/EntityTypeOption
+@onready
+var template_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/TemplateOption
 @onready var quantity_spin: SpinBox = $MarginContainer/Root/Panels/Right/SingleForm/QuantitySpin
-@onready var loadout_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/LoadoutOption
+@onready
+var loadout_option: OptionButton = $MarginContainer/Root/Panels/Right/SingleForm/LoadoutOption
 @onready var single_form: GridContainer = $MarginContainer/Root/Panels/Right/SingleForm
 @onready var multi_form: VBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm
-@onready var squad_mode_option: OptionButton = $MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadModeOption
-@onready var squad_spread_slider: HSlider = $MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadSpreadRow/SquadSpreadSlider
-@onready var squad_spread_value: Label = $MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadSpreadRow/SquadSpreadValue
+@onready
+var squad_mode_option: OptionButton = $MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadModeOption
+@onready
+var squad_spread_slider: HSlider = $MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadSpreadRow/SquadSpreadSlider
+@onready
+var squad_spread_value: Label = $MarginContainer/Root/Panels/Right/MultiForm/SquadSettings/SquadSpreadRow/SquadSpreadValue
 @onready var multi_header: HBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm/MultiHeader
 @onready var multi_scroll: ScrollContainer = $MarginContainer/Root/Panels/Right/MultiForm/MultiScroll
 @onready var add_unit_row: HBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm/AddUnitRow
 @onready var budget_form: GridContainer = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm
-@onready var budget_power_spin: SpinBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetPowerSpin
-@onready var budget_count_spin: SpinBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetCountSpin
-@onready var budget_light_check: CheckBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow/BudgetLightCheck
-@onready var budget_medium_check: CheckBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow/BudgetMediumCheck
-@onready var budget_heavy_check: CheckBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow/BudgetHeavyCheck
-@onready var budget_colossal_check: CheckBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow/BudgetColossalCheck
-@onready var budget_loadout_option: OptionButton = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetLoadoutOption
+@onready
+var budget_power_spin: SpinBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetPowerSpin
+@onready
+var budget_count_spin: SpinBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetCountSpin
+@onready
+var budget_light_check: CheckBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow/BudgetLightCheck
+@onready
+var budget_medium_check: CheckBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow/BudgetMediumCheck
+@onready
+var budget_heavy_check: CheckBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow/BudgetHeavyCheck
+@onready
+var budget_colossal_check: CheckBox = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetSizesRow/BudgetColossalCheck
+@onready
+var budget_loadout_option: OptionButton = $MarginContainer/Root/Panels/Right/MultiForm/BudgetForm/BudgetLoadoutOption
 @onready var outpost_form: GridContainer = $MarginContainer/Root/Panels/Right/OutpostForm
-@onready var unit_list: VBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm/MultiScroll/UnitList
-@onready var add_unit_button: Button = $MarginContainer/Root/Panels/Right/MultiForm/AddUnitRow/AddUnitButton
-@onready var outpost_type_option: OptionButton = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostTypeOption
-@onready var outpost_size_option: OptionButton = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostSizeOption
-@onready var outpost_spread_slider: HSlider = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostSpreadRow/OutpostSpreadSlider
-@onready var outpost_spread_value: Label = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostSpreadRow/OutpostSpreadValue
-@onready var outpost_defenses_check: CheckBox = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostDefensesCheck
-@onready var outpost_walls_check: CheckBox = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostWallsCheck
-@onready var outpost_clearance_check: CheckBox = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostClearanceCheck
+@onready
+var unit_list: VBoxContainer = $MarginContainer/Root/Panels/Right/MultiForm/MultiScroll/UnitList
+@onready
+var add_unit_button: Button = $MarginContainer/Root/Panels/Right/MultiForm/AddUnitRow/AddUnitButton
+@onready
+var outpost_type_option: OptionButton = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostTypeOption
+@onready
+var outpost_size_option: OptionButton = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostSizeOption
+@onready
+var outpost_spread_slider: HSlider = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostSpreadRow/OutpostSpreadSlider
+@onready
+var outpost_spread_value: Label = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostSpreadRow/OutpostSpreadValue
+@onready
+var outpost_defenses_check: CheckBox = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostDefensesCheck
+@onready
+var outpost_walls_check: CheckBox = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostWallsCheck
+@onready
+var outpost_clearance_check: CheckBox = $MarginContainer/Root/Panels/Right/OutpostForm/OutpostClearanceCheck
 @onready var status_label: Label = $MarginContainer/Root/StatusLabel
 @onready var spawn_button: Button = $MarginContainer/Root/Buttons/SpawnButton
 @onready var cancel_button: Button = $MarginContainer/Root/Buttons/CancelButton
@@ -162,7 +187,9 @@ func _populate_npc_commander_option(default_owner: EntityOwner = null) -> void:
 		return
 
 	var keys: Array[String] = commander_map.keys()
-	keys.sort_custom(func(a: String, b: String): return commander_map[a].to_lower() < commander_map[b].to_lower())
+	keys.sort_custom(
+		func(a: String, b: String): return commander_map[a].to_lower() < commander_map[b].to_lower()
+	)
 
 	npc_commander_option.add_separator()
 
@@ -185,10 +212,11 @@ func _populate_clans(default_clan_id: String) -> void:
 	var clan_ids: Array[String] = []
 	for clan_id: String in DataManager.clans.keys():
 		clan_ids.append(clan_id)
-	clan_ids.sort_custom(func(a: String, b: String):
-		var clan_a: Clan = DataManager.clans[a]
-		var clan_b: Clan = DataManager.clans[b]
-		return clan_a.clan_name.to_lower() < clan_b.clan_name.to_lower()
+	clan_ids.sort_custom(
+		func(a: String, b: String):
+			var clan_a: Clan = DataManager.clans[a]
+			var clan_b: Clan = DataManager.clans[b]
+			return clan_a.clan_name.to_lower() < clan_b.clan_name.to_lower()
 	)
 
 	var default_index: int = -1
@@ -209,7 +237,9 @@ func _populate_clans(default_clan_id: String) -> void:
 func _populate_players() -> void:
 	player_option.clear()
 	var players: Array[Player] = DataManager.players.values()
-	players.sort_custom(func(a: Player, b: Player): return a.player_name.to_lower() < b.player_name.to_lower())
+	players.sort_custom(
+		func(a: Player, b: Player): return a.player_name.to_lower() < b.player_name.to_lower()
+	)
 	for index in range(players.size()):
 		var player: Player = players[index]
 		player_option.add_item(player.player_name)
@@ -230,7 +260,7 @@ func _populate_templates() -> void:
 		}
 		for template_id: String in TemplateManager.mek_templates.keys():
 			var template: MekTemplate = TemplateManager.mek_templates[template_id]
-			grouped[template.size].append({ "id": template_id, "name": template.mek_name })
+			grouped[template.size].append({"id": template_id, "name": template.mek_name})
 
 		var size_order: Array[int] = [
 			Enums.EntitySize.LIGHT,
@@ -243,8 +273,9 @@ func _populate_templates() -> void:
 			var group: Array = grouped[size_class]
 			if group.is_empty():
 				continue
-			group.sort_custom(func(a: Dictionary, b: Dictionary):
-				return a["name"].to_lower() < b["name"].to_lower()
+			group.sort_custom(
+				func(a: Dictionary, b: Dictionary):
+					return a["name"].to_lower() < b["name"].to_lower()
 			)
 			if added_group:
 				template_option.add_separator()
@@ -256,10 +287,11 @@ func _populate_templates() -> void:
 		var structure_ids: Array[String] = []
 		for template_id: String in TemplateManager.structure_templates.keys():
 			structure_ids.append(template_id)
-		structure_ids.sort_custom(func(a: String, b: String):
-			var sa: StructureTemplate = TemplateManager.structure_templates[a]
-			var sb: StructureTemplate = TemplateManager.structure_templates[b]
-			return sa.structure_name.to_lower() < sb.structure_name.to_lower()
+		structure_ids.sort_custom(
+			func(a: String, b: String):
+				var sa: StructureTemplate = TemplateManager.structure_templates[a]
+				var sb: StructureTemplate = TemplateManager.structure_templates[b]
+				return sa.structure_name.to_lower() < sb.structure_name.to_lower()
 		)
 		for index in range(structure_ids.size()):
 			var template_id: String = structure_ids[index]
@@ -330,8 +362,6 @@ func _populate_outpost_options() -> void:
 	outpost_type_option.set_item_metadata(1, "industrial")
 	outpost_type_option.add_item("Salvage")
 	outpost_type_option.set_item_metadata(2, "salvage")
-	outpost_type_option.add_item("Hunting")
-	outpost_type_option.set_item_metadata(3, "hunting")
 	outpost_type_option.select(0)
 
 	outpost_size_option.clear()

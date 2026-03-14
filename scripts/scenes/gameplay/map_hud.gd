@@ -2,6 +2,7 @@ extends Node
 
 signal map_state_changed(game_map: GameMap)
 signal map_cell_clicked(cell_position: Vector2i)
+signal selected_entity_changed(entity: MapEntity)
 
 # The size of sectors.
 const SECTOR_SIZE: int = 10
@@ -100,6 +101,7 @@ func clear():
 		game_map.turn_manager.on_turn_ended.disconnect(_on_turn_ended)
 	game_map = null
 	selected_entity = null
+	selected_entity_changed.emit(selected_entity)
 	# Clear the sub-components.
 	time_of_day_overlay.clear()
 	grid_container.clear()
@@ -383,6 +385,7 @@ func _select_entity(entity: MapEntity) -> void:
 	info_panel.set_entity(entity)
 	entity_list_panel.select_entity(entity)
 	grid_drawer.set_selected_entity(entity)
+	selected_entity_changed.emit(selected_entity)
 
 
 func _find_entity_by_item_uuid(item_uuid: String) -> MapEntity:
@@ -411,8 +414,8 @@ func _entity_has_item_uuid(map_entity: MapEntity, item_uuid: String) -> bool:
 
 func _on_cell_selected(cell_position: Vector2i):
 	"""Handles cell selection and updates the UnitInfoPanel."""
-	map_cell_clicked.emit(cell_position)
 	if _anchor_pick_mode_enabled:
+		map_cell_clicked.emit(cell_position)
 		return
 
 	# Get the entity at the given position.
@@ -423,6 +426,9 @@ func _on_cell_selected(cell_position: Vector2i):
 		info_panel.set_entity(entity)
 		entity_list_panel.select_entity(entity)
 		grid_drawer.set_selected_entity(entity)
+		selected_entity_changed.emit(selected_entity)
+
+	map_cell_clicked.emit(cell_position)
 
 
 func _on_entity_list_entity_selected(entity: MapEntity) -> void:
@@ -432,6 +438,7 @@ func _on_entity_list_entity_selected(entity: MapEntity) -> void:
 	center_on(entity.position)
 	info_panel.set_entity(entity)
 	grid_drawer.set_selected_entity(entity)
+	selected_entity_changed.emit(selected_entity)
 
 
 func _on_cell_context_requested(cell_position: Vector2i, mouse_position: Vector2) -> void:
@@ -475,6 +482,7 @@ func _delete_entity_at_context_cell() -> void:
 		selected_entity = null
 		info_panel.clear()
 		grid_drawer.deselect_entity()
+		selected_entity_changed.emit(selected_entity)
 
 	_refresh_entity_views()
 	map_state_changed.emit(game_map)

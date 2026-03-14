@@ -44,6 +44,8 @@ func _ready() -> void:
 		map_hud.map_state_changed.connect(_on_map_hud_state_changed)
 	if map_hud and not map_hud.map_cell_clicked.is_connected(_on_map_cell_clicked):
 		map_hud.map_cell_clicked.connect(_on_map_cell_clicked)
+	if map_hud and not map_hud.selected_entity_changed.is_connected(_on_selected_entity_changed):
+		map_hud.selected_entity_changed.connect(_on_selected_entity_changed)
 	if map_hud and npc_directive_panel:
 		map_hud.set_ai_overlay_enabled(npc_directive_panel.is_ai_overlay_enabled())
 		map_hud.set_anchor_pick_mode_enabled(npc_directive_panel.is_anchor_pick_mode_enabled())
@@ -71,6 +73,7 @@ func _on_map_selected(game_map: GameMap) -> void:
 		map_hud.clear()
 	turn_management_panel.setup(game_map)
 	npc_directive_panel.setup(game_map)
+	npc_directive_panel.set_selected_entity(map_hud.selected_entity)
 
 
 func _get_current_selected_map() -> GameMap:
@@ -89,12 +92,14 @@ func _input(_event):
 			map_hud.icon_drawer.update_icons()
 			map_hud.entity_list_panel.refresh()
 			map_hud.selected_entity = null
+			npc_directive_panel.set_selected_entity(null)
 			turn_management_panel.refresh_state()
 			npc_directive_panel.refresh_state()
 	elif Input.is_key_pressed(KEY_ESCAPE):
 		map_hud.selected_entity = null
 		map_hud.info_panel.clear()
 		map_hud.grid_drawer.deselect_entity()
+		npc_directive_panel.set_selected_entity(null)
 
 
 func _on_map_hud_state_changed(game_map: GameMap) -> void:
@@ -138,3 +143,8 @@ func _on_anchor_pick_mode_changed(enabled: bool) -> void:
 func _on_map_cell_clicked(cell_position: Vector2i) -> void:
 	if npc_directive_panel:
 		npc_directive_panel.apply_anchor_from_map(cell_position)
+
+
+func _on_selected_entity_changed(entity: MapEntity) -> void:
+	if npc_directive_panel:
+		npc_directive_panel.set_selected_entity(entity)

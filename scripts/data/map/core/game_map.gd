@@ -725,8 +725,10 @@ func _compute_owner_anchor(owner_key: String) -> Vector2i:
 
 func _build_patrol_waypoints(anchor: Vector2i, leash_radius: int, patrol_type: int) -> Array[Vector2i]:
 	match patrol_type:
+		NpcDirectiveState.PatrolType.SQUARE:
+			return _build_square_patrol_waypoints(anchor, leash_radius)
 		NpcDirectiveState.PatrolType.MAP_BORDER:
-			return _build_border_patrol_waypoints(anchor)
+			return _build_border_patrol_waypoints(anchor, leash_radius)
 		_:
 			return _build_circle_patrol_waypoints(anchor, leash_radius)
 
@@ -759,16 +761,44 @@ func _build_circle_patrol_waypoints(anchor: Vector2i, leash_radius: int) -> Arra
 	return waypoints
 
 
-func _build_border_patrol_waypoints(anchor: Vector2i) -> Array[Vector2i]:
+func _build_square_patrol_waypoints(anchor: Vector2i, half_side: int) -> Array[Vector2i]:
+	var waypoints: Array[Vector2i] = []
+	if anchor == Vector2i.ZERO:
+		return waypoints
+
+	var r: int = maxi(1, half_side)
+	var candidates: Array[Vector2i] = [
+		anchor + Vector2i(0, -r),
+		anchor + Vector2i(r, -r),
+		anchor + Vector2i(r, 0),
+		anchor + Vector2i(r, r),
+		anchor + Vector2i(0, r),
+		anchor + Vector2i(-r, r),
+		anchor + Vector2i(-r, 0),
+		anchor + Vector2i(-r, -r),
+	]
+
+	for point in candidates:
+		if is_in_bounds(point):
+			waypoints.append(point)
+
+	if waypoints.is_empty():
+		waypoints.append(anchor)
+
+	return waypoints
+
+
+func _build_border_patrol_waypoints(anchor: Vector2i, padding: int = 0) -> Array[Vector2i]:
 	var waypoints: Array[Vector2i] = []
 	if map_width <= 0 or map_height <= 0:
 		return waypoints
 
+	var pad: int = clampi(padding, 0, int(mini(map_width, map_height) * 0.5) - 1)
 	var corners: Array[Vector2i] = [
-		Vector2i(0, 0),
-		Vector2i(map_width - 1, 0),
-		Vector2i(map_width - 1, map_height - 1),
-		Vector2i(0, map_height - 1),
+		Vector2i(pad, pad),
+		Vector2i(map_width - 1 - pad, pad),
+		Vector2i(map_width - 1 - pad, map_height - 1 - pad),
+		Vector2i(pad, map_height - 1 - pad),
 	]
 
 	var start_index: int = 0

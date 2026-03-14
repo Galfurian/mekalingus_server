@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://coanqrlt58aby"]
+[gd_scene load_steps=4 format=3 uid="uid://coanqrlt58aby"]
 
 [ext_resource type="Script" uid="uid://bkkfw46aeoxtj" path="res://scripts/scenes/ui/npc_directive_panel.gd" id="1_5d61b"]
 [ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_yonrf"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_patrol"]
 
 [node name="NpcDirectivePanel" type="VBoxContainer"]
 script = ExtResource("1_5d61b")
@@ -16,141 +18,19 @@ horizontal_alignment = 1
 layout_mode = 2
 text = "Show AI Intent Overlay"
 
-[node name="TabContainer" type="TabContainer" parent="."]
-layout_mode = 2
-size_flags_vertical = 3
-current_tab = 1
-
-[node name="Directive" type="VBoxContainer" parent="TabContainer"]
-visible = false
-layout_mode = 2
-metadata/_tab_index = 0
-
-[node name="Section" type="PanelContainer" parent="TabContainer/Directive"]
+[node name="SquadRow" type="HBoxContainer" parent="."]
 layout_mode = 2
 
-[node name="Inner" type="VBoxContainer" parent="TabContainer/Directive/Section"]
-layout_mode = 2
-
-[node name="OwnerRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
-layout_mode = 2
-
-[node name="OwnerLabel" type="Label" parent="TabContainer/Directive/Section/Inner/OwnerRow"]
+[node name="SquadLabel" type="Label" parent="SquadRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Squad"
 
-[node name="OwnerOption" type="OptionButton" parent="TabContainer/Directive/Section/Inner/OwnerRow"]
+[node name="SquadOption" type="OptionButton" parent="SquadRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="DirectiveRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
-layout_mode = 2
-
-[node name="DirectiveLabel" type="Label" parent="TabContainer/Directive/Section/Inner/DirectiveRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Directive"
-
-[node name="DirectiveOption" type="OptionButton" parent="TabContainer/Directive/Section/Inner/DirectiveRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="PatrolTypeRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
-layout_mode = 2
-
-[node name="PatrolTypeLabel" type="Label" parent="TabContainer/Directive/Section/Inner/PatrolTypeRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Patrol Type"
-
-[node name="PatrolTypeOption" type="OptionButton" parent="TabContainer/Directive/Section/Inner/PatrolTypeRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="CompactRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
-layout_mode = 2
-
-[node name="CompactLabel" type="Label" parent="TabContainer/Directive/Section/Inner/CompactRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Compact Radius"
-
-[node name="CompactSpin" type="SpinBox" parent="TabContainer/Directive/Section/Inner/CompactRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-min_value = 1.0
-max_value = 20.0
-value = 4.0
-rounded = true
-
-[node name="LeashRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
-layout_mode = 2
-
-[node name="LeashLabel" type="Label" parent="TabContainer/Directive/Section/Inner/LeashRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Leash Radius"
-
-[node name="LeashSpin" type="SpinBox" parent="TabContainer/Directive/Section/Inner/LeashRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-min_value = 1.0
-max_value = 30.0
-value = 6.0
-rounded = true
-
-[node name="AnchorRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
-layout_mode = 2
-
-[node name="AnchorLabel" type="Label" parent="TabContainer/Directive/Section/Inner/AnchorRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Anchor"
-
-[node name="AnchorValue" type="Label" parent="TabContainer/Directive/Section/Inner/AnchorRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "-"
-horizontal_alignment = 2
-
-[node name="PatrolRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
-layout_mode = 2
-
-[node name="PatrolLabel" type="Label" parent="TabContainer/Directive/Section/Inner/PatrolRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Patrol Target"
-
-[node name="PatrolValue" type="Label" parent="TabContainer/Directive/Section/Inner/PatrolRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "-"
-horizontal_alignment = 2
-
-[node name="ButtonsRow" type="HBoxContainer" parent="TabContainer/Directive/Section/Inner"]
-layout_mode = 2
-
-[node name="ApplyButton" type="Button" parent="TabContainer/Directive/Section/Inner/ButtonsRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Apply"
-
-[node name="ResetAnchorButton" type="Button" parent="TabContainer/Directive/Section/Inner/ButtonsRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Set Anchor"
-
-[node name="ResetAllButton" type="Button" parent="TabContainer/Directive/Section/Inner/ButtonsRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Clear All Directives"
-
-[node name="Squads" type="VBoxContainer" parent="TabContainer"]
-layout_mode = 2
-metadata/_tab_index = 1
-
-[node name="SquadTree" type="Tree" parent="TabContainer/Squads"]
+[node name="SquadTree" type="Tree" parent="."]
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_vertical = 3
@@ -158,28 +38,82 @@ columns = 4
 column_titles_visible = true
 hide_root = true
 
-[node name="QuickButtons" type="HBoxContainer" parent="TabContainer/Squads"]
+[node name="SpreadRow" type="HBoxContainer" parent="."]
 layout_mode = 2
 
-[node name="QuickHold" type="Button" parent="TabContainer/Squads/QuickButtons"]
+[node name="SpreadLabel" type="Label" parent="SpreadRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Hold"
+text = "Spread"
 
-[node name="QuickPatrol" type="Button" parent="TabContainer/Squads/QuickButtons"]
+[node name="SpreadSpin" type="SpinBox" parent="SpreadRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 30.0
+value = 6.0
+rounded = true
+
+[node name="MoveSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="MoveSectionLabel" type="Label" parent="."]
+layout_mode = 2
+text = "Move"
+horizontal_alignment = 1
+
+[node name="MoveButtons" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="MoveCompactButton" type="Button" parent="MoveButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Move Compact"
+
+[node name="MoveNowButton" type="Button" parent="MoveButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Move Now"
+
+[node name="PatrolSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="PatrolSectionLabel" type="Label" parent="."]
+layout_mode = 2
+text = "Patrol"
+horizontal_alignment = 1
+
+[node name="PatrolTypeRow" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="CircleButton" type="Button" parent="PatrolTypeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_patrol")
+text = "Circle"
+
+[node name="SquareButton" type="Button" parent="PatrolTypeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_group = SubResource("ButtonGroup_patrol")
+text = "Square"
+
+[node name="BorderButton" type="Button" parent="PatrolTypeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_group = SubResource("ButtonGroup_patrol")
+text = "Map Border"
+
+[node name="PatrolButton" type="Button" parent="."]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Patrol"
 
-[node name="AnchorButtons" type="HBoxContainer" parent="TabContainer/Squads"]
-layout_mode = 2
-
-[node name="SetAnchorHere" type="Button" parent="TabContainer/Squads/AnchorButtons"]
+[node name="CancelButton" type="Button" parent="."]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Set Anchor"
-
-[node name="AutoPatrolRing" type="Button" parent="TabContainer/Squads/AnchorButtons"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Auto Patrol Ring"
+text = "Cancel all Plans"

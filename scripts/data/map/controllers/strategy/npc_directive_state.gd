@@ -8,6 +8,7 @@ enum Directive {
 
 enum PatrolType {
 	CIRCLE,
+	SQUARE,
 	MAP_BORDER,
 }
 
@@ -37,6 +38,7 @@ static func from_dict(data: Dictionary) -> NpcDirectiveState:
 	state.patrol_type = clampi(
 		int(data.get("patrol_type", PatrolType.CIRCLE)), PatrolType.CIRCLE, PatrolType.MAP_BORDER
 	)
+
 	state.compact_radius = maxi(1, int(data.get("compact_radius", 4)))
 	state.leash_radius = maxi(1, int(data.get("leash_radius", 6)))
 	state.aggressiveness_override = float(data.get("aggressiveness_override", -1.0))

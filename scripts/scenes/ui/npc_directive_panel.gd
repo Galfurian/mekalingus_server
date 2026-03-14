@@ -20,7 +20,6 @@ var _anchor_pick_mode: bool = false
 var _anchor_pick_owner_key: String = ""
 var _pending_action: int = PendingAction.NONE
 
-@onready var squad_option: OptionButton = $SquadRow/SquadOption
 @onready var squad_tree: Tree = $SquadTree
 @onready var spread_spin: SpinBox = $SpreadRow/SpreadSpin
 @onready var move_compact_button: Button = $MoveButtons/MoveCompactButton
@@ -34,7 +33,6 @@ var _pending_action: int = PendingAction.NONE
 
 
 func _ready() -> void:
-	squad_option.item_selected.connect(_on_squad_selected)
 	squad_tree.item_selected.connect(_on_squad_tree_item_selected)
 	squad_tree.set_column_title(0, "Squad")
 	squad_tree.set_column_title(1, "Units")
@@ -53,14 +51,12 @@ func _ready() -> void:
 
 func setup(p_game_map: GameMap) -> void:
 	game_map = p_game_map
-	_refresh_squad_option()
 	_refresh_squad_tree()
 	_refresh_spread_from_selection()
 
 
 func clear() -> void:
 	game_map = null
-	squad_option.clear()
 	if squad_tree:
 		squad_tree.clear()
 	_set_controls_enabled(false)
@@ -72,7 +68,6 @@ func refresh_state() -> void:
 	if not game_map:
 		clear()
 		return
-	_refresh_squad_option()
 	_refresh_squad_tree()
 	_refresh_spread_from_selection()
 
@@ -83,11 +78,7 @@ func set_selected_entity(entity: MapEntity) -> void:
 	var owner_key: String = game_map.get_owner_key(entity.owner)
 	if owner_key.is_empty():
 		return
-	for index in range(squad_option.item_count):
-		if str(squad_option.get_item_metadata(index)) == owner_key:
-			squad_option.select(index)
-			break
-	_sync_tree_to_option()
+	_select_squad_tree_owner(owner_key)
 	_refresh_spread_from_selection()
 
 
@@ -149,11 +140,6 @@ func is_ai_overlay_enabled() -> bool:
 	return overlay_toggle and overlay_toggle.button_pressed
 
 
-func _on_squad_selected(_index: int) -> void:
-	_sync_tree_to_option()
-	_refresh_spread_from_selection()
-
-
 func _on_squad_tree_item_selected() -> void:
 	if not game_map:
 		return
@@ -163,10 +149,6 @@ func _on_squad_tree_item_selected() -> void:
 	var owner_key: String = str(selected_item.get_metadata(0))
 	if owner_key.is_empty():
 		return
-	for index in range(squad_option.item_count):
-		if str(squad_option.get_item_metadata(index)) == owner_key:
-			squad_option.select(index)
-			break
 	_refresh_spread_from_selection()
 
 
@@ -245,41 +227,12 @@ func _on_cancel_all_pressed() -> void:
 		)
 	_set_anchor_pick_mode(false)
 	_reissue_ai_orders()
-	_refresh_squad_option()
 	_refresh_squad_tree()
 	directives_changed.emit(game_map)
 
 
 func _on_overlay_toggled(enabled: bool) -> void:
 	ai_overlay_toggled.emit(enabled)
-
-
-func _refresh_squad_option() -> void:
-	var selected_owner_key: String = _get_selected_owner_key()
-	squad_option.clear()
-	if not game_map:
-		_set_controls_enabled(false)
-		return
-
-	var owner_keys: Array[String] = game_map.get_owner_keys(false)
-	owner_keys.sort_custom(func(a: String, b: String):
-		return (
-			game_map.get_owner_label_by_key(a).to_lower()
-			< game_map.get_owner_label_by_key(b).to_lower()
-		)
-	)
-
-	for owner_key in owner_keys:
-		var index: int = squad_option.item_count
-		squad_option.add_item(game_map.get_owner_label_by_key(owner_key))
-		squad_option.set_item_metadata(index, owner_key)
-		if owner_key == selected_owner_key:
-			squad_option.select(index)
-
-	if squad_option.item_count > 0 and squad_option.get_selected() < 0:
-		squad_option.select(0)
-
-	_set_controls_enabled(squad_option.item_count > 0)
 
 
 func _refresh_squad_tree() -> void:
@@ -321,6 +274,8 @@ func _refresh_squad_tree() -> void:
 	if first_child and not squad_tree.get_selected():
 		first_child.select(0)
 
+	_set_controls_enabled(squad_tree.get_selected() != null)
+
 
 func _refresh_spread_from_selection() -> void:
 	var owner_key: String = _get_selected_owner_key()
@@ -346,18 +301,6 @@ func _sync_patrol_type_buttons(patrol_type: int) -> void:
 			border_button.button_pressed = true
 		_:
 			circle_button.button_pressed = true
-
-
-func _sync_tree_to_option() -> void:
-	var owner_key: String = _get_selected_owner_key()
-	if owner_key.is_empty() or not squad_tree.get_root():
-		return
-	var item: TreeItem = squad_tree.get_root().get_first_child()
-	while item:
-		if str(item.get_metadata(0)) == owner_key:
-			item.select(0)
-			break
-		item = item.get_next()
 
 
 func _set_controls_enabled(enabled: bool) -> void:
@@ -403,9 +346,7 @@ func _reissue_ai_orders() -> void:
 
 
 func _get_selected_owner_key() -> String:
-	if squad_option.item_count <= 0 or squad_option.get_selected() < 0:
-		return ""
-	return str(squad_option.get_item_metadata(squad_option.get_selected()))
+	return _get_selected_owner_key_from_squad_tree()
 
 
 func _get_selected_owner_key_from_squad_tree() -> String:
@@ -413,6 +354,18 @@ func _get_selected_owner_key_from_squad_tree() -> String:
 	if not selected_item:
 		return ""
 	return str(selected_item.get_metadata(0))
+
+
+func _select_squad_tree_owner(owner_key: String) -> void:
+	if owner_key.is_empty() or not squad_tree.get_root():
+		return
+
+	var item: TreeItem = squad_tree.get_root().get_first_child()
+	while item:
+		if str(item.get_metadata(0)) == owner_key:
+			item.select(0)
+			return
+		item = item.get_next()
 
 
 func _get_selected_patrol_type() -> int:

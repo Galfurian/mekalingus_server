@@ -18,18 +18,6 @@ horizontal_alignment = 1
 layout_mode = 2
 text = "Show AI Intent Overlay"
 
-[node name="SquadRow" type="HBoxContainer" parent="."]
-layout_mode = 2
-
-[node name="SquadLabel" type="Label" parent="SquadRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Squad"
-
-[node name="SquadOption" type="OptionButton" parent="SquadRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-
 [node name="SquadTree" type="Tree" parent="."]
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2

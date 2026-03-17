@@ -2,7 +2,7 @@ class_name AIPlanningContext
 extends RefCounted
 
 var source: MapCombatEntity
-var game_map
+var game_map: GameMap
 var aggressiveness: float = 1.0
 var turn_context: RefCounted = null
 

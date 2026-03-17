@@ -133,7 +133,7 @@ static func _consume_expensive_op(
 		return current_ops
 
 	current_ops = 0
-	if context and is_instance_valid(context.game_map):
+	if context and is_instance_valid(context.game_map) and context.game_map.is_inside_tree():
 		var tree: SceneTree = context.game_map.get_tree()
 		if tree:
 			await tree.process_frame

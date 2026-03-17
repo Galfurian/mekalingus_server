@@ -1,9 +1,10 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://77eou844yvq7"]
 
-[ext_resource type="Script" path="res://scripts/ui/gameplay/equipment_panel.gd" id="1_equip"]
+[ext_resource type="Script" uid="uid://depatn37kln1c" path="res://scripts/ui/gameplay/equipment_panel.gd" id="1_equip"]
 
 [node name="Equipment" type="Control"]
-layout_mode = 2
+layout_mode = 3
+anchors_preset = 0
 script = ExtResource("1_equip")
 
 [node name="SlotEditorScroll" type="ScrollContainer" parent="."]

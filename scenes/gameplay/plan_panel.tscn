@@ -1,10 +1,11 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://bijaving70etq"]
 
-[ext_resource type="Script" path="res://scripts/ui/gameplay/plan_panel.gd" id="1_plan"]
+[ext_resource type="Script" uid="uid://3pr3nicdx3xc" path="res://scripts/ui/gameplay/plan_panel.gd" id="1_plan"]
 
 [node name="Plan" type="Control"]
 visible = false
-layout_mode = 2
+layout_mode = 3
+anchors_preset = 0
 script = ExtResource("1_plan")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]

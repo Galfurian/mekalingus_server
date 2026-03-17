@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://cosbr482fkmyp"]
 
-[ext_resource type="Script" uid="uid://duq72mdkt152f" path="res://scripts/ui/gameplay/info_panel.gd" id="1_x2cik"]
-[ext_resource type="PackedScene" path="res://scenes/gameplay/entity_info_panel.tscn" id="2_entity"]
+[ext_resource type="Script" path="res://scripts/ui/gameplay/info_panel.gd" id="1_x2cik"]
+[ext_resource type="PackedScene" uid="uid://tf2613r6o8gj" path="res://scenes/gameplay/entity_info_panel.tscn" id="2_entity"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/item_inspector.tscn" id="3_item"]
 
 [node name="InfoPanel" type="Control"]
@@ -24,8 +24,5 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="EntityInfo" parent="EntityInspector" instance=ExtResource("2_entity")]
-layout_mode = 2
 
 [node name="ItemInspector" parent="EntityInspector" instance=ExtResource("3_item")]
-visible = false
-layout_mode = 2

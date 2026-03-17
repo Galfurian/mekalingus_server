@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dct1pd3p6nlaa"]
 
-[ext_resource type="Script" uid="uid://qjanx1ebljvc" path="res://scripts/ui/server_admin/map_management_panel.gd" id="1_ap83w"]
+[ext_resource type="Script" path="res://scripts/ui/server_admin/map_management_panel.gd" id="1_ap83w"]
 [ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_i8oxt"]
 
 [node name="MapManagementPanel" type="VBoxContainer"]

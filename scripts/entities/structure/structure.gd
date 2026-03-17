@@ -30,40 +30,21 @@ func get_icon_path() -> String:
 
 func rebuild_combat_state() -> void:
 	var stats_payload: Dictionary = {
-		"health": health,
-		"max_health": max_health,
-		"armor": armor,
-		"max_armor": max_armor,
-		"shield": shield,
-		"max_shield": max_shield,
-		"power": power,
-		"max_power": max_power,
-		"health_generation": health_generation,
-		"armor_generation": armor_generation,
-		"shield_generation": shield_generation,
-		"power_generation": power_generation,
-		"speed": speed,
+		"health": template.health,
+		"max_health": template.health,
+		"armor": template.armor,
+		"max_armor": template.armor,
+		"shield": template.shield,
+		"max_shield": template.shield,
+		"power": template.power,
+		"max_power": template.power,
+		"health_generation": 0,
+		"armor_generation": 0,
+		"shield_generation": template.shield_generation,
+		"power_generation": template.power_generation,
+		"speed": template.speed,
 	}
-	if template:
-		stats_payload = {
-			"health": template.health,
-			"max_health": template.health,
-			"armor": template.armor,
-			"max_armor": template.armor,
-			"shield": template.shield,
-			"max_shield": template.shield,
-			"power": template.power,
-			"max_power": template.power,
-			"health_generation": 0,
-			"armor_generation": 0,
-			"shield_generation": template.shield_generation,
-			"power_generation": template.power_generation,
-			"speed": template.speed,
-		}
-		rebuild_combat_state_with_items(stats_payload, template.slots)
-		return
-
-	rebuild_combat_state_with_items(stats_payload, slots)
+	rebuild_combat_state_with_items(stats_payload, template.slots)
 
 
 func from_dict(data: Dictionary = {}) -> bool:

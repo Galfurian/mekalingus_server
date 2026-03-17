@@ -1,10 +1,6 @@
 class_name AIAttackIntentEvaluator
 extends RefCounted
 
-
-const TacticalBrainResolver = preload(
-	"res://scripts/data/map/controllers/strategy/ai_tactical_brain_resolver.gd"
-)
 const DEFAULT_MAX_LOS_TILE_CANDIDATES: int = 6
 
 
@@ -18,7 +14,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	if offensive_modules.is_empty():
 		return null
 
-	var profile: AIActionProfile = TacticalBrainResolver.resolve_attack_profile(source)
+	var profile: AIActionProfile = AITacticalBrainResolver.resolve_attack_profile(source)
 	if not profile:
 		# No attack profile means this brain contributes zero utility to ATTACK intents.
 		return null
@@ -41,19 +37,21 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			"max_distance": float(max_candidate_distance),
 		}
 		var preliminary_score: float = profile.evaluate_preliminary(preliminary_context)
-		candidate_targets.append(
-			{
-				"target": target,
-				"preliminary_score": preliminary_score,
-			}
+		(
+			candidate_targets
+			. append(
+				{
+					"target": target,
+					"preliminary_score": preliminary_score,
+				}
+			)
 		)
 
 	if candidate_targets.is_empty():
 		return null
 
 	candidate_targets.sort_custom(
-		func(a: Dictionary, b: Dictionary):
-			return a["preliminary_score"] > b["preliminary_score"]
+		func(a: Dictionary, b: Dictionary): return a["preliminary_score"] > b["preliminary_score"]
 	)
 
 	var los_cache: Dictionary = {}
@@ -141,13 +139,16 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	if not best_target:
 		return null
 
-	return AIPlanBuilder.build_plan(
-		context,
-		AIPlan.Intent.ATTACK,
-		clampf(best_score, 0.0, 100.0),
-		best_target,
-		best_equipped_module,
-		best_destination,
+	return (
+		AIPlanBuilder
+		. build_plan(
+			context,
+			AIPlan.Intent.ATTACK,
+			clampf(best_score, 0.0, 100.0),
+			best_target,
+			best_equipped_module,
+			best_destination,
+		)
 	)
 
 
@@ -203,11 +204,14 @@ static func _find_attack_destination_with_los(
 		if distance_to_target < min_range or distance_to_target > max_range:
 			continue
 
-		candidate_tiles.append(
-			{
-				"tile": tile,
-				"distance_to_source": _manhattan_distance(source.position, tile),
-			}
+		(
+			candidate_tiles
+			. append(
+				{
+					"tile": tile,
+					"distance_to_source": _manhattan_distance(source.position, tile),
+				}
+			)
 		)
 
 	if candidate_tiles.is_empty():
@@ -218,8 +222,7 @@ static func _find_attack_destination_with_los(
 		}
 
 	candidate_tiles.sort_custom(
-		func(a: Dictionary, b: Dictionary):
-			return a["distance_to_source"] < b["distance_to_source"]
+		func(a: Dictionary, b: Dictionary): return a["distance_to_source"] < b["distance_to_source"]
 	)
 
 	var max_los_candidates: int = mini(DEFAULT_MAX_LOS_TILE_CANDIDATES, candidate_tiles.size())
@@ -248,10 +251,13 @@ static func _find_attack_destination_with_los(
 		max_expensive_ops_per_frame,
 		current_expensive_ops,
 	)
-	var path: Array[Vector2i] = AIPathfinder.get_shortest_path(
-		context.game_map,
-		source.position,
-		destination,
+	var path: Array[Vector2i] = (
+		AIPathfinder
+		. get_shortest_path(
+			context.game_map,
+			source.position,
+			destination,
+		)
 	)
 	if path.is_empty():
 		return {

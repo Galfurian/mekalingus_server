@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bnw3baaeo5u61"]
 
-[ext_resource type="Script" uid="uid://ba0jwmx0v6kg6" path="res://scripts/scenes/gameplay/spawn_panel.gd" id="1"]
+[ext_resource type="Script" uid="uid://ba0jwmx0v6kg6" path="res://scripts/ui/gameplay/spawn_panel.gd" id="1"]
 [ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_8r2pv"]
 
 [node name="SpawnPanel" type="PopupPanel"]

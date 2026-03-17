@@ -31,7 +31,7 @@ func _init(
 # =============================================================================
 
 
-static func from_dict(data: Dictionary) -> MapPickup:
+static func from_dict(data: Dictionary) -> MapEntity:
 	"""
 	Loads pickup data from a dictionary.
 	"""

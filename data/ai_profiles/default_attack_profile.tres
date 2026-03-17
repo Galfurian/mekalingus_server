@@ -1,9 +1,9 @@
 [gd_resource type="AIActionProfile" load_steps=8 format=3]
 
-[ext_resource type="Script" path="res://scripts/data/ai/ai_action_profile.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/data/ai/considerations/target_health_consideration.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/data/ai/considerations/target_distance_consideration.gd" id="3"]
-[ext_resource type="Script" path="res://scripts/data/ai/considerations/module_effectiveness_consideration.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/systems/ai/ai_action_profile.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/systems/ai/considerations/target_health_consideration.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/systems/ai/considerations/target_distance_consideration.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/systems/ai/considerations/module_effectiveness_consideration.gd" id="4"]
 
 [sub_resource type="Curve" id="1"]
 _data = [Vector2(0, 1), 0.0, -1.5, 0, 0, Vector2(1, 0), -1.5, 0.0, 0, 0]

@@ -4,6 +4,9 @@ class_name CooldownManager
 
 extends Node
 
+const MIN_COOLDOWN_MODIFIER: int = -5
+const MAX_COOLDOWN_MODIFIER: int = 5
+
 # =============================================================================
 # PROPERTIES
 # =============================================================================
@@ -12,10 +15,6 @@ extends Node
 var actor = null
 # Dictionary mapping module names to remaining cooldown turns.
 var cooldowns: Dictionary = {}
-
-const MIN_COOLDOWN_MODIFIER: int = -5
-const MAX_COOLDOWN_MODIFIER: int = 5
-
 
 # =============================================================================
 # INITIALIZATION

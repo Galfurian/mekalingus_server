@@ -19,10 +19,10 @@ config/icon="uid://du2t45aonvtq1"
 
 GameServer="*res://scripts/core/game_server.gd"
 RPCHandler="*res://scripts/core/rpc_handler.gd"
-TemplateManager="*res://scripts/data/template_manager.gd"
-DataManager="*res://scripts/data/data_manager.gd"
+TemplateManager="*res://scripts/core/template_manager.gd"
+DataManager="*res://scripts/core/data_manager.gd"
 UIColor="*res://scripts/utils/ui_color.gd"
-AIUtils="*res://scripts/data/map/controllers/ai_utils.gd"
+AIUtils="*res://scripts/systems/ai/ai_utils.gd"
 
 [display]
 

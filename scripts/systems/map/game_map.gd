@@ -9,7 +9,6 @@ extends Node
 # =============================================================================
 
 const DEFAULT_DETECTION_RANGE = 10
-const DIRECTIVE_PLANNER_SCRIPT = preload("res://scripts/data/map/turn_system/directive_planner.gd")
 
 # =====================================
 # STATIC INFORMATION
@@ -80,7 +79,7 @@ func _init(
 	chat_logger.set_chat_preset()
 	ai_controller = AIController.new(self)
 	turn_manager = TurnManager.new(self)
-	directive_planner = DIRECTIVE_PLANNER_SCRIPT.new(self)
+	directive_planner = DirectivePlanner.new(self)
 
 
 func generate_map() -> void:
@@ -591,7 +590,7 @@ static func from_dict(data: Dictionary) -> GameMap:
 	# Load the NPC units.
 	map.npc_units.clear()
 	for unit_uuid in data.get("npc_units", {}):
-		var unit: MapMek = MapMek.from_dict(data.get("npc_units", {})[unit_uuid])
+		var unit := MapMek.from_dict(data.get("npc_units", {})[unit_uuid]) as MapMek
 		if unit:
 			map.npc_units[unit.combatant.uuid] = unit
 		else:
@@ -601,7 +600,7 @@ static func from_dict(data: Dictionary) -> GameMap:
 	# Load the player units.
 	map.player_units.clear()
 	for unit_uuid in data.get("player_units", {}):
-		var player_unit: MapMek = MapMek.from_dict(data["player_units"][unit_uuid])
+		var player_unit := MapMek.from_dict(data["player_units"][unit_uuid]) as MapMek
 		if player_unit:
 			map.player_units[player_unit.combatant.uuid] = player_unit
 		else:

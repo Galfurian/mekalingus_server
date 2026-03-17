@@ -23,7 +23,7 @@ func can_move() -> bool:
 # =============================================================================
 
 
-static func from_dict(data: Dictionary) -> MapMek:
+static func from_dict(data: Dictionary) -> MapEntity:
 	"""
 	Loads item data from a dictionary.
 	"""

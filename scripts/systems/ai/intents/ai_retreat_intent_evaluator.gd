@@ -2,17 +2,12 @@ class_name AIRetreatIntentEvaluator
 extends RefCounted
 
 
-const TacticalBrainResolver = preload(
-	"res://scripts/data/map/controllers/strategy/ai_tactical_brain_resolver.gd"
-)
-
-
 static func evaluate(context: AIPlanningContext) -> AIPlan:
 	var source: MapCombatEntity = context.source
 	if not source.can_move():
 		return null
 
-	var profile: AIActionProfile = TacticalBrainResolver.resolve_retreat_profile(source)
+	var profile: AIActionProfile = AITacticalBrainResolver.resolve_retreat_profile(source)
 	if not profile:
 		return null
 
@@ -34,19 +29,21 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			"tile": tile,
 		}
 		var preliminary_score: float = profile.evaluate_preliminary(preliminary_context)
-		candidate_tiles.append(
-			{
-				"tile": tile,
-				"preliminary_score": preliminary_score,
-			}
+		(
+			candidate_tiles
+			. append(
+				{
+					"tile": tile,
+					"preliminary_score": preliminary_score,
+				}
+			)
 		)
 
 	if candidate_tiles.is_empty():
 		return null
 
 	candidate_tiles.sort_custom(
-		func(a: Dictionary, b: Dictionary):
-			return a["preliminary_score"] > b["preliminary_score"]
+		func(a: Dictionary, b: Dictionary): return a["preliminary_score"] > b["preliminary_score"]
 	)
 
 	var best_tile: Vector2i = source.position
@@ -61,11 +58,16 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		var tile: Vector2i = candidate["tile"]
 
 		if tile != source.position:
-			expensive_ops = await _consume_expensive_op(context, expensive_ops_budget, expensive_ops)
-			var path: Array[Vector2i] = AIPathfinder.get_shortest_path(
-				context.game_map,
-				source.position,
-				tile,
+			expensive_ops = await _consume_expensive_op(
+				context, expensive_ops_budget, expensive_ops
+			)
+			var path: Array[Vector2i] = (
+				AIPathfinder
+				. get_shortest_path(
+					context.game_map,
+					source.position,
+					tile,
+				)
 			)
 			if path.is_empty():
 				continue
@@ -108,13 +110,16 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	if best_tile == source.position:
 		return null
 
-	return AIPlanBuilder.build_plan(
-		context,
-		AIPlan.Intent.RETREAT,
-		clampf(best_score, 0.0, 100.0),
-		source,
-		best_equipped_module,
-		best_tile,
+	return (
+		AIPlanBuilder
+		. build_plan(
+			context,
+			AIPlan.Intent.RETREAT,
+			clampf(best_score, 0.0, 100.0),
+			source,
+			best_equipped_module,
+			best_tile,
+		)
 	)
 
 

@@ -40,7 +40,7 @@ func can_move() -> bool:
 # =============================================================================
 
 
-static func from_dict(data: Dictionary) -> MapStructure:
+static func from_dict(data: Dictionary) -> MapEntity:
 	"""
 	Loads structure data from a dictionary.
 	"""

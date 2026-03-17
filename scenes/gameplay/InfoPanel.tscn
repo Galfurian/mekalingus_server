@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://cosbr482fkmyp"]
 
-[ext_resource type="Script" uid="uid://duq72mdkt152f" path="res://scripts/scenes/gameplay/info_panel.gd" id="1_x2cik"]
+[ext_resource type="Script" uid="uid://duq72mdkt152f" path="res://scripts/ui/gameplay/info_panel.gd" id="1_x2cik"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/entity_info_panel.tscn" id="2_entity"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/item_inspector.tscn" id="3_item"]
 

@@ -1,5 +1,5 @@
 class_name SelfHealthConsideration
-extends "res://scripts/data/ai/ai_consideration.gd"
+extends "res://scripts/systems/ai/ai_consideration.gd"
 
 
 func get_normalized_input(context: Dictionary) -> float:

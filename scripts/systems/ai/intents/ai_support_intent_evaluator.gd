@@ -2,14 +2,9 @@ class_name AISupportIntentEvaluator
 extends RefCounted
 
 
-const TacticalBrainResolver = preload(
-	"res://scripts/data/map/controllers/strategy/ai_tactical_brain_resolver.gd"
-)
-
-
 static func evaluate(context: AIPlanningContext) -> AIPlan:
 	var source: MapCombatEntity = context.source
-	var profile: AIActionProfile = TacticalBrainResolver.resolve_support_profile(source)
+	var profile: AIActionProfile = AITacticalBrainResolver.resolve_support_profile(source)
 	if not profile:
 		return null
 
@@ -34,19 +29,21 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			"max_distance": float(max_candidate_distance),
 		}
 		var preliminary_score: float = profile.evaluate_preliminary(preliminary_context)
-		candidate_targets.append(
-			{
-				"target": target,
-				"preliminary_score": preliminary_score,
-			}
+		(
+			candidate_targets
+			. append(
+				{
+					"target": target,
+					"preliminary_score": preliminary_score,
+				}
+			)
 		)
 
 	if candidate_targets.is_empty():
 		return null
 
 	candidate_targets.sort_custom(
-		func(a: Dictionary, b: Dictionary):
-			return a["preliminary_score"] > b["preliminary_score"]
+		func(a: Dictionary, b: Dictionary): return a["preliminary_score"] > b["preliminary_score"]
 	)
 
 	var best_score: float = -INF
@@ -81,7 +78,9 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			var destination: Vector2i = source.position
 
 			if not can_use_from_source:
-				expensive_ops = await _consume_expensive_op(context, expensive_ops_budget, expensive_ops)
+				expensive_ops = await _consume_expensive_op(
+					context, expensive_ops_budget, expensive_ops
+				)
 				var move_data: Dictionary = await _find_support_destination(
 					context,
 					source,
@@ -118,13 +117,16 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	if not best_target:
 		return null
 
-	return AIPlanBuilder.build_plan(
-		context,
-		AIPlan.Intent.SUPPORT,
-		clampf(best_score, 0.0, 100.0),
-		best_target,
-		best_equipped_module,
-		best_destination,
+	return (
+		AIPlanBuilder
+		. build_plan(
+			context,
+			AIPlan.Intent.SUPPORT,
+			clampf(best_score, 0.0, 100.0),
+			best_target,
+			best_equipped_module,
+			best_destination,
+		)
 	)
 
 
@@ -166,12 +168,15 @@ static func _find_support_destination(
 			current_expensive_ops,
 		)
 		var tile_threat: float = context.get_threat(tile)
-		candidate_tiles.append(
-			{
-				"tile": tile,
-				"tile_threat": tile_threat,
-				"distance_to_source": _manhattan_distance(source.position, tile),
-			}
+		(
+			candidate_tiles
+			. append(
+				{
+					"tile": tile,
+					"tile_threat": tile_threat,
+					"distance_to_source": _manhattan_distance(source.position, tile),
+				}
+			)
 		)
 
 	if candidate_tiles.is_empty():
@@ -194,10 +199,13 @@ static func _find_support_destination(
 		max_expensive_ops_per_frame,
 		current_expensive_ops,
 	)
-	var path: Array[Vector2i] = AIPathfinder.get_shortest_path(
-		context.game_map,
-		source.position,
-		destination,
+	var path: Array[Vector2i] = (
+		AIPathfinder
+		. get_shortest_path(
+			context.game_map,
+			source.position,
+			destination,
+		)
 	)
 	if path.is_empty():
 		return {

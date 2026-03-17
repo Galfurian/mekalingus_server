@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dj4n3b2k1m7pq"]
 
-[ext_resource type="Script" uid="uid://clkdqjbuav1ec" path="res://scripts/scenes/gameplay/entity_list_panel.gd" id="1_ql8hw"]
+[ext_resource type="Script" uid="uid://clkdqjbuav1ec" path="res://scripts/ui/gameplay/entity_list_panel.gd" id="1_ql8hw"]
 
 [node name="EntityListPanel" type="PanelContainer"]
 anchors_preset = 15

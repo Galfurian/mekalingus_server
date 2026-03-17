@@ -38,6 +38,8 @@ var _is_active: bool
 var _timer: float
 # The time interval for each turn in seconds.
 var _turn_interval: float
+# Prevents turn re-entry while AI planning yields across frames.
+var _is_processing_turn: bool
 
 # =================================================================
 # PUBLIC API
@@ -58,6 +60,7 @@ func _init(p_game_map, p_turn_interval: float = 1.0) -> void:
 	_is_active = false
 	_timer = 0.0
 	_turn_interval = p_turn_interval
+	_is_processing_turn = false
 
 
 func get_time_of_day() -> float:
@@ -127,12 +130,14 @@ func step_once() -> void:
 	"""
 	if not game_map:
 		return
+	if _is_processing_turn:
+		return
 
 	var was_active: bool = _is_active
 	if _is_active:
 		stop()
 
-	_execute_turn()
+	await _execute_turn()
 
 	# Preserve whatever run/paused state was in effect before stepping. This allows stepping through
 	# turns even when there are no hostiles.
@@ -155,6 +160,7 @@ func clear() -> void:
 	_is_active = false
 	_timer = 0.0
 	_turn_interval = 0.0
+	_is_processing_turn = false
 
 
 func start() -> void:
@@ -181,32 +187,37 @@ func tick(delta: float) -> void:
 		return
 	if not _is_active:
 		return
+	if _is_processing_turn:
+		return
 	# Increment the timer.
 	_timer += delta
 	# If the timer exceeds the turn interval, execute the turn.
 	# This is the main loop for the turn manager.
 	if _timer >= _turn_interval:
-		_execute_turn()
+		await _execute_turn()
 
 
 func _execute_turn() -> void:
+	if _is_processing_turn:
+		return
+	_is_processing_turn = true
 	# Reset the timer.
 	_timer = 0.0
 	# Emit the turn started signal.
 	on_turn_started.emit(_current_turn)
 
 	# 1) Generate AI orders for all AI-controlled combat entities.
-	game_map.ai_controller.generate_ai_orders()
+	await game_map.ai_controller.generate_ai_orders()
 
 	# 3.1) Process use of offensive module activations.
-	game_map.ai_controller.execute_offensive_module_orders()
+	await game_map.ai_controller.execute_offensive_module_orders()
 	# 3.2) Process use of utility module activations.
-	game_map.ai_controller.execute_utility_module_orders()
+	await game_map.ai_controller.execute_utility_module_orders()
 	# 3.3) Check if any units are destroyed after executing the orders.
 	_erase_destroyed_units()
 
 	# 4) Process movement orders.
-	game_map.ai_controller.execute_move_orders()
+	await game_map.ai_controller.execute_move_orders()
 
 	# 5.1) Regenerate all units.
 	_regenerate_units()
@@ -218,7 +229,7 @@ func _execute_turn() -> void:
 	# Always precompute plans for the next turn so the UI can display intent, even when there are no
 	# hostile pairs remaining. This keeps the AI plan cache up to date for the next step.
 	if game_map and game_map.ai_controller:
-		game_map.ai_controller.precompute_next_turn_plans()
+		await game_map.ai_controller.precompute_next_turn_plans()
 
 	# Emit the turn ended signal.
 	on_turn_ended.emit(_current_turn)
@@ -236,6 +247,8 @@ func _execute_turn() -> void:
 				"Combat ended on turn %d: no hostile units remain." % _current_turn,
 			)
 		)
+
+	_is_processing_turn = false
 
 
 static func format_pos_tag(pos: Vector2i) -> String:

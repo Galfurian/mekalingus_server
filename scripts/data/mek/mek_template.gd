@@ -33,6 +33,8 @@ var speed: int
 var slots: Array[int]
 # The icon representing the Mek in the UI.
 var icon: String
+# Resource path to the AI action profile used by this mek.
+var ai_profile_path: String
 
 # =============================================================================
 # GENERAL
@@ -105,6 +107,7 @@ func from_dict(data: Dictionary):
 	speed = int(data.get("speed", 0))
 	slots = Utils.to_array_int(data["slots"])
 	icon = data.get("icon", "")
+	ai_profile_path = data.get("ai_profile_path", "")
 
 
 func to_dict() -> Dictionary:
@@ -122,4 +125,5 @@ func to_dict() -> Dictionary:
 		"speed": speed,
 		"slots": slots,
 		"icon": icon,
+		"ai_profile_path": ai_profile_path,
 	}

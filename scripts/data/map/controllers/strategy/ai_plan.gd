@@ -151,9 +151,14 @@ func _generate_combat_order(reserved_tiles: Dictionary) -> Order:
 		return null
 	else:
 		AIPathfinder.set_reserved_tiles(reserved_tiles)
-		var target_tile: Vector2i = _find_combat_approach_tile(
-			is_enemy_target, module_range, min_range, movement_speed
-		)
+		var target_tile: Vector2i = destination
+		if target_tile == Vector2i.ZERO:
+			target_tile = _find_combat_approach_tile(
+				is_enemy_target,
+				module_range,
+				min_range,
+				movement_speed,
+			)
 		if not (target_tile == Vector2i.ZERO or target_tile == source.position):
 			order = MoveOrder.new(source, target_tile)
 

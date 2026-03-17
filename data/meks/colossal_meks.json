@@ -17,7 +17,8 @@
             5,
             3
         ],
-        "icon": "meks/colossal/cmek001.png"
+        "icon": "meks/colossal/cmek001.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "cmek002": {
         "name": "Leviathan Warlord",
@@ -37,7 +38,8 @@
             4,
             4
         ],
-        "icon": "meks/colossal/cmek002.png"
+        "icon": "meks/colossal/cmek002.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "cmek003": {
         "name": "Titanus Annihilator",
@@ -57,7 +59,8 @@
             5,
             4
         ],
-        "icon": "meks/colossal/cmek003.png"
+        "icon": "meks/colossal/cmek003.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "cmek004": {
         "name": "Oblivion Sentinel",
@@ -77,7 +80,8 @@
             4,
             3
         ],
-        "icon": "meks/colossal/cmek004.png"
+        "icon": "meks/colossal/cmek004.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "cmek005": {
         "name": "Doom Bringer",
@@ -97,6 +101,7 @@
             5,
             3
         ],
-        "icon": "meks/colossal/cmek005.png"
+        "icon": "meks/colossal/cmek005.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     }
 }

@@ -136,7 +136,7 @@ func _process_order_with_recovery(order: Order, expected_type: Object) -> void:
 	else:
 		_add_log("Invalid: %s" % str(order))
 		if ENABLE_ACTION_RECOVERY:
-			var replacement: Order = _reissue_order_for_source(order.source)
+			var replacement: Order = await _reissue_order_for_source(order.source)
 			if replacement:
 				if is_instance_of(replacement, expected_type):
 					replacement.execute(game_map)
@@ -157,7 +157,7 @@ func execute_utility_module_orders() -> void:
 		var order: UseUtilityModuleOrder = _use_utility_module_orders[source_uuid]
 		if not order:
 			continue
-		_process_order_with_recovery(order, UseUtilityModuleOrder)
+		await _process_order_with_recovery(order, UseUtilityModuleOrder)
 	_use_utility_module_orders.clear()
 
 
@@ -169,7 +169,7 @@ func execute_offensive_module_orders() -> void:
 		var order: UseOffensiveModuleOrder = _use_offensive_module_orders[source_uuid]
 		if not order:
 			continue
-		_process_order_with_recovery(order, UseOffensiveModuleOrder)
+		await _process_order_with_recovery(order, UseOffensiveModuleOrder)
 	_use_offensive_module_orders.clear()
 
 
@@ -185,9 +185,9 @@ func _process_move_order_with_recovery(order: MoveOrder) -> void:
 	if game_map.is_occupied(order.destination):
 		_add_log("Skipped move order (destination occupied): %s" % str(order))
 		if ENABLE_ACTION_RECOVERY:
-			var replacement: Order = _reissue_order_for_source(order.source)
+			var replacement: Order = await _reissue_order_for_source(order.source)
 			if replacement and is_instance_of(replacement, MoveOrder):
-				_process_move_order_with_recovery(replacement)
+				await _process_move_order_with_recovery(replacement)
 			elif replacement:
 				_queue_generated_order(replacement)
 		return
@@ -224,7 +224,7 @@ func execute_move_orders() -> void:
 
 	for source_uuid: String in source_ids:
 		var order: MoveOrder = _move_orders.get(source_uuid, null)
-		_process_move_order_with_recovery(order)
+		await _process_move_order_with_recovery(order)
 
 	_move_orders.clear()
 	_reserved_move_tiles.clear()
@@ -251,7 +251,12 @@ func plan_for_unit(source: MapCombatEntity) -> void:
 		aggressiveness = source.owner.clan.aggressiveness
 
 	# Generate the plan for the source unit.
-	var new_plan: AIPlan = _planner.generate_plan(source, game_map, aggressiveness, _turn_context)
+	var new_plan: AIPlan = await _planner.generate_plan(
+		source,
+		game_map,
+		aggressiveness,
+		_turn_context,
+	)
 
 	if not new_plan or not new_plan.is_valid():
 		return
@@ -271,7 +276,7 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 		return
 
 	# Ensure the unit has a current plan, or regenerate if needed.
-	plan_for_unit(source)
+	await plan_for_unit(source)
 
 	# Retrieve the current plan from the cache.
 	var current_plan: AIPlan = get_current_plan(source)
@@ -294,7 +299,7 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 			)
 		)
 		_current_plans.erase(source.combatant.uuid)
-		plan_for_unit(source)
+		await plan_for_unit(source)
 		current_plan = get_current_plan(source)
 		if current_plan and current_plan.is_valid() and not current_plan.is_complete():
 			order = current_plan.generate_order(_reserved_move_tiles)
@@ -328,7 +333,7 @@ func _reissue_order_for_source(source: MapCombatEntity) -> Order:
 	if not source or source.combatant.is_dead():
 		return null
 	_current_plans.erase(source.combatant.uuid)
-	plan_for_unit(source)
+	await plan_for_unit(source)
 	var refreshed_plan: AIPlan = get_current_plan(source)
 	if not refreshed_plan or not refreshed_plan.is_valid() or refreshed_plan.is_complete():
 		return null
@@ -376,9 +381,9 @@ func generate_ai_orders() -> void:
 
 	for unit: MapCombatEntity in units:
 		# Generate or reuse the current plan.
-		plan_for_unit(unit)
+		await plan_for_unit(unit)
 		# Generate the next order based on the current plan.
-		generate_orders_for_unit(unit)
+		await generate_orders_for_unit(unit)
 
 	_turn_context = null
 
@@ -397,7 +402,7 @@ func precompute_next_turn_plans() -> void:
 	_turn_context = AITurnContext.new(game_map)
 
 	for unit: MapCombatEntity in _iter_ai_controlled_entities():
-		plan_for_unit(unit)
+		await plan_for_unit(unit)
 
 	_turn_context = null
 

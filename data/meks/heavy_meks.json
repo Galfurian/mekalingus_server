@@ -17,7 +17,8 @@
             2,
             2
         ],
-        "icon": "meks/heavy/hmek001.png"
+        "icon": "meks/heavy/hmek001.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "hmek002": {
         "name": "Dread Bastion",
@@ -38,7 +39,8 @@
             3,
             2
         ],
-        "icon": "meks/heavy/hmek002.png"
+        "icon": "meks/heavy/hmek002.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "hmek003": {
         "name": "Thunder Colossus",
@@ -58,7 +60,8 @@
             2,
             2
         ],
-        "icon": "meks/heavy/hmek003.png"
+        "icon": "meks/heavy/hmek003.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "hmek004": {
         "name": "Goliath Enforcer",
@@ -78,7 +81,8 @@
             3,
             3
         ],
-        "icon": "meks/heavy/hmek004.png"
+        "icon": "meks/heavy/hmek004.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "hmek005": {
         "name": "Onyx Warlord",
@@ -98,7 +102,8 @@
             2,
             2
         ],
-        "icon": "meks/heavy/hmek005.png"
+        "icon": "meks/heavy/hmek005.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "hmek006": {
         "name": "Hellstorm Titan",
@@ -118,7 +123,8 @@
             3,
             2
         ],
-        "icon": "meks/heavy/hmek006.png"
+        "icon": "meks/heavy/hmek006.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "hmek007": {
         "name": "Crimson Juggernaut",
@@ -138,7 +144,8 @@
             4,
             2
         ],
-        "icon": "meks/heavy/hmek007.png"
+        "icon": "meks/heavy/hmek007.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "hmek008": {
         "name": "Vanguard Behemoth",
@@ -158,7 +165,8 @@
             3,
             3
         ],
-        "icon": "meks/heavby/hmek008.png"
+        "icon": "meks/heavby/hmek008.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "hmek009": {
         "name": "Storm Leviathan",
@@ -178,7 +186,8 @@
             2,
             2
         ],
-        "icon": "meks/heavy/hmek009.png"
+        "icon": "meks/heavy/hmek009.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     },
     "hmek010": {
         "name": "Iron Tyrant",
@@ -198,6 +207,7 @@
             4,
             3
         ],
-        "icon": "meks/heavy/hmek010.png"
+        "icon": "meks/heavy/hmek010.png",
+        "ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
     }
 }

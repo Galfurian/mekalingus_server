@@ -10,6 +10,8 @@ class_name Mek
 var mek_id: String
 # Reference to the Mek template.
 var template = null
+# Cached AI action profile resource loaded from the template path.
+var ai_action_profile: Resource = null
 
 # =============================================================================
 # GENERAL
@@ -102,6 +104,11 @@ func from_dict(data: Dictionary = {}) -> bool:
 	# Load the template.
 	template = TemplateManager.get_mek_template(mek_id)
 	assert(template, "Cannot find the template: " + mek_id + "\n")
+	ai_action_profile = null
+	if template.ai_profile_path and not template.ai_profile_path.is_empty():
+		ai_action_profile = load(template.ai_profile_path)
+		if not ai_action_profile:
+			push_error("Failed to load AI profile at path: %s" % template.ai_profile_path)
 
 	rebuild_combat_state()
 

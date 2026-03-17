@@ -342,7 +342,7 @@ func _reissue_ai_orders() -> void:
 	if not game_map or not game_map.ai_controller:
 		return
 	game_map.ai_controller.clear()
-	game_map.ai_controller.generate_ai_orders()
+	await game_map.ai_controller.generate_ai_orders()
 
 
 func _get_selected_owner_key() -> String:

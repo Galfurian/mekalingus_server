@@ -2,10 +2,10 @@ class_name AIAttackIntentEvaluator
 extends RefCounted
 
 
-const DEFAULT_PROFILE_PATH: String = "res://data/ai_profiles/default_basic.tres"
+const DEFAULT_BRAIN_PATH: String = "res://data/ai_profiles/default_basic.tres"
 const DEFAULT_MAX_LOS_TILE_CANDIDATES: int = 6
 
-static var _profile_cache: Dictionary = {}
+static var _brain_cache: Dictionary = {}
 
 
 static func evaluate(context: AIPlanningContext) -> AIPlan:
@@ -18,8 +18,9 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	if offensive_modules.is_empty():
 		return null
 
-	var profile: Resource = _resolve_profile(source)
+	var profile: AIActionProfile = _resolve_attack_profile(source)
 	if not profile:
+		# No attack profile means this brain contributes zero utility to ATTACK intents.
 		return null
 
 	var max_module_range: int = _get_max_module_range(source, offensive_modules)
@@ -317,7 +318,24 @@ static func _get_max_module_range(
 	return max_range
 
 
-static func _resolve_profile(source: MapCombatEntity) -> Resource:
+static func _resolve_attack_profile(source: MapCombatEntity) -> AIActionProfile:
+	var brain: Resource = _resolve_brain(source)
+	if not brain:
+		return null
+
+	var attack_profile: AIActionProfile = brain.get("attack_profile")
+	if not attack_profile:
+		if source:
+			push_warning(
+				"Missing attack_profile in tactical brain for %s."
+				% source.combatant.get_chat_tag()
+			)
+		return null
+
+	return attack_profile
+
+
+static func _resolve_brain(source: MapCombatEntity) -> Resource:
 	var profile_path: String = ""
 	if source and source.owner:
 		if is_instance_of(source.owner, NPCOwned):
@@ -333,26 +351,26 @@ static func _resolve_profile(source: MapCombatEntity) -> Resource:
 			profile_path = source.owner.clan.ai_profile_path
 
 	if profile_path.is_empty():
-		profile_path = DEFAULT_PROFILE_PATH
+		profile_path = DEFAULT_BRAIN_PATH
 		if source:
 			push_warning(
 				"AI profile fallback to default for %s (%s)"
 				% [
 					source.combatant.get_chat_tag(),
-					DEFAULT_PROFILE_PATH,
+					DEFAULT_BRAIN_PATH,
 				]
 			)
 
-	if _profile_cache.has(profile_path):
-		return _profile_cache[profile_path]
+	if _brain_cache.has(profile_path):
+		return _brain_cache[profile_path]
 
-	var loaded_profile: Resource = load(profile_path)
-	if not loaded_profile:
-		push_warning("Failed to load AI profile path '%s', using default." % profile_path)
-		loaded_profile = load(DEFAULT_PROFILE_PATH)
+	var loaded_brain: Resource = load(profile_path)
+	if not loaded_brain:
+		push_warning("Failed to load tactical brain path '%s', using default." % profile_path)
+		loaded_brain = load(DEFAULT_BRAIN_PATH)
 
-	_profile_cache[profile_path] = loaded_profile
-	return loaded_profile
+	_brain_cache[profile_path] = loaded_brain
+	return loaded_brain
 
 
 static func _manhattan_distance(a: Vector2i, b: Vector2i) -> int:

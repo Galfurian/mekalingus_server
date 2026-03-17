@@ -1,6 +1,10 @@
 class_name CombatActor
 extends Node
 
+signal ai_thought_logged(entry: String)
+
+const AI_THOUGHT_LOG_LIMIT: int = 5_000
+
 # =============================================================================
 # IDENTITY / EQUIPMENT
 # =============================================================================
@@ -9,6 +13,7 @@ var uuid: String
 var alias: String
 var items: Array[Item]
 var slots: Array[int]
+var ai_thought_log: Array[String] = []
 
 # =============================================================================
 # MANAGERS
@@ -174,6 +179,31 @@ func is_alive() -> bool:
 
 func get_icon_path() -> String:
 	return ""
+
+
+func add_ai_thought(message: String) -> void:
+	if message.strip_edges().is_empty():
+		return
+
+	var entry: String = "[%s] %s" % [Time.get_time_string_from_system(), message]
+	ai_thought_log.append(entry)
+	if ai_thought_log.size() > AI_THOUGHT_LOG_LIMIT:
+		ai_thought_log = (
+			ai_thought_log
+			. slice(
+				ai_thought_log.size() - AI_THOUGHT_LOG_LIMIT,
+				ai_thought_log.size(),
+			)
+		)
+	ai_thought_logged.emit(entry)
+
+
+func get_ai_thoughts() -> Array[String]:
+	return ai_thought_log.duplicate()
+
+
+func clear_ai_thoughts() -> void:
+	ai_thought_log.clear()
 
 
 func get_stat(stat: int) -> int:
@@ -351,10 +381,13 @@ func apply_regen_effects() -> void:
 	if not active_effect_manager:
 		return
 	for effect in active_effect_manager.get_regen_effects():
-		BaseEffect.adjust_actor_current_stat(
-			self,
-			BaseEffect.get_regen_target_stat(effect.effect.stat),
-			effect.effect.amount,
+		(
+			BaseEffect
+			. adjust_actor_current_stat(
+				self,
+				BaseEffect.get_regen_target_stat(effect.effect.stat),
+				effect.effect.amount,
+			)
 		)
 
 
@@ -514,13 +547,21 @@ func _apply_stats_from_payload(payload: Dictionary) -> void:
 
 func _ensure_max_defaults() -> void:
 	if not base_stats.has(Enums.StatType.MAX_HEALTH):
-		_set_raw_stat(base_stats, Enums.StatType.MAX_HEALTH, _get_raw_stat(base_stats, Enums.StatType.HEALTH))
+		_set_raw_stat(
+			base_stats, Enums.StatType.MAX_HEALTH, _get_raw_stat(base_stats, Enums.StatType.HEALTH)
+		)
 	if not base_stats.has(Enums.StatType.MAX_ARMOR):
-		_set_raw_stat(base_stats, Enums.StatType.MAX_ARMOR, _get_raw_stat(base_stats, Enums.StatType.ARMOR))
+		_set_raw_stat(
+			base_stats, Enums.StatType.MAX_ARMOR, _get_raw_stat(base_stats, Enums.StatType.ARMOR)
+		)
 	if not base_stats.has(Enums.StatType.MAX_SHIELD):
-		_set_raw_stat(base_stats, Enums.StatType.MAX_SHIELD, _get_raw_stat(base_stats, Enums.StatType.SHIELD))
+		_set_raw_stat(
+			base_stats, Enums.StatType.MAX_SHIELD, _get_raw_stat(base_stats, Enums.StatType.SHIELD)
+		)
 	if not base_stats.has(Enums.StatType.MAX_POWER):
-		_set_raw_stat(base_stats, Enums.StatType.MAX_POWER, _get_raw_stat(base_stats, Enums.StatType.POWER))
+		_set_raw_stat(
+			base_stats, Enums.StatType.MAX_POWER, _get_raw_stat(base_stats, Enums.StatType.POWER)
+		)
 
 
 func _clamp_all_current_stats() -> void:

@@ -5,12 +5,14 @@ extends PanelContainer
 # =============================================================================
 
 var game_map: GameMap
+var selected_combatant: CombatActor = null
 
 # =============================================================================
 # COMPONENT REFERENCES
 # =============================================================================
 
 @onready var combat_log = $TabContainer/CombatLog/ScrollContainer/CombatLog
+@onready var mind_log = $TabContainer/Mind/ScrollContainer/MindLog
 @onready var chat_log = $TabContainer/Chat/ScrollContainer/ChatLog
 @onready var chat_input = $TabContainer/Chat/ChatInput
 @onready var info_message = $TabContainer/Chat/ChatInput/InfoMessageBox/InfoMessage
@@ -44,6 +46,7 @@ func setup(p_game_map: GameMap):
 		add_log_entry_combat(log_entry)
 	for log_entry in game_map.chat_logger.get_logs():
 		add_log_entry_chat(log_entry)
+	set_selected_entity(null)
 
 
 func clear():
@@ -52,10 +55,17 @@ func clear():
 		game_map.chat_logger.on_log_added.disconnect(_on_log_added_chat)
 	if game_map and game_map.combat_logger.on_log_added.is_connected(_on_log_added_combat):
 		game_map.combat_logger.on_log_added.disconnect(_on_log_added_combat)
+	if (
+		selected_combatant
+		and selected_combatant.ai_thought_logged.is_connected(_on_ai_thought_logged)
+	):
+		selected_combatant.ai_thought_logged.disconnect(_on_ai_thought_logged)
+	selected_combatant = null
 	# Unset the game_map reference.
 	game_map = null
 	# Clear the logs.
 	combat_log.clear()
+	mind_log.clear()
 	chat_log.clear()
 
 
@@ -77,6 +87,27 @@ func add_chat_message(message: String):
 	chat_log.append_text("[" + timestamp + "] " + message + "\n")
 
 
+func set_selected_entity(entity: MapEntity) -> void:
+	if selected_combatant and selected_combatant.ai_thought_logged.is_connected(_on_ai_thought_logged):
+		selected_combatant.ai_thought_logged.disconnect(_on_ai_thought_logged)
+
+	selected_combatant = null
+	mind_log.clear()
+
+	if entity and is_instance_of(entity, MapCombatEntity):
+		selected_combatant = (entity as MapCombatEntity).combatant
+
+	if not selected_combatant:
+		mind_log.append_text("Select a Mek/Structure to inspect AI thoughts.\n")
+		return
+
+	if not selected_combatant.ai_thought_logged.is_connected(_on_ai_thought_logged):
+		selected_combatant.ai_thought_logged.connect(_on_ai_thought_logged)
+
+	for entry: String in selected_combatant.get_ai_thoughts():
+		mind_log.append_text(entry + "\n")
+
+
 # =============================================================================
 # PRIVATE METHODS
 # =============================================================================
@@ -88,6 +119,10 @@ func _on_log_added_combat(entry: LogEntry):
 
 func _on_log_added_chat(entry: LogEntry):
 	add_log_entry_chat(entry)
+
+
+func _on_ai_thought_logged(entry: String) -> void:
+	mind_log.append_text(entry + "\n")
 
 
 func _on_chat_input_submitted(message: String):

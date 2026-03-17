@@ -17,6 +17,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	var profile: AIActionProfile = AITacticalBrainResolver.resolve_attack_profile(source)
 	if not profile:
 		# No attack profile means this brain contributes zero utility to ATTACK intents.
+		_add_thought(source, "Attack intent unavailable: missing profile")
 		return null
 
 	var max_module_range: int = _get_max_module_range(source, offensive_modules)
@@ -39,6 +40,15 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			"max_distance": float(max_candidate_distance),
 		}
 		var preliminary_score: float = profile.evaluate_preliminary(preliminary_context)
+		_add_thought(
+			source,
+			"Attack prelim: target=%s dist=%d prelim=%.2f"
+			% [
+				target.combatant.get_chat_tag(),
+				distance,
+				preliminary_score,
+			],
+		)
 		(
 			candidate_targets
 			. append(
@@ -71,6 +81,11 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	for candidate_index in range(max_targets):
 		var candidate: Dictionary = candidate_targets[candidate_index]
 		var target: MapCombatEntity = candidate["target"]
+		_add_thought(
+			source,
+			"Attack narrow-phase target=%s prelim=%.2f"
+			% [target.combatant.get_chat_tag(), float(candidate["preliminary_score"])],
+		)
 
 		expensive_ops = await _consume_expensive_op(context, expensive_ops_budget, expensive_ops)
 		var has_los_from_source: bool = _get_or_compute_los(
@@ -111,6 +126,11 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 				)
 				expensive_ops = move_data["expensive_ops"]
 				if not move_data["reachable"]:
+					_add_thought(
+						source,
+						"Attack option rejected: target=%s module=%s reason=unreachable"
+						% [target.combatant.get_chat_tag(), equipped_module.get_chat_tag()],
+					)
 					continue
 				destination = move_data["destination"]
 
@@ -127,14 +147,46 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			else:
 				score += profile.reachable_bonus
 
+			_add_thought(
+				source,
+				"Attack option: target=%s module=%s score=%.2f tile=%s"
+				% [
+					target.combatant.get_chat_tag(),
+					equipped_module.get_chat_tag(),
+					score,
+					MetaTag.pos_tag(destination),
+				],
+			)
+
 			if score > best_score:
 				best_score = score
 				best_target = target
 				best_equipped_module = equipped_module
 				best_destination = destination
+				_add_thought(
+					source,
+					"Attack best updated: target=%s module=%s score=%.2f"
+					% [
+						best_target.combatant.get_chat_tag(),
+						best_equipped_module.get_chat_tag(),
+						best_score,
+					],
+				)
 
 	if not best_target:
+		_add_thought(source, "Attack intent produced no valid target")
 		return null
+
+	_add_thought(
+		source,
+		"Attack selected: target=%s module=%s score=%.2f tile=%s"
+		% [
+			best_target.combatant.get_chat_tag(),
+			best_equipped_module.get_chat_tag(),
+			best_score,
+			MetaTag.pos_tag(best_destination),
+		],
+	)
 
 	return (
 		AIPlanBuilder
@@ -326,3 +378,8 @@ static func _get_max_module_range(
 
 static func _manhattan_distance(a: Vector2i, b: Vector2i) -> int:
 	return absi(a.x - b.x) + absi(a.y - b.y)
+
+
+static func _add_thought(source: MapCombatEntity, message: String) -> void:
+	if source and source.combatant:
+		source.combatant.add_ai_thought(message)

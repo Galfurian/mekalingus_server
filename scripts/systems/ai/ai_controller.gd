@@ -59,10 +59,16 @@ func clear() -> void:
 	_clear_orders()
 
 
-func _add_log(message: String) -> void:
+func _add_action_log(message: String) -> void:
 	if is_instance_valid(game_map):
 		game_map.combat_logger.add_log(Enums.LogType.AI, message)
 		return
+
+
+func _add_thought(source: MapCombatEntity, message: String) -> void:
+	if not source or not source.combatant:
+		return
+	source.combatant.add_ai_thought(message)
 
 
 func _format_pos_tag(pos: Vector2i) -> String:
@@ -103,7 +109,7 @@ func queue_offensive_module_order(order: UseOffensiveModuleOrder) -> void:
 	"""
 	if order:
 		_use_offensive_module_orders[order.source.combatant.uuid] = order
-		_add_log("Queued: %s" % str(order))
+		_add_thought(order.source, "Queued: %s" % str(order))
 
 
 func queue_utility_module_order(order: UseUtilityModuleOrder) -> void:
@@ -112,7 +118,7 @@ func queue_utility_module_order(order: UseUtilityModuleOrder) -> void:
 	"""
 	if order:
 		_use_utility_module_orders[order.source.combatant.uuid] = order
-		_add_log("Queued: %s" % str(order))
+		_add_thought(order.source, "Queued: %s" % str(order))
 
 
 func queue_move_order(order: MoveOrder) -> void:
@@ -122,7 +128,7 @@ func queue_move_order(order: MoveOrder) -> void:
 	if order:
 		_move_orders[order.source.combatant.uuid] = order
 		_reserved_move_tiles[_tile_key(order.destination)] = true
-		_add_log("Queued: %s" % str(order))
+		_add_thought(order.source, "Queued: %s" % str(order))
 
 
 func _process_order_with_recovery(order: Order, expected_type: Object) -> void:
@@ -132,21 +138,21 @@ func _process_order_with_recovery(order: Order, expected_type: Object) -> void:
 
 	if order.validate():
 		order.execute(game_map)
-		_add_log("Executed: %s" % str(order))
+		_add_action_log("Executed: %s" % str(order))
 	else:
-		_add_log("Invalid: %s" % str(order))
+		_add_thought(order.source, "Invalid: %s" % str(order))
 		if ENABLE_ACTION_RECOVERY:
 			var replacement: Order = await _reissue_order_for_source(order.source)
 			if replacement:
 				if is_instance_of(replacement, expected_type):
 					replacement.execute(game_map)
-					_add_log("Executed replacement: %s" % str(replacement))
+					_add_action_log("Executed replacement: %s" % str(replacement))
 				elif replacement:
 					_queue_generated_order(replacement)
 
 	var plan: AIPlan = get_current_plan(order.source)
 	if plan and plan.is_complete():
-		_add_log("Completed: %s" % str(plan))
+		_add_thought(order.source, "Completed: %s" % str(plan))
 
 
 func execute_utility_module_orders() -> void:
@@ -179,11 +185,11 @@ func _process_move_order_with_recovery(order: MoveOrder) -> void:
 		return
 
 	if order.destination == order.source.position:
-		_add_log("Skipped move order (already at destination): %s" % str(order))
+		_add_thought(order.source, "Skipped move order (already at destination): %s" % str(order))
 		return
 
 	if game_map.is_occupied(order.destination):
-		_add_log("Skipped move order (destination occupied): %s" % str(order))
+		_add_thought(order.source, "Skipped move order (destination occupied): %s" % str(order))
 		if ENABLE_ACTION_RECOVERY:
 			var replacement: Order = await _reissue_order_for_source(order.source)
 			if replacement and is_instance_of(replacement, MoveOrder):
@@ -194,11 +200,11 @@ func _process_move_order_with_recovery(order: MoveOrder) -> void:
 
 	_reserved_move_tiles[_tile_key(order.destination)] = true
 	order.execute(game_map)
-	_add_log("Executed: %s" % str(order))
+	_add_action_log("Executed: %s" % str(order))
 
 	var plan: AIPlan = get_current_plan(order.source)
 	if plan and plan.is_complete():
-		_add_log("Completed: %s" % str(plan))
+		_add_thought(order.source, "Completed: %s" % str(plan))
 
 
 func execute_move_orders() -> void:
@@ -257,7 +263,7 @@ func plan_for_unit(source: MapCombatEntity) -> void:
 	# Save the new plan.
 	_current_plans[source.combatant.uuid] = new_plan
 
-	_add_log("Planned: %s" % str(new_plan))
+	_add_thought(source, "Planned: %s" % str(new_plan))
 
 
 func generate_orders_for_unit(source: MapCombatEntity) -> void:
@@ -286,7 +292,8 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 	# Generate the order for the current plan.
 	var order: Order = current_plan.generate_order(_reserved_move_tiles)
 	if not order:
-		_add_log(
+		_add_thought(
+			source,
 			(
 				"%s plan generated no order; attempting one replan pass."
 				% source.combatant.get_chat_tag()
@@ -299,10 +306,10 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 			order = current_plan.generate_order(_reserved_move_tiles)
 		if not order:
 			_current_plans.erase(source.combatant.uuid)
-			_add_log("%s has no actionable order this turn." % source.combatant.get_chat_tag())
+			_add_thought(source, "%s has no actionable order this turn." % source.combatant.get_chat_tag())
 		return
 
-	_add_log("New order: %s" % str(order))
+	_add_thought(source, "New order: %s" % str(order))
 	_queue_generated_order(order)
 
 
@@ -333,7 +340,8 @@ func _reissue_order_for_source(source: MapCombatEntity) -> Order:
 		return null
 	var replacement: Order = refreshed_plan.generate_order()
 	if replacement:
-		_add_log(
+		_add_thought(
+			source,
 			(
 				"%s regenerated order after invalidation: %s"
 				% [

@@ -86,6 +86,7 @@ func setup(p_game_map: GameMap, p_grid_size: int = 50):
 	info_panel.setup(p_game_map)
 	entity_list_panel.setup(p_game_map)
 	log_panel.setup(p_game_map)
+	log_panel.set_selected_entity(selected_entity)
 	# Connect signals once.
 	if game_map and not game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
 		game_map.turn_manager.on_turn_ended.connect(_on_turn_ended)
@@ -385,6 +386,7 @@ func _select_entity(entity: MapEntity) -> void:
 	info_panel.set_entity(entity)
 	entity_list_panel.select_entity(entity)
 	grid_drawer.set_selected_entity(entity)
+	log_panel.set_selected_entity(entity)
 	selected_entity_changed.emit(selected_entity)
 
 
@@ -426,6 +428,7 @@ func _on_cell_selected(cell_position: Vector2i):
 		info_panel.set_entity(entity)
 		entity_list_panel.select_entity(entity)
 		grid_drawer.set_selected_entity(entity)
+		log_panel.set_selected_entity(entity)
 		selected_entity_changed.emit(selected_entity)
 
 	map_cell_clicked.emit(cell_position)
@@ -438,6 +441,7 @@ func _on_entity_list_entity_selected(entity: MapEntity) -> void:
 	center_on(entity.position)
 	info_panel.set_entity(entity)
 	grid_drawer.set_selected_entity(entity)
+	log_panel.set_selected_entity(entity)
 	selected_entity_changed.emit(selected_entity)
 
 
@@ -482,6 +486,7 @@ func _delete_entity_at_context_cell() -> void:
 		selected_entity = null
 		info_panel.clear()
 		grid_drawer.deselect_entity()
+		log_panel.set_selected_entity(null)
 		selected_entity_changed.emit(selected_entity)
 
 	_refresh_entity_views()

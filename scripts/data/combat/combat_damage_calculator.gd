@@ -4,7 +4,7 @@ extends RefCounted
 const MAX_DAMAGE_REDUCTION_RATIO: float = 0.95
 
 
-static func take_damage_from_effect(actor, effect: ItemEffect) -> Dictionary:
+static func take_damage_from_effect(actor, effect: BaseEffect) -> Dictionary:
 	"""
 	Applies damage from a given effect using actor resistances and damage-type modifiers.
 	"""

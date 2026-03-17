@@ -187,10 +187,10 @@ static func _preset_weight_for_item(item_template: ItemTemplate, preset: String)
 	var utility: int = 0
 
 	for module: ItemModule in item_template.modules:
-		for effect: ItemEffect in module.effects:
+		for effect: BaseEffect in module.effects:
 			if effect.target == Enums.TargetType.ENEMY and (effect.is_damage() or effect.is_dot()):
 				offense += 4
-			elif effect.is_repair() or effect.is_defensive():
+			elif effect.is_repair() or (effect.is_buff() and not effect.is_damage() and not effect.is_dot()):
 				defense += 4
 			else:
 				utility += 3

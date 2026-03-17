@@ -12,10 +12,10 @@
 				"cooldown": 5,
 				"effects": [
 					{
-						"type": "SPEED_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
-						"amount": 4,
-						"duration": 5
+						"stat": "SPEED",
+						"amount": 4
 					}
 				]
 			}
@@ -32,8 +32,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "SPEED_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
+						"stat": "SPEED",
 						"amount": 6
 					}
 				]
@@ -51,8 +52,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "SPEED_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
+						"stat": "SPEED",
 						"amount": 4
 					}
 				]
@@ -70,8 +72,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "ARMOR_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
+						"stat": "MAX_ARMOR",
 						"amount": 15
 					}
 				]
@@ -91,10 +94,10 @@
 				"cooldown": 5,
 				"effects": [
 					{
-						"type": "SHIELD_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
-						"amount": 16,
-						"duration": 4
+						"stat": "MAX_SHIELD",
+						"amount": 16
 					}
 				]
 			}
@@ -111,8 +114,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "DAMAGE_REDUCTION_ENERGY",
+						"effect_class": "DamageReductionEffect",
 						"target": "SELF",
+						"stat": "DAMAGE_REDUCTION_ENERGY",
 						"amount": 10
 					}
 				]
@@ -130,8 +134,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "DAMAGE_REDUCTION_KINETIC",
+						"effect_class": "DamageReductionEffect",
 						"target": "SELF",
+						"stat": "DAMAGE_REDUCTION_KINETIC",
 						"amount": 10
 					}
 				]
@@ -149,8 +154,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "DAMAGE_REDUCTION_EXPLOSIVE",
+						"effect_class": "DamageReductionEffect",
 						"target": "SELF",
+						"stat": "DAMAGE_REDUCTION_EXPLOSIVE",
 						"amount": 10
 					}
 				]
@@ -168,8 +174,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "HEALTH_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
+						"stat": "MAX_HEALTH",
 						"amount": 20
 					}
 				]
@@ -189,8 +196,9 @@
 				"cooldown": 3,
 				"effects": [
 					{
-						"type": "HEALTH_REPAIR",
+						"effect_class": "RepairEffect",
 						"target": "SELF",
+						"stat": "HEALTH",
 						"amount": 20
 					}
 				]
@@ -208,8 +216,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "DAMAGE_REDUCTION_PLASMA",
+						"effect_class": "DamageReductionEffect",
 						"target": "SELF",
+						"stat": "DAMAGE_REDUCTION_PLASMA",
 						"amount": 10
 					}
 				]
@@ -227,8 +236,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "DAMAGE_REDUCTION_CORROSIVE",
+						"effect_class": "DamageReductionEffect",
 						"target": "SELF",
+						"stat": "DAMAGE_REDUCTION_CORROSIVE",
 						"amount": 10
 					}
 				]
@@ -246,8 +256,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "DAMAGE_REDUCTION_ALL",
+						"effect_class": "DamageReductionEffect",
 						"target": "SELF",
+						"stat": "DAMAGE_REDUCTION_ALL",
 						"amount": 5
 					}
 				]
@@ -265,8 +276,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "ACCURACY_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
+						"stat": "ACCURACY_MODIFIER",
 						"amount": 10
 					}
 				]
@@ -284,8 +296,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "RANGE_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
+						"stat": "RANGE_MODIFIER",
 						"amount": 2
 					}
 				]
@@ -306,8 +319,9 @@
 				"cooldown": 3,
 				"effects": [
 					{
-						"type": "ACCURACY_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "ALLY",
+						"stat": "ACCURACY_MODIFIER",
 						"amount": 10
 					}
 				]
@@ -327,8 +341,9 @@
 				"cooldown": 3,
 				"effects": [
 					{
-						"type": "POWER_REGEN",
+						"effect_class": "RegenEffect",
 						"target": "SELF",
+						"stat": "POWER_REGEN",
 						"amount": 30
 					}
 				]
@@ -346,8 +361,9 @@
 				"passive": true,
 				"effects": [
 					{
-						"type": "COOLDOWN_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
+						"stat": "COOLDOWN_MODIFIER",
 						"amount": -2
 					}
 				]
@@ -367,32 +383,35 @@
 				"cooldown": 4,
 				"effects": [
 					{
-						"type": "SPEED_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
-						"amount": 9,
-						"duration": 4
+						"stat": "SPEED",
+						"amount": 9
 					},
 					{
-						"type": "ACCURACY_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
+						"stat": "ACCURACY_MODIFIER",
 						"amount": 6
 					},
 					{
-						"type": "COOLDOWN_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
+						"stat": "COOLDOWN_MODIFIER",
 						"amount": -2
 					},
 					{
-						"type": "POWER_REGEN",
+						"effect_class": "RegenEffect",
 						"target": "SELF",
+						"stat": "POWER_REGEN",
 						"amount": 12,
 						"duration": 3
 					},
 					{
-						"type": "SHIELD_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "SELF",
-						"amount": -28,
-						"duration": 3
+						"stat": "MAX_SHIELD",
+						"amount": -28
 					}
 				]
 			}
@@ -408,12 +427,13 @@
 				"name": "Emergency Repair Pulse",
 				"passive": false,
 				"power_on_use": 16,
-				"cooldown": 3,
 				"module_range": 4.0,
+				"cooldown": 3,
 				"effects": [
 					{
-						"type": "HEALTH_REPAIR",
+						"effect_class": "RepairEffect",
 						"target": "ALLY",
+						"stat": "HEALTH",
 						"amount": 20
 					}
 				]
@@ -422,7 +442,7 @@
 	},
 	"utl021": {
 		"name": "Shield Stabilizer",
-		"description": "Reinforces the Mek's own shield generators to quickly restore shielding.",
+		"description": "Reinforces the Mek\u0027s own shield generators to quickly restore shielding.",
 		"slot": "utility",
 		"base_power_usage": 25,
 		"modules": [
@@ -433,8 +453,9 @@
 				"cooldown": 2,
 				"effects": [
 					{
-						"type": "SHIELD_REPAIR",
+						"effect_class": "RepairEffect",
 						"target": "SELF",
+						"stat": "SHIELD",
 						"amount": 30
 					}
 				]
@@ -451,12 +472,13 @@
 				"name": "Shield Regeneration Beam",
 				"passive": false,
 				"power_on_use": 12,
-				"cooldown": 2,
 				"module_range": 3.0,
+				"cooldown": 2,
 				"effects": [
 					{
-						"type": "SHIELD_REPAIR",
+						"effect_class": "RepairEffect",
 						"target": "ALLY",
+						"stat": "SHIELD",
 						"amount": 30
 					}
 				]
@@ -465,7 +487,7 @@
 	},
 	"utl023": {
 		"name": "Armor Plating Injector",
-		"description": "Injects nanomaterials into the Mek's armor to patch structural weaknesses.",
+		"description": "Injects nanomaterials into the Mek\u0027s armor to patch structural weaknesses.",
 		"slot": "utility",
 		"base_power_usage": 28,
 		"modules": [
@@ -476,8 +498,9 @@
 				"cooldown": 3,
 				"effects": [
 					{
-						"type": "ARMOR_REPAIR",
+						"effect_class": "RepairEffect",
 						"target": "SELF",
+						"stat": "ARMOR",
 						"amount": 25
 					}
 				]
@@ -494,12 +517,13 @@
 				"name": "Remote Nanite Patch",
 				"passive": false,
 				"power_on_use": 14,
-				"cooldown": 3,
 				"module_range": 3.0,
+				"cooldown": 3,
 				"effects": [
 					{
-						"type": "ARMOR_REPAIR",
+						"effect_class": "RepairEffect",
 						"target": "ALLY",
+						"stat": "ARMOR",
 						"amount": 25
 					}
 				]

@@ -13,7 +13,7 @@
 				"cooldown": 0.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
 						"amount": 23.0
@@ -28,7 +28,7 @@
 				"cooldown": 3.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
 						"amount": 41.0
@@ -51,13 +51,13 @@
 				"cooldown": 3.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
 						"amount": 34.0
 					},
 					{
-						"type": "DAMAGE_OVER_TIME",
+						"effect_class": "DamageOverTimeEffect",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
 						"amount": 15.0,
@@ -81,7 +81,7 @@
 				"cooldown": 0.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
 						"amount": 40.0
@@ -105,7 +105,7 @@
 				"repeats": 3,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
 						"amount": 14.0
@@ -128,13 +128,13 @@
 				"cooldown": 0.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
 						"amount": 32.0
 					},
 					{
-						"type": "DAMAGE_OVER_TIME",
+						"effect_class": "DamageOverTimeEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
 						"amount": 5.0,
@@ -158,13 +158,13 @@
 				"cooldown": 1.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "EXPLOSIVE",
 						"amount": 32.0
 					},
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
 						"amount": 16.0,
@@ -188,17 +188,17 @@
 				"cooldown": 4.0,
 				"effects": [
 					{
-						"type": "DAMAGE_OVER_TIME",
+						"effect_class": "DamageOverTimeEffect",
 						"target": "ENEMY",
 						"damage_type": "CORROSIVE",
 						"amount": 16.0,
 						"duration": 3.0
 					},
 					{
-						"type": "ARMOR_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
-						"amount": -10.0,
-						"duration": 3.0
+						"stat": "MAX_ARMOR",
+						"amount": -10.0
 					}
 				]
 			}
@@ -218,13 +218,13 @@
 				"cooldown": 0.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
 						"amount": 30.0
 					},
 					{
-						"type": "DAMAGE_OVER_TIME",
+						"effect_class": "DamageOverTimeEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
 						"amount": 5.0,
@@ -248,13 +248,13 @@
 				"cooldown": 1.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
 						"amount": 25.0
 					},
 					{
-						"type": "DAMAGE_OVER_TIME",
+						"effect_class": "DamageOverTimeEffect",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
 						"amount": 10.0,
@@ -278,13 +278,13 @@
 				"cooldown": 3.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "CORROSIVE",
 						"amount": 20.0
 					},
 					{
-						"type": "DAMAGE_OVER_TIME",
+						"effect_class": "DamageOverTimeEffect",
 						"target": "ENEMY",
 						"damage_type": "CORROSIVE",
 						"amount": 13.0,
@@ -308,13 +308,13 @@
 				"cooldown": 2.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
 						"amount": 15.0
 					},
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
 						"amount": 22.0,
@@ -338,14 +338,14 @@
 				"cooldown": 1.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
 						"amount": 19.0,
 						"radius": 1.0
 					},
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
 						"amount": 25.0,
@@ -369,16 +369,16 @@
 				"cooldown": 1.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "EXPLOSIVE",
 						"amount": 35.0
 					},
 					{
-						"type": "SPEED_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
-						"amount": -2.0,
-						"duration": 2.0
+						"stat": "SPEED",
+						"amount": -2.0
 					}
 				]
 			}
@@ -398,14 +398,14 @@
 				"cooldown": 3.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "PLASMA",
 						"amount": 23.0,
 						"radius": 1.0
 					},
 					{
-						"type": "DAMAGE_OVER_TIME",
+						"effect_class": "DamageOverTimeEffect",
 						"target": "AREA",
 						"damage_type": "PLASMA",
 						"amount": 11.0,
@@ -430,15 +430,16 @@
 				"cooldown": 2.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
 						"amount": 27.0,
 						"radius": 1.0
 					},
 					{
-						"type": "DAMAGE_REDUCTION_ALL",
+						"effect_class": "DamageReductionEffect",
 						"target": "ENEMY",
+						"stat": "DAMAGE_REDUCTION_ALL",
 						"amount": -10.0,
 						"duration": 2.0
 					}
@@ -460,16 +461,16 @@
 				"cooldown": 0.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
 						"amount": 32.0
 					},
 					{
-						"type": "SPEED_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
-						"amount": -2.0,
-						"duration": 2.0
+						"stat": "SPEED",
+						"amount": -2.0
 					}
 				]
 			}
@@ -489,13 +490,13 @@
 				"cooldown": 0.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
 						"amount": 25.0
 					},
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "KINETIC",
 						"amount": 10.0,
@@ -519,13 +520,14 @@
 				"cooldown": 3.0,
 				"effects": [
 					{
-						"type": "DAMAGE_REDUCTION_ALL",
+						"effect_class": "DamageReductionEffect",
 						"target": "ENEMY",
+						"stat": "DAMAGE_REDUCTION_ALL",
 						"amount": -10.0,
 						"duration": 1.0
 					},
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
 						"amount": 48.0,
@@ -549,16 +551,16 @@
 				"cooldown": 0.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
 						"amount": 27.0
 					},
 					{
-						"type": "SPEED_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
-						"amount": -2.0,
-						"duration": 2.0
+						"stat": "SPEED",
+						"amount": -2.0
 					}
 				]
 			}
@@ -578,14 +580,15 @@
 				"cooldown": 2.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
 						"amount": 31.0
 					},
 					{
-						"type": "POWER_REGEN",
+						"effect_class": "RegenEffect",
 						"target": "ENEMY",
+						"stat": "POWER_REGEN",
 						"amount": -8.0,
 						"duration": 3.0
 					}

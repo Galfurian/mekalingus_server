@@ -113,7 +113,7 @@ func execute(game_map) -> bool:
 		elif effect.is_modifier():
 			_apply_modifier_effect(game_map, effect)
 		else:
-			_add_combat_log(game_map, "Effect %s not yet implemented" % Enums.EffectType.keys()[effect.type])
+			_add_combat_log(game_map, "Effect %s not yet implemented" % effect.get_effect_type_label())
 		if source_actor.is_dead() or target_actor.is_dead():
 			break
 	return true

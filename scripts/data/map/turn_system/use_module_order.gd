@@ -77,13 +77,13 @@ func _is_target_in_module_range(_game_map) -> bool:
 # =============================================================================
 
 
-func _apply_damage_effect(game_map, effect: ItemEffect) -> void:
+func _apply_damage_effect(game_map, effect: BaseEffect) -> void:
 	var source_actor: CombatActor = source.combatant
 	var target_actor: CombatActor = target.combatant
 	if source_actor.is_dead() or target_actor.is_dead():
 		return
 	# Handle SELF damage.
-	if effect.target_self():
+	if effect.target == Enums.TargetType.SELF:
 		var result = source_actor.take_damage_from_effect(effect)
 		_add_log(game_map, Enums.LogType.ATTACK, "%s hurts itself with %s -> %d shield, %d armor, %d health (reduced %d %s)" % [
 			source_actor.get_chat_tag(),
@@ -94,7 +94,7 @@ func _apply_damage_effect(game_map, effect: ItemEffect) -> void:
 			result.reduced,
 			Enums.DamageType.keys()[effect.damage_type]])
 	# Handle AREA damage.
-	elif effect.target_area():
+	elif effect.target == Enums.TargetType.AREA:
 		var center = target if effect.center_on_target else source
 		var affected = AIUnitQueries.get_units_in_range(game_map,
 			source, center.position, effect.radius, true, true
@@ -127,13 +127,13 @@ func _apply_damage_effect(game_map, effect: ItemEffect) -> void:
 			Enums.DamageType.keys()[effect.damage_type]])
 
 
-func _apply_repair_effect(game_map, effect: ItemEffect) -> void:
+func _apply_repair_effect(game_map, effect: BaseEffect) -> void:
 	var source_actor: CombatActor = source.combatant
 	var target_actor: CombatActor = target.combatant
 	if source_actor.is_dead() or target_actor.is_dead():
 		return
 	# Handle SELF repair.
-	if effect.target_self():
+	if effect.target == Enums.TargetType.SELF:
 		var result = source_actor.repair_from_effect(effect)
 		_add_log(game_map, Enums.LogType.SUPPORT, "%s restores %d %s to itself using %s" % [
 			source_actor.get_chat_tag(),
@@ -141,10 +141,12 @@ func _apply_repair_effect(game_map, effect: ItemEffect) -> void:
 			result.stat,
 			equipped_module.module.module_name])
 	# Handle AREA repair.
-	elif effect.target_area():
+	elif effect.target == Enums.TargetType.AREA:
 		var center = target if effect.center_on_target else source
-		var include_allies = effect.target_ally() or effect.target_self()
-		var include_enemies = effect.target_enemy()
+		var include_allies = (
+			effect.target == Enums.TargetType.ALLY or effect.target == Enums.TargetType.SELF
+		)
+		var include_enemies = effect.target == Enums.TargetType.ENEMY
 		var affected = AIUnitQueries.get_units_in_range(game_map,
 			source, center.position, effect.radius, include_allies, include_enemies, []
 		)
@@ -174,13 +176,13 @@ func _apply_repair_effect(game_map, effect: ItemEffect) -> void:
 			equipped_module.module.module_name])
 
 
-func _apply_modifier_effect(game_map, effect: ItemEffect) -> void:
+func _apply_modifier_effect(game_map, effect: BaseEffect) -> void:
 	var source_actor: CombatActor = source.combatant
 	var target_actor: CombatActor = target.combatant
 	if source_actor.is_dead() or target_actor.is_dead():
 		return
 	# Handle SELF-targeted effects.
-	if effect.target_self():
+	if effect.target == Enums.TargetType.SELF:
 		source_actor.add_effect(equipped_module.module, effect, source)
 		_add_log(game_map, Enums.LogType.SUPPORT, "%s applies %s to itself -> %d for %d turns (%s)" % [
 			source_actor.get_chat_tag(),
@@ -189,10 +191,12 @@ func _apply_modifier_effect(game_map, effect: ItemEffect) -> void:
 			effect.duration,
 			equipped_module.module.module_name])
 	# Handle AREA-based effects.
-	elif effect.target_area():
+	elif effect.target == Enums.TargetType.AREA:
 		var center = target if effect.center_on_target else source
-		var include_allies = effect.target_ally() or effect.target_self()
-		var include_enemies = effect.target_enemy()
+		var include_allies = (
+			effect.target == Enums.TargetType.ALLY or effect.target == Enums.TargetType.SELF
+		)
+		var include_enemies = effect.target == Enums.TargetType.ENEMY
 		var affected = AIUnitQueries.get_units_in_range(game_map,
 			source, center.position, effect.radius, include_allies, include_enemies, [source]
 		)

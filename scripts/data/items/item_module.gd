@@ -21,7 +21,7 @@ var module_range: int
 # The number of times the module's behaviour is executed upon use.
 var repeats: int
 # List of effects this module applies.
-var effects: Array[ItemEffect]
+var effects: Array[BaseEffect]
 
 # =============================================================================
 # GENERAL
@@ -84,7 +84,9 @@ func from_dict(data: Dictionary):
 	repeats = int(data.get("repeats", 1))
 	effects.clear()
 	for effect_data in data["effects"]:
-		effects.append(ItemEffect.new(effect_data))
+		var effect := EffectFactory.create_from_dict(effect_data)
+		if effect:
+			effects.append(effect)
 
 
 func to_dict() -> Dictionary:

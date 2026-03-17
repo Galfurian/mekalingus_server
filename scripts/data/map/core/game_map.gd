@@ -452,6 +452,7 @@ func has_hostile_pairs() -> bool:
 				return true
 	return false
 
+
 func remove_destroyed_units() -> void:
 	"""
 	Checks for destroyed units and removes them from the game map.
@@ -460,6 +461,7 @@ func remove_destroyed_units() -> void:
 	Utils.erase(player_units, Utils.filter(player_units, _filter_dead_unit))
 	Utils.erase(npc_units, Utils.filter(npc_units, _filter_dead_unit))
 	Utils.erase(structures, Utils.filter(structures, _filter_dead_unit))
+
 
 func get_owner_key(p_owner: EntityOwner) -> String:
 	if not p_owner:
@@ -554,6 +556,7 @@ func get_owned_combat_entities_by_key(owner_key: String) -> Array[MapCombatEntit
 # FORMATTING
 # =============================================================================
 
+
 static func format_pos_tag(pos: Vector2i) -> String:
 	return MetaTag.pos_tag(pos)
 
@@ -578,13 +581,13 @@ static func from_dict(data: Dictionary) -> GameMap:
 	if not biome:
 		push_error("Invalid biome: " + biome_name)
 		return null
-	
+
 	# Create the map instance.
 	var map = GameMap.new(data["map_uuid"], biome, data["map_width"], data["map_height"])
 
 	# Load the map data.
 	map.terrain_data = Utils.deserialize_matrix(data["terrain_data"])
-	
+
 	# Load the NPC units.
 	map.npc_units.clear()
 	for unit_uuid in data.get("npc_units", {}):

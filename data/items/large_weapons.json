@@ -13,14 +13,15 @@
 				"cooldown": 3.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
 						"amount": 120.0
 					},
 					{
-						"type": "DAMAGE_REDUCTION_ALL",
+						"effect_class": "DamageReductionEffect",
 						"target": "ENEMY",
+						"stat": "DAMAGE_REDUCTION_ALL",
 						"amount": -10.0,
 						"duration": 3.0
 					}
@@ -34,7 +35,7 @@
 				"cooldown": 1.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
 						"amount": 45.0
@@ -57,17 +58,17 @@
 				"cooldown": 2.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "KINETIC",
 						"amount": 60.0,
 						"radius": 2.0
 					},
 					{
-						"type": "SPEED_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
-						"amount": -3.0,
-						"duration": 2.0
+						"stat": "SPEED",
+						"amount": -3.0
 					}
 				]
 			}
@@ -87,22 +88,23 @@
 				"cooldown": 3.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
 						"amount": 130.0
 					},
 					{
-						"type": "SHIELD_REGEN",
+						"effect_class": "RegenEffect",
 						"target": "ENEMY",
+						"stat": "SHIELD_REGEN",
 						"amount": -10.0,
 						"duration": 2.0
 					},
 					{
-						"type": "POWER_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
-						"amount": -15.0,
-						"duration": 1.0
+						"stat": "MAX_POWER",
+						"amount": -15.0
 					}
 				]
 			},
@@ -114,7 +116,7 @@
 				"cooldown": 1.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
 						"amount": 40.0
@@ -137,14 +139,15 @@
 				"cooldown": 2.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
 						"amount": 95.0
 					},
 					{
-						"type": "POWER_REGEN",
+						"effect_class": "RegenEffect",
 						"target": "ENEMY",
+						"stat": "POWER_REGEN",
 						"amount": -15.0,
 						"duration": 3.0
 					}
@@ -158,12 +161,11 @@
 				"cooldown": 1.0,
 				"effects": [
 					{
-						"type": "POWER_MODIFIER",
+						"effect_class": "StatModifierEffect",
 						"target": "AREA",
+						"stat": "MAX_POWER",
 						"amount": -10.0,
-						"duration": 1.0,
-						"radius": 1,
-						"center_on_target": true
+						"radius": 1
 					}
 				]
 			}
@@ -184,12 +186,11 @@
 				"repeats": 4,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
 						"amount": 24.0,
-						"radius": 2.0,
-						"center_on_target": true
+						"radius": 2.0
 					}
 				]
 			}
@@ -209,7 +210,7 @@
 				"cooldown": 4.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
 						"amount": 56.0,
@@ -233,13 +234,13 @@
 				"cooldown": 3.0,
 				"effects": [
 					{
-						"type": "DAMAGE",
+						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
 						"amount": 106.0
 					},
 					{
-						"type": "DAMAGE_OVER_TIME",
+						"effect_class": "DamageOverTimeEffect",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
 						"amount": 27.0,

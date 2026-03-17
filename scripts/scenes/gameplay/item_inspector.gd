@@ -130,7 +130,7 @@ func _show_item_details(item: Item) -> void:
 		for effect in module.effects:
 			var effect_line: String = "|"
 			effect_line += "["
-			effect_line += UIColor.apply("effect_type", Enums.EffectType.keys()[effect.type])
+			effect_line += UIColor.apply("effect_type", effect.get_effect_type_label())
 			effect_line += "] -> "
 			effect_line += UIColor.apply(
 				"effect_target_type",
@@ -139,8 +139,8 @@ func _show_item_details(item: Item) -> void:
 			effect_line += " | " + UIColor.apply("effect_amount", str(effect.amount))
 
 			if (
-				effect.type == Enums.EffectType.DAMAGE
-				or effect.type == Enums.EffectType.DAMAGE_OVER_TIME
+				effect.is_damage()
+				or effect.is_dot()
 			):
 				var damage_type_name: String = Enums.DamageType.keys()[effect.damage_type]
 				var damage_description: String = DAMAGE_TYPE_DESCRIPTIONS.get(

@@ -35,6 +35,32 @@ enum DamageType {
 	CORROSIVE = 4,  # Slowly depletes armor & health, weak against shields.
 }
 
+# Canonical combat stat identifiers.
+enum StatType {
+	HEALTH,
+	ARMOR,
+	SHIELD,
+	POWER,
+	MAX_HEALTH,
+	MAX_ARMOR,
+	MAX_SHIELD,
+	MAX_POWER,
+	HEALTH_REGEN,
+	ARMOR_REGEN,
+	SHIELD_REGEN,
+	POWER_REGEN,
+	SPEED,
+	DAMAGE_REDUCTION_ALL,
+	DAMAGE_REDUCTION_KINETIC,
+	DAMAGE_REDUCTION_ENERGY,
+	DAMAGE_REDUCTION_EXPLOSIVE,
+	DAMAGE_REDUCTION_PLASMA,
+	DAMAGE_REDUCTION_CORROSIVE,
+	ACCURACY_MODIFIER,
+	RANGE_MODIFIER,
+	COOLDOWN_MODIFIER,
+}
+
 # The type of effects.
 enum EffectType {
 	DAMAGE,  # Deals direct damage.

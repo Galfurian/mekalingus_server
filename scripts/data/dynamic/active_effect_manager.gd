@@ -36,7 +36,7 @@ func add_active_effect(active_effect: ActiveEffect) -> void:
 	Adds a new active effect to the list.
 	"""
 	# Toggle the effect on the owner actor.
-	active_effect.effect.toggle_effect(actor, true)
+	active_effect.effect.apply(actor)
 	# Add the effect to the list.
 	active_effects.append(active_effect)
 
@@ -48,7 +48,7 @@ func remove_expired_effects() -> void:
 	# Deactivate the effect on the owner actor.
 	for effect in active_effects:
 		if effect.is_expired():
-			effect.effect.toggle_effect(actor, false)
+			effect.effect.remove(actor)
 	# Filter out expired effects from the list.
 	active_effects = active_effects.filter(func(e): return not e.is_expired())
 
@@ -67,7 +67,7 @@ func remove_all_effects() -> void:
 	Removes all active_effects from the list and deactivates them on the owner actor.
 	"""
 	for effect in active_effects:
-		effect.effect.toggle_effect(actor, false)
+		effect.effect.remove(actor)
 	active_effects.clear()
 
 
@@ -97,18 +97,8 @@ func get_debuffs() -> Array[ActiveEffect]:
 
 
 # =============================================================================
-# QUERIES: BY TYPE OR CATEGORY
+# QUERIES: BY CATEGORY
 # =============================================================================
-
-
-func get_effects_by_type(effect_type: Enums.EffectType) -> Array[ActiveEffect]:
-	"""Returns all active_effects of a specific effect type (e.g., DAMAGE_REDUCTION_ALL)."""
-	return active_effects.filter(func(e): return e.effect.type == effect_type)
-
-
-func has_effect_type(effect_type: Enums.EffectType) -> bool:
-	"""Returns true if there is any effect of the specified type."""
-	return active_effects.any(func(e): return e.effect.type == effect_type)
 
 
 func has_any_effects() -> bool:
@@ -138,13 +128,13 @@ func get_dot_damage_by_type() -> Dictionary:
 	return breakdown
 
 
-func should_refresh_dot(new_effect: ItemEffect) -> bool:
+func should_refresh_dot(new_effect: BaseEffect) -> bool:
 	"""Returns true when applying a new DOT would extend its remaining duration.
 
 	This is used to avoid wasting attacks on DOTs that are already active and last
 	as long or longer than the new effect.
 	"""
-	if new_effect.type != Enums.EffectType.DAMAGE_OVER_TIME:
+	if not new_effect.is_dot():
 		return false
 
 	for effect in get_dot_effects():

@@ -44,7 +44,7 @@ func execute(game_map) -> bool:
 		)
 		return false
 	var has_offensive_effect: bool = equipped_module.module.effects.any(
-		func(effect: ItemEffect): return effect.is_offensive()
+		func(effect: BaseEffect): return effect.is_offensive()
 	)
 	if has_offensive_effect and game_map.is_enemy_of(source, target):
 		var base_accuracy: int = 90 + source_actor.accuracy_modifier
@@ -105,7 +105,7 @@ func execute(game_map) -> bool:
 		elif effect.is_modifier():
 			_apply_modifier_effect(game_map, effect)
 		else:
-			_add_utility_log(game_map, "Effect %s not yet implemented" % Enums.EffectType.keys()[effect.type])
+			_add_utility_log(game_map, "Effect %s not yet implemented" % effect.get_effect_type_label())
 		if source_actor.is_dead() or target_actor.is_dead():
 			break
 	return true

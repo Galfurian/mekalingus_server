@@ -44,13 +44,8 @@ static func get_threat_level_from_enemy_cache(
 
 static func _score_module_threat(module: ItemModule) -> float:
 	var score := 0.0
-	for effect: ItemEffect in module.effects:
-		if effect.type == Enums.EffectType.DAMAGE:
-			score += float(effect.amount)
-		elif effect.type == Enums.EffectType.DAMAGE_OVER_TIME:
-			score += float(effect.amount * effect.duration) * 0.5
-		else:
-			score += 2.0
+	for effect: BaseEffect in module.effects:
+		score += effect.get_threat_score()
 	return score
 
 

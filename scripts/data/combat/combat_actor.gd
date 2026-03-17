@@ -158,17 +158,11 @@ func evaluate_combat_power() -> float:
 	return CombatPowerEvaluator.evaluate(self)
 
 
-func add_effect(module: ItemModule, effect: ItemEffect, source) -> void:
+func add_effect(module: ItemModule, effect: BaseEffect, source) -> void:
 	if not active_effect_manager:
 		return
 	var active: ActiveEffect = ActiveEffect.new(module, effect, source, effect.duration)
 	active_effect_manager.add_active_effect(active)
-
-
-func has_effect_type(effect_type: Enums.EffectType) -> bool:
-	if not active_effect_manager:
-		return false
-	return active_effect_manager.has_effect_type(effect_type)
 
 
 func clear_active_effects() -> void:
@@ -180,7 +174,10 @@ func clear_active_effects() -> void:
 func _toggle_module_passive_effect_modifiers(module: ItemModule, enable: bool) -> void:
 	if module.passive:
 		for effect in module.effects:
-			effect.toggle_effect(self, enable)
+			if enable:
+				effect.apply(self)
+			else:
+				effect.remove(self)
 
 
 func _toggle_item_passive_effect_modifiers(item: Item, enable: bool) -> void:
@@ -200,7 +197,7 @@ func _disable_item_passive_modifiers(item: Item) -> void:
 	max_power += item.template.base_power_usage
 
 
-func take_damage_from_effect(effect: ItemEffect) -> Dictionary:
+func take_damage_from_effect(effect: BaseEffect) -> Dictionary:
 	return CombatDamageCalculator.take_damage_from_effect(self, effect)
 
 
@@ -208,37 +205,20 @@ func take_dot_damage() -> Dictionary:
 	return CombatDamageCalculator.take_dot_damage(self)
 
 
-func repair_from_effect(effect: ItemEffect) -> Dictionary:
-	var restored := 0
-	var stat: String = ""
-	match effect.type:
-		Enums.EffectType.HEALTH_REPAIR:
-			restored = adjust_health(effect.amount)
-			stat = "health"
-		Enums.EffectType.SHIELD_REPAIR:
-			restored = adjust_shield(effect.amount)
-			stat = "shield"
-		Enums.EffectType.ARMOR_REPAIR:
-			restored = adjust_armor(effect.amount)
-			stat = "armor"
-		_:
-			return {"stat": "unknown", "amount": 0}
-	return {"stat": stat, "amount": restored}
+func repair_from_effect(effect: BaseEffect) -> Dictionary:
+	var restored := BaseEffect.adjust_actor_current_stat(self, effect.stat, effect.amount)
+	return {"stat": BaseEffect.get_stat_key(effect.stat), "amount": restored}
 
 
 func apply_regen_effects() -> void:
 	if not active_effect_manager:
 		return
 	for effect in active_effect_manager.get_regen_effects():
-		match effect.effect.type:
-			Enums.EffectType.HEALTH_REGEN:
-				adjust_health(effect.effect.amount)
-			Enums.EffectType.SHIELD_REGEN:
-				adjust_shield(effect.effect.amount)
-			Enums.EffectType.ARMOR_REGEN:
-				adjust_armor(effect.effect.amount)
-			Enums.EffectType.POWER_REGEN:
-				adjust_power(effect.effect.amount)
+		BaseEffect.adjust_actor_current_stat(
+			self,
+			BaseEffect.get_regen_target_stat(effect.effect.stat),
+			effect.effect.amount,
+		)
 
 
 # =============================================================================

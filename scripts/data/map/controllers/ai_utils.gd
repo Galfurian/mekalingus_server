@@ -5,85 +5,23 @@ extends Node
 # =====================================================================
 
 
-func evaluate_utility_effect_priority(target: MapCombatEntity, effect: ItemEffect) -> int:
+func evaluate_utility_effect_priority(target: MapCombatEntity, effect: BaseEffect) -> int:
 	"""
 	Calculates a priority score for a specific effect on a specific target.
 	"""
-	# Initialize the priority score.
-	var priority = 0
-	# Check the effect type and assign a score.
-	match effect.type:
-		# Repairs (High priority if the related stat is low)
-		Enums.EffectType.HEALTH_REPAIR:
-			if target.combatant.health < target.combatant.max_health * 0.4:
-				priority += 16
-			elif target.combatant.health < target.combatant.max_health * 0.7:
-				priority += 8
-		Enums.EffectType.SHIELD_REPAIR:
-			if target.combatant.shield < target.combatant.max_shield * 0.4:
-				priority += 16
-			elif target.combatant.shield < target.combatant.max_shield * 0.7:
-				priority += 8
-		Enums.EffectType.ARMOR_REPAIR:
-			if target.combatant.armor < target.combatant.max_armor * 0.4:
-				priority += 16
-			elif target.combatant.armor < target.combatant.max_armor * 0.7:
-				priority += 8
-		# Max stat modifiers (Lower priority than direct repairs)
-		Enums.EffectType.HEALTH_MODIFIER:
-			priority += 4 if target.combatant.health < target.combatant.max_health * 0.4 else 2
-		Enums.EffectType.SHIELD_MODIFIER:
-			priority += 4 if target.combatant.shield < target.combatant.max_shield * 0.4 else 2
-		Enums.EffectType.ARMOR_MODIFIER:
-			priority += 4 if target.combatant.armor < target.combatant.max_armor * 0.4 else 2
-		Enums.EffectType.POWER_MODIFIER:
-			priority += 3 if target.combatant.power < target.combatant.max_power * 0.4 else 1
-		# Speed modifier (Always useful, moderate priority)
-		Enums.EffectType.SPEED_MODIFIER:
-			priority += 8
-		# Combat performance modifiers (Medium priority)
-		Enums.EffectType.ACCURACY_MODIFIER:
-			priority += 12
-		Enums.EffectType.RANGE_MODIFIER:
-			priority += 12
-		Enums.EffectType.COOLDOWN_MODIFIER:
-			priority += 12
-		# Regeneration effects (Lower than direct repair but useful)
-		Enums.EffectType.HEALTH_REGEN:
-			priority += 5 if target.combatant.health < target.combatant.max_health * 0.3 else 3
-		Enums.EffectType.SHIELD_REGEN:
-			priority += 5 if target.combatant.shield < target.combatant.max_shield * 0.3 else 3
-		Enums.EffectType.ARMOR_REGEN:
-			priority += 5 if target.combatant.armor < target.combatant.max_armor * 0.3 else 3
-		Enums.EffectType.POWER_REGEN:
-			priority += 5 if target.combatant.power < target.combatant.max_power * 0.3 else 3
-		# Damage Reduction (Always useful, medium priority)
-		Enums.EffectType.DAMAGE_REDUCTION_ALL:
-			priority += 12
-		Enums.EffectType.DAMAGE_REDUCTION_KINETIC:
-			priority += 6
-		Enums.EffectType.DAMAGE_REDUCTION_ENERGY:
-			priority += 6
-		Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE:
-			priority += 6
-		Enums.EffectType.DAMAGE_REDUCTION_PLASMA:
-			priority += 6
-		Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE:
-			priority += 6
-	return priority
+	return effect.get_ai_utility_priority(target)
 
 
-func evaluate_offensive_effect_priority(target: MapCombatEntity, effect: ItemEffect) -> int:
+func evaluate_offensive_effect_priority(target: MapCombatEntity, effect: BaseEffect) -> int:
 	"""
 	Assigns a priority value to an offensive effect targeting a specific entity.
 	"""
-	var priority = 0
+	var priority: int = _get_target_state_priority(target) + effect.get_ai_offensive_priority(target)
+	return clamp(priority, 0, 25)
 
-	# Factor 1: Threat level by size (larger = more threatening)
 
-	priority += (target.combatant.template.size + 1) * (target.combatant.template.size + 1)
-
-	# Factor 2: Target state sensitivity.
+func _get_target_state_priority(target: MapCombatEntity) -> int:
+	var priority: int = (target.combatant.template.size + 1) * (target.combatant.template.size + 1)
 
 	if target.combatant.health < target.combatant.max_health * 0.25:
 		priority += 10
@@ -100,82 +38,7 @@ func evaluate_offensive_effect_priority(target: MapCombatEntity, effect: ItemEff
 	elif target.combatant.armor < target.combatant.max_armor * 0.5:
 		priority += 2
 
-	# Factor 3: Effect-Specific Logic.
-
-	if effect.type == Enums.EffectType.DAMAGE:
-		# Scale based on raw damage amount.
-		priority += clamp(effect.amount / 10.0, 1, 10)
-
-	elif effect.type == Enums.EffectType.DAMAGE_OVER_TIME:
-		# Prefer refreshing a DOT only if it will extend the remaining duration.
-		if not target.combatant.active_effect_manager.should_refresh_dot(effect):
-			priority -= 8
-		else:
-			# Scale based on damage per second and duration.
-			priority += clamp((effect.amount * effect.duration) / 5.0, 1, 8)
-
-	elif (
-		effect.type
-		in [
-			Enums.EffectType.ACCURACY_MODIFIER,
-			Enums.EffectType.RANGE_MODIFIER,
-			Enums.EffectType.COOLDOWN_MODIFIER,
-		]
-	):
-		# Higher priority for debuffs, scaled by amount.
-		if effect.amount < 0:
-			priority += clamp(abs(effect.amount), 4, 16)
-	elif (
-		effect.type
-		in [
-			Enums.EffectType.POWER_MODIFIER,
-			Enums.EffectType.HEALTH_MODIFIER,
-			Enums.EffectType.ARMOR_MODIFIER,
-			Enums.EffectType.SHIELD_MODIFIER,
-		]
-	):
-		# Moderate priority for debuffs, scaled by amount.
-		if effect.amount < 0:
-			priority += clamp(abs(effect.amount), 2, 8)
-	elif effect.type == Enums.EffectType.SPEED_MODIFIER:
-		# High priority for speed debuffs, scaled by amount.
-		if effect.amount < 0:
-			priority += clamp(abs(effect.amount), 4, 16)
-	elif (
-		effect.type
-		in [
-			Enums.EffectType.HEALTH_REGEN,
-			Enums.EffectType.SHIELD_REGEN,
-			Enums.EffectType.ARMOR_REGEN,
-			Enums.EffectType.POWER_REGEN,
-		]
-	):
-		# Moderate priority for regeneration reduction, scaled by amount.
-		if effect.amount < 0:
-			priority += clamp(abs(effect.amount), 3, 12)
-	elif effect.type == Enums.EffectType.DAMAGE_REDUCTION_ALL:
-		# Moderate priority for damage reduction debuffs, scaled by amount.
-		if effect.amount < 0:
-			priority += clamp(abs(effect.amount), 3, 12)
-	elif (
-		effect.type
-		in [
-			Enums.EffectType.DAMAGE_REDUCTION_KINETIC,
-			Enums.EffectType.DAMAGE_REDUCTION_ENERGY,
-			Enums.EffectType.DAMAGE_REDUCTION_EXPLOSIVE,
-			Enums.EffectType.DAMAGE_REDUCTION_PLASMA,
-			Enums.EffectType.DAMAGE_REDUCTION_CORROSIVE,
-		]
-	):
-		# Lower priority for specific damage reduction debuffs, scaled by amount.
-		if effect.amount < 0:
-			priority += clamp(abs(effect.amount), 2, 8)
-	else:
-		# Default case for any other effect types (shouldn't happen for offensive modules).
-		priority += 0
-
-	# Cap to prevent over-prioritization.
-	return clamp(priority, 0, 25)
+	return priority
 
 
 func score_utility_module_on_target(

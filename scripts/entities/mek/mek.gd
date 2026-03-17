@@ -1,6 +1,5 @@
-extends CombatActor
-
 class_name Mek
+extends CombatActor
 
 # =============================================================================
 # PROPERTIES
@@ -33,7 +32,7 @@ static func compare_meks(a: Mek, b: Mek) -> bool:
 
 func rebuild_combat_state():
 	"""Rebuilds dynamic combat state from template values plus passive item effects."""
-	var base_stats := {
+	var stats_payload: Dictionary = {
 		"health": template.health,
 		"max_health": template.health,
 		"armor": template.armor,
@@ -48,7 +47,7 @@ func rebuild_combat_state():
 		"power_generation": template.power_generation,
 		"speed": template.speed,
 	}
-	rebuild_combat_state_with_items(base_stats, template.slots)
+	rebuild_combat_state_with_items(stats_payload, template.slots)
 
 
 # =============================================================================

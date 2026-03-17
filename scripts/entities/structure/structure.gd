@@ -32,7 +32,7 @@ func get_icon_path() -> String:
 
 
 func rebuild_combat_state() -> void:
-	var base_stats: Dictionary = {
+	var stats_payload: Dictionary = {
 		"health": health,
 		"max_health": max_health,
 		"armor": armor,
@@ -48,7 +48,7 @@ func rebuild_combat_state() -> void:
 		"speed": speed,
 	}
 	if template:
-		base_stats = {
+		stats_payload = {
 			"health": template.health,
 			"max_health": template.health,
 			"armor": template.armor,
@@ -63,10 +63,10 @@ func rebuild_combat_state() -> void:
 			"power_generation": template.power_generation,
 			"speed": template.speed,
 		}
-		rebuild_combat_state_with_items(base_stats, template.slots)
+		rebuild_combat_state_with_items(stats_payload, template.slots)
 		return
 
-	rebuild_combat_state_with_items(base_stats, slots)
+	rebuild_combat_state_with_items(stats_payload, slots)
 
 
 func from_dict(data: Dictionary = {}) -> bool:

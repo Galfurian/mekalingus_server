@@ -21,6 +21,24 @@ metadata/_tab_index = 0
 layout_mode = 2
 metadata/_tab_index = 1
 
+[node name="Mind" type="VBoxContainer" parent="Tabs"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Tabs/Mind"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MindLog" type="RichTextLabel" parent="Tabs/Mind/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 2
+bbcode_enabled = true
+scroll_following = true
+selection_enabled = true
+
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 3

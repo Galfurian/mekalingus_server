@@ -21,8 +21,11 @@ var _last_selected_tab: int = 0
 @onready var tabs: TabContainer = $Tabs
 @onready var equipment_panel = $Tabs/Equipment
 @onready var plan_panel = $Tabs/Plan
+@onready var mind_log: RichTextLabel = $Tabs/Mind/ScrollContainer/MindLog
 @onready var item_info: RichTextLabel = $ScrollContainer/ItemInfo
 @onready var plan_info: RichTextLabel = plan_panel.plan_info
+
+var _mind_log_combatant: CombatActor = null
 
 
 func _ready() -> void:
@@ -39,6 +42,7 @@ func clear() -> void:
 	_entity = null
 	equipment_panel.clear()
 	plan_panel.clear()
+	_set_mind_log_combatant(null)
 	item_info.clear()
 	visible = false
 
@@ -48,6 +52,7 @@ func display_combat_entity(game_map: GameMap, map_entity: MapCombatEntity) -> vo
 	_entity = map_entity
 	visible = true
 	item_info.clear()
+	_set_mind_log_combatant(map_entity.combatant)
 	equipment_panel.display_combatant(map_entity.combatant)
 	plan_panel.display_plan(game_map, map_entity)
 	tabs.current_tab = _last_selected_tab
@@ -76,6 +81,31 @@ func _on_equipment_loadout_changed(selected_item: Item) -> void:
 		plan_panel.display_plan(_game_map, _entity)
 	_show_item_details(selected_item)
 	loadout_changed.emit()
+
+
+func _set_mind_log_combatant(combatant: CombatActor) -> void:
+	# Disconnect previous combatant signal (if any).
+	if _mind_log_combatant and _mind_log_combatant.ai_thought_logged.is_connected(_on_ai_thought_logged):
+		_mind_log_combatant.ai_thought_logged.disconnect(_on_ai_thought_logged)
+
+	_mind_log_combatant = combatant
+	mind_log.clear()
+
+	if not is_instance_valid(_mind_log_combatant):
+		mind_log.append_text("Select a Mek/Structure to inspect AI thoughts.\n")
+		return
+
+	# Populate the mind log with existing thoughts.
+	for entry: String in _mind_log_combatant.get_ai_thoughts():
+		mind_log.append_text(entry + "\n")
+
+	# Subscribe to future thoughts.
+	if not _mind_log_combatant.ai_thought_logged.is_connected(_on_ai_thought_logged):
+		_mind_log_combatant.ai_thought_logged.connect(_on_ai_thought_logged)
+
+
+func _on_ai_thought_logged(entry: String) -> void:
+	mind_log.append_text(entry + "\n")
 
 
 func _show_item_details(item: Item) -> void:

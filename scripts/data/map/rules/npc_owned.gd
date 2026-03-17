@@ -4,6 +4,8 @@ extends EntityOwner
 
 # The name of the NPC.
 var npc_name: String
+# Optional per-pilot AI profile override path.
+var ai_profile_path: String = ""
 
 
 func _init(_npc_name: String, _clan: Clan) -> void:
@@ -32,8 +34,14 @@ static func from_dict(data: Dictionary) -> EntityOwner:
 	if not resolved_clan:
 		push_error("Invalid NPCOwned data: unknown clan %s" % data["clan"])
 		return null
-	return NPCOwned.new(data["npc_name"], resolved_clan)
+	var npc_owner: NPCOwned = NPCOwned.new(data["npc_name"], resolved_clan)
+	npc_owner.ai_profile_path = data.get("ai_profile_path", "")
+	return npc_owner
 
 
 func to_dict() -> Dictionary:
-	return {"npc_name": npc_name, "clan": clan.id}
+	return {
+		"npc_name": npc_name,
+		"clan": clan.id,
+		"ai_profile_path": ai_profile_path,
+	}

@@ -9,6 +9,7 @@
         "SUPPORT"
     ],
     "aggressiveness": 0.8,
+    "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
     "is_player_joinable": true,
     "allies": ["nova_regents", "ember_guard", "standard_player_clan"]
 }

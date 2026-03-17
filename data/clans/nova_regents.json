@@ -9,6 +9,7 @@
         "SNIPER"
     ],
     "aggressiveness": 1.2,
+    "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
     "is_player_joinable": true,
     "allies": ["phantom_blades", "storm_howlers"]
 }

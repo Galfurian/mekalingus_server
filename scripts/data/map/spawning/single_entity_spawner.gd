@@ -85,7 +85,9 @@ static func build_owner_from_request(request: Dictionary, index: int) -> EntityO
 	var npc_mode: String = str(request.get("npc_mode", "new"))
 	if npc_mode != "existing" and index > 0:
 		base_name += " %d" % (index + 1)
-	return NPCOwned.new(base_name, clan)
+	var npc_owner: NPCOwned = NPCOwned.new(base_name, clan)
+	npc_owner.ai_profile_path = str(request.get("ai_profile_path", "")).strip_edges()
+	return npc_owner
 
 
 static func spawn_mek(

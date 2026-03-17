@@ -17,8 +17,7 @@
 			0,
 			2
 		],
-		"icon": "meks/light/lmek001.png",
-		"ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
+		"icon": "meks/light/lmek001.png"
 	},
 	"lmek002": {
 		"name": "Shadow Phantom",
@@ -38,8 +37,7 @@
 			0,
 			2
 		],
-		"icon": "meks/light/lmek002.png",
-		"ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
+		"icon": "meks/light/lmek002.png"
 	},
 	"lmek003": {
 		"name": "Specter Shadow",
@@ -59,8 +57,7 @@
 			0,
 			2
 		],
-		"icon": "meks/light/lmek003.png",
-		"ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
+		"icon": "meks/light/lmek003.png"
 	},
 	"lmek004": {
 		"name": "Storm Dancer",
@@ -80,8 +77,7 @@
 			0,
 			2
 		],
-		"icon": "meks/light/lmek004.png",
-		"ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
+		"icon": "meks/light/lmek004.png"
 	},
 	"lmek005": {
 		"name": "Blitz Warden",
@@ -101,8 +97,7 @@
 			0,
 			2
 		],
-		"icon": "meks/light/lmek005.png",
-		"ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
+		"icon": "meks/light/lmek005.png"
 	},
 	"lmek006": {
 		"name": "Striker Talon",
@@ -122,8 +117,7 @@
 			0,
 			1
 		],
-		"icon": "meks/light/lmek006.png",
-		"ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
+		"icon": "meks/light/lmek006.png"
 	},
 	"lmek007": {
 		"name": "Falcon Edge",
@@ -143,8 +137,7 @@
 			0,
 			2
 		],
-		"icon": "meks/light/lmek007.png",
-		"ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
+		"icon": "meks/light/lmek007.png"
 	},
 	"lmek008": {
 		"name": "Viper Stride",
@@ -164,8 +157,7 @@
 			0,
 			2
 		],
-		"icon": "meks/light/lmek008.png",
-		"ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
+		"icon": "meks/light/lmek008.png"
 	},
 	"lmek009": {
 		"name": "Ghost Mirage",
@@ -185,8 +177,7 @@
 			0,
 			2
 		],
-		"icon": "meks/light/lmek009.png",
-		"ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
+		"icon": "meks/light/lmek009.png"
 	},
 	"lmek010": {
 		"name": "Raptor Fang",
@@ -206,7 +197,6 @@
 			0,
 			2
 		],
-		"icon": "meks/light/lmek010.png",
-		"ai_profile_path": "res://data/ai_profiles/aggressive_brawler.tres"
+		"icon": "meks/light/lmek010.png"
 	}
 }

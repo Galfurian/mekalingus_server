@@ -9,6 +9,7 @@
         "BRAWLER"
     ],
     "aggressiveness": 0.6,
+    "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
     "is_player_joinable": true,
     "allies": ["phantom_blades", "standard_player_clan"]
 }

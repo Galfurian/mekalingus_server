@@ -37,6 +37,8 @@ var preferred_roles: Array = []
 
 # How aggressive the AI of this clan is.
 var aggressiveness: float = 1.0
+# Tactical doctrine profile path used by AI-controlled members of this clan.
+var ai_profile_path: String = ""
 
 # -------------------------------------
 # PLAYER INTEGRATION
@@ -78,6 +80,7 @@ static func from_dict(data: Dictionary) -> Clan:
 	clan.emblem_path = data.get("emblem_path", "")
 	clan.preferred_roles = Utils.strings_to_enums(Enums.MekRole, data["preferred_roles"])
 	clan.aggressiveness = data.get("aggressiveness", 1.0)
+	clan.ai_profile_path = data.get("ai_profile_path", "")
 	clan.is_player_joinable = data.get("is_player_joinable", true)
 	clan.allies = data.get("allies", [])
 	return clan
@@ -93,6 +96,7 @@ func to_dict() -> Dictionary:
 		"emblem_path": emblem_path,
 		"preferred_roles": Utils.enums_to_strings(Enums.MekRole, preferred_roles),
 		"aggressiveness": aggressiveness,
+		"ai_profile_path": ai_profile_path,
 		"is_player_joinable": is_player_joinable,
 		"allies": allies,
 	}

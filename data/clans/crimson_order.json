@@ -9,6 +9,7 @@
 		"SUPPORT"
 	],
 	"aggressiveness": 1.1,
+    "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
 	"is_player_joinable": false,
 	"allies": ["iron_forge", "void_hammers"]
 }

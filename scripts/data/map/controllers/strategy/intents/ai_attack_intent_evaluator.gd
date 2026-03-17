@@ -2,7 +2,7 @@ class_name AIAttackIntentEvaluator
 extends RefCounted
 
 
-const DEFAULT_PROFILE_PATH: String = "res://data/ai_profiles/aggressive_brawler.tres"
+const DEFAULT_PROFILE_PATH: String = "res://data/ai_profiles/default_basic.tres"
 const DEFAULT_MAX_LOS_TILE_CANDIDATES: int = 6
 
 static var _profile_cache: Dictionary = {}
@@ -318,20 +318,37 @@ static func _get_max_module_range(
 
 
 static func _resolve_profile(source: MapCombatEntity) -> Resource:
-	var profile_path: String = DEFAULT_PROFILE_PATH
-	if source and source.combatant and is_instance_of(source.combatant, Mek):
-		var mek: Mek = source.combatant
-		if mek.ai_action_profile:
-			return mek.ai_action_profile
-		if mek.template and not mek.template.ai_profile_path.is_empty():
-			profile_path = mek.template.ai_profile_path
+	var profile_path: String = ""
+	if source and source.owner:
+		if is_instance_of(source.owner, NPCOwned):
+			var npc_owner: NPCOwned = source.owner
+			if not npc_owner.ai_profile_path.is_empty():
+				profile_path = npc_owner.ai_profile_path
+
+		if (
+			profile_path.is_empty()
+			and source.owner.clan
+			and not source.owner.clan.ai_profile_path.is_empty()
+		):
+			profile_path = source.owner.clan.ai_profile_path
+
+	if profile_path.is_empty():
+		profile_path = DEFAULT_PROFILE_PATH
+		if source:
+			push_warning(
+				"AI profile fallback to default for %s (%s)"
+				% [
+					source.combatant.get_chat_tag(),
+					DEFAULT_PROFILE_PATH,
+				]
+			)
 
 	if _profile_cache.has(profile_path):
 		return _profile_cache[profile_path]
 
 	var loaded_profile: Resource = load(profile_path)
 	if not loaded_profile:
-		push_error("Failed to load AI profile: %s" % profile_path)
+		push_warning("Failed to load AI profile path '%s', using default." % profile_path)
 		loaded_profile = load(DEFAULT_PROFILE_PATH)
 
 	_profile_cache[profile_path] = loaded_profile

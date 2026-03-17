@@ -11,6 +11,7 @@
         "ARTILLERY"
     ],
     "aggressiveness": 1.0,
+    "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
     "is_player_joinable": true,
     "allies": ["phantom_blades", "ember_guard", "storm_howlers"]
 }

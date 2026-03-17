@@ -37,19 +37,19 @@ func get_ai_offensive_priority(_target) -> int:
 			return 0
 
 
-func get_ai_utility_priority(target) -> int:
-	if not target or not target.combatant:
+func get_ai_utility_priority(_target) -> int:
+	if not _target or not _target.combatant:
 		return 0
 
 	match stat:
 		Enums.StatType.MAX_HEALTH:
-			return 4 if target.combatant.health < target.combatant.max_health * 0.4 else 2
+			return 4 if _target.combatant.health < _target.combatant.max_health * 0.4 else 2
 		Enums.StatType.MAX_SHIELD:
-			return 4 if target.combatant.shield < target.combatant.max_shield * 0.4 else 2
+			return 4 if _target.combatant.shield < _target.combatant.max_shield * 0.4 else 2
 		Enums.StatType.MAX_ARMOR:
-			return 4 if target.combatant.armor < target.combatant.max_armor * 0.4 else 2
+			return 4 if _target.combatant.armor < _target.combatant.max_armor * 0.4 else 2
 		Enums.StatType.MAX_POWER:
-			return 3 if target.combatant.power < target.combatant.max_power * 0.4 else 1
+			return 3 if _target.combatant.power < _target.combatant.max_power * 0.4 else 1
 		Enums.StatType.SPEED:
 			return 8
 		Enums.StatType.ACCURACY_MODIFIER, Enums.StatType.RANGE_MODIFIER, Enums.StatType.COOLDOWN_MODIFIER:

@@ -22,12 +22,12 @@ func get_effect_type_label() -> String:
 			return "Repair"
 
 
-func get_ai_utility_priority(target) -> int:
-	if not target or not target.combatant:
+func get_ai_utility_priority(_target) -> int:
+	if not _target or not _target.combatant:
 		return 0
 
-	var current: int = BaseEffect.get_actor_stat(target.combatant, stat)
-	var maximum: int = BaseEffect.get_actor_stat(target.combatant, _get_max_stat())
+	var current: int = BaseEffect.get_actor_stat(_target.combatant, stat)
+	var maximum: int = BaseEffect.get_actor_stat(_target.combatant, _get_max_stat())
 	if current < maximum * 0.4:
 		return 16
 	if current < maximum * 0.7:

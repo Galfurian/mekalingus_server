@@ -28,19 +28,19 @@ func get_ai_offensive_priority(_target) -> int:
 	return clamp(abs(amount), 3, 12)
 
 
-func get_ai_utility_priority(target) -> int:
-	if not target or not target.combatant:
+func get_ai_utility_priority(_target) -> int:
+	if not _target or not _target.combatant:
 		return 0
 
 	match stat:
 		Enums.StatType.HEALTH_REGEN:
-			return 5 if target.combatant.health < target.combatant.max_health * 0.3 else 3
+			return 5 if _target.combatant.health < _target.combatant.max_health * 0.3 else 3
 		Enums.StatType.SHIELD_REGEN:
-			return 5 if target.combatant.shield < target.combatant.max_shield * 0.3 else 3
+			return 5 if _target.combatant.shield < _target.combatant.max_shield * 0.3 else 3
 		Enums.StatType.ARMOR_REGEN:
-			return 5 if target.combatant.armor < target.combatant.max_armor * 0.3 else 3
+			return 5 if _target.combatant.armor < _target.combatant.max_armor * 0.3 else 3
 		Enums.StatType.POWER_REGEN:
-			return 5 if target.combatant.power < target.combatant.max_power * 0.3 else 3
+			return 5 if _target.combatant.power < _target.combatant.max_power * 0.3 else 3
 		_:
 			return 0
 

@@ -18,10 +18,10 @@ func get_threat_score() -> float:
 	return float(amount * duration) * 0.5
 
 
-func get_ai_offensive_priority(p_target) -> int:
-	if not p_target or not p_target.combatant or not p_target.combatant.active_effect_manager:
+func get_ai_offensive_priority(_target) -> int:
+	if not _target or not _target.combatant or not _target.combatant.active_effect_manager:
 		return clamp(int(round(float(amount * duration) / 5.0)), 1, 8)
-	if not p_target.combatant.active_effect_manager.should_refresh_dot(self):
+	if not _target.combatant.active_effect_manager.should_refresh_dot(self):
 		return -8
 	return clamp(int(round(float(amount * duration) / 5.0)), 1, 8)
 

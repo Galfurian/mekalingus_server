@@ -61,6 +61,128 @@ enum StatType {
 	COOLDOWN_MODIFIER,
 }
 
+
+static func get_stat_types() -> Array[int]:
+	var stat_types: Array[int] = []
+	for value in StatType.values():
+		stat_types.append(int(value))
+	return stat_types
+
+
+static func get_stat_key(stat_type: int) -> String:
+	match stat_type:
+		StatType.HEALTH:
+			return "health"
+		StatType.ARMOR:
+			return "armor"
+		StatType.SHIELD:
+			return "shield"
+		StatType.POWER:
+			return "power"
+		StatType.MAX_HEALTH:
+			return "max_health"
+		StatType.MAX_ARMOR:
+			return "max_armor"
+		StatType.MAX_SHIELD:
+			return "max_shield"
+		StatType.MAX_POWER:
+			return "max_power"
+		# Keep payload wire keys as *_generation for backward compatibility.
+		StatType.HEALTH_REGEN:
+			return "health_generation"
+		StatType.ARMOR_REGEN:
+			return "armor_generation"
+		StatType.SHIELD_REGEN:
+			return "shield_generation"
+		StatType.POWER_REGEN:
+			return "power_generation"
+		StatType.SPEED:
+			return "speed"
+		StatType.DAMAGE_REDUCTION_ALL:
+			return "damage_reduction_all"
+		StatType.DAMAGE_REDUCTION_KINETIC:
+			return "damage_reduction_kinetic"
+		StatType.DAMAGE_REDUCTION_ENERGY:
+			return "damage_reduction_energy"
+		StatType.DAMAGE_REDUCTION_EXPLOSIVE:
+			return "damage_reduction_explosive"
+		StatType.DAMAGE_REDUCTION_PLASMA:
+			return "damage_reduction_plasma"
+		StatType.DAMAGE_REDUCTION_CORROSIVE:
+			return "damage_reduction_corrosive"
+		StatType.ACCURACY_MODIFIER:
+			return "accuracy_modifier"
+		StatType.RANGE_MODIFIER:
+			return "range_modifier"
+		StatType.COOLDOWN_MODIFIER:
+			return "cooldown_modifier"
+		_:
+			return "unknown"
+
+
+static func get_stat_type_from_key(stat_key: String) -> int:
+	match stat_key:
+		"health":
+			return StatType.HEALTH
+		"armor":
+			return StatType.ARMOR
+		"shield":
+			return StatType.SHIELD
+		"power":
+			return StatType.POWER
+		"max_health":
+			return StatType.MAX_HEALTH
+		"max_armor":
+			return StatType.MAX_ARMOR
+		"max_shield":
+			return StatType.MAX_SHIELD
+		"max_power":
+			return StatType.MAX_POWER
+		"health_generation":
+			return StatType.HEALTH_REGEN
+		"armor_generation":
+			return StatType.ARMOR_REGEN
+		"shield_generation":
+			return StatType.SHIELD_REGEN
+		"power_generation":
+			return StatType.POWER_REGEN
+		"speed":
+			return StatType.SPEED
+		"damage_reduction_all":
+			return StatType.DAMAGE_REDUCTION_ALL
+		"damage_reduction_kinetic":
+			return StatType.DAMAGE_REDUCTION_KINETIC
+		"damage_reduction_energy":
+			return StatType.DAMAGE_REDUCTION_ENERGY
+		"damage_reduction_explosive":
+			return StatType.DAMAGE_REDUCTION_EXPLOSIVE
+		"damage_reduction_plasma":
+			return StatType.DAMAGE_REDUCTION_PLASMA
+		"damage_reduction_corrosive":
+			return StatType.DAMAGE_REDUCTION_CORROSIVE
+		"accuracy_modifier":
+			return StatType.ACCURACY_MODIFIER
+		"range_modifier":
+			return StatType.RANGE_MODIFIER
+		"cooldown_modifier":
+			return StatType.COOLDOWN_MODIFIER
+		_:
+			return -1
+
+
+static func is_modifier_stat(stat_type: int) -> bool:
+	return (
+		stat_type == StatType.DAMAGE_REDUCTION_ALL
+		or stat_type == StatType.DAMAGE_REDUCTION_KINETIC
+		or stat_type == StatType.DAMAGE_REDUCTION_ENERGY
+		or stat_type == StatType.DAMAGE_REDUCTION_EXPLOSIVE
+		or stat_type == StatType.DAMAGE_REDUCTION_PLASMA
+		or stat_type == StatType.DAMAGE_REDUCTION_CORROSIVE
+		or stat_type == StatType.ACCURACY_MODIFIER
+		or stat_type == StatType.RANGE_MODIFIER
+		or stat_type == StatType.COOLDOWN_MODIFIER
+	)
+
 # The type of effects.
 enum EffectType {
 	DAMAGE,  # Deals direct damage.

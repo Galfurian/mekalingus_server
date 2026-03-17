@@ -22,33 +22,140 @@ var cooldown_manager: CooldownManager = null
 # COMBAT STATS
 # =============================================================================
 
-var health: int
-var armor: int
-var shield: int
-var power: int
+var base_stats: Dictionary = {}
+var modifiers: Dictionary = {}
 
-var max_health: int
-var max_armor: int
-var max_shield: int
-var max_power: int
+var health: int:
+	get:
+		return get_health()
+	set(value):
+		set_base_stat(Enums.StatType.HEALTH, value)
 
-var health_generation: int
-var armor_generation: int
-var shield_generation: int
-var power_generation: int
+var armor: int:
+	get:
+		return get_armor()
+	set(value):
+		set_base_stat(Enums.StatType.ARMOR, value)
 
-var speed: int
+var shield: int:
+	get:
+		return get_shield()
+	set(value):
+		set_base_stat(Enums.StatType.SHIELD, value)
 
-var damage_reduction_all: int
-var damage_reduction_kinetic: int
-var damage_reduction_energy: int
-var damage_reduction_explosive: int
-var damage_reduction_plasma: int
-var damage_reduction_corrosive: int
+var power: int:
+	get:
+		return get_power()
+	set(value):
+		set_base_stat(Enums.StatType.POWER, value)
 
-var accuracy_modifier: int
-var range_modifier: int
-var cooldown_modifier: int
+var max_health: int:
+	get:
+		return get_max_health()
+	set(value):
+		set_base_stat(Enums.StatType.MAX_HEALTH, value)
+
+var max_armor: int:
+	get:
+		return get_max_armor()
+	set(value):
+		set_base_stat(Enums.StatType.MAX_ARMOR, value)
+
+var max_shield: int:
+	get:
+		return get_max_shield()
+	set(value):
+		set_base_stat(Enums.StatType.MAX_SHIELD, value)
+
+var max_power: int:
+	get:
+		return get_max_power()
+	set(value):
+		set_base_stat(Enums.StatType.MAX_POWER, value)
+
+var health_generation: int:
+	get:
+		return get_health_generation()
+	set(value):
+		set_base_stat(Enums.StatType.HEALTH_REGEN, value)
+
+var armor_generation: int:
+	get:
+		return get_armor_generation()
+	set(value):
+		set_base_stat(Enums.StatType.ARMOR_REGEN, value)
+
+var shield_generation: int:
+	get:
+		return get_shield_generation()
+	set(value):
+		set_base_stat(Enums.StatType.SHIELD_REGEN, value)
+
+var power_generation: int:
+	get:
+		return get_power_generation()
+	set(value):
+		set_base_stat(Enums.StatType.POWER_REGEN, value)
+
+var speed: int:
+	get:
+		return get_speed()
+	set(value):
+		set_base_stat(Enums.StatType.SPEED, value)
+
+var damage_reduction_all: int:
+	get:
+		return get_stat(Enums.StatType.DAMAGE_REDUCTION_ALL)
+	set(value):
+		set_base_stat(Enums.StatType.DAMAGE_REDUCTION_ALL, value)
+
+var damage_reduction_kinetic: int:
+	get:
+		return get_stat(Enums.StatType.DAMAGE_REDUCTION_KINETIC)
+	set(value):
+		set_base_stat(Enums.StatType.DAMAGE_REDUCTION_KINETIC, value)
+
+var damage_reduction_energy: int:
+	get:
+		return get_stat(Enums.StatType.DAMAGE_REDUCTION_ENERGY)
+	set(value):
+		set_base_stat(Enums.StatType.DAMAGE_REDUCTION_ENERGY, value)
+
+var damage_reduction_explosive: int:
+	get:
+		return get_stat(Enums.StatType.DAMAGE_REDUCTION_EXPLOSIVE)
+	set(value):
+		set_base_stat(Enums.StatType.DAMAGE_REDUCTION_EXPLOSIVE, value)
+
+var damage_reduction_plasma: int:
+	get:
+		return get_stat(Enums.StatType.DAMAGE_REDUCTION_PLASMA)
+	set(value):
+		set_base_stat(Enums.StatType.DAMAGE_REDUCTION_PLASMA, value)
+
+var damage_reduction_corrosive: int:
+	get:
+		return get_stat(Enums.StatType.DAMAGE_REDUCTION_CORROSIVE)
+	set(value):
+		set_base_stat(Enums.StatType.DAMAGE_REDUCTION_CORROSIVE, value)
+
+var accuracy_modifier: int:
+	get:
+		return get_accuracy_modifier()
+	set(value):
+		set_base_stat(Enums.StatType.ACCURACY_MODIFIER, value)
+
+var range_modifier: int:
+	get:
+		return get_range_modifier()
+	set(value):
+		set_base_stat(Enums.StatType.RANGE_MODIFIER, value)
+
+var cooldown_modifier: int:
+	get:
+		return get_cooldown_modifier()
+	set(value):
+		set_base_stat(Enums.StatType.COOLDOWN_MODIFIER, value)
 
 var tiles_moved_last_turn: int = 0
 
@@ -69,28 +176,42 @@ func get_icon_path() -> String:
 	return ""
 
 
+func get_stat(stat: int) -> int:
+	return _get_raw_stat(base_stats, stat) + _get_raw_stat(modifiers, stat)
+
+
+func set_base_stat(stat: int, value: int) -> void:
+	if Enums.is_modifier_stat(stat):
+		_set_raw_stat(modifiers, stat, value)
+		return
+	_set_raw_stat(base_stats, stat, value)
+	_clamp_after_stat_write(stat)
+
+
+func modify_stat(stat: int, delta: int) -> void:
+	set_base_stat(stat, get_stat(stat) + delta)
+
+
+func adjust_current_stat(stat: int, amount: int) -> int:
+	var before: int = get_stat(stat)
+	set_base_stat(stat, before + amount)
+	return get_stat(stat) - before
+
+
 func adjust_health(amount: int) -> int:
-	var before = health
-	health = clamp(health + amount, 0, max_health)
-	return health - before
+	return adjust_current_stat(Enums.StatType.HEALTH, amount)
 
 
 func adjust_shield(amount: int) -> int:
-	var before = shield
-	shield = clamp(shield + amount, 0, max_shield)
-	return shield - before
+	return adjust_current_stat(Enums.StatType.SHIELD, amount)
 
 
 func adjust_armor(amount: int) -> int:
-	var before = armor
-	armor = clamp(armor + amount, 0, max_armor)
-	return armor - before
+	return adjust_current_stat(Enums.StatType.ARMOR, amount)
 
 
 func adjust_power(amount: int) -> int:
-	var before = power
-	power = clamp(power + amount, 0, max_power)
-	return power - before
+	return adjust_current_stat(Enums.StatType.POWER, amount)
 
 
 func regenerate() -> void:
@@ -100,43 +221,59 @@ func regenerate() -> void:
 	adjust_power(power_generation)
 
 
-func reset_combat_state(base_stats: Dictionary, p_slots: Array[int] = []) -> void:
-	health = int(base_stats.get("health", 0))
-	max_health = int(base_stats.get("max_health", health))
-	armor = int(base_stats.get("armor", 0))
-	max_armor = int(base_stats.get("max_armor", armor))
-	shield = int(base_stats.get("shield", 0))
-	max_shield = int(base_stats.get("max_shield", shield))
-	power = int(base_stats.get("power", 0))
-	max_power = int(base_stats.get("max_power", power))
+func reset_combat_state(stats_payload: Dictionary, p_slots: Array[int] = []) -> void:
+	base_stats.clear()
+	modifiers.clear()
 
-	health_generation = int(base_stats.get("health_generation", 0))
-	armor_generation = int(base_stats.get("armor_generation", 0))
-	shield_generation = int(base_stats.get("shield_generation", 0))
-	power_generation = int(base_stats.get("power_generation", 0))
+	for stat: int in Enums.get_stat_types():
+		var stat_key: String = Enums.get_stat_key(stat)
+		if stats_payload.has(stat_key):
+			if Enums.is_modifier_stat(stat):
+				_set_raw_stat(modifiers, stat, int(stats_payload.get(stat_key, 0)))
+			else:
+				_set_raw_stat(base_stats, stat, int(stats_payload.get(stat_key, 0)))
 
-	speed = int(base_stats.get("speed", 0))
-
-	damage_reduction_all = int(base_stats.get("damage_reduction_all", 0))
-	damage_reduction_kinetic = int(base_stats.get("damage_reduction_kinetic", 0))
-	damage_reduction_energy = int(base_stats.get("damage_reduction_energy", 0))
-	damage_reduction_explosive = int(base_stats.get("damage_reduction_explosive", 0))
-	damage_reduction_plasma = int(base_stats.get("damage_reduction_plasma", 0))
-	damage_reduction_corrosive = int(base_stats.get("damage_reduction_corrosive", 0))
-
-	accuracy_modifier = int(base_stats.get("accuracy_modifier", 0))
-	range_modifier = int(base_stats.get("range_modifier", 0))
-	cooldown_modifier = int(base_stats.get("cooldown_modifier", 0))
-
+	_ensure_max_defaults()
+	_clamp_all_current_stats()
 	slots = p_slots.duplicate()
+
+
+func from_dict(data: Dictionary = {}) -> bool:
+	uuid = str(data.get("uuid", uuid))
+	alias = str(data.get("alias", alias))
+	slots = Utils.to_array_int(data.get("slots", slots))
+	_apply_stats_from_payload(data)
+	return true
+
+
+func to_dict() -> Dictionary:
+	var data: Dictionary = {
+		"uuid": uuid,
+		"alias": alias,
+		"slots": slots,
+		"items": Utils.convert_objects_to_dict(items),
+	}
+	data.merge(_serialize_stats_payload())
+	return data
+
+
+func to_client_dict() -> Dictionary:
+	var data: Dictionary = {
+		"uuid": uuid,
+		"alias": alias,
+		"slots": slots,
+		"items": Utils.convert_objects_to_client_dict(items),
+	}
+	data.merge(_serialize_stats_payload())
+	return data
 
 
 func rebuild_combat_state() -> void:
 	pass
 
 
-func rebuild_combat_state_with_items(base_stats: Dictionary, p_slots: Array[int] = []) -> void:
-	reset_combat_state(base_stats, p_slots)
+func rebuild_combat_state_with_items(stats_payload: Dictionary, p_slots: Array[int] = []) -> void:
+	reset_combat_state(stats_payload, p_slots)
 
 	for item in items:
 		_enable_item_passive_modifiers(item)
@@ -187,14 +324,14 @@ func _toggle_item_passive_effect_modifiers(item: Item, enable: bool) -> void:
 
 func _enable_item_passive_modifiers(item: Item) -> void:
 	_toggle_item_passive_effect_modifiers(item, true)
-	power -= item.template.base_power_usage
-	max_power -= item.template.base_power_usage
+	modify_stat(Enums.StatType.POWER, -item.template.base_power_usage)
+	modify_stat(Enums.StatType.MAX_POWER, -item.template.base_power_usage)
 
 
 func _disable_item_passive_modifiers(item: Item) -> void:
 	_toggle_item_passive_effect_modifiers(item, false)
-	power += item.template.base_power_usage
-	max_power += item.template.base_power_usage
+	modify_stat(Enums.StatType.POWER, item.template.base_power_usage)
+	modify_stat(Enums.StatType.MAX_POWER, item.template.base_power_usage)
 
 
 func take_damage_from_effect(effect: BaseEffect) -> Dictionary:
@@ -239,9 +376,6 @@ func can_equip_item(item: Item) -> bool:
 	if slots[item.template.slot] <= 0:
 		return false
 
-	# Compute how much power remains after accounting for already-equipped items.
-	# This ensures structures can still equip/use their weapon modules even though
-	# their "current" power may be reduced by base item power costs.
 	var used_power: int = 0
 	for equipped_item in items:
 		if equipped_item and equipped_item.template:
@@ -284,6 +418,149 @@ func get_item(item_uuid: String) -> Variant:
 func clear_items() -> void:
 	"""Safely removes and frees all items currently equipped."""
 	for item in items:
-		# Free the UUID if tracked
 		GameServer.free_uuid(item.uuid)
 	items.clear()
+
+
+# =============================================================================
+# COMPATIBILITY FACADE GETTERS
+# =============================================================================
+
+
+func get_health() -> int:
+	return get_stat(Enums.StatType.HEALTH)
+
+
+func get_armor() -> int:
+	return get_stat(Enums.StatType.ARMOR)
+
+
+func get_shield() -> int:
+	return get_stat(Enums.StatType.SHIELD)
+
+
+func get_power() -> int:
+	return get_stat(Enums.StatType.POWER)
+
+
+func get_max_health() -> int:
+	return get_stat(Enums.StatType.MAX_HEALTH)
+
+
+func get_max_armor() -> int:
+	return get_stat(Enums.StatType.MAX_ARMOR)
+
+
+func get_max_shield() -> int:
+	return get_stat(Enums.StatType.MAX_SHIELD)
+
+
+func get_max_power() -> int:
+	return get_stat(Enums.StatType.MAX_POWER)
+
+
+func get_health_generation() -> int:
+	return get_stat(Enums.StatType.HEALTH_REGEN)
+
+
+func get_armor_generation() -> int:
+	return get_stat(Enums.StatType.ARMOR_REGEN)
+
+
+func get_shield_generation() -> int:
+	return get_stat(Enums.StatType.SHIELD_REGEN)
+
+
+func get_power_generation() -> int:
+	return get_stat(Enums.StatType.POWER_REGEN)
+
+
+func get_speed() -> int:
+	return get_stat(Enums.StatType.SPEED)
+
+
+func get_accuracy_modifier() -> int:
+	return get_stat(Enums.StatType.ACCURACY_MODIFIER)
+
+
+func get_range_modifier() -> int:
+	return get_stat(Enums.StatType.RANGE_MODIFIER)
+
+
+func get_cooldown_modifier() -> int:
+	return get_stat(Enums.StatType.COOLDOWN_MODIFIER)
+
+
+# =============================================================================
+# INTERNAL STAT HELPERS
+# =============================================================================
+
+
+func _serialize_stats_payload() -> Dictionary:
+	var payload: Dictionary = {}
+	for stat: int in Enums.get_stat_types():
+		payload[Enums.get_stat_key(stat)] = get_stat(stat)
+	return payload
+
+
+func _apply_stats_from_payload(payload: Dictionary) -> void:
+	for stat: int in Enums.get_stat_types():
+		var stat_key: String = Enums.get_stat_key(stat)
+		if payload.has(stat_key):
+			set_base_stat(stat, int(payload.get(stat_key, 0)))
+	_ensure_max_defaults()
+	_clamp_all_current_stats()
+
+
+func _ensure_max_defaults() -> void:
+	if not base_stats.has(Enums.StatType.MAX_HEALTH):
+		_set_raw_stat(base_stats, Enums.StatType.MAX_HEALTH, _get_raw_stat(base_stats, Enums.StatType.HEALTH))
+	if not base_stats.has(Enums.StatType.MAX_ARMOR):
+		_set_raw_stat(base_stats, Enums.StatType.MAX_ARMOR, _get_raw_stat(base_stats, Enums.StatType.ARMOR))
+	if not base_stats.has(Enums.StatType.MAX_SHIELD):
+		_set_raw_stat(base_stats, Enums.StatType.MAX_SHIELD, _get_raw_stat(base_stats, Enums.StatType.SHIELD))
+	if not base_stats.has(Enums.StatType.MAX_POWER):
+		_set_raw_stat(base_stats, Enums.StatType.MAX_POWER, _get_raw_stat(base_stats, Enums.StatType.POWER))
+
+
+func _clamp_all_current_stats() -> void:
+	_clamp_current_stat_to_max(Enums.StatType.HEALTH, Enums.StatType.MAX_HEALTH)
+	_clamp_current_stat_to_max(Enums.StatType.ARMOR, Enums.StatType.MAX_ARMOR)
+	_clamp_current_stat_to_max(Enums.StatType.SHIELD, Enums.StatType.MAX_SHIELD)
+	_clamp_current_stat_to_max(Enums.StatType.POWER, Enums.StatType.MAX_POWER)
+
+
+func _clamp_after_stat_write(stat: int) -> void:
+	match stat:
+		Enums.StatType.HEALTH:
+			_clamp_current_stat_to_max(Enums.StatType.HEALTH, Enums.StatType.MAX_HEALTH)
+		Enums.StatType.ARMOR:
+			_clamp_current_stat_to_max(Enums.StatType.ARMOR, Enums.StatType.MAX_ARMOR)
+		Enums.StatType.SHIELD:
+			_clamp_current_stat_to_max(Enums.StatType.SHIELD, Enums.StatType.MAX_SHIELD)
+		Enums.StatType.POWER:
+			_clamp_current_stat_to_max(Enums.StatType.POWER, Enums.StatType.MAX_POWER)
+		Enums.StatType.MAX_HEALTH:
+			_clamp_current_stat_to_max(Enums.StatType.HEALTH, Enums.StatType.MAX_HEALTH)
+		Enums.StatType.MAX_ARMOR:
+			_clamp_current_stat_to_max(Enums.StatType.ARMOR, Enums.StatType.MAX_ARMOR)
+		Enums.StatType.MAX_SHIELD:
+			_clamp_current_stat_to_max(Enums.StatType.SHIELD, Enums.StatType.MAX_SHIELD)
+		Enums.StatType.MAX_POWER:
+			_clamp_current_stat_to_max(Enums.StatType.POWER, Enums.StatType.MAX_POWER)
+		_:
+			pass
+
+
+func _clamp_current_stat_to_max(current_stat: int, max_stat: int) -> void:
+	var max_value: int = maxi(0, get_stat(max_stat))
+	var current_value: int = get_stat(current_stat)
+	_set_raw_stat(base_stats, current_stat, clampi(current_value, 0, max_value))
+
+
+func _set_raw_stat(storage: Dictionary, stat: int, value: int) -> void:
+	storage[stat] = int(value)
+
+
+func _get_raw_stat(storage: Dictionary, stat: int) -> int:
+	return int(storage.get(stat, 0))

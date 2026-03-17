@@ -154,53 +154,7 @@ func _get_target_rationale() -> float:
 
 
 static func get_stat_key(stat_type: int) -> String:
-	match stat_type:
-		Enums.StatType.HEALTH:
-			return "health"
-		Enums.StatType.ARMOR:
-			return "armor"
-		Enums.StatType.SHIELD:
-			return "shield"
-		Enums.StatType.POWER:
-			return "power"
-		Enums.StatType.MAX_HEALTH:
-			return "max_health"
-		Enums.StatType.MAX_ARMOR:
-			return "max_armor"
-		Enums.StatType.MAX_SHIELD:
-			return "max_shield"
-		Enums.StatType.MAX_POWER:
-			return "max_power"
-		Enums.StatType.HEALTH_REGEN:
-			return "health_generation"
-		Enums.StatType.ARMOR_REGEN:
-			return "armor_generation"
-		Enums.StatType.SHIELD_REGEN:
-			return "shield_generation"
-		Enums.StatType.POWER_REGEN:
-			return "power_generation"
-		Enums.StatType.SPEED:
-			return "speed"
-		Enums.StatType.DAMAGE_REDUCTION_ALL:
-			return "damage_reduction_all"
-		Enums.StatType.DAMAGE_REDUCTION_KINETIC:
-			return "damage_reduction_kinetic"
-		Enums.StatType.DAMAGE_REDUCTION_ENERGY:
-			return "damage_reduction_energy"
-		Enums.StatType.DAMAGE_REDUCTION_EXPLOSIVE:
-			return "damage_reduction_explosive"
-		Enums.StatType.DAMAGE_REDUCTION_PLASMA:
-			return "damage_reduction_plasma"
-		Enums.StatType.DAMAGE_REDUCTION_CORROSIVE:
-			return "damage_reduction_corrosive"
-		Enums.StatType.ACCURACY_MODIFIER:
-			return "accuracy_modifier"
-		Enums.StatType.RANGE_MODIFIER:
-			return "range_modifier"
-		Enums.StatType.COOLDOWN_MODIFIER:
-			return "cooldown_modifier"
-		_:
-			return "unknown"
+	return Enums.get_stat_key(stat_type)
 
 
 static func get_stat_label(stat_type: int) -> String:
@@ -254,102 +208,20 @@ static func get_stat_label(stat_type: int) -> String:
 
 
 static func get_actor_stat(actor, stat_type: int) -> int:
-	match stat_type:
-		Enums.StatType.HEALTH:
-			return actor.health
-		Enums.StatType.ARMOR:
-			return actor.armor
-		Enums.StatType.SHIELD:
-			return actor.shield
-		Enums.StatType.POWER:
-			return actor.power
-		Enums.StatType.MAX_HEALTH:
-			return actor.max_health
-		Enums.StatType.MAX_ARMOR:
-			return actor.max_armor
-		Enums.StatType.MAX_SHIELD:
-			return actor.max_shield
-		Enums.StatType.MAX_POWER:
-			return actor.max_power
-		Enums.StatType.HEALTH_REGEN:
-			return actor.health_generation
-		Enums.StatType.ARMOR_REGEN:
-			return actor.armor_generation
-		Enums.StatType.SHIELD_REGEN:
-			return actor.shield_generation
-		Enums.StatType.POWER_REGEN:
-			return actor.power_generation
-		Enums.StatType.SPEED:
-			return actor.speed
-		Enums.StatType.DAMAGE_REDUCTION_ALL:
-			return actor.damage_reduction_all
-		Enums.StatType.DAMAGE_REDUCTION_KINETIC:
-			return actor.damage_reduction_kinetic
-		Enums.StatType.DAMAGE_REDUCTION_ENERGY:
-			return actor.damage_reduction_energy
-		Enums.StatType.DAMAGE_REDUCTION_EXPLOSIVE:
-			return actor.damage_reduction_explosive
-		Enums.StatType.DAMAGE_REDUCTION_PLASMA:
-			return actor.damage_reduction_plasma
-		Enums.StatType.DAMAGE_REDUCTION_CORROSIVE:
-			return actor.damage_reduction_corrosive
-		Enums.StatType.ACCURACY_MODIFIER:
-			return actor.accuracy_modifier
-		Enums.StatType.RANGE_MODIFIER:
-			return actor.range_modifier
-		Enums.StatType.COOLDOWN_MODIFIER:
-			return actor.cooldown_modifier
-		_:
-			return 0
+	if actor and actor.has_method("get_stat"):
+		return int(actor.get_stat(stat_type))
+	return 0
 
 
 static func add_to_actor_stat(actor, stat_type: int, delta: int) -> void:
-	match stat_type:
-		Enums.StatType.MAX_HEALTH:
-			actor.max_health += delta
-			actor.health = min(actor.health, actor.max_health)
-		Enums.StatType.MAX_ARMOR:
-			actor.max_armor += delta
-			actor.armor = min(actor.armor, actor.max_armor)
-		Enums.StatType.MAX_SHIELD:
-			actor.max_shield += delta
-			actor.shield = min(actor.shield, actor.max_shield)
-		Enums.StatType.MAX_POWER:
-			actor.max_power += delta
-			actor.power = min(actor.power, actor.max_power)
-		Enums.StatType.HEALTH_REGEN:
-			actor.health_generation += delta
-		Enums.StatType.ARMOR_REGEN:
-			actor.armor_generation += delta
-		Enums.StatType.SHIELD_REGEN:
-			actor.shield_generation += delta
-		Enums.StatType.POWER_REGEN:
-			actor.power_generation += delta
-		Enums.StatType.SPEED:
-			actor.speed += delta
-		Enums.StatType.DAMAGE_REDUCTION_ALL:
-			actor.damage_reduction_all += delta
-		Enums.StatType.DAMAGE_REDUCTION_KINETIC:
-			actor.damage_reduction_kinetic += delta
-		Enums.StatType.DAMAGE_REDUCTION_ENERGY:
-			actor.damage_reduction_energy += delta
-		Enums.StatType.DAMAGE_REDUCTION_EXPLOSIVE:
-			actor.damage_reduction_explosive += delta
-		Enums.StatType.DAMAGE_REDUCTION_PLASMA:
-			actor.damage_reduction_plasma += delta
-		Enums.StatType.DAMAGE_REDUCTION_CORROSIVE:
-			actor.damage_reduction_corrosive += delta
-		Enums.StatType.ACCURACY_MODIFIER:
-			actor.accuracy_modifier += delta
-		Enums.StatType.RANGE_MODIFIER:
-			actor.range_modifier += delta
-		Enums.StatType.COOLDOWN_MODIFIER:
-			actor.cooldown_modifier += delta
-		_:
-			pass
+	if actor and actor.has_method("modify_stat"):
+		actor.modify_stat(stat_type, delta)
 
 
 static func adjust_actor_current_stat(actor, stat_type: int, delta: int) -> int:
+	if actor and actor.has_method("adjust_current_stat"):
+		return int(actor.adjust_current_stat(stat_type, delta))
+
 	match stat_type:
 		Enums.StatType.HEALTH:
 			return actor.adjust_health(delta)

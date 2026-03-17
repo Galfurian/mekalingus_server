@@ -1,4 +1,4 @@
-[gd_resource type="AIActionProfile" script_class="AIActionProfile" load_steps=11 format=3 uid="uid://b8bv3lpa573wn"]
+[gd_resource type="Resource" script_class="" load_steps=11 format=3 uid="uid://b8bv3lpa573wn"]
 
 [ext_resource type="Script" uid="uid://cwirj0mqpui3m" path="res://scripts/systems/ai/ai_action_profile.gd" id="1"]
 [ext_resource type="Script" uid="uid://cadgfryrok7id" path="res://scripts/systems/ai/considerations/ally_health_consideration.gd" id="2"]

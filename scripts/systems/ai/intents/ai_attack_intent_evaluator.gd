@@ -20,7 +20,9 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		return null
 
 	var max_module_range: int = _get_max_module_range(source, offensive_modules)
-	var max_candidate_distance: int = source.combatant.speed + max_module_range
+	var max_candidate_distance: int = (
+		source.combatant.get_stat(Enums.StatType.SPEED) + max_module_range
+	)
 	var candidate_targets: Array[Dictionary] = []
 
 	for target: MapCombatEntity in visible_enemies:
@@ -80,7 +82,8 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 
 		for equipped_module: EquippedModule in offensive_modules:
 			var module_range: int = (
-				equipped_module.module.module_range + source.combatant.range_modifier
+				equipped_module.module.module_range
+				+ source.combatant.get_stat(Enums.StatType.RANGE_MODIFIER)
 			)
 			var min_range: int = AIUtils.get_offensive_min_range(module_range)
 			var source_distance: int = _manhattan_distance(source.position, target.position)
@@ -314,7 +317,8 @@ static func _get_max_module_range(
 	var max_range: int = 0
 	for equipped_module: EquippedModule in offensive_modules:
 		var range_with_modifier: int = (
-			equipped_module.module.module_range + source.combatant.range_modifier
+			equipped_module.module.module_range
+			+ source.combatant.get_stat(Enums.StatType.RANGE_MODIFIER)
 		)
 		max_range = maxi(max_range, range_with_modifier)
 	return max_range

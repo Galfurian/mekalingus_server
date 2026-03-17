@@ -8,12 +8,16 @@ func get_normalized_input(context: Dictionary) -> float:
 		return 0.0
 
 	var max_survivability: float = float(
-		source.combatant.max_health + source.combatant.max_armor + source.combatant.max_shield
+		source.combatant.get_stat(Enums.StatType.MAX_HEALTH)
+		+ source.combatant.get_stat(Enums.StatType.MAX_ARMOR)
+		+ source.combatant.get_stat(Enums.StatType.MAX_SHIELD)
 	)
 	if max_survivability <= 0.0:
 		return 0.0
 
 	var current_survivability: float = float(
-		source.combatant.health + source.combatant.armor + source.combatant.shield
+		source.combatant.get_stat(Enums.StatType.HEALTH)
+		+ source.combatant.get_stat(Enums.StatType.ARMOR)
+		+ source.combatant.get_stat(Enums.StatType.SHIELD)
 	)
 	return clampf(current_survivability / max_survivability, 0.0, 1.0)

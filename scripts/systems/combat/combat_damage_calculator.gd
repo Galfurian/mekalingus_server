@@ -29,34 +29,36 @@ static func take_damage_from_effect(actor, effect: BaseEffect) -> Dictionary:
 		effect.damage_type, { "shield": 1.0, "armor": 1.0, "health": 1.0 }
 	)
 
-	var reduction = max(0, actor.damage_reduction_all)
+	var reduction: int = max(0, actor.get_stat(Enums.StatType.DAMAGE_REDUCTION_ALL))
 	match effect.damage_type:
 		Enums.DamageType.KINETIC:
-			reduction += max(0, actor.damage_reduction_kinetic)
+			reduction += max(0, actor.get_stat(Enums.StatType.DAMAGE_REDUCTION_KINETIC))
 		Enums.DamageType.ENERGY:
-			reduction += max(0, actor.damage_reduction_energy)
+			reduction += max(0, actor.get_stat(Enums.StatType.DAMAGE_REDUCTION_ENERGY))
 		Enums.DamageType.EXPLOSIVE:
-			reduction += max(0, actor.damage_reduction_explosive)
+			reduction += max(0, actor.get_stat(Enums.StatType.DAMAGE_REDUCTION_EXPLOSIVE))
 		Enums.DamageType.PLASMA:
-			reduction += max(0, actor.damage_reduction_plasma)
+			reduction += max(0, actor.get_stat(Enums.StatType.DAMAGE_REDUCTION_PLASMA))
 		Enums.DamageType.CORROSIVE:
-			reduction += max(0, actor.damage_reduction_corrosive)
+			reduction += max(0, actor.get_stat(Enums.StatType.DAMAGE_REDUCTION_CORROSIVE))
 
 	var max_reduction: int = int(floor(float(effect.amount) * MAX_DAMAGE_REDUCTION_RATIO))
 	reduction = min(reduction, max_reduction)
 	var adjusted = max(effect.amount - reduction, 0)
 	result.reduced = effect.amount - adjusted
 	var remaining = adjusted
+	var shield_value: int = actor.get_stat(Enums.StatType.SHIELD)
+	var armor_value: int = actor.get_stat(Enums.StatType.ARMOR)
 
-	if actor.shield > 0:
+	if shield_value > 0:
 		var shield_damage = int(round(remaining * modifiers.shield))
-		shield_damage = min(shield_damage, actor.shield)
+		shield_damage = min(shield_damage, shield_value)
 		actor.adjust_shield(-shield_damage)
 		remaining -= shield_damage / modifiers.shield
 		result.shield = shield_damage
 
-	if actor.armor > 0 and remaining > 0:
-		var armor_raw = min(remaining, actor.armor / modifiers.armor)
+	if armor_value > 0 and remaining > 0:
+		var armor_raw: float = min(remaining, float(armor_value) / modifiers.armor)
 		var armor_damage = int(round(armor_raw * modifiers.armor))
 		actor.adjust_armor(-armor_damage)
 		remaining -= armor_raw

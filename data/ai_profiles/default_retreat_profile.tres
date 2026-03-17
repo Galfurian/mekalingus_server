@@ -1,41 +1,43 @@
-[gd_resource type="AIActionProfile" load_steps=8 format=3]
+[gd_resource type="AIActionProfile" script_class="AIActionProfile" load_steps=11 format=3 uid="uid://7p8nxc68slq1"]
 
-[ext_resource type="Script" path="res://scripts/systems/ai/ai_action_profile.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/self_health_consideration.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="3"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/utility_module_effectiveness_consideration.gd" id="4"]
+[ext_resource type="Script" uid="uid://cwirj0mqpui3m" path="res://scripts/systems/ai/ai_action_profile.gd" id="1"]
+[ext_resource type="Script" uid="uid://e1ad54jrmv35" path="res://scripts/systems/ai/considerations/self_health_consideration.gd" id="2"]
+[ext_resource type="Script" uid="uid://btu3py5ygwvye" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="3"]
+[ext_resource type="Script" uid="uid://7413rxd7sxtj" path="res://scripts/systems/ai/considerations/utility_module_effectiveness_consideration.gd" id="4"]
 
 [sub_resource type="Curve" id="1"]
 _data = [Vector2(0, 1), 0.0, -1.8, 0, 0, Vector2(1, 0), -1.8, 0.0, 0, 0]
 point_count = 2
 
-[sub_resource type="Curve" id="2"]
-_data = [Vector2(0, 1), 0.0, -1.5, 0, 0, Vector2(1, 0), -1.5, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="Curve" id="3"]
-_data = [Vector2(0, 0.2), 1.3, 0.0, 0, 0, Vector2(0.5, 0.7), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
-point_count = 3
-
-[sub_resource type="SelfHealthConsideration" id="4"]
+[sub_resource type="Resource" id="4"]
 script = ExtResource("2")
 consideration_name = "self_health"
 weight = 18.0
 response_curve = SubResource("1")
 
-[sub_resource type="TileThreatConsideration" id="5"]
+[sub_resource type="Curve" id="2"]
+_data = [Vector2(0, 1), 0.0, -1.5, 0, 0, Vector2(1, 0), -1.5, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Resource" id="5"]
 script = ExtResource("3")
 consideration_name = "tile_threat"
 weight = 16.0
 response_curve = SubResource("2")
 
-[sub_resource type="UtilityModuleEffectivenessConsideration" id="6"]
+[sub_resource type="Curve" id="3"]
+_data = [Vector2(0, 0.2), 1.3, 0.0, 0, 0, Vector2(0.5, 0.7), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="Resource" id="6"]
 script = ExtResource("4")
 consideration_name = "utility_module_effectiveness"
 weight = 8.0
 response_curve = SubResource("3")
 
 [resource]
+resource_local_to_scene = false
+resource_name = ""
 script = ExtResource("1")
 profile_name = "default_retreat_profile"
 preliminary_considerations = Array[Resource]([SubResource("4"), SubResource("5")])

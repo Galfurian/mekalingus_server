@@ -4,11 +4,6 @@
 	"description": "An elite clan of disciplined warmongers with relentless coordination.",
 	"color": "#C0392B",
 	"emblem_path": "res://assets/emblems/crimson_order.png",
-	"preferred_roles": [
-		"BRAWLER",
-		"SUPPORT"
-	],
-	"aggressiveness": 1.1,
     "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
 	"is_player_joinable": false,
 	"allies": ["iron_forge", "void_hammers"]

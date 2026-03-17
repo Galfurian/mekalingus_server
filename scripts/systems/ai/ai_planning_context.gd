@@ -3,7 +3,6 @@ extends RefCounted
 
 var source: MapCombatEntity
 var game_map: GameMap
-var aggressiveness: float = 1.0
 var turn_context: RefCounted = null
 
 var _visible_enemies: Array[MapCombatEntity] = []
@@ -36,12 +35,10 @@ var _enemy_offensive_modules_cache: Dictionary = {}
 func _init(
 	p_source: MapCombatEntity,
 	p_game_map,
-	p_aggressiveness: float,
 	p_turn_context: RefCounted = null
 ) -> void:
 	source = p_source
 	game_map = p_game_map
-	aggressiveness = p_aggressiveness
 	turn_context = p_turn_context
 
 

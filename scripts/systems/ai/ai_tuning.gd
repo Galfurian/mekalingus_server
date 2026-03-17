@@ -11,8 +11,6 @@ const REPOSITION_PATROL_SCORE: float = 4.0
 const ATTACK_STANDOFF_BONUS: float = 8.0
 const ATTACK_REACHABLE_BONUS: float = 4.0
 const ATTACK_UNREACHABLE_PENALTY: float = 12.0
-const AGGRESSIVENESS_MIN: float = 1.0
-const AGGRESSIVENESS_MAX: float = 1.2
 
 const HOLD_THREAT_WEIGHT: float = 1.6
 const HOLD_OBJECTIVE_WEIGHT: float = 1.1

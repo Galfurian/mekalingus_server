@@ -4,11 +4,6 @@
     "description": "A heavily industrialized clan that favors brute force and overwhelming firepower.",
     "color": "#FF4C4C",
     "emblem_path": "res://assets/emblems/iron_forge.png",
-    "preferred_roles": [
-        "BRAWLER",
-        "ARTILLERY"
-    ],
-    "aggressiveness": 1.5,
     "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
     "is_player_joinable": false,
     "allies": ["crimson_order", "void_hammers"]

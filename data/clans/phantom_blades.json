@@ -4,11 +4,6 @@
     "description": "Stealthy and precise, the Phantom Blades excel at hit-and-run tactics.",
     "color": "#5D6D7E",
     "emblem_path": "res://assets/emblems/phantom_blades.png",
-    "preferred_roles": [
-        "SNIPER",
-        "SUPPORT"
-    ],
-    "aggressiveness": 0.8,
     "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
     "is_player_joinable": true,
     "allies": ["nova_regents", "ember_guard", "standard_player_clan"]

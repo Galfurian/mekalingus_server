@@ -19,7 +19,6 @@ var patrol_index: int = 0
 var patrol_type: int = PatrolType.CIRCLE
 var compact_radius: int = 4
 var leash_radius: int = 6
-var aggressiveness_override: float = -1.0
 
 
 func _init() -> void:
@@ -41,7 +40,6 @@ static func from_dict(data: Dictionary) -> NpcDirectiveState:
 
 	state.compact_radius = maxi(1, int(data.get("compact_radius", 4)))
 	state.leash_radius = maxi(1, int(data.get("leash_radius", 6)))
-	state.aggressiveness_override = float(data.get("aggressiveness_override", -1.0))
 
 	state.patrol_waypoints.clear()
 	for point_data in data.get("patrol_waypoints", []):
@@ -68,7 +66,6 @@ func to_dict() -> Dictionary:
 		"patrol_type": patrol_type,
 		"compact_radius": compact_radius,
 		"leash_radius": leash_radius,
-		"aggressiveness_override": aggressiveness_override,
 	}
 
 

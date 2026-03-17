@@ -245,16 +245,10 @@ func plan_for_unit(source: MapCombatEntity) -> void:
 	if current_plan and current_plan.is_valid():
 		return
 
-	# Get the clan aggressiveness and generate a plan.
-	var aggressiveness: float = 1.0
-	if source.owner and source.owner.clan:
-		aggressiveness = source.owner.clan.aggressiveness
-
 	# Generate the plan for the source unit.
 	var new_plan: AIPlan = await _planner.generate_plan(
 		source,
 		game_map,
-		aggressiveness,
 		_turn_context,
 	)
 

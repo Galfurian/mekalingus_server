@@ -124,12 +124,6 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			else:
 				score += profile.reachable_bonus
 
-			score *= lerp(
-				AITuning.AGGRESSIVENESS_MIN,
-				AITuning.AGGRESSIVENESS_MAX,
-				context.aggressiveness,
-			)
-
 			if score > best_score:
 				best_score = score
 				best_target = target

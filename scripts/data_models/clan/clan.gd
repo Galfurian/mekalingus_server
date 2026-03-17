@@ -24,19 +24,6 @@ var emblem_path: String
 # List of allied clans.
 var allies: Array
 
-# -------------------------------------
-# IDENTITY
-# -------------------------------------
-
-# The preferred roles for the meks of this clan.
-var preferred_roles: Array = []
-
-# -------------------------------------
-# AI BEHAVIOR
-# -------------------------------------
-
-# How aggressive the AI of this clan is.
-var aggressiveness: float = 1.0
 # Tactical doctrine profile path used by AI-controlled members of this clan.
 var ai_profile_path: String = ""
 
@@ -78,8 +65,6 @@ static func from_dict(data: Dictionary) -> Clan:
 	clan.description = data["description"]
 	clan.color = Utils.hex_to_color(data["color"])
 	clan.emblem_path = data.get("emblem_path", "")
-	clan.preferred_roles = Utils.strings_to_enums(Enums.MekRole, data["preferred_roles"])
-	clan.aggressiveness = data.get("aggressiveness", 1.0)
 	clan.ai_profile_path = data.get("ai_profile_path", "")
 	clan.is_player_joinable = data.get("is_player_joinable", true)
 	clan.allies = data.get("allies", [])
@@ -94,8 +79,6 @@ func to_dict() -> Dictionary:
 		"description": description,
 		"color": Utils.color_to_hex(color),
 		"emblem_path": emblem_path,
-		"preferred_roles": Utils.enums_to_strings(Enums.MekRole, preferred_roles),
-		"aggressiveness": aggressiveness,
 		"ai_profile_path": ai_profile_path,
 		"is_player_joinable": is_player_joinable,
 		"allies": allies,

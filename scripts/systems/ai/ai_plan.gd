@@ -12,8 +12,6 @@ enum Status { NONE, PLANNED, ORDER_QUEUED, EXECUTING, COMPLETED }
 var intent: Intent = Intent.NONE
 # A status enum describing where the plan currently stands.
 var status: Status = Status.NONE
-# Deprecated boolean for backwards compatibility.
-var completed: bool = false
 
 
 # ========== PLAN DATA ==========
@@ -32,7 +30,6 @@ var equipped_module: EquippedModule = null
 var score: float = 0.0
 func set_status(val: Status) -> void:
 	status = val
-	completed = status == Status.COMPLETED
 
 func get_status() -> Status:
 	return status

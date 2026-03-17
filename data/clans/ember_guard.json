@@ -4,11 +4,6 @@
     "description": "Resilient defenders specializing in heat weapons and support utilities.",
     "color": "#E67E22",
     "emblem_path": "res://assets/emblems/ember_guard.png",
-    "preferred_roles": [
-        "SUPPORT",
-        "BRAWLER"
-    ],
-    "aggressiveness": 0.6,
     "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
     "is_player_joinable": true,
     "allies": ["phantom_blades", "standard_player_clan"]

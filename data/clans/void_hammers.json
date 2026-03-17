@@ -4,11 +4,6 @@
     "description": "Forged in isolation, they deliver devastating close-range power.",
     "color": "#1ABC9C",
     "emblem_path": "res://assets/emblems/void_hammers.png",
-    "preferred_roles": [
-        "BRAWLER",
-        "ARTILLERY"
-    ],
-    "aggressiveness": 1.4,
     "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
     "is_player_joinable": false,
     "allies": ["iron_forge", "crimson_order"]

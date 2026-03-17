@@ -85,7 +85,7 @@ func _populate_templates() -> void:
 		}
 		for id: String in TemplateManager.mek_templates.keys():
 			var tmpl: MekTemplate = TemplateManager.mek_templates[id]
-			grouped[tmpl.size].append({ "id": id, "name": tmpl.mek_name })
+			grouped[tmpl.size].append({"id": id, "name": tmpl.mek_name})
 
 		var size_order: Array[int] = [
 			Enums.EntitySize.LIGHT,
@@ -98,8 +98,9 @@ func _populate_templates() -> void:
 			var group: Array = grouped[size_class]
 			if group.is_empty():
 				continue
-			group.sort_custom(func(a: Dictionary, b: Dictionary):
-				return a["name"].to_lower() < b["name"].to_lower()
+			group.sort_custom(
+				func(a: Dictionary, b: Dictionary):
+					return a["name"].to_lower() < b["name"].to_lower()
 			)
 			if added_group:
 				template_option.add_separator()
@@ -111,9 +112,9 @@ func _populate_templates() -> void:
 		var items: Array[Dictionary] = []
 		for id: String in TemplateManager.structure_templates.keys():
 			var tmpl: StructureTemplate = TemplateManager.structure_templates[id]
-			items.append({ "id": id, "name": tmpl.structure_name })
-		items.sort_custom(func(a: Dictionary, b: Dictionary):
-			return a["name"].to_lower() < b["name"].to_lower()
+			items.append({"id": id, "name": tmpl.alias})
+		items.sort_custom(
+			func(a: Dictionary, b: Dictionary): return a["name"].to_lower() < b["name"].to_lower()
 		)
 		for entry: Dictionary in items:
 			template_option.add_item(entry["name"])

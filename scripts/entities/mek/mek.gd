@@ -83,67 +83,28 @@ func _to_string() -> String:
 
 func from_dict(data: Dictionary = {}) -> bool:
 	"""Loads Mek instance data from a dictionary."""
-	if not data.has("mek_id") or not data.has("uuid"):
+	if not data.has("mek_id"):
 		push_error("Invalid Mek data: Missing required fields")
 		return false
 
-	mek_id = data["mek_id"]
-	uuid = data["uuid"]
-	alias = data.get("alias", "")
-	items.clear()
-	for item_data in data.get("items", []):
-		items.append(Item.new(item_data))
-	items.sort_custom(Item.compare_items)
+	# Load basic fields.
+	super(data)
 
-	# Mark the UUID as used.
-	GameServer.occupy_uuid(uuid)
+	# Load mek-specific fields.
+	mek_id = str(data["mek_id"])
 
 	# Load the template.
 	template = TemplateManager.get_mek_template(mek_id)
 	assert(template, "Cannot find the template: " + mek_id + "\n")
 
+	# Rebuild combat state based on template values and items.
 	rebuild_combat_state()
-	# Restore any saved AI mind log entries.
-	_load_saved_mind_log(data)
 
 	return true
 
 
 func to_dict() -> Dictionary:
 	"""Converts Mek instance data to a dictionary."""
-	return {
-		"mek_id": mek_id,
-		"uuid": uuid,
-		"alias": alias,
-		"items": Utils.convert_objects_to_dict(items),
-	}
-
-
-func to_client_dict() -> Dictionary:
-	"""Converts Mek instance data to a dictionary."""
-	return {
-		"mek_id": mek_id,
-		"uuid": uuid,
-		"alias": alias,
-		"items": Utils.convert_objects_to_client_dict(items),
-		"health": health,
-		"armor": armor,
-		"shield": shield,
-		"power": power,
-		"max_health": max_health,
-		"max_armor": max_armor,
-		"max_shield": max_shield,
-		"max_power": max_power,
-		"health_generation": health_generation,
-		"armor_generation": armor_generation,
-		"shield_generation": shield_generation,
-		"power_generation": power_generation,
-		"speed": speed,
-		"damage_reduction_all": damage_reduction_all,
-		"damage_reduction_kinetic": damage_reduction_kinetic,
-		"damage_reduction_energy": damage_reduction_energy,
-		"damage_reduction_explosive": damage_reduction_explosive,
-		"damage_reduction_plasma": damage_reduction_plasma,
-		"damage_reduction_corrosive": damage_reduction_corrosive,
-		"slots": slots
-	}
+	var data: Dictionary = super()
+	data["mek_id"] = mek_id
+	return data

@@ -7,8 +7,10 @@ var _sessions = PeerSessionManager.new()
 # GENERAL
 # =============================================================================
 
+
 func log_message(msg: String):
 	GameServer.log_message(msg)
+
 
 func associate_peer_with_player(peer_id: int, player_uuid: String):
 	var previous_peer_id: int = _sessions.find_peer_id(player_uuid)
@@ -17,16 +19,27 @@ func associate_peer_with_player(peer_id: int, player_uuid: String):
 	_sessions.associate(multiplayer, peer_id, player_uuid)
 	log_message("Associated peer with player: " + str(peer_id) + " -> " + player_uuid)
 
+
 func find_player_uuid(peer_id: int) -> String:
 	return _sessions.find_player_uuid(peer_id)
+
 
 func find_peer_id(player_uuid: String) -> int:
 	return _sessions.find_peer_id(player_uuid)
 
+
 func remove_peer(peer_id: int):
-	log_message("Removing peer from player map: " + str(peer_id) + " -> " + _sessions.find_player_uuid(peer_id))
+	log_message(
+		(
+			"Removing peer from player map: "
+			+ str(peer_id)
+			+ " -> "
+			+ _sessions.find_player_uuid(peer_id)
+		)
+	)
 	_sessions.remove(peer_id)
-	
+
+
 # =============================================================================
 # RPC: GENERIC
 # =============================================================================
@@ -35,10 +48,12 @@ func remove_peer(peer_id: int):
 func generic_failed_request(_reason: String):
 	pass
 
+
 func send_generic_failure(peer_id: int, reason: String):
 	generic_failed_request.rpc_id(peer_id, reason)
 	log_message("[" + str(peer_id) + "] " + reason)
-	
+
+
 # =============================================================================
 # RPC: LOGIN
 # =============================================================================
@@ -47,10 +62,11 @@ func send_generic_failure(peer_id: int, reason: String):
 func login_successful(_player_data: Player):
 	pass
 
+
 @rpc("any_peer", "call_remote", "reliable", 0)
 func login_player(player_name: String):
 	var peer_id = multiplayer.get_remote_sender_id()
-	var player  = DataManager.find_player_by_name(player_name)
+	var player = DataManager.find_player_by_name(player_name)
 	if not player:
 		send_generic_failure(peer_id, "Failed to FIND player.")
 		return
@@ -58,9 +74,10 @@ func login_player(player_name: String):
 	# Update the (peer_id <-> player_uuid) association.
 	associate_peer_with_player(peer_id, player.player_uuid)
 	# Send the updated player.
-	receive_player.rpc_id(peer_id, player.to_client_dict())
+	receive_player.rpc_id(peer_id, player.to_dict())
 	# Notify that the login was successful.
 	login_successful.rpc_id(peer_id, player.player_uuid)
+
 
 # =============================================================================
 # RPC: REGISTER
@@ -70,10 +87,11 @@ func login_player(player_name: String):
 func registration_successful(_player_uuid: String):
 	pass
 
+
 @rpc("any_peer", "call_remote", "reliable", 0)
 func register_player(player_name: String):
 	var peer_id = multiplayer.get_remote_sender_id()
-	var player  = DataManager.find_player_by_name(player_name)
+	var player = DataManager.find_player_by_name(player_name)
 	if player:
 		send_generic_failure(peer_id, "Player with given NAME already exists.")
 		return
@@ -93,9 +111,10 @@ func register_player(player_name: String):
 	# Update the (peer_id <-> player_uuid) association.
 	associate_peer_with_player(peer_id, player.player_uuid)
 	# Send the updated player.
-	receive_player.rpc_id(peer_id, player.to_client_dict())
+	receive_player.rpc_id(peer_id, player.to_dict())
 	# Notify that the registration was successful.
 	registration_successful.rpc_id(peer_id, player.player_uuid)
+
 
 # =============================================================================
 # RPC: TEMPLATES
@@ -105,21 +124,29 @@ func register_player(player_name: String):
 func receive_mek_templates(_data: Array):
 	pass
 
+
 @rpc("any_peer", "call_remote", "reliable", 0)
 func receive_item_templates(_data: Array):
 	pass
+
 
 @rpc("any_peer", "call_remote", "reliable", 0)
 func request_mek_templates():
 	var peer_id = multiplayer.get_remote_sender_id()
 	log_message("Peer " + str(peer_id) + " requested the Mek templates.")
-	receive_mek_templates.rpc_id(peer_id, Utils.convert_objects_to_dict(TemplateManager.mek_templates.values()))
+	receive_mek_templates.rpc_id(
+		peer_id, Utils.convert_objects_to_dict(TemplateManager.mek_templates.values())
+	)
+
 
 @rpc("any_peer", "call_remote", "reliable", 0)
 func request_item_templates():
 	var peer_id = multiplayer.get_remote_sender_id()
 	log_message("Peer " + str(peer_id) + " requested the Item templates.")
-	receive_item_templates.rpc_id(peer_id, Utils.convert_objects_to_dict(TemplateManager.item_templates.values()))
+	receive_item_templates.rpc_id(
+		peer_id, Utils.convert_objects_to_dict(TemplateManager.item_templates.values())
+	)
+
 
 # =============================================================================
 # RPC: EQUIP
@@ -129,11 +156,12 @@ func request_item_templates():
 func request_equip_item_success(_mek_uuid: String, _item_uuid: String):
 	pass
 
+
 @rpc("any_peer", "call_remote", "reliable", 0)
 func request_equip_item(mek_uuid: String, item_uuid: String):
-	var peer_id     = multiplayer.get_remote_sender_id()
+	var peer_id = multiplayer.get_remote_sender_id()
 	var player_uuid = find_player_uuid(peer_id)
-	
+
 	var player = DataManager.find_player_by_uuid(player_uuid)
 	if not player:
 		send_generic_failure(peer_id, "Failed to find player (" + player_uuid + ")")
@@ -147,22 +175,39 @@ func request_equip_item(mek_uuid: String, item_uuid: String):
 		send_generic_failure(peer_id, "Failed to find item (" + item_uuid + ")")
 		return
 	if not player.remove_item(item):
-		send_generic_failure(peer_id, "Failed to remove item " + item.template.item_name + " from player.")
+		send_generic_failure(
+			peer_id, "Failed to remove item " + item.template.item_name + " from player."
+		)
 		return
 	if not mek.add_item(item):
 		if not player.add_item(item):
-			send_generic_failure(peer_id, "Failed to re-add item " + item.template.item_name + " to player.")
+			send_generic_failure(
+				peer_id, "Failed to re-add item " + item.template.item_name + " to player."
+			)
 			return
-		send_generic_failure(peer_id, "Failed to equip item " + item.template.item_name + " to " + mek.template.mek_name )
+		send_generic_failure(
+			peer_id,
+			"Failed to equip item " + item.template.item_name + " to " + mek.template.mek_name
+		)
 		return
-		
-	log_message("Player " + player.player_name + " equipped " + mek.template.mek_name + " with " + item.template.item_name)
+
+	log_message(
+		(
+			"Player "
+			+ player.player_name
+			+ " equipped "
+			+ mek.template.mek_name
+			+ " with "
+			+ item.template.item_name
+		)
+	)
 	if not DataManager.save_player(player):
 		send_generic_failure(peer_id, "Failed to save player after equipping item.")
 		return
-	
+
 	# Send the updated player.
 	request_equip_item_success.rpc_id(peer_id, mek_uuid, item_uuid)
+
 
 # =============================================================================
 # RPC: UNEQUIP
@@ -172,44 +217,58 @@ func request_equip_item(mek_uuid: String, item_uuid: String):
 func request_unequip_item_success(_mek_uuid: String, _item_uuid: String):
 	pass
 
+
 @rpc("any_peer", "call_remote", "reliable", 0)
 func request_unequip_item(mek_uuid: String, item_uuid: String):
-	var peer_id     = multiplayer.get_remote_sender_id()
+	var peer_id = multiplayer.get_remote_sender_id()
 	var player_uuid = find_player_uuid(peer_id)
-	
+
 	var player: Player
 	var mek: Mek
 	var item: Item
-	
+
 	player = DataManager.find_player_by_uuid(player_uuid)
 	if not player:
 		send_generic_failure(peer_id, "Failed to find player (" + player_uuid + ")")
 		return
-	
+
 	mek = player.get_mek(mek_uuid)
 	if not mek:
 		send_generic_failure(peer_id, "Failed to find mek (" + mek_uuid + ")")
 		return
-	
+
 	item = mek.get_item(item_uuid)
 	if not item:
-		send_generic_failure(peer_id, "Failed to find equipped item " + item_uuid + " in " + mek.template.mek_name)
+		send_generic_failure(
+			peer_id, "Failed to find equipped item " + item_uuid + " in " + mek.template.mek_name
+		)
 		return
-	
+
 	if not mek.remove_item(item):
-		send_generic_failure(peer_id, "Failed to remove item " + item.template.item_name + " from " + mek.template.mek_name)
+		send_generic_failure(
+			peer_id,
+			"Failed to remove item " + item.template.item_name + " from " + mek.template.mek_name
+		)
 		return
 	player.add_item(item)
-	
-	log_message("Player " + player.player_name + " unequipped " + item.template.item_name + " from " + mek.template.mek_name)
+
+	log_message(
+		(
+			"Player "
+			+ player.player_name
+			+ " unequipped "
+			+ item.template.item_name
+			+ " from "
+			+ mek.template.mek_name
+		)
+	)
 	if not DataManager.save_player(player):
 		send_generic_failure(peer_id, "Failed to save player after unequipping item.")
 		return
-	
+
 	# Send the updated player.
 	request_unequip_item_success.rpc_id(peer_id, mek_uuid, item_uuid)
-	
-	
+
 
 # =============================================================================
 # RPC: PLAYER
@@ -219,6 +278,7 @@ func request_unequip_item(mek_uuid: String, item_uuid: String):
 func receive_player(_data: Dictionary):
 	pass
 
+
 # =============================================================================
 # RPC: MEK
 # =============================================================================
@@ -227,36 +287,41 @@ func receive_player(_data: Dictionary):
 func receive_mek(_mek_data: Dictionary):
 	pass
 
+
 @rpc("any_peer", "call_remote", "reliable", 0)
 func request_mek(mek_uuid: String):
-	var peer_id     = multiplayer.get_remote_sender_id()
+	var peer_id = multiplayer.get_remote_sender_id()
 	var player_uuid = find_player_uuid(peer_id)
-	
+
 	var player: Player
 	var mek: Mek
-	
+
 	player = DataManager.find_player_by_uuid(player_uuid)
 	if not player:
 		send_generic_failure(peer_id, "Failed to find player (" + player_uuid + ")")
 		return
-	
+
 	mek = player.get_mek(mek_uuid)
 	if not mek:
 		send_generic_failure(peer_id, "Failed to find mek (" + mek_uuid + ")")
 		return
 
 	# Send the Mek data back to the requesting client.
-	receive_mek.rpc_id(peer_id, mek.to_client_dict())
-	
-	log_message("Player " + player.player_name + " requested update for " + mek.template.mek_name + ".")
+	receive_mek.rpc_id(peer_id, mek.to_dict())
+
+	log_message(
+		"Player " + player.player_name + " requested update for " + mek.template.mek_name + "."
+	)
+
 
 @rpc("any_peer", "call_remote", "reliable", 0)
 func set_mek_alias_success(_mek_uuid: String, _alias: String):
 	pass
 
+
 @rpc("any_peer", "call_remote", "reliable", 0)
 func set_mek_alias(mek_uuid: String, alias: String):
-	var peer_id     = multiplayer.get_remote_sender_id()
+	var peer_id = multiplayer.get_remote_sender_id()
 	var player_uuid = find_player_uuid(peer_id)
 	var player: Player = DataManager.find_player_by_uuid(player_uuid)
 	if not player:
@@ -270,4 +335,14 @@ func set_mek_alias(mek_uuid: String, alias: String):
 	mek.alias = alias
 	# Send the updated player.
 	set_mek_alias_success.rpc_id(peer_id, mek_uuid, alias)
-	log_message("Player " + player.player_name + " calls " + mek.template.mek_name + " with the alias " + alias + ".")
+	log_message(
+		(
+			"Player "
+			+ player.player_name
+			+ " calls "
+			+ mek.template.mek_name
+			+ " with the alias "
+			+ alias
+			+ "."
+		)
+	)

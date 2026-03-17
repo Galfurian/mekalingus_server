@@ -3,8 +3,6 @@ extends Node
 
 # Unique identifier for the Structure template.
 var id: String
-# The name of the Structure.
-var structure_name: String
 # The size category of the Structure.
 var size: Enums.EntitySize
 # The base health of the Mek, determining its durability.
@@ -40,7 +38,7 @@ func _init(_id: String = "", data: Dictionary = {}):
 
 
 func is_valid() -> bool:
-	return id != "" and structure_name != "" and health > 0 and armor >= 0 and shield >= 0
+	return id != "" and health > 0 and armor >= 0 and shield >= 0
 
 
 func build_structure(uuid: String = GameServer.generate_uuid()) -> Structure:
@@ -52,7 +50,6 @@ func from_dict(data: Dictionary):
 		push_error("Invalid StructureTemplate data: Missing required fields")
 		return
 
-	structure_name = data["name"]
 	size = Utils.string_to_enum(Enums.EntitySize, data["size"])
 	health = int(data.get("health", 0))
 	armor = int(data.get("armor", 0))
@@ -71,7 +68,6 @@ func from_dict(data: Dictionary):
 func to_dict() -> Dictionary:
 	return {
 		"id": id,
-		"name": structure_name,
 		"size": Utils.enum_to_string(Enums.EntitySize, size),
 		"health": health,
 		"armor": armor,

@@ -165,15 +165,3 @@ func to_dict() -> Dictionary:
 		"meks": Utils.convert_objects_to_dict(meks),
 		"items": Utils.convert_objects_to_dict(items),
 	}
-
-
-func to_client_dict() -> Dictionary:
-	"""
-	Converts Mek instance data to a dictionary.
-	"""
-	return {
-		"player_name": player_name,
-		"player_uuid": player_uuid,
-		"meks": Utils.convert_objects_to_client_dict(meks),
-		"items": Utils.convert_objects_to_client_dict(items),
-	}

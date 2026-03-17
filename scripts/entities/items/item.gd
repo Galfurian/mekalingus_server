@@ -86,8 +86,3 @@ func from_dict(data: Dictionary = {}) -> bool:
 func to_dict() -> Dictionary:
 	"""Converts item instance data to a dictionary."""
 	return {"item_id": item_id, "uuid": uuid}
-
-
-func to_client_dict() -> Dictionary:
-	"""Converts Mek instance data to a dictionary."""
-	return {"item_id": item_id, "uuid": uuid}

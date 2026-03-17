@@ -80,19 +80,6 @@ static func to_array_int(array: Array[Variant]) -> Array[int]:
 	return output
 
 
-static func convert_objects_to_client_dict(array: Array[Variant]) -> Array[Dictionary]:
-	"""
-	Convert a array of objects with `to_client_dict()` into a array of dictionaries.
-	"""
-	var output: Array[Dictionary] = []
-	for entry in array:
-		if entry.has_method("to_client_dict"):
-			output.append(entry.to_client_dict())
-		else:
-			push_error("Object does not implement to_client_dict() for entry: %s" % str(entry))
-	return output
-
-
 static func convert_objects_to_dict(array: Array[Variant]) -> Array[Dictionary]:
 	"""
 	Convert a array of objects with `to_dict()` into a array of dictionaries.

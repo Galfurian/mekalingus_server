@@ -283,12 +283,12 @@ func _populate_templates() -> void:
 			func(a: String, b: String):
 				var sa: StructureTemplate = TemplateManager.structure_templates[a]
 				var sb: StructureTemplate = TemplateManager.structure_templates[b]
-				return sa.structure_name.to_lower() < sb.structure_name.to_lower()
+				return sa.alias.to_lower() < sb.alias.to_lower()
 		)
 		for index in range(structure_ids.size()):
 			var template_id: String = structure_ids[index]
 			var template: StructureTemplate = TemplateManager.structure_templates[template_id]
-			template_option.add_item(template.structure_name)
+			template_option.add_item(template.alias)
 			template_option.set_item_metadata(index, template_id)
 
 	if template_option.item_count > 0:

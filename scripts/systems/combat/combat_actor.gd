@@ -181,31 +181,6 @@ func get_icon_path() -> String:
 	return ""
 
 
-func add_ai_thought(message: String) -> void:
-	if message.strip_edges().is_empty():
-		return
-
-	var entry: String = "[%s] %s" % [Time.get_time_string_from_system(), message]
-	ai_thought_log.append(entry)
-	if ai_thought_log.size() > AI_THOUGHT_LOG_LIMIT:
-		ai_thought_log = (
-			ai_thought_log
-			. slice(
-				ai_thought_log.size() - AI_THOUGHT_LOG_LIMIT,
-				ai_thought_log.size(),
-			)
-		)
-	ai_thought_logged.emit(entry)
-
-
-func get_ai_thoughts() -> Array[String]:
-	return ai_thought_log.duplicate()
-
-
-func clear_ai_thoughts() -> void:
-	ai_thought_log.clear()
-
-
 func get_stat(stat: int) -> int:
 	return _get_raw_stat(base_stats, stat) + _get_raw_stat(modifiers, stat)
 
@@ -269,9 +244,13 @@ func reset_combat_state(stats_payload: Dictionary, p_slots: Array[int] = []) -> 
 
 
 func from_dict(data: Dictionary = {}) -> bool:
-	uuid = str(data.get("uuid", uuid))
-	alias = str(data.get("alias", alias))
-	slots = Utils.to_array_int(data.get("slots", slots))
+	uuid = str(data.get("uuid", GameServer.generate_uuid()))
+	alias = str(data.get("alias", ""))
+	slots = Utils.to_array_int(data.get("slots", []))
+	items.clear()
+	for item_data: Dictionary in data.get("items", []):
+		items.append(Item.new(item_data))
+	items.sort_custom(Item.compare_items)
 	_apply_stats_from_payload(data)
 	_load_saved_mind_log(data)
 	return true
@@ -284,32 +263,6 @@ func to_dict() -> Dictionary:
 		"slots": slots,
 		"items": Utils.convert_objects_to_dict(items),
 		"ai_thought_log": ai_thought_log,
-	}
-	data.merge(_serialize_stats_payload())
-	return data
-
-
-func _load_saved_mind_log(data: Dictionary) -> void:
-	if not data.has("ai_thought_log"):
-		return
-	var saved: Array = data.get("ai_thought_log", [])
-	if typeof(saved) != TYPE_ARRAY:
-		return
-	# Ensure we only keep up to the configured limit.
-	saved = saved.slice(max(0, saved.size() - AI_THOUGHT_LOG_LIMIT), saved.size())
-	ai_thought_log = []
-	for entry in saved:
-		if typeof(entry) == TYPE_STRING:
-			ai_thought_log.append(entry)
-	# If the current selected unit is showing in the UI, external code can re-bind signals as needed.
-
-
-func to_client_dict() -> Dictionary:
-	var data: Dictionary = {
-		"uuid": uuid,
-		"alias": alias,
-		"slots": slots,
-		"items": Utils.convert_objects_to_client_dict(items),
 	}
 	data.merge(_serialize_stats_payload())
 	return data
@@ -406,6 +359,50 @@ func apply_regen_effects() -> void:
 				effect.effect.amount,
 			)
 		)
+
+
+# =============================================================================
+# AI THOUGHT LOGGING
+# =============================================================================
+
+
+func add_ai_thought(message: String) -> void:
+	if message.strip_edges().is_empty():
+		return
+
+	var entry: String = "[%s] %s" % [Time.get_time_string_from_system(), message]
+	ai_thought_log.append(entry)
+	if ai_thought_log.size() > AI_THOUGHT_LOG_LIMIT:
+		ai_thought_log = (
+			ai_thought_log
+			. slice(
+				ai_thought_log.size() - AI_THOUGHT_LOG_LIMIT,
+				ai_thought_log.size(),
+			)
+		)
+	ai_thought_logged.emit(entry)
+
+
+func get_ai_thoughts() -> Array[String]:
+	return ai_thought_log.duplicate()
+
+
+func clear_ai_thoughts() -> void:
+	ai_thought_log.clear()
+
+
+func _load_saved_mind_log(data: Dictionary) -> void:
+	if not data.has("ai_thought_log"):
+		return
+	var saved: Array = data.get("ai_thought_log", [])
+	if typeof(saved) != TYPE_ARRAY:
+		return
+	# Ensure we only keep up to the configured limit.
+	saved = saved.slice(max(0, saved.size() - AI_THOUGHT_LOG_LIMIT), saved.size())
+	ai_thought_log = []
+	for entry in saved:
+		if typeof(entry) == TYPE_STRING:
+			ai_thought_log.append(entry)
 
 
 # =============================================================================

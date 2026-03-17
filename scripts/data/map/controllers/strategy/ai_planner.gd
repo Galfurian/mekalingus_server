@@ -17,19 +17,14 @@ func generate_plan(
 		plan = attack_candidate
 		best_score = attack_candidate.score
 
-	var support_candidate: AIPlan = AISupportIntentEvaluator.evaluate(context)
+	var support_candidate: AIPlan = await AISupportIntentEvaluator.evaluate(context)
 	if support_candidate and support_candidate.score > best_score:
 		plan = support_candidate
 		best_score = support_candidate.score
 
-	var retreat_candidate: AIPlan = AIRetreatIntentEvaluator.evaluate(context)
+	var retreat_candidate: AIPlan = await AIRetreatIntentEvaluator.evaluate(context)
 	if retreat_candidate and retreat_candidate.score > best_score:
 		plan = retreat_candidate
 		best_score = retreat_candidate.score
-
-	var reposition_candidate: AIPlan = AIRepositionIntentEvaluator.evaluate(context)
-	if reposition_candidate and reposition_candidate.score > best_score:
-		plan = reposition_candidate
-		best_score = reposition_candidate.score
 
 	return plan

@@ -1,8 +1,12 @@
-[gd_resource type="AITacticalBrain" load_steps=3 format=3]
+[gd_resource type="AITacticalBrain" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/ai/ai_tactical_brain.gd" id="1"]
 [ext_resource type="Resource" path="res://data/ai_profiles/default_attack_profile.tres" id="2"]
+[ext_resource type="Resource" path="res://data/ai_profiles/default_support_profile.tres" id="3"]
+[ext_resource type="Resource" path="res://data/ai_profiles/default_retreat_profile.tres" id="4"]
 
 [resource]
 script = ExtResource("1")
 attack_profile = ExtResource("2")
+support_profile = ExtResource("3")
+retreat_profile = ExtResource("4")

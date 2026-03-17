@@ -1,0 +1,47 @@
+[gd_resource type="AIActionProfile" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/ai/ai_action_profile.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/data/ai/considerations/self_health_consideration.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/data/ai/considerations/tile_threat_consideration.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/data/ai/considerations/utility_module_effectiveness_consideration.gd" id="4"]
+
+[sub_resource type="Curve" id="1"]
+_data = [Vector2(0, 1), 0.0, -1.8, 0, 0, Vector2(1, 0), -1.8, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="2"]
+_data = [Vector2(0, 1), 0.0, -1.5, 0, 0, Vector2(1, 0), -1.5, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="3"]
+_data = [Vector2(0, 0.2), 1.3, 0.0, 0, 0, Vector2(0.5, 0.7), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="SelfHealthConsideration" id="4"]
+script = ExtResource("2")
+consideration_name = "self_health"
+weight = 18.0
+response_curve = SubResource("1")
+
+[sub_resource type="TileThreatConsideration" id="5"]
+script = ExtResource("3")
+consideration_name = "tile_threat"
+weight = 16.0
+response_curve = SubResource("2")
+
+[sub_resource type="UtilityModuleEffectivenessConsideration" id="6"]
+script = ExtResource("4")
+consideration_name = "utility_module_effectiveness"
+weight = 8.0
+response_curve = SubResource("3")
+
+[resource]
+script = ExtResource("1")
+profile_name = "default_retreat_profile"
+preliminary_considerations = Array[Resource]([SubResource("4"), SubResource("5")])
+final_considerations = Array[Resource]([SubResource("4"), SubResource("5"), SubResource("6")])
+max_targets_to_narrow_phase = 4
+max_expensive_ops_per_frame = 3
+in_range_los_bonus = 0.0
+reachable_bonus = 7.0
+unreachable_penalty = 6.0

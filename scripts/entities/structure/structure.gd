@@ -104,6 +104,8 @@ func from_dict(data: Dictionary = {}) -> bool:
 		slots = Utils.to_array_int(data.get("slots", []))
 
 	rebuild_combat_state()
+	# Restore any saved AI mind log entries.
+	_load_saved_mind_log(data)
 	GameServer.occupy_uuid(uuid)
 	return true
 

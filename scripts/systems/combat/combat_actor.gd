@@ -273,6 +273,7 @@ func from_dict(data: Dictionary = {}) -> bool:
 	alias = str(data.get("alias", alias))
 	slots = Utils.to_array_int(data.get("slots", slots))
 	_apply_stats_from_payload(data)
+	_load_saved_mind_log(data)
 	return true
 
 
@@ -282,9 +283,25 @@ func to_dict() -> Dictionary:
 		"alias": alias,
 		"slots": slots,
 		"items": Utils.convert_objects_to_dict(items),
+		"ai_thought_log": ai_thought_log,
 	}
 	data.merge(_serialize_stats_payload())
 	return data
+
+
+func _load_saved_mind_log(data: Dictionary) -> void:
+	if not data.has("ai_thought_log"):
+		return
+	var saved: Array = data.get("ai_thought_log", [])
+	if typeof(saved) != TYPE_ARRAY:
+		return
+	# Ensure we only keep up to the configured limit.
+	saved = saved.slice(max(0, saved.size() - AI_THOUGHT_LOG_LIMIT), saved.size())
+	ai_thought_log = []
+	for entry in saved:
+		if typeof(entry) == TYPE_STRING:
+			ai_thought_log.append(entry)
+	# If the current selected unit is showing in the UI, external code can re-bind signals as needed.
 
 
 func to_client_dict() -> Dictionary:

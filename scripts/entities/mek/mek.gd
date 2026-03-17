@@ -103,6 +103,8 @@ func from_dict(data: Dictionary = {}) -> bool:
 	assert(template, "Cannot find the template: " + mek_id + "\n")
 
 	rebuild_combat_state()
+	# Restore any saved AI mind log entries.
+	_load_saved_mind_log(data)
 
 	return true
 

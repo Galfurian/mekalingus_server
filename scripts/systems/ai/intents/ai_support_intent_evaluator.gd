@@ -39,12 +39,14 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		var distance: int = _manhattan_distance(source.position, target.position)
 		_log(
 			source,
-			"prelim: target=%s dist=%d prelim=%.2f"
-			% [
-				target.combatant.get_chat_tag(),
-				distance,
-				preliminary_score,
-			],
+			(
+				"prelim: target=%s dist=%d prelim=%.2f"
+				% [
+					target.combatant.get_chat_tag(),
+					distance,
+					preliminary_score,
+				]
+			),
 		)
 		(
 			candidate_targets
@@ -123,13 +125,15 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 
 			_log(
 				source,
-				"option: target=%s module=%s score=%.2f tile=%s"
-				% [
-					target.combatant.get_chat_tag(),
-					equipped_module.get_chat_tag(),
-					score,
-					MetaTag.pos_tag(destination),
-				],
+				(
+					"option: target=%s module=%s score=%.2f tile=%s"
+					% [
+						target.combatant.get_chat_tag(),
+						equipped_module.get_chat_tag(),
+						score,
+						MetaTag.pos_tag(destination),
+					]
+				),
 			)
 
 			if score > best_score:
@@ -139,12 +143,14 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 				best_destination = destination
 				_log(
 					source,
-					"best updated: target=%s module=%s score=%.2f"
-					% [
-						target.combatant.get_chat_tag(),
-						equipped_module.get_chat_tag(),
-						score,
-					],
+					(
+						"best updated: target=%s module=%s score=%.2f"
+						% [
+							target.combatant.get_chat_tag(),
+							equipped_module.get_chat_tag(),
+							score,
+						]
+					),
 				)
 
 	if not best_target:
@@ -158,26 +164,30 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		"planning_context": context,
 		"tile": best_destination,
 	}
-	var support_breakdown: Dictionary = profile.evaluate_final_breakdown(
-		support_breakdown_context
+	var support_breakdown: Dictionary = profile.evaluate_final_breakdown(support_breakdown_context)
+	var support_bonus: float = (
+		0.0 if best_destination == source.position else profile.reachable_bonus
 	)
-	var support_bonus: float = best_destination == source.position ? 0.0 : profile.reachable_bonus
 	_log(
 		source,
-		"breakdown: base=%.2f reachable=%.2f total=%.2f"
-		% [support_breakdown.score, support_bonus, best_score],
+		(
+			"breakdown: base=%.2f reachable=%.2f total=%.2f"
+			% [support_breakdown.score, support_bonus, best_score]
+		),
 	)
 	for component in support_breakdown.components:
 		_log(
 			source,
-			"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
-			% [
-				component.get("name"),
-				component.get("normalized_input"),
-				component.get("curve"),
-				component.get("weight"),
-				component.get("contribution"),
-			],
+			(
+				"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
+				% [
+					component.get("name"),
+					component.get("normalized_input"),
+					component.get("curve"),
+					component.get("weight"),
+					component.get("contribution"),
+				]
+			),
 		)
 	_log(source, "scored %.2f" % best_score)
 	return (

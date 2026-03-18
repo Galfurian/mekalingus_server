@@ -13,27 +13,27 @@ func generate_plan(
 
 	var attack_candidate: AIPlan = AIAttackIntentEvaluator.evaluate(context)
 	if attack_candidate:
-		source.combatant.add_ai_thought("Intent ATTACK scored %.2f" % attack_candidate.score)
+		source.combatant.add_ai_thought("Attack scored %.2f" % attack_candidate.score)
 	else:
-		source.combatant.add_ai_thought("Intent ATTACK unavailable")
+		source.combatant.add_ai_thought("Attack unavailable")
 	if attack_candidate and attack_candidate.score > best_score:
 		plan = attack_candidate
 		best_score = attack_candidate.score
 
 	var support_candidate: AIPlan = AISupportIntentEvaluator.evaluate(context)
 	if support_candidate:
-		source.combatant.add_ai_thought("Intent SUPPORT scored %.2f" % support_candidate.score)
+		source.combatant.add_ai_thought("Support scored %.2f" % support_candidate.score)
 	else:
-		source.combatant.add_ai_thought("Intent SUPPORT unavailable")
+		source.combatant.add_ai_thought("Support unavailable")
 	if support_candidate and support_candidate.score > best_score:
 		plan = support_candidate
 		best_score = support_candidate.score
 
 	var retreat_candidate: AIPlan = AIRetreatIntentEvaluator.evaluate(context)
 	if retreat_candidate:
-		source.combatant.add_ai_thought("Intent RETREAT scored %.2f" % retreat_candidate.score)
+		source.combatant.add_ai_thought("Retreat scored %.2f" % retreat_candidate.score)
 	else:
-		source.combatant.add_ai_thought("Intent RETREAT unavailable")
+		source.combatant.add_ai_thought("Retreat unavailable")
 	if retreat_candidate and retreat_candidate.score > best_score:
 		plan = retreat_candidate
 		best_score = retreat_candidate.score

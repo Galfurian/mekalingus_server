@@ -1,9 +1,14 @@
 class_name AISupportIntentEvaluator
 extends RefCounted
 
+const INTENT_LABEL: String = "Support"
+
+static func _log(source: MapCombatEntity, message: String) -> void:
+	_add_thought(source, "%s %s" % [INTENT_LABEL, message])
+
 
 static func evaluate(context: AIPlanningContext) -> AIPlan:
-	_add_thought(context.source, "----- Evaluating SUPPORT intent -----")
+	_add_thought(context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()])
 	var source: MapCombatEntity = context.source
 	var profile: AIActionProfile = AITacticalBrainResolver.resolve_support_profile(source)
 	if not profile:
@@ -108,8 +113,10 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 				best_destination = destination
 
 	if not best_target:
+		_log(source, "intent produced no valid target")
 		return null
 
+	_log(source, "scored %.2f" % best_score)
 	return (
 		AIPlanBuilder
 		. build_plan(

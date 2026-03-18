@@ -1,9 +1,14 @@
 class_name AIRetreatIntentEvaluator
 extends RefCounted
 
+const INTENT_LABEL: String = "Retreat"
+
+static func _log(source: MapCombatEntity, message: String) -> void:
+	_add_thought(source, "%s %s" % [INTENT_LABEL, message])
+
 
 static func evaluate(context: AIPlanningContext) -> AIPlan:
-	_add_thought(context.source, "----- Evaluating RETREAT intent -----")
+	_add_thought(context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()])
 
 	var source: MapCombatEntity = context.source
 	if not source.can_move():
@@ -140,10 +145,10 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		}
 		module_breakdown = profile.evaluate_final_breakdown(module_context)
 
-	_add_thought(
+	_log(
 		source,
 		(
-			"Retreat breakdown: tile=%s base=%.2f module=%.2f reachable=%.2f total=%.2f"
+			"breakdown: tile=%s base=%.2f module=%.2f reachable=%.2f total=%.2f"
 			% [
 				best_tile,
 				retreat_breakdown.score,
@@ -154,7 +159,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		),
 	)
 	for component in retreat_breakdown.components:
-		_add_thought(
+		_log(
 			source,
 			(
 				"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
@@ -168,26 +173,22 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			),
 		)
 	if best_used_module:
-		_add_thought(
+		_log(
 			source,
-			(
-				"  Module breakdown (%s): score=%.2f"
-				% [best_equipped_module.get_chat_tag(), module_breakdown.score]
-			),
+			"Module breakdown (%s): score=%.2f"
+			% [best_equipped_module.get_chat_tag(), module_breakdown.score],
 		)
 		for component in module_breakdown.components:
-			_add_thought(
+			_log(
 				source,
-				(
-					"    - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
-					% [
-						component.get("name"),
-						component.get("normalized_input"),
-						component.get("curve"),
-						component.get("weight"),
-						component.get("contribution"),
-					]
-				),
+				"    - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
+				% [
+					component.get("name"),
+					component.get("normalized_input"),
+					component.get("curve"),
+					component.get("weight"),
+					component.get("contribution"),
+				],
 			)
 
 	return (

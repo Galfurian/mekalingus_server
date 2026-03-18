@@ -2,10 +2,15 @@ class_name AIAttackIntentEvaluator
 extends RefCounted
 
 const DEFAULT_MAX_LOS_TILE_CANDIDATES: int = 6
+const INTENT_LABEL: String = "Attack"
+
+
+static func _log(source: MapCombatEntity, message: String) -> void:
+	_add_thought(source, "%s %s" % [INTENT_LABEL, message])
 
 
 static func evaluate(context: AIPlanningContext) -> AIPlan:
-	_add_thought(context.source, "----- Evaluating ATTACK intent -----")
+	_add_thought(context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()])
 	var source: MapCombatEntity = context.source
 	var visible_enemies: Array[MapCombatEntity] = context.get_visible_enemies()
 	if visible_enemies.is_empty():
@@ -18,7 +23,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	var profile: AIActionProfile = AITacticalBrainResolver.resolve_attack_profile(source)
 	if not profile:
 		# No attack profile means this brain contributes zero utility to ATTACK intents.
-		_add_thought(source, "Attack intent unavailable: missing profile")
+		_log(source, "intent unavailable: missing profile")
 		return null
 
 	var max_module_range: int = _get_max_module_range(source, offensive_modules)
@@ -41,16 +46,14 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			"max_distance": float(max_candidate_distance),
 		}
 		var preliminary_score: float = profile.evaluate_preliminary(preliminary_context)
-		_add_thought(
+		_log(
 			source,
-			(
-				"Attack prelim: target=%s dist=%d prelim=%.2f"
-				% [
-					target.combatant.get_chat_tag(),
-					distance,
-					preliminary_score,
-				]
-			),
+			"prelim: target=%s dist=%d prelim=%.2f"
+			% [
+				target.combatant.get_chat_tag(),
+				distance,
+				preliminary_score,
+			],
 		)
 		(
 			candidate_targets
@@ -83,12 +86,10 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	for candidate_index in range(max_targets):
 		var candidate: Dictionary = candidate_targets[candidate_index]
 		var target: MapCombatEntity = candidate["target"]
-		_add_thought(
+		_log(
 			source,
-			(
-				"Attack narrow-phase target=%s prelim=%.2f"
-				% [target.combatant.get_chat_tag(), float(candidate["preliminary_score"])]
-			),
+			"narrow-phase target=%s prelim=%.2f"
+			% [target.combatant.get_chat_tag(), float(candidate["preliminary_score"])],
 		)
 
 		var has_los_from_source: bool = _get_or_compute_los(
@@ -121,12 +122,10 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 					module_range,
 				)
 				if not move_data["reachable"]:
-					_add_thought(
+					_log(
 						source,
-						(
-							"Attack option rejected: target=%s module=%s reason=unreachable"
-							% [target.combatant.get_chat_tag(), equipped_module.get_chat_tag()]
-						),
+						"option rejected: target=%s module=%s reason=unreachable"
+						% [target.combatant.get_chat_tag(), equipped_module.get_chat_tag()],
 					)
 					continue
 				destination = move_data["destination"]
@@ -148,17 +147,15 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 				reachable_bonus = profile.reachable_bonus
 				score += reachable_bonus
 
-			_add_thought(
+			_log(
 				source,
-				(
-					"Attack option: target=%s module=%s score=%.2f tile=%s"
-					% [
-						target.combatant.get_chat_tag(),
-						equipped_module.get_chat_tag(),
-						score,
-						MetaTag.pos_tag(destination),
-					]
-				),
+				"option: target=%s module=%s score=%.2f tile=%s"
+				% [
+					target.combatant.get_chat_tag(),
+					equipped_module.get_chat_tag(),
+					score,
+					MetaTag.pos_tag(destination),
+				],
 			)
 
 			if score > best_score:
@@ -167,33 +164,29 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 				best_target = target
 				best_equipped_module = equipped_module
 				best_destination = destination
-				_add_thought(
+				_log(
 					source,
-					(
-						"Attack best updated: target=%s module=%s score=%.2f"
-						% [
-							best_target.combatant.get_chat_tag(),
-							best_equipped_module.get_chat_tag(),
-							best_score,
-						]
-					),
+					"best updated: target=%s module=%s score=%.2f"
+					% [
+						best_target.combatant.get_chat_tag(),
+						best_equipped_module.get_chat_tag(),
+						best_score,
+					],
 				)
 
 	if not best_target:
-		_add_thought(source, "Attack intent produced no valid target")
+		_log(source, "intent produced no valid target")
 		return null
 
-	_add_thought(
+	_log(
 		source,
-		(
-			"Attack selected: target=%s module=%s score=%.2f tile=%s"
-			% [
-				best_target.combatant.get_chat_tag(),
-				best_equipped_module.get_chat_tag(),
-				best_score,
-				MetaTag.pos_tag(best_destination),
-			]
-		),
+		"selected: target=%s module=%s score=%.2f tile=%s"
+		% [
+			best_target.combatant.get_chat_tag(),
+			best_equipped_module.get_chat_tag(),
+			best_score,
+			MetaTag.pos_tag(best_destination),
+		],
 	)
 
 	var attack_breakdown_context: Dictionary = {
@@ -207,26 +200,22 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		profile.in_range_los_bonus if best_in_range else profile.reachable_bonus
 	)
 	var attack_bonus_name: String = "in_range_los_bonus" if best_in_range else "reachable_bonus"
-	_add_thought(
+	_log(
 		source,
-		(
-			"Attack breakdown: base=%.2f %s=%.2f total=%.2f"
-			% [attack_breakdown.score, attack_bonus_name, attack_bonus, best_score]
-		),
+		"breakdown: base=%.2f %s=%.2f total=%.2f"
+		% [attack_breakdown.score, attack_bonus_name, attack_bonus, best_score],
 	)
 	for component in attack_breakdown.components:
-		_add_thought(
+		_log(
 			source,
-			(
-				"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
-				% [
-					component.get("name"),
-					component.get("normalized_input"),
-					component.get("curve"),
-					component.get("weight"),
-					component.get("contribution"),
-				]
-			),
+			"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
+			% [
+				component.get("name"),
+				component.get("normalized_input"),
+				component.get("curve"),
+				component.get("weight"),
+				component.get("contribution"),
+			],
 		)
 
 	return (

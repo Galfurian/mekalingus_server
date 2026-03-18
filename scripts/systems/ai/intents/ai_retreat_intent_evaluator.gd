@@ -3,6 +3,7 @@ extends RefCounted
 
 const INTENT_LABEL: String = "Retreat"
 
+
 static func _log(source: MapCombatEntity, message: String) -> void:
 	_add_thought(source, "%s %s" % [INTENT_LABEL, message])
 
@@ -175,21 +176,27 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	if best_used_module:
 		_log(
 			source,
-			"Module breakdown (%s): score=%.2f"
-			% [best_equipped_module.get_chat_tag(), module_breakdown.score],
+			(
+				"Module breakdown (%s): score=%.2f"
+				% [best_equipped_module.get_chat_tag(), module_breakdown.score]
+			),
 		)
 		for component in module_breakdown.components:
 			_log(
 				source,
-				"    - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
-				% [
-					component.get("name"),
-					component.get("normalized_input"),
-					component.get("curve"),
-					component.get("weight"),
-					component.get("contribution"),
-				],
+				(
+					"    - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
+					% [
+						component.get("name"),
+						component.get("normalized_input"),
+						component.get("curve"),
+						component.get("weight"),
+						component.get("contribution"),
+					]
+				),
 			)
+
+	_log(source, "scored %.2f" % best_score)
 
 	return (
 		AIPlanBuilder

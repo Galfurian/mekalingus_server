@@ -48,12 +48,14 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		var preliminary_score: float = profile.evaluate_preliminary(preliminary_context)
 		_log(
 			source,
-			"prelim: target=%s dist=%d prelim=%.2f"
-			% [
-				target.combatant.get_chat_tag(),
-				distance,
-				preliminary_score,
-			],
+			(
+				"prelim: target=%s dist=%d prelim=%.2f"
+				% [
+					target.combatant.get_chat_tag(),
+					distance,
+					preliminary_score,
+				]
+			),
 		)
 		(
 			candidate_targets
@@ -88,8 +90,10 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		var target: MapCombatEntity = candidate["target"]
 		_log(
 			source,
-			"narrow-phase target=%s prelim=%.2f"
-			% [target.combatant.get_chat_tag(), float(candidate["preliminary_score"])],
+			(
+				"narrow-phase target=%s prelim=%.2f"
+				% [target.combatant.get_chat_tag(), float(candidate["preliminary_score"])]
+			),
 		)
 
 		var has_los_from_source: bool = _get_or_compute_los(
@@ -124,8 +128,10 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 				if not move_data["reachable"]:
 					_log(
 						source,
-						"option rejected: target=%s module=%s reason=unreachable"
-						% [target.combatant.get_chat_tag(), equipped_module.get_chat_tag()],
+						(
+							"option rejected: target=%s module=%s reason=unreachable"
+							% [target.combatant.get_chat_tag(), equipped_module.get_chat_tag()]
+						),
 					)
 					continue
 				destination = move_data["destination"]
@@ -149,13 +155,15 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 
 			_log(
 				source,
-				"option: target=%s module=%s score=%.2f tile=%s"
-				% [
-					target.combatant.get_chat_tag(),
-					equipped_module.get_chat_tag(),
-					score,
-					MetaTag.pos_tag(destination),
-				],
+				(
+					"option: target=%s module=%s score=%.2f tile=%s"
+					% [
+						target.combatant.get_chat_tag(),
+						equipped_module.get_chat_tag(),
+						score,
+						MetaTag.pos_tag(destination),
+					]
+				),
 			)
 
 			if score > best_score:
@@ -166,12 +174,14 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 				best_destination = destination
 				_log(
 					source,
-					"best updated: target=%s module=%s score=%.2f"
-					% [
-						best_target.combatant.get_chat_tag(),
-						best_equipped_module.get_chat_tag(),
-						best_score,
-					],
+					(
+						"best updated: target=%s module=%s score=%.2f"
+						% [
+							best_target.combatant.get_chat_tag(),
+							best_equipped_module.get_chat_tag(),
+							best_score,
+						]
+					),
 				)
 
 	if not best_target:
@@ -180,13 +190,15 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 
 	_log(
 		source,
-		"selected: target=%s module=%s score=%.2f tile=%s"
-		% [
-			best_target.combatant.get_chat_tag(),
-			best_equipped_module.get_chat_tag(),
-			best_score,
-			MetaTag.pos_tag(best_destination),
-		],
+		(
+			"selected: target=%s module=%s score=%.2f tile=%s"
+			% [
+				best_target.combatant.get_chat_tag(),
+				best_equipped_module.get_chat_tag(),
+				best_score,
+				MetaTag.pos_tag(best_destination),
+			]
+		),
 	)
 
 	var attack_breakdown_context: Dictionary = {
@@ -202,21 +214,27 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	var attack_bonus_name: String = "in_range_los_bonus" if best_in_range else "reachable_bonus"
 	_log(
 		source,
-		"breakdown: base=%.2f %s=%.2f total=%.2f"
-		% [attack_breakdown.score, attack_bonus_name, attack_bonus, best_score],
+		(
+			"breakdown: base=%.2f %s=%.2f total=%.2f"
+			% [attack_breakdown.score, attack_bonus_name, attack_bonus, best_score]
+		),
 	)
 	for component in attack_breakdown.components:
 		_log(
 			source,
-			"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
-			% [
-				component.get("name"),
-				component.get("normalized_input"),
-				component.get("curve"),
-				component.get("weight"),
-				component.get("contribution"),
-			],
+			(
+				"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
+				% [
+					component.get("name"),
+					component.get("normalized_input"),
+					component.get("curve"),
+					component.get("weight"),
+					component.get("contribution"),
+				]
+			),
 		)
+
+	_log(source, "scored %.2f" % best_score)
 
 	return (
 		AIPlanBuilder

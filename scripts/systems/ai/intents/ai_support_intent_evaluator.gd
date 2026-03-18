@@ -3,6 +3,7 @@ extends RefCounted
 
 const INTENT_LABEL: String = "Support"
 
+
 static func _log(source: MapCombatEntity, message: String) -> void:
 	_add_thought(source, "%s %s" % [INTENT_LABEL, message])
 
@@ -35,6 +36,16 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			"max_distance": float(max_candidate_distance),
 		}
 		var preliminary_score: float = profile.evaluate_preliminary(preliminary_context)
+		var distance: int = _manhattan_distance(source.position, target.position)
+		_log(
+			source,
+			"prelim: target=%s dist=%d prelim=%.2f"
+			% [
+				target.combatant.get_chat_tag(),
+				distance,
+				preliminary_score,
+			],
+		)
 		(
 			candidate_targets
 			. append(
@@ -101,21 +112,73 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 				"max_distance": float(max_candidate_distance),
 			}
 			var score: float = profile.evaluate_final(score_context)
+			var in_range_bonus: float = 0.0
+			var reachable_bonus: float = 0.0
 			if can_use_from_source:
-				score += profile.in_range_los_bonus
+				in_range_bonus = profile.in_range_los_bonus
+				score += in_range_bonus
 			else:
-				score += profile.reachable_bonus
+				reachable_bonus = profile.reachable_bonus
+				score += reachable_bonus
+
+			_log(
+				source,
+				"option: target=%s module=%s score=%.2f tile=%s"
+				% [
+					target.combatant.get_chat_tag(),
+					equipped_module.get_chat_tag(),
+					score,
+					MetaTag.pos_tag(destination),
+				],
+			)
 
 			if score > best_score:
 				best_score = score
 				best_target = target
 				best_equipped_module = equipped_module
 				best_destination = destination
+				_log(
+					source,
+					"best updated: target=%s module=%s score=%.2f"
+					% [
+						target.combatant.get_chat_tag(),
+						equipped_module.get_chat_tag(),
+						score,
+					],
+				)
 
 	if not best_target:
 		_log(source, "intent produced no valid target")
 		return null
 
+	var support_breakdown_context: Dictionary = {
+		"source": source,
+		"target": best_target,
+		"module": best_equipped_module.module,
+		"planning_context": context,
+		"tile": best_destination,
+	}
+	var support_breakdown: Dictionary = profile.evaluate_final_breakdown(
+		support_breakdown_context
+	)
+	var support_bonus: float = best_destination == source.position ? 0.0 : profile.reachable_bonus
+	_log(
+		source,
+		"breakdown: base=%.2f reachable=%.2f total=%.2f"
+		% [support_breakdown.score, support_bonus, best_score],
+	)
+	for component in support_breakdown.components:
+		_log(
+			source,
+			"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
+			% [
+				component.get("name"),
+				component.get("normalized_input"),
+				component.get("curve"),
+				component.get("weight"),
+				component.get("contribution"),
+			],
+		)
 	_log(source, "scored %.2f" % best_score)
 	return (
 		AIPlanBuilder

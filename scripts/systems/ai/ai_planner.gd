@@ -12,37 +12,31 @@ func generate_plan(
 	var best_score := -INF
 
 	var attack_candidate: AIPlan = AIAttackIntentEvaluator.evaluate(context)
-	if attack_candidate:
-		source.combatant.add_ai_thought("Attack scored %.2f" % attack_candidate.score)
-	else:
-		source.combatant.add_ai_thought("Attack unavailable")
 	if attack_candidate and attack_candidate.score > best_score:
 		plan = attack_candidate
 		best_score = attack_candidate.score
 
 	var support_candidate: AIPlan = AISupportIntentEvaluator.evaluate(context)
-	if support_candidate:
-		source.combatant.add_ai_thought("Support scored %.2f" % support_candidate.score)
-	else:
-		source.combatant.add_ai_thought("Support unavailable")
 	if support_candidate and support_candidate.score > best_score:
 		plan = support_candidate
 		best_score = support_candidate.score
 
 	var retreat_candidate: AIPlan = AIRetreatIntentEvaluator.evaluate(context)
-	if retreat_candidate:
-		source.combatant.add_ai_thought("Retreat scored %.2f" % retreat_candidate.score)
-	else:
-		source.combatant.add_ai_thought("Retreat unavailable")
 	if retreat_candidate and retreat_candidate.score > best_score:
 		plan = retreat_candidate
 		best_score = retreat_candidate.score
 
 	if plan:
-		source.combatant.add_ai_thought(
+		_add_thought(
+			source,
 			"Selected intent %s with score %.2f" % [AIPlan.Intent.keys()[plan.intent], plan.score]
 		)
 	else:
-		source.combatant.add_ai_thought("No valid plan selected")
+		_add_thought(source, "No valid plan selected")
 
 	return plan
+
+
+static func _add_thought(source: MapCombatEntity, message: String) -> void:
+	if source and source.combatant:
+		source.combatant.add_ai_thought(message)

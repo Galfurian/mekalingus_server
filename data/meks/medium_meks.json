@@ -17,7 +17,8 @@
             0,
             3
         ],
-        "icon": "meks/medium/mmek001.png"
+        "icon": "meks/medium/mmek001.png",
+        "sensor_range": 8
     },
     "mmek002": {
         "name": "Titan Vanguard",
@@ -37,7 +38,8 @@
             0,
             2
         ],
-        "icon": "meks/medium/mmek002.png"
+        "icon": "meks/medium/mmek002.png",
+        "sensor_range": 8
     },
     "mmek003": {
         "name": "Iron Reaver",
@@ -57,7 +59,8 @@
             1,
             2
         ],
-        "icon": "meks/medium/mmek003.png"
+        "icon": "meks/medium/mmek003.png",
+        "sensor_range": 8
     },
     "mmek004": {
         "name": "Phantom Breaker",
@@ -77,7 +80,8 @@
             1,
             1
         ],
-        "icon": "meks/medium/mmek004.png"
+        "icon": "meks/medium/mmek004.png",
+        "sensor_range": 8
     },
     "mmek005": {
         "name": "Thunder Sentinel",
@@ -97,7 +101,8 @@
             1,
             3
         ],
-        "icon": "meks/medium/mmek005.png"
+        "icon": "meks/medium/mmek005.png",
+        "sensor_range": 8
     },
     "mmek006": {
         "name": "Ember Warden",
@@ -117,7 +122,8 @@
             2,
             3
         ],
-        "icon": "meks/medium/mmek006.png"
+        "icon": "meks/medium/mmek006.png",
+        "sensor_range": 8
     },
     "mmek007": {
         "name": "Shadow Bastion",
@@ -137,7 +143,8 @@
             1,
             1
         ],
-        "icon": "meks/medium/mmek007.png"
+        "icon": "meks/medium/mmek007.png",
+        "sensor_range": 8
     },
     "mmek008": {
         "name": "Cyclone Hunter",
@@ -157,7 +164,8 @@
             1,
             2
         ],
-        "icon": "meks/medium/mmek008.png"
+        "icon": "meks/medium/mmek008.png",
+        "sensor_range": 8
     },
     "mmek009": {
         "name": "Avalanche Titan",
@@ -177,7 +185,8 @@
             0,
             2
         ],
-        "icon": "meks/medium/mmek009.png"
+        "icon": "meks/medium/mmek009.png",
+        "sensor_range": 8
     },
     "mmek010": {
         "name": "Nova Lancer",
@@ -197,6 +206,7 @@
             0,
             2
         ],
-        "icon": "meks/medium/mmek010.png"
+        "icon": "meks/medium/mmek010.png",
+        "sensor_range": 8
     }
 }

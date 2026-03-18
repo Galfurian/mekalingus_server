@@ -32,11 +32,7 @@ var _threat_cache: Dictionary = {}
 var _enemy_offensive_modules_cache: Dictionary = {}
 
 
-func _init(
-	p_source: MapCombatEntity,
-	p_game_map,
-	p_turn_context: RefCounted = null
-) -> void:
+func _init(p_source: MapCombatEntity, p_game_map, p_turn_context: RefCounted = null) -> void:
 	source = p_source
 	game_map = p_game_map
 	turn_context = p_turn_context
@@ -45,14 +41,17 @@ func _init(
 func get_visible_enemies() -> Array[MapCombatEntity]:
 	if _visible_enemies_ready:
 		return _visible_enemies
+
+	if not source or not source.combatant:
+		_visible_enemies = []
+		_visible_enemies_ready = true
+		return _visible_enemies
+
+	var detection_range: int = source.combatant.get_sensor_range()
 	if turn_context:
-		_visible_enemies = turn_context.get_visible_enemies(
-			source, game_map.DEFAULT_DETECTION_RANGE
-		)
+		_visible_enemies = turn_context.get_visible_enemies(source, detection_range)
 	else:
-		_visible_enemies = AIUnitQueries.get_enemies_in_range(
-			game_map, source, game_map.DEFAULT_DETECTION_RANGE
-		)
+		_visible_enemies = AIUnitQueries.get_enemies_in_range(game_map, source, detection_range)
 	_visible_enemies_ready = true
 	return _visible_enemies
 

@@ -7,14 +7,20 @@
 		"armor": 70,
 		"shield": 10,
 		"shield_generation": 1,
-        "power": 400,
-        "power_generation": 120,
+		"power": 400,
+		"power_generation": 120,
 		"speed": 0,
-		"slots": [0, 0, 0, 3],
+		"slots": [
+			0,
+			0,
+			0,
+			3
+		],
 		"structure_type": "extraction",
 		"structure_sub_type": "drilling",
 		"passable": false,
-		"icon": "structures/extraction/drill_rig.png"
+		"icon": "structures/extraction/drill_rig.png",
+		"sensor_range": 8
 	},
 	"refinery_node": {
 		"name": "Refinery Node",
@@ -24,14 +30,20 @@
 		"armor": 52,
 		"shield": 20,
 		"shield_generation": 2,
-        "power": 400,
-        "power_generation": 120,
+		"power": 400,
+		"power_generation": 120,
 		"speed": 0,
-		"slots": [0, 0, 0, 2],
+		"slots": [
+			0,
+			0,
+			0,
+			2
+		],
 		"structure_type": "extraction",
 		"structure_sub_type": "refining",
 		"passable": false,
-		"icon": "structures/extraction/refinery_node.png"
+		"icon": "structures/extraction/refinery_node.png",
+		"sensor_range": 8
 	},
 	"salvage_processor": {
 		"name": "Salvage Processor",
@@ -41,14 +53,20 @@
 		"armor": 50,
 		"shield": 18,
 		"shield_generation": 2,
-        "power": 400,
-        "power_generation": 120,
+		"power": 400,
+		"power_generation": 120,
 		"speed": 0,
-		"slots": [1, 0, 0, 2],
+		"slots": [
+			1,
+			0,
+			0,
+			2
+		],
 		"structure_type": "extraction",
 		"structure_sub_type": "salvaging",
 		"passable": false,
-		"icon": "structures/extraction/salvage_processor.png"
+		"icon": "structures/extraction/salvage_processor.png",
+		"sensor_range": 8
 	},
 	"ore_survey_node": {
 		"name": "Ore Survey Node",
@@ -61,11 +79,17 @@
 		"power": 320,
 		"power_generation": 90,
 		"speed": 0,
-		"slots": [0, 0, 0, 2],
+		"slots": [
+			0,
+			0,
+			0,
+			2
+		],
 		"structure_type": "extraction",
 		"structure_sub_type": "surveying",
 		"passable": false,
-		"icon": "structures/extraction/ore_survey_node.png"
+		"icon": "structures/extraction/ore_survey_node.png",
+		"sensor_range": 8
 	},
 	"ore_washer": {
 		"name": "Ore Washer",
@@ -78,10 +102,16 @@
 		"power": 420,
 		"power_generation": 130,
 		"speed": 0,
-		"slots": [0, 0, 0, 3],
+		"slots": [
+			0,
+			0,
+			0,
+			3
+		],
 		"structure_type": "extraction",
 		"structure_sub_type": "refining",
 		"passable": false,
-		"icon": "structures/extraction/ore_washer.png"
+		"icon": "structures/extraction/ore_washer.png",
+		"sensor_range": 8
 	}
 }

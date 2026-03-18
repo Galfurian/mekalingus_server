@@ -10,11 +10,17 @@
 		"power": 80,
 		"power_generation": 6,
 		"speed": 0,
-		"slots": [0, 0, 0, 2],
+		"slots": [
+			0,
+			0,
+			0,
+			2
+		],
 		"structure_type": "logistics",
 		"structure_sub_type": "cache",
 		"passable": false,
-		"icon": "structures/logistics/secure_cache.png"
+		"icon": "structures/logistics/secure_cache.png",
+		"sensor_range": 8
 	},
 	"unlocked_terminal": {
 		"name": "Unlocked Terminal",
@@ -27,11 +33,17 @@
 		"power": 88,
 		"power_generation": 7,
 		"speed": 0,
-		"slots": [1, 0, 0, 2],
+		"slots": [
+			1,
+			0,
+			0,
+			2
+		],
 		"structure_type": "logistics",
 		"structure_sub_type": "intel",
 		"passable": false,
-		"icon": "structures/logistics/unlocked_terminal.png"
+		"icon": "structures/logistics/unlocked_terminal.png",
+		"sensor_range": 8
 	},
 	"relay_uplink": {
 		"name": "Relay Uplink",
@@ -44,11 +56,17 @@
 		"power": 140,
 		"power_generation": 12,
 		"speed": 0,
-		"slots": [0, 0, 0, 2],
+		"slots": [
+			0,
+			0,
+			0,
+			2
+		],
 		"structure_type": "logistics",
 		"structure_sub_type": "intel",
 		"passable": false,
-		"icon": "structures/logistics/relay_uplink.png"
+		"icon": "structures/logistics/relay_uplink.png",
+		"sensor_range": 8
 	},
 	"cargo_stacker": {
 		"name": "Cargo Stacker",
@@ -61,10 +79,16 @@
 		"power": 100,
 		"power_generation": 8,
 		"speed": 0,
-		"slots": [0, 0, 0, 2],
+		"slots": [
+			0,
+			0,
+			0,
+			2
+		],
 		"structure_type": "logistics",
 		"structure_sub_type": "cache",
 		"passable": false,
-		"icon": "structures/logistics/cargo_stacker.png"
+		"icon": "structures/logistics/cargo_stacker.png",
+		"sensor_range": 8
 	}
 }

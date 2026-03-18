@@ -28,6 +28,8 @@ var power: int
 var power_generation: int
 # The movement speed of the Mek, affecting turn order and repositioning.
 var speed: int
+# The sensor range of the Mek, defining how far it can detect enemies.
+var sensor_range: int
 # Slot configuration for equipping items.
 # Each index represents a slot size (e.g., small, medium, large, utility).
 var slots: Array[int]
@@ -47,7 +49,14 @@ func _init(_id: String = "", data: Dictionary = {}):
 
 func is_valid() -> bool:
 	"""Checks if the Mek template contains valid values."""
-	return id != "" and mek_name != "" and health > 0 and armor >= 0 and shield >= 0
+	return (
+		id != ""
+		and mek_name != ""
+		and health > 0
+		and armor >= 0
+		and shield >= 0
+		and sensor_range > 0
+	)
 
 
 func build_mek(uuid: String = GameServer.generate_uuid()) -> Mek:
@@ -96,15 +105,16 @@ func from_dict(data: Dictionary):
 
 	mek_name = data["name"]
 	size = Utils.string_to_enum(Enums.EntitySize, data["size"])
-	health = int(data.get("health", 0))
-	armor = int(data.get("armor", 0))
-	shield = int(data.get("shield", 0))
-	shield_generation = int(data.get("shield_generation", 0))
-	power = int(data.get("power", 0))
-	power_generation = int(data.get("power_generation", 0))
-	speed = int(data.get("speed", 0))
+	health = int(data["health"])
+	armor = int(data["armor"])
+	shield = int(data["shield"])
+	shield_generation = int(data["shield_generation"])
+	power = int(data["power"])
+	power_generation = int(data["power_generation"])
+	speed = int(data["speed"])
+	sensor_range = int(data["sensor_range"])
 	slots = Utils.to_array_int(data["slots"])
-	icon = data.get("icon", "")
+	icon = data["icon"]
 
 
 func to_dict() -> Dictionary:
@@ -120,6 +130,7 @@ func to_dict() -> Dictionary:
 		"power": power,
 		"power_generation": power_generation,
 		"speed": speed,
+		"sensor_range": sensor_range,
 		"slots": slots,
 		"icon": icon,
 	}

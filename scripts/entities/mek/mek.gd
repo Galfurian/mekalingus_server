@@ -46,6 +46,7 @@ func rebuild_combat_state():
 		"shield_generation": template.shield_generation,
 		"power_generation": template.power_generation,
 		"speed": template.speed,
+		"sensor_range": template.sensor_range,
 	}
 	rebuild_combat_state_with_items(stats_payload, template.slots)
 

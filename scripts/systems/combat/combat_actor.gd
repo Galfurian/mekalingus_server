@@ -108,6 +108,12 @@ var speed: int:
 	set(value):
 		set_base_stat(Enums.StatType.SPEED, value)
 
+var sensor_range: int:
+	get:
+		return get_sensor_range()
+	set(value):
+		set_base_stat(Enums.StatType.SENSOR_RANGE, value)
+
 var damage_reduction_all: int:
 	get:
 		return get_stat(Enums.StatType.DAMAGE_REDUCTION_ALL)
@@ -524,6 +530,10 @@ func get_power_generation() -> int:
 
 func get_speed() -> int:
 	return get_stat(Enums.StatType.SPEED)
+
+
+func get_sensor_range() -> int:
+	return get_stat(Enums.StatType.SENSOR_RANGE)
 
 
 func get_accuracy_modifier() -> int:

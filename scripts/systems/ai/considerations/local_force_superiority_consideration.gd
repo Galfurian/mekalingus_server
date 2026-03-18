@@ -7,6 +7,7 @@ extends "res://scripts/systems/ai/ai_consideration.gd"
 ## Maximum expected force ratio for normalization (values > 2.0 will be clamped to 1.0).
 const MAX_FORCE_RATIO: float = 2.0
 
+# Radius to scan for nearby enemies when evaluating local force superiority.
 const LOCAL_SCAN_RADIUS: int = 8
 
 ## Size scaling factors to balance unit class differences in force calculation.

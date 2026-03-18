@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://cgc7kc43of35n" path="res://scripts/systems/ai/considerations/self_health_consideration.gd" id="2"]
 [ext_resource type="Script" uid="uid://df75e74obpmtx" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="3"]
 [ext_resource type="Script" uid="uid://cybt2e8q65ee6" path="res://scripts/systems/ai/considerations/utility_module_effectiveness_consideration.gd" id="4"]
+[ext_resource type="Script" uid="uid://c7r5kj9pzq4l" path="res://scripts/systems/ai/considerations/local_force_superiority_consideration.gd" id="5"]
 
 [sub_resource type="Curve" id="1"]
 _data = [Vector2(0, 1), 0.0, -1.8, 0, 0, Vector2(1, 0), -1.8, 0.0, 0, 0]
@@ -25,6 +26,17 @@ consideration_name = "tile_threat"
 weight = 16.0
 response_curve = SubResource("2")
 
+[sub_resource type="Curve" id="7"]
+_data = [Vector2(0, 0), 0.0, 0.5, 0, 0, Vector2(1, 1), 0.5, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Resource" id="7"]
+script = ExtResource("5")
+consideration_name = "local_force_superiority"
+weight = 20.0
+response_curve = SubResource("7")
+
+
 [sub_resource type="Curve" id="3"]
 _data = [Vector2(0, 0.2), 1.3, 0.0, 0, 0, Vector2(0.5, 0.7), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 3
@@ -38,7 +50,7 @@ response_curve = SubResource("3")
 [resource]
 script = ExtResource("1")
 profile_name = "default_retreat_profile"
-preliminary_considerations = Array[Resource]([SubResource("4"), SubResource("5")])
+preliminary_considerations = Array[Resource]([SubResource("4"), SubResource("5"), SubResource("7")])
 final_considerations = Array[Resource]([SubResource("4"), SubResource("5"), SubResource("6")])
 max_targets_to_narrow_phase = 4
 in_range_los_bonus = 0.0

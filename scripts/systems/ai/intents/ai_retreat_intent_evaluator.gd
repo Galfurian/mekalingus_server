@@ -15,55 +15,117 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	if not source.can_move():
 		return null
 
-	var profile: AIActionProfile = AITacticalBrainResolver.resolve_retreat_profile(source)
-	if not profile:
+	# Phase 1: Decide IF we should retreat from current tile (self_health + current_threat only)
+	var retreat_decision: Dictionary = _evaluate_retreat_necessity(source, context)
+	if not retreat_decision["should_retreat"]:
+		_log(
+			source,
+			(
+				"no retreat needed: health=%.2f threat=%.2f"
+				% [retreat_decision["health_score"], retreat_decision["threat_score"]]
+			),
+		)
 		return null
 
+	_log(
+		source,
+		(
+			"retreat triggered: health=%.2f threat=%.2f"
+			% [retreat_decision["health_score"], retreat_decision["threat_score"]]
+		),
+	)
+
+	# Phase 2: Find safest reachable retreat tile
 	var reachable_tiles: Array[Vector2i] = context.get_reachable_tiles()
 	if reachable_tiles.is_empty():
 		return null
 
+	var best_tile: Vector2i = _find_safest_retreat_tile(source, context, reachable_tiles)
+	if best_tile == source.position:
+		_log(source, "no safe retreat destination found")
+		return null
+
+	# Phase 3: Select utility module for escape
 	var utility_modules: Array[EquippedModule] = context.get_utility_modules()
-	var candidate_tiles: Array[Dictionary] = []
+	var selected_module: EquippedModule = _select_retreat_module(
+		source, context, best_tile, utility_modules
+	)
+
+	# Phase 4: Log escape plan
+	_log(
+		source,
+		(
+			"retreating to %s (threat: current=%.2f dest=%.2f)"
+			% [
+				MetaTag.pos_tag(best_tile),
+				context.get_threat(source.position),
+				context.get_threat(best_tile),
+			]
+		)
+	)
+	if selected_module:
+		_log(source, "with module: %s" % [selected_module.get_chat_tag()])
+
+	return (
+		AIPlanBuilder
+		. build_plan(
+			context,
+			AIPlan.Intent.RETREAT,
+			75.0,
+			source,
+			selected_module,
+			best_tile,
+		)
+	)
+
+
+## Evaluate current position: should we retreat based on self_health and current tile threat?
+## Returns dict with "should_retreat" bool and component scores.
+static func _evaluate_retreat_necessity(
+	source: MapCombatEntity,
+	context: AIPlanningContext,
+) -> Dictionary:
+	var combatant: CombatActor = source.combatant
+	if not combatant:
+		return {"should_retreat": false, "health_score": 0.0, "threat_score": 0.0}
+
+	# Health score: 1.0 = full health, 0.0 = dead
+	var health_ratio: float = float(combatant.current_health) / float(combatant.max_health)
+	# Inverted: low health = high retreat score
+	var health_score: float = 1.0 - clampf(health_ratio, 0.0, 1.0)
+
+	# Threat score: how dangerous is current position? (0.0 to 1.0)
+	var current_threat: float = context.get_threat(source.position)
+	var threat_score: float = clampf(current_threat / 100.0, 0.0, 1.0)
+
+	# Simple logic: retreat if EITHER is high (health critical OR threat extreme)
+	# Threshold: combined score > 1.0 triggers retreat
+	var combined_score: float = health_score + threat_score
+	var should_retreat: bool = combined_score > 1.0
+
+	return {
+		"should_retreat": should_retreat,
+		"health_score": health_score,
+		"threat_score": threat_score,
+		"combined_score": combined_score,
+	}
+
+
+## Find the safest reachable tile to retreat to (lowest threat among reachable tiles).
+static func _find_safest_retreat_tile(
+	source: MapCombatEntity,
+	context: AIPlanningContext,
+	reachable_tiles: Array[Vector2i],
+) -> Vector2i:
+	var safest_tile: Vector2i = source.position
+	var lowest_threat: float = INF
 
 	for tile: Vector2i in reachable_tiles:
+		# Skip occupied tiles
 		if tile != source.position and context.game_map.is_occupied(tile):
 			continue
 
-		var preliminary_context: Dictionary = {
-			"source": source,
-			"target": source,
-			"planning_context": context,
-			"tile": tile,
-		}
-		var preliminary_score: float = profile.evaluate_preliminary(preliminary_context)
-		(
-			candidate_tiles
-			. append(
-				{
-					"tile": tile,
-					"preliminary_score": preliminary_score,
-				}
-			)
-		)
-
-	if candidate_tiles.is_empty():
-		return null
-
-	candidate_tiles.sort_custom(
-		func(a: Dictionary, b: Dictionary): return a["preliminary_score"] > b["preliminary_score"]
-	)
-
-	var best_tile: Vector2i = source.position
-	var best_score: float = -INF
-	var best_base_score: float = 0.0
-	var best_reachable_bonus: float = 0.0
-	var max_targets: int = mini(profile.get_max_targets_to_narrow_phase(), candidate_tiles.size())
-
-	for candidate_index in range(max_targets):
-		var candidate: Dictionary = candidate_tiles[candidate_index]
-		var tile: Vector2i = candidate["tile"]
-
+		# Verify pathfinding
 		if tile != source.position:
 			var path: Array[Vector2i] = (
 				AIPathfinder
@@ -76,151 +138,34 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			if path.is_empty():
 				continue
 
-		var score_context: Dictionary = {
-			"source": source,
-			"target": source,
-			"planning_context": context,
-			"tile": tile,
-		}
-		var base_score: float = profile.evaluate_preliminary(score_context)
-		var score: float = base_score
-		var reachable_bonus: float = 0.0
-		if tile != source.position:
-			reachable_bonus = profile.reachable_bonus
-			score += reachable_bonus
+		# Check threat at this tile
+		var threat: float = context.get_threat(tile)
+		if threat < lowest_threat:
+			lowest_threat = threat
+			safest_tile = tile
 
-		_log(
-			source,
-			"option: tile=%s base=%.2f reachable=%.2f total=%.2f"
-			% [
-				MetaTag.pos_tag(tile),
-				base_score,
-				reachable_bonus,
-				score,
-			],
-		)
+	return safest_tile
 
-		if score > best_score:
-			best_score = score
-			best_base_score = base_score
-			best_reachable_bonus = reachable_bonus
-			best_tile = tile
-			_log(
-				source,
-				"best updated: tile=%s score=%.2f"
-				% [MetaTag.pos_tag(best_tile), best_score],
-			)
 
-	if best_tile == source.position:
-		_log(source, "intent produced no valid retreat tile")
-		return null
+## Select utility module for escape (secondary benefit, not part of retreat decision).
+static func _select_retreat_module(
+	source: MapCombatEntity,
+	_context: AIPlanningContext,
+	_tile: Vector2i,
+	utility_modules: Array[EquippedModule],
+) -> EquippedModule:
+	var best_module: EquippedModule = null
 
-	var best_equipped_module: EquippedModule = null
-	var best_module_score: float = -INF
 	for equipped_module: EquippedModule in utility_modules:
 		if not _can_module_target_self(equipped_module.module, source):
 			continue
 
-		var module_context: Dictionary = {
-			"source": source,
-			"target": source,
-			"module": equipped_module.module,
-			"planning_context": context,
-			"tile": best_tile,
-		}
-		var module_score: float = profile.evaluate_final(module_context)
-		if module_score > best_module_score:
-			best_module_score = module_score
-			best_equipped_module = equipped_module
+		# Use default/simple module scoring if available
+		# For now, just pick first valid module
+		best_module = equipped_module
+		break
 
-	var retreat_score_context: Dictionary = {
-		"source": source,
-		"target": source,
-		"planning_context": context,
-		"tile": best_tile,
-	}
-	var retreat_breakdown: Dictionary = profile.evaluate_preliminary_breakdown(retreat_score_context)
-	var module_breakdown: Dictionary = {
-		"score": best_module_score,
-		"components": [],
-	}
-	if best_equipped_module:
-		var module_context: Dictionary = {
-			"source": source,
-			"target": source,
-			"module": best_equipped_module.module,
-			"planning_context": context,
-			"tile": best_tile,
-		}
-		module_breakdown = profile.evaluate_final_breakdown(module_context)
-
-	var current_tile_threat: float = context.get_threat(source.position)
-	var destination_tile_threat: float = context.get_threat(best_tile)
-
-	_log(
-		source,
-		(
-			"breakdown: tile=%s base=%.2f reachable=%.2f total=%.2f threat: current=%.2f destination=%.2f"
-			% [
-				best_tile,
-				best_base_score,
-				best_reachable_bonus,
-				best_score,
-				current_tile_threat,
-				destination_tile_threat,
-			]
-		),
-	)
-	for component in retreat_breakdown.components:
-		_log(
-			source,
-			(
-				"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
-				% [
-					component.get("name"),
-					component.get("normalized_input"),
-					component.get("curve"),
-					component.get("weight"),
-					component.get("contribution"),
-				]
-			),
-		)
-	if best_equipped_module:
-		_log(
-			source,
-			(
-				"module selected (%s): score=%.2f (not added to retreat score)"
-				% [best_equipped_module.get_chat_tag(), module_breakdown.score]
-			),
-		)
-		for component in module_breakdown.components:
-			_log(
-				source,
-				(
-					"    - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
-					% [
-						component.get("name"),
-						component.get("normalized_input"),
-						component.get("curve"),
-						component.get("weight"),
-						component.get("contribution"),
-					]
-				),
-			)
-
-	_log(source, "scored %.2f" % best_score)
-
-	return (
-		AIPlanBuilder
-		. build_plan(
-			context,
-			AIPlan.Intent.RETREAT,
-			clampf(best_score, 0.0, 100.0),
-			source,
-			best_equipped_module,
-			best_tile,
-		)
-	)
+	return best_module
 
 
 static func _can_module_target_self(module: ItemModule, _source: MapCombatEntity) -> bool:

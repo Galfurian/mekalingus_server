@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="" load_steps=11 format=3 uid="uid://b7n72bel7bvil"]
+[gd_resource type="Resource" script_class="AIActionProfile" format=3 uid="uid://b7n72bel7bvil"]
 
-[ext_resource type="Script" uid="uid://cwirj0mqpui3m" path="res://scripts/systems/ai/ai_action_profile.gd" id="1"]
-[ext_resource type="Script" uid="uid://correoissr2d5" path="res://scripts/systems/ai/considerations/target_health_consideration.gd" id="2"]
-[ext_resource type="Script" uid="uid://dbpge6mblpdqn" path="res://scripts/systems/ai/considerations/target_distance_consideration.gd" id="3"]
-[ext_resource type="Script" uid="uid://ckqhxwfb15m48" path="res://scripts/systems/ai/considerations/module_effectiveness_consideration.gd" id="4"]
+[ext_resource type="Script" uid="uid://rh4iy81im0ti" path="res://scripts/systems/ai/ai_action_profile.gd" id="1"]
+[ext_resource type="Script" uid="uid://bkiteq4w5g1cm" path="res://scripts/systems/ai/considerations/target_health_consideration.gd" id="2"]
+[ext_resource type="Script" uid="uid://dkpf5r6i5i7o6" path="res://scripts/systems/ai/considerations/target_distance_consideration.gd" id="3"]
+[ext_resource type="Script" uid="uid://cmc0ut0wqkkcr" path="res://scripts/systems/ai/considerations/module_effectiveness_consideration.gd" id="4"]
 
 [sub_resource type="Curve" id="1"]
 _data = [Vector2(0, 1), 0.0, -1.5, 0, 0, Vector2(1, 0), -1.5, 0.0, 0, 0]
@@ -36,14 +36,10 @@ weight = 14.0
 response_curve = SubResource("3")
 
 [resource]
-resource_local_to_scene = false
-resource_name = ""
 script = ExtResource("1")
 profile_name = "default_attack_profile"
 preliminary_considerations = Array[Resource]([SubResource("4"), SubResource("5")])
 final_considerations = Array[Resource]([SubResource("4"), SubResource("5"), SubResource("6")])
 max_targets_to_narrow_phase = 3
-max_expensive_ops_per_frame = 3
 in_range_los_bonus = 8.0
 reachable_bonus = 5.0
-unreachable_penalty = 8.0

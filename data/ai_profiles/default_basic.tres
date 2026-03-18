@@ -6,8 +6,6 @@
 [ext_resource type="Resource" uid="uid://7p8nxc68slq1" path="res://data/ai_profiles/default_retreat_profile.tres" id="4"]
 
 [resource]
-resource_local_to_scene = false
-resource_name = ""
 script = ExtResource("1")
 attack_profile = ExtResource("2")
 support_profile = ExtResource("3")

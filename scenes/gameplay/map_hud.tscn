@@ -1,13 +1,13 @@
-[gd_scene load_steps=7 format=3 uid="uid://bic16d6uw0g6y"]
+[gd_scene format=3 uid="uid://bic16d6uw0g6y"]
 
-[ext_resource type="Script" uid="uid://vflbjobbh0ag" path="res://scripts/ui/gameplay/map_hud.gd" id="1_daorq"]
+[ext_resource type="Script" uid="uid://c4dkolmhly6aw" path="res://scripts/ui/gameplay/map_hud.gd" id="1_daorq"]
 [ext_resource type="PackedScene" uid="uid://cdsk2ml3347yf" path="res://scenes/gameplay/log_panel.tscn" id="3_7afkc"]
 [ext_resource type="PackedScene" uid="uid://cosbr482fkmyp" path="res://scenes/gameplay/InfoPanel.tscn" id="3_0206q"]
 [ext_resource type="PackedScene" uid="uid://cid4owatwb65x" path="res://scenes/gameplay/grid_map.tscn" id="3_vm2jc"]
 [ext_resource type="PackedScene" uid="uid://dj4n3b2k1m7pq" path="res://scenes/gameplay/entity_list_panel.tscn" id="4_g2adk"]
 [ext_resource type="PackedScene" uid="uid://bnw3baaeo5u61" path="res://scenes/gameplay/spawn_panel.tscn" id="5_spawn"]
 
-[node name="MapHud" type="Control"]
+[node name="MapHud" type="Control" unique_id=372883053]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,7 +16,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_daorq")
 
-[node name="RootSplit" type="MarginContainer" parent="."]
+[node name="RootSplit" type="MarginContainer" parent="." unique_id=1994866731]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,42 +24,42 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MainSplit" type="HSplitContainer" parent="RootSplit"]
+[node name="MainSplit" type="HSplitContainer" parent="RootSplit" unique_id=1533390656]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="LeftSidePanel" type="VSplitContainer" parent="RootSplit/MainSplit"]
+[node name="LeftSidePanel" type="VSplitContainer" parent="RootSplit/MainSplit" unique_id=1145090374]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.2
 
-[node name="InfoPanel" parent="RootSplit/MainSplit/LeftSidePanel" instance=ExtResource("3_0206q")]
+[node name="InfoPanel" parent="RootSplit/MainSplit/LeftSidePanel" unique_id=1973888571 instance=ExtResource("3_0206q")]
 layout_mode = 2
 
-[node name="EntityListPanel" parent="RootSplit/MainSplit/LeftSidePanel" instance=ExtResource("4_g2adk")]
+[node name="EntityListPanel" parent="RootSplit/MainSplit/LeftSidePanel" unique_id=334773965 instance=ExtResource("4_g2adk")]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.35
 
-[node name="MapLogSplit" type="VSplitContainer" parent="RootSplit/MainSplit"]
+[node name="MapLogSplit" type="VSplitContainer" parent="RootSplit/MainSplit" unique_id=197691270]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.8
 
-[node name="GridMap" parent="RootSplit/MainSplit/MapLogSplit" instance=ExtResource("3_vm2jc")]
+[node name="GridMap" parent="RootSplit/MainSplit/MapLogSplit" unique_id=2075585567 instance=ExtResource("3_vm2jc")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="LogPanel" parent="RootSplit/MainSplit/MapLogSplit" instance=ExtResource("3_7afkc")]
+[node name="LogPanel" parent="RootSplit/MainSplit/MapLogSplit" unique_id=1415023208 instance=ExtResource("3_7afkc")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.35
 
-[node name="ActionMenu" type="PopupMenu" parent="."]
+[node name="ActionMenu" type="PopupMenu" parent="." unique_id=601977910]
 
-[node name="SpawnPanel" parent="." instance=ExtResource("5_spawn")]
+[node name="SpawnPanel" parent="." unique_id=1524084867 instance=ExtResource("5_spawn")]

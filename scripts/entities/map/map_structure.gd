@@ -10,10 +10,7 @@ extends MapCombatEntity
 
 
 func _init(
-	p_position: Vector2i,
-	p_owner: EntityOwner,
-	p_structure: Structure,
-	p_blocking: bool = true
+	p_position: Vector2i, p_owner: EntityOwner, p_structure: Structure, p_blocking: bool = true
 ) -> void:
 	super(p_position, p_owner, p_structure, p_blocking)
 
@@ -44,15 +41,26 @@ static func from_dict(data: Dictionary) -> MapEntity:
 	"""
 	Loads structure data from a dictionary.
 	"""
-	if (
-		not data.has("position")
-		or not data.has("owner")
-		or not data.has("actor_type")
-		or not data.has("actor")
-		or not data.has("blocking")
-		or not data.has("active")
-	):
-		push_error("Invalid MapStructure data: Missing required fields")
+	if not data:
+		push_error("Invalid MapStructure data: data is null")
+		return null
+	if not data.has("position"):
+		push_error("Invalid MapStructure data: missing position")
+		return null
+	if not data.has("owner"):
+		push_error("Invalid MapStructure data: missing owner")
+		return null
+	if not data.has("actor_type"):
+		push_error("Invalid MapStructure data: missing actor_type")
+		return null
+	if not data.has("actor"):
+		push_error("Invalid MapStructure data: missing actor")
+		return null
+	if not data.has("blocking"):
+		push_error("Invalid MapStructure data: missing blocking")
+		return null
+	if not data.has("active"):
+		push_error("Invalid MapStructure data: missing active")
 		return null
 
 	if str(data["actor_type"]) != "structure":
@@ -70,10 +78,7 @@ static func from_dict(data: Dictionary) -> MapEntity:
 		return null
 
 	var loaded_structure := MapStructure.new(
-		Utils.deserialize_position(data["position"]),
-		parsed_owner,
-		actor,
-		bool(data["blocking"])
+		Utils.deserialize_position(data["position"]), parsed_owner, actor, bool(data["blocking"])
 	)
 	loaded_structure.active = bool(data["active"])
 	return loaded_structure

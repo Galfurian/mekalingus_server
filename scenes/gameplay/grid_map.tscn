@@ -1,40 +1,40 @@
-[gd_scene load_steps=8 format=3 uid="uid://cid4owatwb65x"]
+[gd_scene format=3 uid="uid://cid4owatwb65x"]
 
-[ext_resource type="Script" uid="uid://b0vg3dbssv77k" path="res://scripts/ui/gameplay/grid_container.gd" id="2_05c1y"]
-[ext_resource type="Script" uid="uid://xej60jml0jgq" path="res://scripts/ui/gameplay/scroll_view.gd" id="2_74cwi"]
-[ext_resource type="Script" uid="uid://cfslabsb6yajr" path="res://scripts/ui/gameplay/grid_drawer.gd" id="4_168ta"]
-[ext_resource type="Script" uid="uid://dljr4lhkfv66k" path="res://scripts/ui/gameplay/icon_drawer.gd" id="5_74cwi"]
+[ext_resource type="Script" uid="uid://db42p17brkc0m" path="res://scripts/ui/gameplay/grid_container.gd" id="2_05c1y"]
+[ext_resource type="Script" uid="uid://dc8rnjylbn8xb" path="res://scripts/ui/gameplay/scroll_view.gd" id="2_74cwi"]
+[ext_resource type="Script" uid="uid://c08qgt2mvq4s1" path="res://scripts/ui/gameplay/grid_drawer.gd" id="4_168ta"]
+[ext_resource type="Script" uid="uid://bcsv7476pvi0n" path="res://scripts/ui/gameplay/icon_drawer.gd" id="5_74cwi"]
 [ext_resource type="Material" uid="uid://lnfic5l3g0wf" path="res://shaders/time_of_day_shader_material.tres" id="5_e0tmq"]
-[ext_resource type="Script" uid="uid://ce165jfe64gpu" path="res://scripts/ui/gameplay/time_of_day_overlay.gd" id="6_e0tmq"]
+[ext_resource type="Script" uid="uid://cfacmx265wc65" path="res://scripts/ui/gameplay/time_of_day_overlay.gd" id="6_e0tmq"]
 [ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="7_168ta"]
 
-[node name="GridMap" type="PanelContainer"]
+[node name="GridMap" type="PanelContainer" unique_id=2129581890]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ScrollView" type="ScrollContainer" parent="."]
+[node name="ScrollView" type="ScrollContainer" parent="." unique_id=1624030683]
 layout_mode = 2
 script = ExtResource("2_74cwi")
 
-[node name="GridContainer" type="Control" parent="ScrollView"]
+[node name="GridContainer" type="Control" parent="ScrollView" unique_id=787063989]
 layout_mode = 2
 script = ExtResource("2_05c1y")
 
-[node name="GridDrawer" type="Node2D" parent="ScrollView/GridContainer"]
+[node name="GridDrawer" type="Node2D" parent="ScrollView/GridContainer" unique_id=871144913]
 position = Vector2(0, 1)
 script = ExtResource("4_168ta")
 
-[node name="IconDrawer" type="Node2D" parent="ScrollView/GridContainer"]
+[node name="IconDrawer" type="Node2D" parent="ScrollView/GridContainer" unique_id=1734626104]
 script = ExtResource("5_74cwi")
 
-[node name="TimeOfDayOverlay" type="Node2D" parent="ScrollView/GridContainer"]
+[node name="TimeOfDayOverlay" type="Node2D" parent="ScrollView/GridContainer" unique_id=1117881031]
 material = ExtResource("5_e0tmq")
 script = ExtResource("6_e0tmq")
 
-[node name="TimeLabel" type="Label" parent="."]
+[node name="TimeLabel" type="Label" parent="." unique_id=375190259]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 0

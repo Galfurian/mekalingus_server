@@ -1,14 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://bijaving70etq"]
+[gd_scene format=3 uid="uid://bijaving70etq"]
 
-[ext_resource type="Script" uid="uid://3pr3nicdx3xc" path="res://scripts/ui/gameplay/plan_panel.gd" id="1_plan"]
+[ext_resource type="Script" uid="uid://ckhb3rryeaxui" path="res://scripts/ui/gameplay/plan_panel.gd" id="1_plan"]
 
-[node name="Plan" type="Control"]
+[node name="Plan" type="Control" unique_id=270092182]
 visible = false
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_plan")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=1720921086]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,7 +16,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PlanInfo" type="RichTextLabel" parent="ScrollContainer"]
+[node name="PlanInfo" type="RichTextLabel" parent="ScrollContainer" unique_id=681254744]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3

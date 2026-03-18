@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://cdsk2ml3347yf"]
+[gd_scene format=3 uid="uid://cdsk2ml3347yf"]
 
-[ext_resource type="Script" uid="uid://clv8n0o6pcs51" path="res://scripts/ui/gameplay/log_panel.gd" id="1_lv157"]
+[ext_resource type="Script" uid="uid://ds76ug8p5bi2i" path="res://scripts/ui/gameplay/log_panel.gd" id="1_lv157"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d761l"]
 bg_color = Color(0.21, 0.456, 0.354, 0.5)
@@ -9,7 +9,7 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
-[node name="LogPanel" type="PanelContainer"]
+[node name="LogPanel" type="PanelContainer" unique_id=1106535828]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -17,19 +17,19 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_lv157")
 
-[node name="TabContainer" type="TabContainer" parent="."]
+[node name="TabContainer" type="TabContainer" parent="." unique_id=989832038]
 layout_mode = 2
 current_tab = 0
 
-[node name="CombatLog" type="VBoxContainer" parent="TabContainer"]
+[node name="CombatLog" type="VBoxContainer" parent="TabContainer" unique_id=921841327]
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/CombatLog"]
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/CombatLog" unique_id=124357659]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CombatLog" type="RichTextLabel" parent="TabContainer/CombatLog/ScrollContainer"]
+[node name="CombatLog" type="RichTextLabel" parent="TabContainer/CombatLog/ScrollContainer" unique_id=825838263]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -38,16 +38,16 @@ bbcode_enabled = true
 scroll_following = true
 selection_enabled = true
 
-[node name="Chat" type="VBoxContainer" parent="TabContainer"]
+[node name="Chat" type="VBoxContainer" parent="TabContainer" unique_id=841892194]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Chat"]
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/Chat" unique_id=331252491]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ChatLog" type="RichTextLabel" parent="TabContainer/Chat/ScrollContainer"]
+[node name="ChatLog" type="RichTextLabel" parent="TabContainer/Chat/ScrollContainer" unique_id=1205282121]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -56,20 +56,20 @@ bbcode_enabled = true
 scroll_following = true
 selection_enabled = true
 
-[node name="ChatInput" type="LineEdit" parent="TabContainer/Chat"]
+[node name="ChatInput" type="LineEdit" parent="TabContainer/Chat" unique_id=1330057458]
 layout_mode = 2
 placeholder_text = "Write a message to the chat..."
 max_length = 120
 keep_editing_on_text_submit = true
 
-[node name="InfoMessageBox" type="Panel" parent="TabContainer/Chat/ChatInput"]
+[node name="InfoMessageBox" type="Panel" parent="TabContainer/Chat/ChatInput" unique_id=1886034426]
 visible = false
 layout_mode = 0
 offset_right = 300.0
 offset_bottom = 30.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_d761l")
 
-[node name="InfoMessage" type="RichTextLabel" parent="TabContainer/Chat/ChatInput/InfoMessageBox"]
+[node name="InfoMessage" type="RichTextLabel" parent="TabContainer/Chat/ChatInput/InfoMessageBox" unique_id=1693780875]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5

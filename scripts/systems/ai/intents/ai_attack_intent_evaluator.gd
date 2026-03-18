@@ -5,6 +5,7 @@ const DEFAULT_MAX_LOS_TILE_CANDIDATES: int = 6
 
 
 static func evaluate(context: AIPlanningContext) -> AIPlan:
+	_add_thought(context.source, "----- Evaluating ATTACK intent -----")
 	var source: MapCombatEntity = context.source
 	var visible_enemies: Array[MapCombatEntity] = context.get_visible_enemies()
 	if visible_enemies.is_empty():
@@ -42,12 +43,14 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		var preliminary_score: float = profile.evaluate_preliminary(preliminary_context)
 		_add_thought(
 			source,
-			"Attack prelim: target=%s dist=%d prelim=%.2f"
-			% [
-				target.combatant.get_chat_tag(),
-				distance,
-				preliminary_score,
-			],
+			(
+				"Attack prelim: target=%s dist=%d prelim=%.2f"
+				% [
+					target.combatant.get_chat_tag(),
+					distance,
+					preliminary_score,
+				]
+			),
 		)
 		(
 			candidate_targets
@@ -68,6 +71,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 
 	var los_cache: Dictionary = {}
 	var best_score: float = -INF
+	var best_in_range: bool = false
 	var best_target: MapCombatEntity = null
 	var best_equipped_module: EquippedModule = null
 	var best_destination: Vector2i = Vector2i.ZERO
@@ -75,19 +79,18 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		profile.get_max_targets_to_narrow_phase(),
 		candidate_targets.size(),
 	)
-	var expensive_ops_budget: int = profile.get_max_expensive_ops_per_frame()
-	var expensive_ops: int = 0
 
 	for candidate_index in range(max_targets):
 		var candidate: Dictionary = candidate_targets[candidate_index]
 		var target: MapCombatEntity = candidate["target"]
 		_add_thought(
 			source,
-			"Attack narrow-phase target=%s prelim=%.2f"
-			% [target.combatant.get_chat_tag(), float(candidate["preliminary_score"])],
+			(
+				"Attack narrow-phase target=%s prelim=%.2f"
+				% [target.combatant.get_chat_tag(), float(candidate["preliminary_score"])]
+			),
 		)
 
-		expensive_ops = await _consume_expensive_op(context, expensive_ops_budget, expensive_ops)
 		var has_los_from_source: bool = _get_or_compute_los(
 			context,
 			source,
@@ -110,26 +113,20 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			var destination: Vector2i = source.position
 
 			if not can_attack_from_source:
-				expensive_ops = await _consume_expensive_op(
-					context,
-					expensive_ops_budget,
-					expensive_ops,
-				)
-				var move_data: Dictionary = await _find_attack_destination_with_los(
+				var move_data: Dictionary = _find_attack_destination_with_los(
 					context,
 					source,
 					target,
 					min_range,
 					module_range,
-					expensive_ops_budget,
-					expensive_ops,
 				)
-				expensive_ops = move_data["expensive_ops"]
 				if not move_data["reachable"]:
 					_add_thought(
 						source,
-						"Attack option rejected: target=%s module=%s reason=unreachable"
-						% [target.combatant.get_chat_tag(), equipped_module.get_chat_tag()],
+						(
+							"Attack option rejected: target=%s module=%s reason=unreachable"
+							% [target.combatant.get_chat_tag(), equipped_module.get_chat_tag()]
+						),
 					)
 					continue
 				destination = move_data["destination"]
@@ -140,37 +137,46 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 				"module": equipped_module.module,
 				"max_distance": float(max_candidate_distance),
 			}
-			var score: float = profile.evaluate_final(score_context)
-
+			var base_score: float = profile.evaluate_final(score_context)
+			var score: float = base_score
+			var in_range_bonus: float = 0.0
+			var reachable_bonus: float = 0.0
 			if can_attack_from_source:
-				score += profile.in_range_los_bonus
+				in_range_bonus = profile.in_range_los_bonus
+				score += in_range_bonus
 			else:
-				score += profile.reachable_bonus
+				reachable_bonus = profile.reachable_bonus
+				score += reachable_bonus
 
 			_add_thought(
 				source,
-				"Attack option: target=%s module=%s score=%.2f tile=%s"
-				% [
-					target.combatant.get_chat_tag(),
-					equipped_module.get_chat_tag(),
-					score,
-					MetaTag.pos_tag(destination),
-				],
+				(
+					"Attack option: target=%s module=%s score=%.2f tile=%s"
+					% [
+						target.combatant.get_chat_tag(),
+						equipped_module.get_chat_tag(),
+						score,
+						MetaTag.pos_tag(destination),
+					]
+				),
 			)
 
 			if score > best_score:
 				best_score = score
+				best_in_range = can_attack_from_source
 				best_target = target
 				best_equipped_module = equipped_module
 				best_destination = destination
 				_add_thought(
 					source,
-					"Attack best updated: target=%s module=%s score=%.2f"
-					% [
-						best_target.combatant.get_chat_tag(),
-						best_equipped_module.get_chat_tag(),
-						best_score,
-					],
+					(
+						"Attack best updated: target=%s module=%s score=%.2f"
+						% [
+							best_target.combatant.get_chat_tag(),
+							best_equipped_module.get_chat_tag(),
+							best_score,
+						]
+					),
 				)
 
 	if not best_target:
@@ -179,14 +185,49 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 
 	_add_thought(
 		source,
-		"Attack selected: target=%s module=%s score=%.2f tile=%s"
-		% [
-			best_target.combatant.get_chat_tag(),
-			best_equipped_module.get_chat_tag(),
-			best_score,
-			MetaTag.pos_tag(best_destination),
-		],
+		(
+			"Attack selected: target=%s module=%s score=%.2f tile=%s"
+			% [
+				best_target.combatant.get_chat_tag(),
+				best_equipped_module.get_chat_tag(),
+				best_score,
+				MetaTag.pos_tag(best_destination),
+			]
+		),
 	)
+
+	var attack_breakdown_context: Dictionary = {
+		"source": source,
+		"target": best_target,
+		"module": best_equipped_module.module,
+		"max_distance": float(max_candidate_distance),
+	}
+	var attack_breakdown: Dictionary = profile.evaluate_final_breakdown(attack_breakdown_context)
+	var attack_bonus: float = (
+		profile.in_range_los_bonus if best_in_range else profile.reachable_bonus
+	)
+	var attack_bonus_name: String = "in_range_los_bonus" if best_in_range else "reachable_bonus"
+	_add_thought(
+		source,
+		(
+			"Attack breakdown: base=%.2f %s=%.2f total=%.2f"
+			% [attack_breakdown.score, attack_bonus_name, attack_bonus, best_score]
+		),
+	)
+	for component in attack_breakdown.components:
+		_add_thought(
+			source,
+			(
+				"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
+				% [
+					component.get("name"),
+					component.get("normalized_input"),
+					component.get("curve"),
+					component.get("weight"),
+					component.get("contribution"),
+				]
+			),
+		)
 
 	return (
 		AIPlanBuilder
@@ -199,23 +240,6 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			best_destination,
 		)
 	)
-
-
-static func _consume_expensive_op(
-	context: AIPlanningContext,
-	max_expensive_ops_per_frame: int,
-	current_ops: int,
-) -> int:
-	current_ops += 1
-	if current_ops < max_expensive_ops_per_frame:
-		return current_ops
-
-	current_ops = 0
-	if context and is_instance_valid(context.game_map) and context.game_map.is_inside_tree():
-		var tree: SceneTree = context.game_map.get_tree()
-		if tree:
-			await tree.process_frame
-	return current_ops
 
 
 static func _get_or_compute_los(
@@ -243,8 +267,6 @@ static func _find_attack_destination_with_los(
 	target: MapCombatEntity,
 	min_range: int,
 	max_range: int,
-	max_expensive_ops_per_frame: int,
-	current_expensive_ops: int,
 ) -> Dictionary:
 	var candidate_tiles: Array[Dictionary] = []
 	for tile: Vector2i in context.get_reachable_tiles():
@@ -269,7 +291,6 @@ static func _find_attack_destination_with_los(
 		return {
 			"reachable": false,
 			"destination": Vector2i.ZERO,
-			"expensive_ops": current_expensive_ops,
 		}
 
 	candidate_tiles.sort_custom(
@@ -280,11 +301,6 @@ static func _find_attack_destination_with_los(
 	var destination: Vector2i = Vector2i.ZERO
 
 	for tile_index in range(max_los_candidates):
-		current_expensive_ops = await _consume_expensive_op(
-			context,
-			max_expensive_ops_per_frame,
-			current_expensive_ops,
-		)
 		var tile: Vector2i = candidate_tiles[tile_index]["tile"]
 		if _has_line_of_sight(context.game_map, tile, target.position):
 			destination = tile
@@ -294,14 +310,8 @@ static func _find_attack_destination_with_los(
 		return {
 			"reachable": false,
 			"destination": Vector2i.ZERO,
-			"expensive_ops": current_expensive_ops,
 		}
 
-	current_expensive_ops = await _consume_expensive_op(
-		context,
-		max_expensive_ops_per_frame,
-		current_expensive_ops,
-	)
 	var path: Array[Vector2i] = (
 		AIPathfinder
 		. get_shortest_path(
@@ -314,13 +324,11 @@ static func _find_attack_destination_with_los(
 		return {
 			"reachable": false,
 			"destination": Vector2i.ZERO,
-			"expensive_ops": current_expensive_ops,
 		}
 
 	return {
 		"reachable": true,
 		"destination": destination,
-		"expensive_ops": current_expensive_ops,
 	}
 
 

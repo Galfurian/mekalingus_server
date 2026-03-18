@@ -27,15 +27,26 @@ static func from_dict(data: Dictionary) -> MapEntity:
 	"""
 	Loads item data from a dictionary.
 	"""
-	if (
-		not data.has("position")
-		or not data.has("owner")
-		or not data.has("actor_type")
-		or not data.has("actor")
-		or not data.has("blocking")
-		or not data.has("active")
-	):
-		push_error("Invalid MapMek data: Missing required fields")
+	if not data:
+		push_error("Invalid MapMek data: data is null")
+		return null
+	if not data.has("position"):
+		push_error("Invalid MapMek data: missing position")
+		return null
+	if not data.has("owner"):
+		push_error("Invalid MapMek data: missing owner")
+		return null
+	if not data.has("actor_type"):
+		push_error("Invalid MapMek data: missing actor_type")
+		return null
+	if not data.has("actor"):
+		push_error("Invalid MapMek data: missing actor")
+		return null
+	if not data.has("blocking"):
+		push_error("Invalid MapMek data: missing blocking")
+		return null
+	if not data.has("active"):
+		push_error("Invalid MapMek data: missing active")
 		return null
 
 	if str(data["actor_type"]) != "mek":
@@ -58,9 +69,7 @@ static func from_dict(data: Dictionary) -> MapEntity:
 		return null
 
 	var loaded_map_mek := MapMek.new(
-		Utils.deserialize_position(data["position"]),
-		parsed_owner,
-		mek_actor
+		Utils.deserialize_position(data["position"]), parsed_owner, mek_actor
 	)
 	loaded_map_mek.active = bool(data["active"])
 	return loaded_map_mek

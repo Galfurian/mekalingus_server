@@ -3,6 +3,7 @@ extends RefCounted
 
 
 static func evaluate(context: AIPlanningContext) -> AIPlan:
+	_add_thought(context.source, "----- Evaluating REPOSITION intent -----")
 	var source: MapCombatEntity = context.source
 	if not source.can_move():
 		return null
@@ -14,8 +15,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		return null
 
 	var state: RefCounted = context.game_map.directive_planner.get_owner_directive_by_key(
-		owner_key,
-		source.position
+		owner_key, source.position
 	)
 	if not state:
 		return null
@@ -97,3 +97,8 @@ static func _pick_destination_for_objective(
 			best_tile = tile
 
 	return best_tile
+
+
+static func _add_thought(source: MapCombatEntity, message: String) -> void:
+	if source and source.combatant:
+		source.combatant.add_ai_thought(message)

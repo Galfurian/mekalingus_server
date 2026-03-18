@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://dyh3xjp4f2j5c"]
+[gd_scene format=3 uid="uid://dyh3xjp4f2j5c"]
 
-[ext_resource type="Script" path="res://scripts/ui/server_admin/server_log_panel.gd" id="1_ulw3n"]
+[ext_resource type="Script" uid="uid://2tlvwfsmjee1" path="res://scripts/ui/server_admin/server_log_panel.gd" id="1_ulw3n"]
 
-[node name="ServerLogPanel" type="VBoxContainer"]
+[node name="ServerLogPanel" type="VBoxContainer" unique_id=979045688]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -10,12 +10,12 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ulw3n")
 
-[node name="ServerLog" type="ScrollContainer" parent="."]
+[node name="ServerLog" type="ScrollContainer" parent="." unique_id=331059705]
 layout_mode = 2
 size_flags_vertical = 3
 metadata/_tab_index = 0
 
-[node name="ServerLogContent" type="RichTextLabel" parent="ServerLog"]
+[node name="ServerLogContent" type="RichTextLabel" parent="ServerLog" unique_id=558709358]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3

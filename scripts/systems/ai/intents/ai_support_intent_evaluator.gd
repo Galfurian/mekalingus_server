@@ -3,6 +3,7 @@ extends RefCounted
 
 
 static func evaluate(context: AIPlanningContext) -> AIPlan:
+	_add_thought(context.source, "----- Evaluating SUPPORT intent -----")
 	var source: MapCombatEntity = context.source
 	var profile: AIActionProfile = AITacticalBrainResolver.resolve_support_profile(source)
 	if not profile:
@@ -54,8 +55,6 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		profile.get_max_targets_to_narrow_phase(),
 		candidate_targets.size(),
 	)
-	var expensive_ops_budget: int = profile.get_max_expensive_ops_per_frame()
-	var expensive_ops: int = 0
 
 	for candidate_index in range(max_targets):
 		var candidate: Dictionary = candidate_targets[candidate_index]
@@ -78,18 +77,12 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			var destination: Vector2i = source.position
 
 			if not can_use_from_source:
-				expensive_ops = await _consume_expensive_op(
-					context, expensive_ops_budget, expensive_ops
-				)
-				var move_data: Dictionary = await _find_support_destination(
+				var move_data: Dictionary = _find_support_destination(
 					context,
 					source,
 					target,
 					module_range,
-					expensive_ops_budget,
-					expensive_ops,
 				)
-				expensive_ops = move_data["expensive_ops"]
 				if not move_data["reachable"]:
 					continue
 				destination = move_data["destination"]
@@ -130,30 +123,11 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	)
 
 
-static func _consume_expensive_op(
-	context: AIPlanningContext,
-	max_expensive_ops_per_frame: int,
-	current_ops: int,
-) -> int:
-	current_ops += 1
-	if current_ops < max_expensive_ops_per_frame:
-		return current_ops
-
-	current_ops = 0
-	if context and is_instance_valid(context.game_map) and context.game_map.is_inside_tree():
-		var tree: SceneTree = context.game_map.get_tree()
-		if tree:
-			await tree.process_frame
-	return current_ops
-
-
 static func _find_support_destination(
 	context: AIPlanningContext,
 	source: MapCombatEntity,
 	target: MapCombatEntity,
 	module_range: int,
-	max_expensive_ops_per_frame: int,
-	current_expensive_ops: int,
 ) -> Dictionary:
 	var candidate_tiles: Array[Dictionary] = []
 	for tile: Vector2i in context.get_reachable_tiles():
@@ -164,11 +138,6 @@ static func _find_support_destination(
 		if distance_to_target > module_range:
 			continue
 
-		current_expensive_ops = await _consume_expensive_op(
-			context,
-			max_expensive_ops_per_frame,
-			current_expensive_ops,
-		)
 		var tile_threat: float = context.get_threat(tile)
 		(
 			candidate_tiles
@@ -185,7 +154,6 @@ static func _find_support_destination(
 		return {
 			"reachable": false,
 			"destination": Vector2i.ZERO,
-			"expensive_ops": current_expensive_ops,
 		}
 
 	candidate_tiles.sort_custom(
@@ -196,11 +164,6 @@ static func _find_support_destination(
 	)
 
 	var destination: Vector2i = candidate_tiles[0]["tile"]
-	current_expensive_ops = await _consume_expensive_op(
-		context,
-		max_expensive_ops_per_frame,
-		current_expensive_ops,
-	)
 	var path: Array[Vector2i] = (
 		AIPathfinder
 		. get_shortest_path(
@@ -213,13 +176,11 @@ static func _find_support_destination(
 		return {
 			"reachable": false,
 			"destination": Vector2i.ZERO,
-			"expensive_ops": current_expensive_ops,
 		}
 
 	return {
 		"reachable": true,
 		"destination": destination,
-		"expensive_ops": current_expensive_ops,
 	}
 
 
@@ -267,3 +228,8 @@ static func _get_max_module_range(
 
 static func _manhattan_distance(a: Vector2i, b: Vector2i) -> int:
 	return absi(a.x - b.x) + absi(a.y - b.y)
+
+
+static func _add_thought(source: MapCombatEntity, message: String) -> void:
+	if source and source.combatant:
+		source.combatant.add_ai_thought(message)

@@ -17,10 +17,7 @@ var item_data: Dictionary
 
 
 func _init(
-	p_position: Vector2i,
-	p_owner: EntityOwner,
-	p_item_data: Dictionary,
-	p_blocking: bool = false
+	p_position: Vector2i, p_owner: EntityOwner, p_item_data: Dictionary, p_blocking: bool = false
 ) -> void:
 	super(p_position, p_owner, p_blocking)
 	item_data = p_item_data
@@ -35,13 +32,20 @@ static func from_dict(data: Dictionary) -> MapEntity:
 	"""
 	Loads pickup data from a dictionary.
 	"""
-	if (
-		not data.has("position")
-		or not data.has("owner")
-		or not data.has("item_data")
-		or not data.has("active")
-	):
-		push_error("Invalid MapPickup data: Missing required fields")
+	if not data:
+		push_error("Invalid MapPickup data: data is null")
+		return null
+	if not data.has("position"):
+		push_error("Invalid MapPickup data: missing position")
+		return null
+	if not data.has("owner"):
+		push_error("Invalid MapPickup data: missing owner")
+		return null
+	if not data.has("item_data"):
+		push_error("Invalid MapPickup data: missing item_data")
+		return null
+	if not data.has("active"):
+		push_error("Invalid MapPickup data: missing active")
 		return null
 
 	var parsed_owner: EntityOwner = EntityOwner.from_dict(data["owner"])

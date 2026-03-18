@@ -1,10 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://cosbr482fkmyp"]
+[gd_scene format=3 uid="uid://cosbr482fkmyp"]
 
-[ext_resource type="Script" uid="uid://dwt0qtv3c0l1j" path="res://scripts/ui/gameplay/info_panel.gd" id="1_x2cik"]
+[ext_resource type="Script" uid="uid://c0d3280ko68eb" path="res://scripts/ui/gameplay/info_panel.gd" id="1_x2cik"]
 [ext_resource type="PackedScene" uid="uid://tf2613r6o8gj" path="res://scenes/gameplay/entity_info_panel.tscn" id="2_entity"]
 [ext_resource type="PackedScene" uid="uid://kqlung7v31tq" path="res://scenes/gameplay/item_inspector.tscn" id="3_item"]
 
-[node name="InfoPanel" type="Control"]
+[node name="InfoPanel" type="Control" unique_id=1974716738]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -15,7 +15,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_x2cik")
 
-[node name="EntityInspector" type="VSplitContainer" parent="."]
+[node name="EntityInspector" type="VSplitContainer" parent="." unique_id=239183046]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,8 +23,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="EntityInfo" parent="EntityInspector" instance=ExtResource("2_entity")]
+[node name="EntityInfo" parent="EntityInspector" unique_id=1108184432 instance=ExtResource("2_entity")]
 layout_mode = 2
 
-[node name="ItemInspector" parent="EntityInspector" instance=ExtResource("3_item")]
+[node name="ItemInspector" parent="EntityInspector" unique_id=1734978609 instance=ExtResource("3_item")]
 layout_mode = 2

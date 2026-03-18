@@ -1,36 +1,36 @@
-[gd_scene load_steps=4 format=3 uid="uid://kqlung7v31tq"]
+[gd_scene format=3 uid="uid://kqlung7v31tq"]
 
-[ext_resource type="Script" uid="uid://43k0x3k8ukgt" path="res://scripts/ui/gameplay/item_inspector.gd" id="1_inspector"]
+[ext_resource type="Script" uid="uid://61y6ypw405hc" path="res://scripts/ui/gameplay/item_inspector.gd" id="1_inspector"]
 [ext_resource type="PackedScene" uid="uid://77eou844yvq7" path="res://scenes/gameplay/equipment_panel.tscn" id="2_equipment"]
 [ext_resource type="PackedScene" uid="uid://bijaving70etq" path="res://scenes/gameplay/plan_panel.tscn" id="3_plan"]
 
-[node name="ItemInspector" type="VSplitContainer"]
+[node name="ItemInspector" type="VSplitContainer" unique_id=242995351]
 size_flags_vertical = 3
 script = ExtResource("1_inspector")
 
-[node name="Tabs" type="TabContainer" parent="."]
+[node name="Tabs" type="TabContainer" parent="." unique_id=1191346263]
 layout_mode = 2
 size_flags_vertical = 3
 current_tab = 0
 
-[node name="Equipment" parent="Tabs" instance=ExtResource("2_equipment")]
+[node name="Equipment" parent="Tabs" unique_id=1296618975 instance=ExtResource("2_equipment")]
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="Plan" parent="Tabs" instance=ExtResource("3_plan")]
+[node name="Plan" parent="Tabs" unique_id=679592788 instance=ExtResource("3_plan")]
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="Mind" type="VBoxContainer" parent="Tabs"]
+[node name="Mind" type="VBoxContainer" parent="Tabs" unique_id=99652057]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
-[node name="ScrollContainer" type="ScrollContainer" parent="Tabs/Mind"]
+[node name="ScrollContainer" type="ScrollContainer" parent="Tabs/Mind" unique_id=2132607399]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="MindLog" type="RichTextLabel" parent="Tabs/Mind/ScrollContainer"]
+[node name="MindLog" type="RichTextLabel" parent="Tabs/Mind/ScrollContainer" unique_id=1251560284]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -39,11 +39,11 @@ bbcode_enabled = true
 scroll_following = true
 selection_enabled = true
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=1445655394]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ItemInfo" type="RichTextLabel" parent="ScrollContainer"]
+[node name="ItemInfo" type="RichTextLabel" parent="ScrollContainer" unique_id=422003884]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3

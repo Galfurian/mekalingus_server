@@ -1,24 +1,24 @@
-[gd_scene load_steps=4 format=3 uid="uid://coanqrlt58aby"]
+[gd_scene format=3 uid="uid://coanqrlt58aby"]
 
-[ext_resource type="Script" path="res://scripts/ui/server_admin/npc_directive_panel.gd" id="1_5d61b"]
+[ext_resource type="Script" uid="uid://7e7x71v27mdw" path="res://scripts/ui/server_admin/npc_directive_panel.gd" id="1_5d61b"]
 [ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_yonrf"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_patrol"]
 
-[node name="NpcDirectivePanel" type="VBoxContainer"]
+[node name="NpcDirectivePanel" type="VBoxContainer" unique_id=352969798]
 script = ExtResource("1_5d61b")
 
-[node name="Title" type="Label" parent="."]
+[node name="Title" type="Label" parent="." unique_id=1166031967]
 layout_mode = 2
 text = "NPC Directives"
 label_settings = ExtResource("2_yonrf")
 horizontal_alignment = 1
 
-[node name="OverlayToggle" type="CheckButton" parent="."]
+[node name="OverlayToggle" type="CheckButton" parent="." unique_id=884690282]
 layout_mode = 2
 text = "Show AI Intent Overlay"
 
-[node name="SquadTree" type="Tree" parent="."]
+[node name="SquadTree" type="Tree" parent="." unique_id=1581252046]
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_vertical = 3
@@ -26,15 +26,15 @@ columns = 4
 column_titles_visible = true
 hide_root = true
 
-[node name="SpreadRow" type="HBoxContainer" parent="."]
+[node name="SpreadRow" type="HBoxContainer" parent="." unique_id=2048820268]
 layout_mode = 2
 
-[node name="SpreadLabel" type="Label" parent="SpreadRow"]
+[node name="SpreadLabel" type="Label" parent="SpreadRow" unique_id=1618187493]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Spread"
 
-[node name="SpreadSpin" type="SpinBox" parent="SpreadRow"]
+[node name="SpreadSpin" type="SpinBox" parent="SpreadRow" unique_id=1135201573]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 1.0
@@ -42,39 +42,39 @@ max_value = 30.0
 value = 6.0
 rounded = true
 
-[node name="MoveSeparator" type="HSeparator" parent="."]
+[node name="MoveSeparator" type="HSeparator" parent="." unique_id=4655497]
 layout_mode = 2
 
-[node name="MoveSectionLabel" type="Label" parent="."]
+[node name="MoveSectionLabel" type="Label" parent="." unique_id=2040515846]
 layout_mode = 2
 text = "Move"
 horizontal_alignment = 1
 
-[node name="MoveButtons" type="HBoxContainer" parent="."]
+[node name="MoveButtons" type="HBoxContainer" parent="." unique_id=1657676630]
 layout_mode = 2
 
-[node name="MoveCompactButton" type="Button" parent="MoveButtons"]
+[node name="MoveCompactButton" type="Button" parent="MoveButtons" unique_id=92959850]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Move Compact"
 
-[node name="MoveNowButton" type="Button" parent="MoveButtons"]
+[node name="MoveNowButton" type="Button" parent="MoveButtons" unique_id=586608491]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Move Now"
 
-[node name="PatrolSeparator" type="HSeparator" parent="."]
+[node name="PatrolSeparator" type="HSeparator" parent="." unique_id=1084857470]
 layout_mode = 2
 
-[node name="PatrolSectionLabel" type="Label" parent="."]
+[node name="PatrolSectionLabel" type="Label" parent="." unique_id=1224291542]
 layout_mode = 2
 text = "Patrol"
 horizontal_alignment = 1
 
-[node name="PatrolTypeRow" type="HBoxContainer" parent="."]
+[node name="PatrolTypeRow" type="HBoxContainer" parent="." unique_id=1705036148]
 layout_mode = 2
 
-[node name="CircleButton" type="Button" parent="PatrolTypeRow"]
+[node name="CircleButton" type="Button" parent="PatrolTypeRow" unique_id=9601971]
 layout_mode = 2
 size_flags_horizontal = 3
 toggle_mode = true
@@ -82,26 +82,26 @@ button_pressed = true
 button_group = SubResource("ButtonGroup_patrol")
 text = "Circle"
 
-[node name="SquareButton" type="Button" parent="PatrolTypeRow"]
+[node name="SquareButton" type="Button" parent="PatrolTypeRow" unique_id=1502015499]
 layout_mode = 2
 size_flags_horizontal = 3
 toggle_mode = true
 button_group = SubResource("ButtonGroup_patrol")
 text = "Square"
 
-[node name="BorderButton" type="Button" parent="PatrolTypeRow"]
+[node name="BorderButton" type="Button" parent="PatrolTypeRow" unique_id=182658129]
 layout_mode = 2
 size_flags_horizontal = 3
 toggle_mode = true
 button_group = SubResource("ButtonGroup_patrol")
 text = "Map Border"
 
-[node name="PatrolButton" type="Button" parent="."]
+[node name="PatrolButton" type="Button" parent="." unique_id=1648800285]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Patrol"
 
-[node name="CancelButton" type="Button" parent="."]
+[node name="CancelButton" type="Button" parent="." unique_id=1342225948]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Cancel all Plans"

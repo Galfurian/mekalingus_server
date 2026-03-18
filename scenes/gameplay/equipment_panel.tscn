@@ -1,13 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://77eou844yvq7"]
+[gd_scene format=3 uid="uid://77eou844yvq7"]
 
-[ext_resource type="Script" uid="uid://depatn37kln1c" path="res://scripts/ui/gameplay/equipment_panel.gd" id="1_equip"]
+[ext_resource type="Script" uid="uid://lkgp2nskt7er" path="res://scripts/ui/gameplay/equipment_panel.gd" id="1_equip"]
 
-[node name="Equipment" type="Control"]
+[node name="Equipment" type="Control" unique_id=1194047911]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_equip")
 
-[node name="SlotEditorScroll" type="ScrollContainer" parent="."]
+[node name="SlotEditorScroll" type="ScrollContainer" parent="." unique_id=1354740341]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,6 +16,6 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
 
-[node name="SlotEditorContainer" type="VBoxContainer" parent="SlotEditorScroll"]
+[node name="SlotEditorContainer" type="VBoxContainer" parent="SlotEditorScroll" unique_id=583579314]
 layout_mode = 2
 size_flags_horizontal = 3

@@ -1,7 +1,11 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://lnfic5l3g0wf"]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://lnfic5l3g0wf"]
 
-[ext_resource type="Shader" uid="uid://dfe32brqk0j03" path="res://shaders/time_of_day_shader.gdshader" id="1_vo683"]
+[ext_resource type="Shader" uid="uid://bam8dueupfobj" path="res://shaders/time_of_day_shader.gdshader" id="1_vo683"]
 
 [resource]
 shader = ExtResource("1_vo683")
 shader_parameter/time_of_day = 0.2
+shader_parameter/sunrise_start = 0.2
+shader_parameter/sunrise_end = 0.3
+shader_parameter/sunset_start = 0.7
+shader_parameter/sunset_end = 0.8

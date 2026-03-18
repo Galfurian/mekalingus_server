@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://dj4n3b2k1m7pq"]
+[gd_scene format=3 uid="uid://dj4n3b2k1m7pq"]
 
-[ext_resource type="Script" uid="uid://dtxfno74g8wpy" path="res://scripts/ui/gameplay/entity_list_panel.gd" id="1_ql8hw"]
+[ext_resource type="Script" uid="uid://dqygua2oa3boi" path="res://scripts/ui/gameplay/entity_list_panel.gd" id="1_ql8hw"]
 
-[node name="EntityListPanel" type="PanelContainer"]
+[node name="EntityListPanel" type="PanelContainer" unique_id=900771683]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -10,48 +10,48 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ql8hw")
 
-[node name="TabContainer" type="TabContainer" parent="."]
+[node name="TabContainer" type="TabContainer" parent="." unique_id=195308053]
 layout_mode = 2
 current_tab = 0
 
-[node name="All" type="VBoxContainer" parent="TabContainer"]
+[node name="All" type="VBoxContainer" parent="TabContainer" unique_id=1985717848]
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="AllTree" type="Tree" parent="TabContainer/All"]
+[node name="AllTree" type="Tree" parent="TabContainer/All" unique_id=765223584]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 hide_root = true
 
-[node name="Meks" type="VBoxContainer" parent="TabContainer"]
+[node name="Meks" type="VBoxContainer" parent="TabContainer" unique_id=1847339961]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="MekTree" type="Tree" parent="TabContainer/Meks"]
+[node name="MekTree" type="Tree" parent="TabContainer/Meks" unique_id=90176230]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 hide_root = true
 
-[node name="Structures" type="VBoxContainer" parent="TabContainer"]
+[node name="Structures" type="VBoxContainer" parent="TabContainer" unique_id=1225320484]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
-[node name="StructureTree" type="Tree" parent="TabContainer/Structures"]
+[node name="StructureTree" type="Tree" parent="TabContainer/Structures" unique_id=1652707258]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 hide_root = true
 
-[node name="Logistics" type="VBoxContainer" parent="TabContainer"]
+[node name="Logistics" type="VBoxContainer" parent="TabContainer" unique_id=301679662]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 3
 
-[node name="LogisticsTree" type="Tree" parent="TabContainer/Logistics"]
+[node name="LogisticsTree" type="Tree" parent="TabContainer/Logistics" unique_id=1377855786]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3

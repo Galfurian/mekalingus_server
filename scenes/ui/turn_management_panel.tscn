@@ -1,150 +1,150 @@
-[gd_scene load_steps=3 format=3 uid="uid://dt3nhvenrb57r"]
+[gd_scene format=3 uid="uid://dt3nhvenrb57r"]
 
-[ext_resource type="Script" path="res://scripts/ui/server_admin/turn_management_panel.gd" id="1_yedch"]
+[ext_resource type="Script" uid="uid://bg32a664x2xsj" path="res://scripts/ui/server_admin/turn_management_panel.gd" id="1_yedch"]
 [ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_lfdsg"]
 
-[node name="TurnManagementPanel" type="VBoxContainer"]
+[node name="TurnManagementPanel" type="VBoxContainer" unique_id=1554689394]
 size_flags_horizontal = 3
 script = ExtResource("1_yedch")
 
-[node name="Title" type="Label" parent="."]
+[node name="Title" type="Label" parent="." unique_id=298881028]
 layout_mode = 2
 text = "Turn Control"
 label_settings = ExtResource("2_lfdsg")
 horizontal_alignment = 1
 
-[node name="Section" type="PanelContainer" parent="."]
+[node name="Section" type="PanelContainer" parent="." unique_id=94472706]
 layout_mode = 2
 
-[node name="Inner" type="VBoxContainer" parent="Section"]
+[node name="Inner" type="VBoxContainer" parent="Section" unique_id=1330597021]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="StatusRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="StatusRow" type="HBoxContainer" parent="Section/Inner" unique_id=1221149197]
 layout_mode = 2
 
-[node name="StatusLabel" type="Label" parent="Section/Inner/StatusRow"]
+[node name="StatusLabel" type="Label" parent="Section/Inner/StatusRow" unique_id=917510652]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Status"
 
-[node name="StatusValue" type="Label" parent="Section/Inner/StatusRow"]
+[node name="StatusValue" type="Label" parent="Section/Inner/StatusRow" unique_id=1059022739]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Paused"
 horizontal_alignment = 2
 
-[node name="TurnRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="TurnRow" type="HBoxContainer" parent="Section/Inner" unique_id=1355563338]
 layout_mode = 2
 
-[node name="TurnLabel" type="Label" parent="Section/Inner/TurnRow"]
+[node name="TurnLabel" type="Label" parent="Section/Inner/TurnRow" unique_id=1741982818]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Current Turn"
 
-[node name="TurnValue" type="Label" parent="Section/Inner/TurnRow"]
+[node name="TurnValue" type="Label" parent="Section/Inner/TurnRow" unique_id=970518367]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "-"
 horizontal_alignment = 2
 
-[node name="CountdownRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="CountdownRow" type="HBoxContainer" parent="Section/Inner" unique_id=2134785151]
 layout_mode = 2
 
-[node name="CountdownLabel" type="Label" parent="Section/Inner/CountdownRow"]
+[node name="CountdownLabel" type="Label" parent="Section/Inner/CountdownRow" unique_id=1102909881]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Next Turn In"
 
-[node name="CountdownValue" type="Label" parent="Section/Inner/CountdownRow"]
+[node name="CountdownValue" type="Label" parent="Section/Inner/CountdownRow" unique_id=2115618978]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "-"
 horizontal_alignment = 2
 
-[node name="ActionRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="ActionRow" type="HBoxContainer" parent="Section/Inner" unique_id=2005766125]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="StartStop" type="Button" parent="Section/Inner/ActionRow"]
+[node name="StartStop" type="Button" parent="Section/Inner/ActionRow" unique_id=948126338]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Start"
 
-[node name="Step" type="Button" parent="Section/Inner/ActionRow"]
+[node name="Step" type="Button" parent="Section/Inner/ActionRow" unique_id=1560172912]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Step"
 
-[node name="IntervalRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="IntervalRow" type="HBoxContainer" parent="Section/Inner" unique_id=10863147]
 layout_mode = 2
 
-[node name="IntervalLabel" type="Label" parent="Section/Inner/IntervalRow"]
+[node name="IntervalLabel" type="Label" parent="Section/Inner/IntervalRow" unique_id=49278253]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Round Duration (s)"
 
-[node name="IntervalSpin" type="SpinBox" parent="Section/Inner/IntervalRow"]
+[node name="IntervalSpin" type="SpinBox" parent="Section/Inner/IntervalRow" unique_id=1359590412]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 1.0
 max_value = 60.0
 value = 1.0
 
-[node name="DaytimeRow" type="HBoxContainer" parent="Section/Inner"]
+[node name="DaytimeRow" type="HBoxContainer" parent="Section/Inner" unique_id=196254148]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="DaytimeLabel" type="Label" parent="Section/Inner/DaytimeRow"]
+[node name="DaytimeLabel" type="Label" parent="Section/Inner/DaytimeRow" unique_id=265362057]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Time of Day (h)"
 
-[node name="DaytimeSpin" type="SpinBox" parent="Section/Inner/DaytimeRow"]
+[node name="DaytimeSpin" type="SpinBox" parent="Section/Inner/DaytimeRow" unique_id=1848679120]
 layout_mode = 2
 size_flags_horizontal = 3
 max_value = 24.0
 step = 0.25
 
-[node name="ApplyDaytime" type="Button" parent="Section/Inner/DaytimeRow"]
+[node name="ApplyDaytime" type="Button" parent="Section/Inner/DaytimeRow" unique_id=1051179928]
 layout_mode = 2
 text = "Apply"
 
-[node name="Future" type="PanelContainer" parent="."]
+[node name="Future" type="PanelContainer" parent="." unique_id=898630150]
 layout_mode = 2
 
-[node name="FutureInner" type="VBoxContainer" parent="Future"]
+[node name="FutureInner" type="VBoxContainer" parent="Future" unique_id=1717662479]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="FutureTitle" type="Label" parent="Future/FutureInner"]
+[node name="FutureTitle" type="Label" parent="Future/FutureInner" unique_id=1271680048]
 layout_mode = 2
 text = "Environment (reserved)"
 horizontal_alignment = 1
 
-[node name="WeatherRow" type="HBoxContainer" parent="Future/FutureInner"]
+[node name="WeatherRow" type="HBoxContainer" parent="Future/FutureInner" unique_id=1705401809]
 layout_mode = 2
 
-[node name="WeatherLabel" type="Label" parent="Future/FutureInner/WeatherRow"]
+[node name="WeatherLabel" type="Label" parent="Future/FutureInner/WeatherRow" unique_id=786897824]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Weather"
 
-[node name="WeatherValue" type="Label" parent="Future/FutureInner/WeatherRow"]
+[node name="WeatherValue" type="Label" parent="Future/FutureInner/WeatherRow" unique_id=564844549]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Reserved"
 horizontal_alignment = 2
 
-[node name="TemperatureRow" type="HBoxContainer" parent="Future/FutureInner"]
+[node name="TemperatureRow" type="HBoxContainer" parent="Future/FutureInner" unique_id=284751690]
 layout_mode = 2
 
-[node name="TemperatureLabel" type="Label" parent="Future/FutureInner/TemperatureRow"]
+[node name="TemperatureLabel" type="Label" parent="Future/FutureInner/TemperatureRow" unique_id=759204235]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Temperature"
 
-[node name="TemperatureValue" type="Label" parent="Future/FutureInner/TemperatureRow"]
+[node name="TemperatureValue" type="Label" parent="Future/FutureInner/TemperatureRow" unique_id=519649356]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Reserved"

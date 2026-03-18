@@ -1,12 +1,12 @@
-[gd_scene load_steps=6 format=3 uid="uid://dkiovd48dvjqd"]
+[gd_scene format=3 uid="uid://dkiovd48dvjqd"]
 
-[ext_resource type="Script" path="res://scripts/ui/server_admin/map_panel.gd" id="1_54ar7"]
+[ext_resource type="Script" uid="uid://dgut0silrff7s" path="res://scripts/ui/server_admin/map_panel.gd" id="1_54ar7"]
 [ext_resource type="PackedScene" uid="uid://bic16d6uw0g6y" path="res://scenes/gameplay/map_hud.tscn" id="2_5xqg1"]
 [ext_resource type="PackedScene" uid="uid://dt3nhvenrb57r" path="res://scenes/ui/turn_management_panel.tscn" id="3_j4d32"]
 [ext_resource type="PackedScene" uid="uid://dct1pd3p6nlaa" path="res://scenes/ui/map_management_panel.tscn" id="4_1a3kf"]
 [ext_resource type="PackedScene" uid="uid://coanqrlt58aby" path="res://scenes/ui/npc_directive_panel.tscn" id="4_nk2qv"]
 
-[node name="MapPanel" type="HSplitContainer"]
+[node name="MapPanel" type="HSplitContainer" unique_id=44510272]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -14,39 +14,39 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_54ar7")
 
-[node name="LeftSidebarSplit" type="VSplitContainer" parent="."]
+[node name="LeftSidebarSplit" type="VSplitContainer" parent="." unique_id=298737252]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.25
 
-[node name="TopControlsSplit" type="VBoxContainer" parent="LeftSidebarSplit"]
+[node name="TopControlsSplit" type="VBoxContainer" parent="LeftSidebarSplit" unique_id=1012610150]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="TurnSection" type="PanelContainer" parent="LeftSidebarSplit/TopControlsSplit"]
+[node name="TurnSection" type="PanelContainer" parent="LeftSidebarSplit/TopControlsSplit" unique_id=1890447883]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="TurnManagementPanel" parent="LeftSidebarSplit/TopControlsSplit/TurnSection" instance=ExtResource("3_j4d32")]
+[node name="TurnManagementPanel" parent="LeftSidebarSplit/TopControlsSplit/TurnSection" unique_id=1904370745 instance=ExtResource("3_j4d32")]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="DirectiveSection" type="PanelContainer" parent="LeftSidebarSplit/TopControlsSplit"]
+[node name="DirectiveSection" type="PanelContainer" parent="LeftSidebarSplit/TopControlsSplit" unique_id=1317106550]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="NpcDirectivePanel" parent="LeftSidebarSplit/TopControlsSplit/DirectiveSection" instance=ExtResource("4_nk2qv")]
+[node name="NpcDirectivePanel" parent="LeftSidebarSplit/TopControlsSplit/DirectiveSection" unique_id=467523380 instance=ExtResource("4_nk2qv")]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="MapManagerSection" type="PanelContainer" parent="LeftSidebarSplit/TopControlsSplit"]
+[node name="MapManagerSection" type="PanelContainer" parent="LeftSidebarSplit/TopControlsSplit" unique_id=1233523545]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="MapManagementPanel" parent="LeftSidebarSplit/TopControlsSplit/MapManagerSection" instance=ExtResource("4_1a3kf")]
+[node name="MapManagementPanel" parent="LeftSidebarSplit/TopControlsSplit/MapManagerSection" unique_id=1158062804 instance=ExtResource("4_1a3kf")]
 layout_mode = 2
 
-[node name="MapHud" parent="." instance=ExtResource("2_5xqg1")]
+[node name="MapHud" parent="." unique_id=1698925475 instance=ExtResource("2_5xqg1")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3

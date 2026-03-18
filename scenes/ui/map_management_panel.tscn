@@ -1,52 +1,52 @@
-[gd_scene load_steps=3 format=3 uid="uid://dct1pd3p6nlaa"]
+[gd_scene format=3 uid="uid://dct1pd3p6nlaa"]
 
-[ext_resource type="Script" path="res://scripts/ui/server_admin/map_management_panel.gd" id="1_ap83w"]
+[ext_resource type="Script" uid="uid://cmtx5jkk5orbu" path="res://scripts/ui/server_admin/map_management_panel.gd" id="1_ap83w"]
 [ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_i8oxt"]
 
-[node name="MapManagementPanel" type="VBoxContainer"]
+[node name="MapManagementPanel" type="VBoxContainer" unique_id=2011654578]
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_ap83w")
 
-[node name="Title" type="Label" parent="."]
+[node name="Title" type="Label" parent="." unique_id=1852011449]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Map Control"
 label_settings = ExtResource("2_i8oxt")
 horizontal_alignment = 1
 
-[node name="Section" type="PanelContainer" parent="."]
+[node name="Section" type="PanelContainer" parent="." unique_id=1960683476]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Inner" type="VBoxContainer" parent="Section"]
+[node name="Inner" type="VBoxContainer" parent="Section" unique_id=736532153]
 layout_mode = 2
 
-[node name="StorageButtons" type="HBoxContainer" parent="Section/Inner"]
+[node name="StorageButtons" type="HBoxContainer" parent="Section/Inner" unique_id=1613185102]
 layout_mode = 2
 
-[node name="SaveMap" type="Button" parent="Section/Inner/StorageButtons"]
+[node name="SaveMap" type="Button" parent="Section/Inner/StorageButtons" unique_id=285078703]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Save Map"
 
-[node name="LoadMap" type="Button" parent="Section/Inner/StorageButtons"]
+[node name="LoadMap" type="Button" parent="Section/Inner/StorageButtons" unique_id=1933147819]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Load Map"
 
-[node name="GeneratorSeparator" type="HSeparator" parent="Section/Inner"]
+[node name="GeneratorSeparator" type="HSeparator" parent="Section/Inner" unique_id=1573274589]
 layout_mode = 2
 
-[node name="HBoxContainer1" type="HBoxContainer" parent="Section/Inner"]
+[node name="HBoxContainer1" type="HBoxContainer" parent="Section/Inner" unique_id=1911520443]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Section/Inner/HBoxContainer1"]
+[node name="Label" type="Label" parent="Section/Inner/HBoxContainer1" unique_id=655744909]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Size"
 
-[node name="MapSize" type="SpinBox" parent="Section/Inner/HBoxContainer1"]
+[node name="MapSize" type="SpinBox" parent="Section/Inner/HBoxContainer1" unique_id=356682511]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 10.0
@@ -55,35 +55,35 @@ step = 10.0
 value = 50.0
 rounded = true
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="Section/Inner"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Section/Inner" unique_id=544407637]
 layout_mode = 2
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="Section/Inner"]
+[node name="HBoxContainer3" type="HBoxContainer" parent="Section/Inner" unique_id=2022583021]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Section/Inner/HBoxContainer3"]
+[node name="Label" type="Label" parent="Section/Inner/HBoxContainer3" unique_id=1879837262]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Biome"
 
-[node name="Biome" type="OptionButton" parent="Section/Inner/HBoxContainer3"]
+[node name="Biome" type="OptionButton" parent="Section/Inner/HBoxContainer3" unique_id=1529526057]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ControlButtons" type="HBoxContainer" parent="Section/Inner"]
+[node name="ControlButtons" type="HBoxContainer" parent="Section/Inner" unique_id=454515880]
 layout_mode = 2
 
-[node name="Generate" type="Button" parent="Section/Inner/ControlButtons"]
+[node name="Generate" type="Button" parent="Section/Inner/ControlButtons" unique_id=529045399]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Generate"
 
-[node name="Delete" type="Button" parent="Section/Inner/ControlButtons"]
+[node name="Delete" type="Button" parent="Section/Inner/ControlButtons" unique_id=1351608352]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Delete"
 
-[node name="MapList" type="ItemList" parent="Section/Inner"]
+[node name="MapList" type="ItemList" parent="Section/Inner" unique_id=640580390]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3

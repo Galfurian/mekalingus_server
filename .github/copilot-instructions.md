@@ -22,6 +22,7 @@ applyTo: '**'
   - *Exception:* Use 1 indent level for multiline arrays, dictionaries, and enums.
 - Use a trailing comma on the last line of multiline arrays, dictionaries, and enums. Do not use trailing commas for single-line lists.
 - Avoid combining multiple statements on a single line. The only exception is the ternary operator.
+- Ternary operator format: `var result = value_if_true if condition else value_if_false`
 - Wrap multiline conditional statements using parentheses rather than backslashes. 
 - Avoid unnecessary parentheses in expressions and conditional statements unless needed for math order of operations or multiline wrapping.
 - Place boolean operators (`and`, `or`) at the beginning of continuation lines, not the end.

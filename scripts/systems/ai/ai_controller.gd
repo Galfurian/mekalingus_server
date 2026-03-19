@@ -138,7 +138,7 @@ func _process_order_with_recovery(order: Order, expected_type: Object) -> void:
 
 	if order.validate():
 		order.execute(game_map)
-		_add_action_log("Executed: %s" % str(order))
+		_add_thought(order.source, "Executed: %s" % str(order))
 	else:
 		_add_thought(order.source, "Invalid: %s" % str(order))
 		if ENABLE_ACTION_RECOVERY:
@@ -146,7 +146,7 @@ func _process_order_with_recovery(order: Order, expected_type: Object) -> void:
 			if replacement:
 				if is_instance_of(replacement, expected_type):
 					replacement.execute(game_map)
-					_add_action_log("Executed replacement: %s" % str(replacement))
+					_add_thought(replacement.source, "Executed replacement: %s" % str(replacement))
 				elif replacement:
 					_queue_generated_order(replacement)
 
@@ -200,7 +200,7 @@ func _process_move_order_with_recovery(order: MoveOrder) -> void:
 
 	_reserved_move_tiles[_tile_key(order.destination)] = true
 	order.execute(game_map)
-	_add_action_log("Executed: %s" % str(order))
+	_add_thought(order.source, "Executed: %s" % str(order))
 
 	var plan: AIPlan = get_current_plan(order.source)
 	if plan and plan.is_complete():

@@ -13,6 +13,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 
 	var source: MapCombatEntity = context.source
 	if not source.can_move():
+		_log(source, "intent unavailable: cannot move")
 		return null
 
 	# Phase 1: Decide IF we should retreat from current tile (self_health + current_threat only)
@@ -38,6 +39,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	# Phase 2: Find safest reachable retreat tile
 	var reachable_tiles: Array[Vector2i] = context.get_reachable_tiles()
 	if reachable_tiles.is_empty():
+		_log(source, "intent unavailable: no reachable tiles")
 		return null
 
 	var best_tile: Vector2i = _find_safest_retreat_tile(source, context, reachable_tiles)
@@ -47,6 +49,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 
 	# Phase 3: Select utility module for escape
 	var utility_modules: Array[EquippedModule] = context.get_utility_modules()
+
 	var selected_module: EquippedModule = _select_retreat_module(
 		source, context, best_tile, utility_modules
 	)
@@ -89,10 +92,10 @@ static func _evaluate_retreat_necessity(
 	if not combatant:
 		return {"should_retreat": false, "health_score": 0.0, "threat_score": 0.0}
 
-	# Health score: 1.0 = full health, 0.0 = dead
+	# Health score: 1.5 = full health, 0.0 = dead
 	var health_ratio: float = float(combatant.health) / float(combatant.max_health)
 	# Inverted: low health = high retreat score
-	var health_score: float = 1.0 - clampf(health_ratio, 0.0, 1.0)
+	var health_score: float = 1.5 - clampf(health_ratio, 0.0, 1.0)
 
 	# Threat score: how dangerous is current position? (0.0 to 1.0)
 	var current_threat: float = context.get_threat(source.position)

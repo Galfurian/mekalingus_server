@@ -28,31 +28,26 @@ func display_combat_entity(map_entity: MapCombatEntity) -> void:
 	text += "Health       : " + UIColor.apply("health", "%3d" % actor.health) + " / "
 	text += UIColor.apply("health", "%3d" % actor.max_health)
 	if actor.health_generation > 0:
-		text += " [" + UIColor.apply("health", "%3d" % actor.health_generation) + "]"
+		text += " [" + UIColor.apply("health_generation", "%3d" % actor.health_generation) + "]"
 	text += "\n"
 
 	text += "Armor        : " + UIColor.apply("armor", "%3d" % actor.armor) + " / "
 	text += UIColor.apply("armor", "%3d" % actor.max_armor)
 	if actor.armor_generation > 0:
-		text += " ["
-		text += UIColor.apply("armor_generation", "%3d" % actor.armor_generation)
-		text += "]"
+		text += " [" + UIColor.apply("armor_generation", "%3d" % actor.armor_generation) + "]"
 	text += "\n"
 
-	text += "Shield       : " + UIColor.apply("max_shield", "%3d" % actor.shield) + " / "
-	text += UIColor.apply("max_shield", "%3d" % actor.max_shield)
+	text += "Shield       : " + UIColor.apply("shield", "%3d" % actor.shield) + " / "
+	text += UIColor.apply("shield", "%3d" % actor.max_shield)
 	if actor.shield_generation > 0:
-		text += " ["
-		text += UIColor.apply("shield_generation", "%3d" % actor.shield_generation)
-		text += "]"
+		text += " [" + UIColor.apply("shield_generation", "%3d" % actor.shield_generation) + "]"
 	text += "\n"
 
 	text += "Power        : " + UIColor.apply("power", "%3d" % actor.power) + " / "
 	text += UIColor.apply("power", "%3d" % actor.max_power)
 	if actor.power_generation > 0:
-		text += " ["
-		text += UIColor.apply("power_generation", "%3d" % actor.power_generation)
-		text += "]"
+		text += " [" + UIColor.apply("power_generation", "%3d" % actor.power_generation) + "]"
+
 	text += "\n"
 	text += "Sensor Range : " + UIColor.apply("sensor_range", "%3d" % actor.sensor_range) + "\n"
 	text += "Speed        : " + UIColor.apply("speed", "%3d" % actor.speed) + "\n"

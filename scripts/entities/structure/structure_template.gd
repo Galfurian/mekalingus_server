@@ -9,8 +9,12 @@ var structure_name: String
 var size: Enums.EntitySize
 # The base health of the Structure, determining its durability.
 var health: int
+# The rate at which health regenerates per turn.
+var health_generation: int
 # The base armor value, reducing incoming kinetic and explosive damage.
 var armor: int
+# The rate at which armor regenerates per turn.
+var armor_generation: int
 # The base shield value, absorbing energy and explosive damage before armor is hit.
 var shield: int
 # The rate at which shields regenerate per turn.
@@ -54,7 +58,9 @@ func from_dict(data: Dictionary):
 	structure_name = str(data["name"])
 	size = Utils.string_to_enum(Enums.EntitySize, data["size"])
 	health = int(data["health"])
+	health_generation = int(data.get("health_generation", 0))
 	armor = int(data["armor"])
+	armor_generation = int(data.get("armor_generation", 0))
 	shield = int(data["shield"])
 	shield_generation = int(data["shield_generation"])
 	power = int(data["power"])
@@ -74,7 +80,9 @@ func to_dict() -> Dictionary:
 		"name": structure_name,
 		"size": Utils.enum_to_string(Enums.EntitySize, size),
 		"health": health,
+		"health_generation": health_generation,
 		"armor": armor,
+		"armor_generation": armor_generation,
 		"shield": shield,
 		"shield_generation": shield_generation,
 		"power": power,

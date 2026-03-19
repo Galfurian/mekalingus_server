@@ -9,22 +9,21 @@ const DEFAULT = "#FFFFFF"
 
 # Health color - Represents Mek health (red-orange).
 const HEALTH = "#FF5733"
+# Health generation color - Represents health recovery rate (light coral).
+const HEALTH_GENERATION = "#F08080"
 
 # Armor color - Represents Mek armor (steel blue).
 const ARMOR = "#4682B4"
-
-# Armor regeneration color - Represents armor recovery rate.
+# Armor generation color - Represents armor recovery rate.
 const ARMOR_GENERATION = "#66A2D4"
 
 # Shield color - Represents energy shields (turquoise).
 const SHIELD = "#00CED1"
-
-# Shield regeneration color - Represents shield recovery rate (light blue).
+# Shield generation color - Represents shield recovery rate (light blue).
 const SHIELD_GENERATION = "#87CEFA"
 
 # Power color - Represents energy capacity (orange).
 const POWER = "#FFA500"
-
 # Power generation color - Represents energy regen rate (lime green).
 const POWER_GENERATION = "#32CD32"
 
@@ -95,9 +94,10 @@ const EFFECT_CENTER_ON_TARGET = "#BA55D3"
 const COLORS = {
 	"default": DEFAULT,
 	"health": HEALTH,
+	"health_generation": HEALTH_GENERATION,
 	"armor": ARMOR,
 	"armor_generation": ARMOR_GENERATION,
-	"max_shield": SHIELD,
+	"shield": SHIELD,
 	"shield_generation": SHIELD_GENERATION,
 	"power": POWER,
 	"power_generation": POWER_GENERATION,

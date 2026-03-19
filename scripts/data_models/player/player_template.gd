@@ -44,8 +44,15 @@ func build_player(player_name: String, player_uuid: String) -> Player:
 	player.player_uuid = player_uuid
 	# Assign the default Meks and items.
 	for template_id in meks:
+		# Generate a UUID for the Mek.
+		var m_uuid: String = GameServer.generate_uuid()
+		# Retrieve the Mek template.
+		var m_template: MekTemplate = TemplateManager.get_mek_template(template_id)
+		if not m_template:
+			push_error("Invalid Mek template ID '%s' in PlayerTemplate." % template_id)
+			continue
 		# Create a new Mek instance with the template ID and a generated UUID.
-		var mek = Mek.new({"mek_id": template_id, "uuid": GameServer.generate_uuid(), "items": {}})
+		var mek = Mek.new(m_uuid, template_id, m_template)
 		# Add the Mek to the player's Mek list.
 		player.meks.append(mek)
 	for template_id in items:
@@ -66,6 +73,7 @@ func _to_string() -> String:
 	Returns a string representation of the player template.
 	"""
 	return "PlayerTemplate: {meks: %s, items: %s}" % [meks, items]
+
 
 func from_dict(data: Dictionary = {}) -> bool:
 	"""

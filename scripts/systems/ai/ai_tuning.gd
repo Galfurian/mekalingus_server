@@ -24,15 +24,3 @@ const ATTACK_THREAT_WEIGHT: float = 0.08
 const ATTACK_ADJACENT_ENEMY_WEIGHT: float = 9.0
 const ATTACK_ADJACENT_ALLY_WEIGHT: float = 5.0
 const ATTACK_CONTACT_PENALTY: float = 30.0
-
-
-static func get_global_scan_radius(game_map) -> int:
-	if not game_map:
-		return FALLBACK_GLOBAL_SCAN_RADIUS
-
-	var width: int = int(game_map.get("map_width"))
-	var height: int = int(game_map.get("map_height"))
-	if width <= 0 or height <= 0:
-		return FALLBACK_GLOBAL_SCAN_RADIUS
-
-	return maxi(width, height) + GLOBAL_SCAN_RADIUS_MARGIN

@@ -10,8 +10,12 @@ extends MapCombatEntity
 # =============================================================================
 
 
-func _init(p_position: Vector2i, p_owner: EntityOwner, p_mek: Mek) -> void:
-	super(p_position, p_owner, p_mek, true)
+func _init(
+	p_position: Vector2i,
+	p_owner: EntityOwner,
+	p_mek: Mek,
+) -> void:
+	super(p_position, p_owner, true, true, p_mek)
 
 
 func can_move() -> bool:
@@ -42,8 +46,8 @@ static func from_dict(data: Dictionary) -> MapEntity:
 	if not data.has("actor"):
 		push_error("Invalid MapMek data: missing actor")
 		return null
-	if not data.has("blocking"):
-		push_error("Invalid MapMek data: missing blocking")
+	if not data.has("passable"):
+		push_error("Invalid MapMek data: missing passable")
 		return null
 	if not data.has("active"):
 		push_error("Invalid MapMek data: missing active")
@@ -63,8 +67,8 @@ static func from_dict(data: Dictionary) -> MapEntity:
 		push_error("Invalid MapMek data: failed to deserialize owner")
 		return null
 
-	var mek_actor: Mek = Mek.new(actor_data)
-	if not mek_actor or mek_actor.mek_id.is_empty():
+	var mek_actor: Mek = Mek.from_dict(actor_data)
+	if not mek_actor:
 		push_error("Invalid MapMek data: failed to deserialize mek actor")
 		return null
 
@@ -77,11 +81,6 @@ static func from_dict(data: Dictionary) -> MapEntity:
 
 func to_dict() -> Dictionary:
 	"""Converts item data to a dictionary."""
-	return {
-		"position": Utils.serialize_position(position),
-		"actor_type": "mek",
-		"actor": combatant.to_dict(),
-		"owner": owner.to_dict(),
-		"blocking": blocking,
-		"active": active
-	}
+	var data: Dictionary = super.to_dict()
+	data["actor_type"] = "mek"
+	return data

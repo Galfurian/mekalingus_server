@@ -1,15 +1,28 @@
 class_name Structure
-extends CombatActor
+extends CombatEntity
 
-var structure_id: String
+# =============================================================================
+# PROPERTIES
+# =============================================================================
+
+var structure_id: String = ""
 var template: StructureTemplate = null
 
+# =============================================================================
+# GENERAL
+# =============================================================================
 
-func _init(data: Dictionary = {}) -> void:
-	items = []
-	slots = []
-	initialize_runtime_managers()
-	from_dict(data)
+
+func _init(
+	p_uuid: String,
+	p_structure_id: String,
+	p_template: StructureTemplate,
+) -> void:
+	super(p_uuid)
+	structure_id = p_structure_id
+	template = p_template
+	# Simply intialize the combat state based on the template values.
+	rebuild_combat_state()
 
 
 func get_structure_name() -> String:
@@ -32,14 +45,14 @@ func rebuild_combat_state() -> void:
 	var stats_payload: Dictionary = {
 		"health": template.health,
 		"max_health": template.health,
+		"health_generation": 0,
 		"armor": template.armor,
 		"max_armor": template.armor,
+		"armor_generation": 0,
 		"shield": template.shield,
 		"max_shield": template.shield,
 		"power": template.power,
 		"max_power": template.power,
-		"health_generation": 0,
-		"armor_generation": 0,
 		"shield_generation": template.shield_generation,
 		"power_generation": template.power_generation,
 		"speed": template.speed,
@@ -48,30 +61,42 @@ func rebuild_combat_state() -> void:
 	rebuild_combat_state_with_items(stats_payload, template.slots)
 
 
-func from_dict(data: Dictionary = {}) -> bool:
+static func from_dict(data: Dictionary = {}) -> Structure:
 	"""Loads Structure instance data from a dictionary."""
 	if not data.has("structure_id"):
 		push_error("Invalid Structure data: Missing required fields")
-		return false
-
-	# Load basic fields.
-	super(data)
-
-	# Load structure-specific fields.
-	structure_id = str(data["structure_id"])
-
-	# Load the template.
-	template = TemplateManager.get_structure_template(structure_id)
-	assert(template, "Structure template '%s' not found for structure '%s'." % [structure_id, uuid])
-
+		return null
+	# Get the UUID
+	var p_uuid = str(data["uuid"])
+	# Get the Structure ID.
+	var p_structure_id = str(data["structure_id"])
+	# Get the template.
+	var p_template = TemplateManager.get_structure_template(p_structure_id)
+	if not p_template:
+		push_error("Invalid Structure data: unknown Structure template '%s'" % p_structure_id)
+		return null
+	# Create the Structure instance.
+	var structure: Structure = Structure.new(p_uuid, p_structure_id, p_template)
+	# Set the alias if it exists.
+	structure.alias = str(data.get("alias", ""))
+	# Reconstruct items.
+	structure.items.clear()
+	for item_data: Dictionary in data.get("items", []):
+		structure.items.append(Item.new(item_data))
+	structure.items.sort_custom(Item.compare_items)
+	# Get the slots.
+	structure.slots = Utils.to_array_int(data.get("slots", []))
+	# Load the AI thought log.
+	structure.ai_thought_log.clear()
+	for thought_data: Dictionary in data.get("ai_thought_log", []):
+		structure.ai_thought_log.append(thought_data)
 	# Rebuild combat state based on template values and items.
-	rebuild_combat_state()
-
-	return true
+	structure.rebuild_combat_state()
+	return structure
 
 
 func to_dict() -> Dictionary:
 	"""Converts Structure instance data to a dictionary."""
-	var data: Dictionary = super()
+	var data: Dictionary = super.to_dict()
 	data["structure_id"] = structure_id
 	return data

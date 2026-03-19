@@ -12,12 +12,24 @@ static func _log(source: MapCombatEntity, message: String) -> void:
 static func evaluate(context: AIPlanningContext) -> AIPlan:
 	_add_thought(context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()])
 	var source: MapCombatEntity = context.source
-	var visible_enemies: Array[MapCombatEntity] = context.get_visible_enemies()
+	var sensor_range: int = context.source.combatant.get_sensor_range()
+
+	var visible_enemies: Array[MapCombatEntity] = (
+		AIUnitQueries
+		. get_enemies_in_range(
+			context.game_map,
+			source,
+			source.position,
+			sensor_range,
+		)
+	)
 	if visible_enemies.is_empty():
+		_log(source, "intent unavailable: no visible enemies in sensor range (%d)" % sensor_range)
 		return null
 
 	var offensive_modules: Array[EquippedModule] = context.get_offensive_modules()
 	if offensive_modules.is_empty():
+		_log(source, "intent unavailable: no offensive modules available")
 		return null
 
 	var profile: AIActionProfile = AITacticalBrainResolver.resolve_attack_profile(source)
@@ -57,15 +69,11 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 				]
 			),
 		)
-		(
-			candidate_targets
-			. append(
-				{
-					"target": target,
-					"preliminary_score": preliminary_score,
-				}
-			)
-		)
+		var candidate_data: Dictionary = {
+			"target": target,
+			"preliminary_score": preliminary_score,
+		}
+		candidate_targets.append(candidate_data)
 
 	if candidate_targets.is_empty():
 		return null

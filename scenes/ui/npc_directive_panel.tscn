@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://coanqrlt58aby"]
 
-[ext_resource type="Script" uid="uid://7e7x71v27mdw" path="res://scripts/ui/server_admin/npc_directive_panel.gd" id="1_5d61b"]
+[ext_resource type="Script" uid="uid://cfk3p4q157yh8" path="res://scripts/ui/server_admin/npc_directive_panel.gd" id="1_5d61b"]
 [ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_yonrf"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_patrol"]

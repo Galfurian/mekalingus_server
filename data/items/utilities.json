@@ -343,7 +343,7 @@
 					{
 						"effect_class": "RegenEffect",
 						"target": "SELF",
-						"stat": "POWER_REGEN",
+						"stat": "POWER_GENERATION",
 						"amount": 30
 					}
 				]
@@ -403,7 +403,7 @@
 					{
 						"effect_class": "RegenEffect",
 						"target": "SELF",
-						"stat": "POWER_REGEN",
+						"stat": "POWER_GENERATION",
 						"amount": 12,
 						"duration": 3
 					},
@@ -525,6 +525,86 @@
 						"target": "ALLY",
 						"stat": "ARMOR",
 						"amount": 25
+					}
+				]
+			}
+		]
+	},
+	"utl025": {
+		"name": "Solar Recharge Array",
+		"description": "Harnesses solar energy to rapidly regenerate the power reserves.",
+		"slot": "utility",
+		"base_power_usage": 30,
+		"modules": [
+			{
+				"name": "Solar Charging",
+				"passive": true,
+				"effects": [
+					{
+						"effect_class": "RegenEffect",
+						"target": "SELF",
+						"stat": "POWER_GENERATION",
+						"amount": 15
+					}
+				]
+			}
+		]
+	},
+	"utl026": {
+		"name": "Shield Generator Amplifier",
+		"description": "Enhances the efficiency of shield generators, increasing shield regeneration rates.",
+		"slot": "utility",
+		"base_power_usage": 30,
+		"modules": [
+			{
+				"name": "Amplified Shielding",
+				"passive": true,
+				"effects": [
+					{
+						"effect_class": "RegenEffect",
+						"target": "SELF",
+						"stat": "SHIELD_GENERATION",
+						"amount": 10
+					}
+				]
+			}
+		]
+	},
+	"utl027": {
+		"name": "Adaptive Repair Matrix",
+		"description": "An advanced system that dynamically adjusts repair protocols based on damage type.",
+		"slot": "utility",
+		"base_power_usage": 50,
+		"modules": [
+			{
+				"name": "Dynamic Repair Protocol",
+				"passive": true,
+				"effects": [
+					{
+						"effect_class": "RegenEffect",
+						"target": "SELF",
+						"stat": "HEALTH_GENERATION",
+						"amount": 10
+					}
+				]
+			}
+		]
+	},
+	"utl028": {
+		"name": "Self-Repairing Plating",
+		"description": "Nanomaterial-infused plating that gradually repairs itself over time.",
+		"slot": "utility",
+		"base_power_usage": 40,
+		"modules": [
+			{
+				"name": "Passive Self-Repair",
+				"passive": true,
+				"effects": [
+					{
+						"effect_class": "RegenEffect",
+						"target": "SELF",
+						"stat": "ARMOR_GENERATION",
+						"amount": 10
 					}
 				]
 			}

@@ -7,7 +7,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	var source: MapCombatEntity = context.source
 	if not source.can_move():
 		return null
-	if not context.get_visible_enemies().is_empty():
+	if not context.get_enemies().is_empty():
 		return null
 
 	var owner_key: String = context.game_map.get_owner_key(source.owner)

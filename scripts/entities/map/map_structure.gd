@@ -10,9 +10,11 @@ extends MapCombatEntity
 
 
 func _init(
-	p_position: Vector2i, p_owner: EntityOwner, p_structure: Structure, p_blocking: bool = true
+	p_position: Vector2i,
+	p_owner: EntityOwner,
+	p_structure: Structure,
 ) -> void:
-	super(p_position, p_owner, p_structure, p_blocking)
+	super(p_position, p_owner, false, true, p_structure)
 
 
 func take_damage(damage: int) -> void:
@@ -39,7 +41,7 @@ func can_move() -> bool:
 
 static func from_dict(data: Dictionary) -> MapEntity:
 	"""
-	Loads structure data from a dictionary.
+	Loads item data from a dictionary.
 	"""
 	if not data:
 		push_error("Invalid MapStructure data: data is null")
@@ -56,8 +58,8 @@ static func from_dict(data: Dictionary) -> MapEntity:
 	if not data.has("actor"):
 		push_error("Invalid MapStructure data: missing actor")
 		return null
-	if not data.has("blocking"):
-		push_error("Invalid MapStructure data: missing blocking")
+	if not data.has("passable"):
+		push_error("Invalid MapStructure data: missing passable")
 		return null
 	if not data.has("active"):
 		push_error("Invalid MapStructure data: missing active")
@@ -67,30 +69,30 @@ static func from_dict(data: Dictionary) -> MapEntity:
 		push_error("Invalid MapStructure data: actor_type must be 'structure'")
 		return null
 
+	var actor_data: Dictionary = data["actor"]
+	if not actor_data.has("structure_id") or not actor_data.has("uuid"):
+		push_error("Invalid MapStructure data: payload is not a Structure actor")
+		return null
+
 	var parsed_owner: EntityOwner = EntityOwner.from_dict(data["owner"])
 	if not parsed_owner:
 		push_error("Invalid MapStructure data: failed to deserialize owner")
 		return null
 
-	var actor: Structure = Structure.new(data["actor"])
-	if not actor:
-		push_error("Invalid MapStructure data: failed to deserialize actor")
+	var structure_actor: Structure = Structure.from_dict(actor_data)
+	if not structure_actor:
+		push_error("Invalid MapStructure data: failed to deserialize structure actor")
 		return null
 
-	var loaded_structure := MapStructure.new(
-		Utils.deserialize_position(data["position"]), parsed_owner, actor, bool(data["blocking"])
+	var loaded_map_structure := MapStructure.new(
+		Utils.deserialize_position(data["position"]), parsed_owner, structure_actor
 	)
-	loaded_structure.active = bool(data["active"])
-	return loaded_structure
+	loaded_map_structure.active = bool(data["active"])
+	return loaded_map_structure
 
 
 func to_dict() -> Dictionary:
 	"""Converts structure data to a dictionary."""
-	return {
-		"position": Utils.serialize_position(position),
-		"owner": owner.to_dict(),
-		"actor_type": "structure",
-		"actor": combatant.to_dict(),
-		"blocking": blocking,
-		"active": active
-	}
+	var data: Dictionary = super.to_dict()
+	data["actor_type"] = "structure"
+	return data

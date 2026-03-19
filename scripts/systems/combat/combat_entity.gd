@@ -1,4 +1,4 @@
-class_name CombatActor
+class_name CombatEntity
 extends Node
 
 signal ai_thought_logged(entry: String)
@@ -9,10 +9,10 @@ const AI_THOUGHT_LOG_LIMIT: int = 5_000
 # IDENTITY / EQUIPMENT
 # =============================================================================
 
-var uuid: String
-var alias: String
-var items: Array[Item]
-var slots: Array[int]
+var uuid: String = ""
+var alias: String = ""
+var items: Array[Item] = []
+var slots: Array[int] = []
 var ai_thought_log: Array[String] = []
 
 # =============================================================================
@@ -28,7 +28,7 @@ var cooldown_manager: CooldownManager = null
 # =============================================================================
 
 var base_stats: Dictionary = {}
-var modifiers: Dictionary = {}
+var tiles_moved_last_turn: int = 0
 
 var health: int:
 	get:
@@ -82,25 +82,25 @@ var health_generation: int:
 	get:
 		return get_health_generation()
 	set(value):
-		set_base_stat(Enums.StatType.HEALTH_REGEN, value)
+		set_base_stat(Enums.StatType.HEALTH_GENERATION, value)
 
 var armor_generation: int:
 	get:
 		return get_armor_generation()
 	set(value):
-		set_base_stat(Enums.StatType.ARMOR_REGEN, value)
+		set_base_stat(Enums.StatType.ARMOR_GENERATION, value)
 
 var shield_generation: int:
 	get:
 		return get_shield_generation()
 	set(value):
-		set_base_stat(Enums.StatType.SHIELD_REGEN, value)
+		set_base_stat(Enums.StatType.SHIELD_GENERATION, value)
 
 var power_generation: int:
 	get:
 		return get_power_generation()
 	set(value):
-		set_base_stat(Enums.StatType.POWER_REGEN, value)
+		set_base_stat(Enums.StatType.POWER_GENERATION, value)
 
 var speed: int:
 	get:
@@ -168,7 +168,17 @@ var cooldown_modifier: int:
 	set(value):
 		set_base_stat(Enums.StatType.COOLDOWN_MODIFIER, value)
 
-var tiles_moved_last_turn: int = 0
+# =============================================================================
+# INITIALIZATION
+# =============================================================================
+
+
+func _init(p_uuid: String) -> void:
+	"""Initializes a CombatEntity instance from a dictionary."""
+	uuid = p_uuid
+	active_effect_manager = ActiveEffectManager.new(self)
+	cooldown_manager = CooldownManager.new(self)
+
 
 # =============================================================================
 # SHARED COMBAT API
@@ -188,13 +198,10 @@ func get_icon_path() -> String:
 
 
 func get_stat(stat: int) -> int:
-	return _get_raw_stat(base_stats, stat) + _get_raw_stat(modifiers, stat)
+	return _get_raw_stat(base_stats, stat)
 
 
 func set_base_stat(stat: int, value: int) -> void:
-	if Enums.is_modifier_stat(stat):
-		_set_raw_stat(modifiers, stat, value)
-		return
 	_set_raw_stat(base_stats, stat, value)
 	_clamp_after_stat_write(stat)
 
@@ -234,32 +241,16 @@ func regenerate() -> void:
 
 func reset_combat_state(stats_payload: Dictionary, p_slots: Array[int] = []) -> void:
 	base_stats.clear()
-	modifiers.clear()
-
-	for stat: int in Enums.get_stat_types():
-		var stat_key: String = Enums.get_stat_key(stat)
-		if stats_payload.has(stat_key):
-			if Enums.is_modifier_stat(stat):
-				_set_raw_stat(modifiers, stat, int(stats_payload.get(stat_key, 0)))
-			else:
-				_set_raw_stat(base_stats, stat, int(stats_payload.get(stat_key, 0)))
-
+	for stat_key in stats_payload.keys():
+		var stat: int = Enums.get_stat_from_key(stat_key)
+		if stat in Enums.get_stat_types():
+			_set_raw_stat(base_stats, stat, int(stats_payload[stat_key]))
+		else:
+			print("Warning: Unrecognized stat key '%s' in stats payload : %d" % [stat_key, stat])
+			print("  Accepted stat keys are: %s" % [Enums.get_stat_types()])
 	_ensure_max_defaults()
 	_clamp_all_current_stats()
 	slots = p_slots.duplicate()
-
-
-func from_dict(data: Dictionary = {}) -> bool:
-	uuid = str(data.get("uuid", GameServer.generate_uuid()))
-	alias = str(data.get("alias", ""))
-	slots = Utils.to_array_int(data.get("slots", []))
-	items.clear()
-	for item_data: Dictionary in data.get("items", []):
-		items.append(Item.new(item_data))
-	items.sort_custom(Item.compare_items)
-	_apply_stats_from_payload(data)
-	_load_saved_mind_log(data)
-	return true
 
 
 func to_dict() -> Dictionary:
@@ -270,7 +261,6 @@ func to_dict() -> Dictionary:
 		"items": Utils.convert_objects_to_dict(items),
 		"ai_thought_log": ai_thought_log,
 	}
-	data.merge(_serialize_stats_payload())
 	return data
 
 
@@ -280,21 +270,13 @@ func rebuild_combat_state() -> void:
 
 func rebuild_combat_state_with_items(stats_payload: Dictionary, p_slots: Array[int] = []) -> void:
 	reset_combat_state(stats_payload, p_slots)
-
 	for item in items:
 		_enable_item_passive_modifiers(item)
-
 	if slots.is_empty():
 		return
-
 	for item in items:
 		if item.template.slot >= 0 and item.template.slot < slots.size():
 			slots[item.template.slot] -= 1
-
-
-func initialize_runtime_managers() -> void:
-	active_effect_manager = ActiveEffectManager.new(self)
-	cooldown_manager = CooldownManager.new(self)
 
 
 func evaluate_combat_power() -> float:
@@ -513,19 +495,19 @@ func get_max_power() -> int:
 
 
 func get_health_generation() -> int:
-	return get_stat(Enums.StatType.HEALTH_REGEN)
+	return get_stat(Enums.StatType.HEALTH_GENERATION)
 
 
 func get_armor_generation() -> int:
-	return get_stat(Enums.StatType.ARMOR_REGEN)
+	return get_stat(Enums.StatType.ARMOR_GENERATION)
 
 
 func get_shield_generation() -> int:
-	return get_stat(Enums.StatType.SHIELD_REGEN)
+	return get_stat(Enums.StatType.SHIELD_GENERATION)
 
 
 func get_power_generation() -> int:
-	return get_stat(Enums.StatType.POWER_REGEN)
+	return get_stat(Enums.StatType.POWER_GENERATION)
 
 
 func get_speed() -> int:
@@ -558,15 +540,6 @@ func _serialize_stats_payload() -> Dictionary:
 	for stat: int in Enums.get_stat_types():
 		payload[Enums.get_stat_key(stat)] = get_stat(stat)
 	return payload
-
-
-func _apply_stats_from_payload(payload: Dictionary) -> void:
-	for stat: int in Enums.get_stat_types():
-		var stat_key: String = Enums.get_stat_key(stat)
-		if payload.has(stat_key):
-			set_base_stat(stat, int(payload.get(stat_key, 0)))
-	_ensure_max_defaults()
-	_clamp_all_current_stats()
 
 
 func _ensure_max_defaults() -> void:
@@ -628,4 +601,6 @@ func _set_raw_stat(storage: Dictionary, stat: int, value: int) -> void:
 
 
 func _get_raw_stat(storage: Dictionary, stat: int) -> int:
+	if not storage.has(stat):
+		return 0
 	return int(storage.get(stat, 0))

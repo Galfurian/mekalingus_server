@@ -148,7 +148,16 @@ func from_dict(data: Dictionary) -> bool:
 	player_uuid = data["player_uuid"]
 
 	for mek_data in data.get("meks", {}):
-		add_mek(Mek.new(mek_data))
+		var uuid: String = str(mek_data.get("uuid", ""))
+		if uuid.is_empty():
+			push_error("Invalid Mek data: Missing UUID")
+			continue
+		var template_id: String = str(mek_data.get("template_id", ""))
+		var template: MekTemplate = TemplateManager.get_mek_template(template_id)
+		if not template:
+			push_error("Invalid Mek data: Unknown template '%s'" % template_id)
+			continue
+		add_mek(Mek.new(uuid, template_id, template))
 	for item_data in data.get("items", {}):
 		add_item(Item.new(item_data))
 

@@ -2,13 +2,10 @@
 ## Compares nearby enemy combat power (scaled by unit size) against source power.
 ## Higher values (enemy_power > source_power) indicate disadvantage and retreat urgency.
 class_name LocalForceSuperioritConsideration
-extends "res://scripts/systems/ai/ai_consideration.gd"
+extends AIConsideration
 
 ## Maximum expected force ratio for normalization (values > 2.0 will be clamped to 1.0).
 const MAX_FORCE_RATIO: float = 2.0
-
-# Radius to scan for nearby enemies when evaluating local force superiority.
-const LOCAL_SCAN_RADIUS: int = 8
 
 ## Size scaling factors to balance unit class differences in force calculation.
 ## Prevents multiple light units from over-dominating against a single large unit.
@@ -22,9 +19,12 @@ const SIZE_SCALE_FACTORS: Dictionary = {
 
 func get_normalized_input(context: Dictionary) -> float:
 	var planning_context: AIPlanningContext = context.get("planning_context", null)
+	if not planning_context:
+		push_error("Missing `planning_context` in context.")
+		return 0.0
 	var source: MapCombatEntity = context.get("source", null)
-
-	if not planning_context or not source:
+	if not source:
+		push_error("Missing `source` entity in context.")
 		return 0.0
 
 	# Get force superiority ratio (enemy_power / source_power)
@@ -38,63 +38,47 @@ func get_normalized_input(context: Dictionary) -> float:
 	return clampf(force_ratio / MAX_FORCE_RATIO, 0.0, 1.0)
 
 
-## Evaluate local force superiority ratio (nearby_power / source_power).
-## Returns value > 1.0 if enemies are locally superior, < 1.0 if source is superior.
+## Internal helper functions for force superiority calculation. It takes the [param source] entity
+## and [param planning_context] to access visible enemies and their combat power.
 static func _get_local_force_superiority(
 	source: MapCombatEntity,
-	context: AIPlanningContext,
+	planning_context: AIPlanningContext,
 ) -> float:
-	if not source or not source.combatant:
-		return 0.0
-
+	# Compute source combat power using the CombatPowerEvaluator.
 	var source_power: float = CombatPowerEvaluator.evaluate(source.combatant)
-	if source_power <= 0.0:
-		return 1.0  # Avoid division by zero; treat zero-power as overwhelmed
-
-	var nearby_enemy_power: float = _get_nearby_enemy_power(source, context)
+	# Compute total nearby enemy power, scaled by size class.
+	var nearby_enemy_power: float = _get_nearby_enemy_power(planning_context)
+	# Calculate and return the force superiority ratio (enemy_power / source_power).
 	return nearby_enemy_power / source_power
 
 
-## Get aggregated combat power of nearby enemies within LOCAL_SCAN_RADIUS,
-## applying size-class scaling to each enemy.
-static func _get_nearby_enemy_power(
-	source: MapCombatEntity,
-	context: AIPlanningContext,
-) -> float:
-	if not source or not context:
-		return 0.0
-
+## Calculates the total scaled combat power of visible enemies in the local area. Takes
+## [planning_context] to access visible enemies and their combat power.
+static func _get_nearby_enemy_power(planning_context: AIPlanningContext) -> float:
 	var total_power: float = 0.0
-	var visible_enemies: Array = context.get_visible_enemies()
-
-	for enemy in visible_enemies:
-		if not enemy or not enemy.combatant:
-			continue
-
-		var distance: int = source.position.distance_to(enemy.position)
-		if distance > LOCAL_SCAN_RADIUS:
-			continue
-
-		# Get enemy power and apply size-class scaling
+	# Iterate the visible enemies and sum their scaled combat power.
+	for enemy in planning_context.get_enemies():
+		# Get enemy combat power using the CombatPowerEvaluator.
 		var enemy_power: float = CombatPowerEvaluator.evaluate(enemy.combatant)
-		var scaled_power: float = _apply_size_scaling(enemy, enemy_power)
+		# Apply size scaling to balance the influence of different unit classes.
+		var scaled_power: float = _get_size_scaling(enemy.combatant) * enemy_power
+		# Accumulate scaled power into total enemy power.
 		total_power += scaled_power
-
 	return total_power
 
 
-## Apply unit-size scaling to combat power to prevent multiple light units
-## from artificially inflating threat against a single large unit.
-static func _apply_size_scaling(entity: MapCombatEntity, power: float) -> float:
-	if not entity or not entity.combatant:
-		return power
-
-	# Try to get size from mek template
-	var size: int = Enums.EntitySize.MEDIUM  # Default fallback
-	if entity.combatant is Mek:
-		var mek: Mek = entity.combatant as Mek
-		if mek and mek.template:
-			size = mek.template.size
-
-	var scale_factor: float = SIZE_SCALE_FACTORS.get(size, 0.6)
-	return power * scale_factor
+## Determines the appropriate scaling factor based on the [param entity]'s size class. This helps to
+## balance the influence of different unit classes in the force superiority calculation, preventing
+## multiple light units from overwhelming a single heavy unit.
+static func _get_size_scaling(entity: CombatEntity) -> float:
+	"""
+	Returns the proper scaling factor for the given entity's size class.
+	"""
+	if entity is Mek:
+		var mek: Mek = entity as Mek
+		return SIZE_SCALE_FACTORS[mek.template.size]
+	if entity is Structure:
+		var structure: Structure = entity as Structure
+		return SIZE_SCALE_FACTORS[structure.template.size]
+	push_error("Unknown entity type for size scaling: " + str(entity))
+	return 0.6

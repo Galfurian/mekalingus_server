@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://cid4owatwb65x"]
 
-[ext_resource type="Script" uid="uid://db42p17brkc0m" path="res://scripts/ui/gameplay/grid_container.gd" id="2_05c1y"]
-[ext_resource type="Script" uid="uid://dc8rnjylbn8xb" path="res://scripts/ui/gameplay/scroll_view.gd" id="2_74cwi"]
-[ext_resource type="Script" uid="uid://c08qgt2mvq4s1" path="res://scripts/ui/gameplay/grid_drawer.gd" id="4_168ta"]
-[ext_resource type="Script" uid="uid://bcsv7476pvi0n" path="res://scripts/ui/gameplay/icon_drawer.gd" id="5_74cwi"]
+[ext_resource type="Script" uid="uid://b0vg3dbssv77k" path="res://scripts/ui/gameplay/grid_container.gd" id="2_05c1y"]
+[ext_resource type="Script" uid="uid://xej60jml0jgq" path="res://scripts/ui/gameplay/scroll_view.gd" id="2_74cwi"]
+[ext_resource type="Script" uid="uid://cfslabsb6yajr" path="res://scripts/ui/gameplay/grid_drawer.gd" id="4_168ta"]
+[ext_resource type="Script" uid="uid://dljr4lhkfv66k" path="res://scripts/ui/gameplay/icon_drawer.gd" id="5_74cwi"]
 [ext_resource type="Material" uid="uid://lnfic5l3g0wf" path="res://shaders/time_of_day_shader_material.tres" id="5_e0tmq"]
-[ext_resource type="Script" uid="uid://cfacmx265wc65" path="res://scripts/ui/gameplay/time_of_day_overlay.gd" id="6_e0tmq"]
+[ext_resource type="Script" uid="uid://ce165jfe64gpu" path="res://scripts/ui/gameplay/time_of_day_overlay.gd" id="6_e0tmq"]
 [ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="7_168ta"]
 
 [node name="GridMap" type="PanelContainer" unique_id=2129581890]

@@ -12,7 +12,7 @@ func display_combat_entity(map_entity: MapCombatEntity) -> void:
 		clear()
 		return
 
-	var actor: CombatActor = map_entity.combatant
+	var actor: CombatEntity = map_entity.combatant
 	var text: String = "[center][b]" + _combatant_name(actor) + "[/b][/center]\n"
 
 	if is_instance_of(map_entity.owner, PlayerOwned):
@@ -39,8 +39,8 @@ func display_combat_entity(map_entity: MapCombatEntity) -> void:
 		text += "]"
 	text += "\n"
 
-	text += "Shield       : " + UIColor.apply("shield", "%3d" % actor.shield) + " / "
-	text += UIColor.apply("shield", "%3d" % actor.max_shield)
+	text += "Shield       : " + UIColor.apply("max_shield", "%3d" % actor.shield) + " / "
+	text += UIColor.apply("max_shield", "%3d" % actor.max_shield)
 	if actor.shield_generation > 0:
 		text += " ["
 		text += UIColor.apply("shield_generation", "%3d" % actor.shield_generation)
@@ -54,7 +54,7 @@ func display_combat_entity(map_entity: MapCombatEntity) -> void:
 		text += UIColor.apply("power_generation", "%3d" % actor.power_generation)
 		text += "]"
 	text += "\n"
-
+	text += "Sensor Range : " + UIColor.apply("sensor_range", "%3d" % actor.sensor_range) + "\n"
 	text += "Speed        : " + UIColor.apply("speed", "%3d" % actor.speed) + "\n"
 	text += _build_active_effects_section(actor)
 	text += "[center][b]Damage Reduction[/b][/center]\n"
@@ -63,7 +63,7 @@ func display_combat_entity(map_entity: MapCombatEntity) -> void:
 	entity_info.append_text(text)
 
 
-func _build_active_effects_section(actor: CombatActor) -> String:
+func _build_active_effects_section(actor: CombatEntity) -> String:
 	var section := "[center][b]Active Effects[/b][/center]\n"
 	if not actor.active_effect_manager or actor.active_effect_manager.active_effects.is_empty():
 		return section + "[center][i]None[/i][/center]\n"
@@ -83,8 +83,7 @@ func _build_active_effect_line(active: ActiveEffect) -> String:
 
 	if active.effect.is_damage() or active.effect.is_dot():
 		var damage_type_name: String = Utils.enum_to_string(
-			Enums.DamageType,
-			active.effect.damage_type
+			Enums.DamageType, active.effect.damage_type
 		)
 		line += " " + UIColor.apply("damage_type", "[" + damage_type_name + "]")
 
@@ -97,7 +96,7 @@ func _build_active_effect_line(active: ActiveEffect) -> String:
 	return line
 
 
-func _build_damage_reduction_line(actor: CombatActor) -> String:
+func _build_damage_reduction_line(actor: CombatEntity) -> String:
 	var icon_map := {
 		"KINETIC": "res://assets/tileset/ui/damage/damage_kinetic.png",
 		"ENERGY": "res://assets/tileset/ui/damage/damage_energy.png",
@@ -132,7 +131,7 @@ func _build_damage_reduction_line(actor: CombatActor) -> String:
 	return line.strip_edges() + "[/center]\n"
 
 
-func _combatant_name(actor: CombatActor) -> String:
+func _combatant_name(actor: CombatEntity) -> String:
 	if not actor:
 		return "Unknown"
 	if actor.has_method("get_mek_name"):

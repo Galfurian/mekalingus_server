@@ -1,12 +1,28 @@
 extends Node
 
 
+static func get_entity_max_survivability(entity: MapCombatEntity) -> float:
+	var max_survivability: float = 0.0
+	max_survivability += entity.combatant.get_stat(Enums.StatType.MAX_HEALTH)
+	max_survivability += entity.combatant.get_stat(Enums.StatType.MAX_ARMOR)
+	max_survivability += entity.combatant.get_stat(Enums.StatType.MAX_SHIELD)
+	return max_survivability
+
+
+static func get_entity_current_survivability(entity: MapCombatEntity) -> float:
+	var current_survivability: float = 0.0
+	current_survivability += entity.combatant.get_stat(Enums.StatType.HEALTH)
+	current_survivability += entity.combatant.get_stat(Enums.StatType.ARMOR)
+	current_survivability += entity.combatant.get_stat(Enums.StatType.SHIELD)
+	return current_survivability
+
+
 # =====================================================================
 # MODULE FILTERING FUNCTIONS
 # =====================================================================
 
 
-func can_module_be_used_now(combatant: CombatActor, item: Item, module: ItemModule) -> bool:
+func can_module_be_used_now(combatant: CombatEntity, item: Item, module: ItemModule) -> bool:
 	"""
 	Checks if a module can be used based on its cooldown and power requirements.
 	"""
@@ -23,7 +39,7 @@ func can_module_be_used_now(combatant: CombatActor, item: Item, module: ItemModu
 	return true
 
 
-func has_item_equipped(combatant: CombatActor, item: Item) -> bool:
+func has_item_equipped(combatant: CombatEntity, item: Item) -> bool:
 	if not combatant or not item:
 		return false
 	for equipped_item: Item in combatant.items:
@@ -43,7 +59,7 @@ func has_item_module(item: Item, module: ItemModule) -> bool:
 	return false
 
 
-func is_equipped_module_available(combatant: CombatActor, equipped_module: EquippedModule) -> bool:
+func is_equipped_module_available(combatant: CombatEntity, equipped_module: EquippedModule) -> bool:
 	if not combatant or not equipped_module:
 		return false
 	if not equipped_module.validate():
@@ -66,7 +82,7 @@ func get_offensive_min_range(module_range: int) -> int:
 
 
 func find_matching_modules(
-	combatant: CombatActor,
+	combatant: CombatEntity,
 	offensive: bool,
 	include_passive: bool,
 	include_on_cooldown: bool,

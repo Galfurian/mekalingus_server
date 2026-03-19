@@ -31,6 +31,9 @@ const POWER_GENERATION = "#32CD32"
 # Speed color - Represents Mek movement speed (gold).
 const SPEED = "#FFD700"
 
+# Sensor range color - Represents Mek sensor range (cyan).
+const SENSOR_RANGE = "#00FFFF"
+
 # =============================================================================
 # ITEM STAT COLORS
 # =============================================================================
@@ -94,7 +97,7 @@ const COLORS = {
 	"health": HEALTH,
 	"armor": ARMOR,
 	"armor_generation": ARMOR_GENERATION,
-	"shield": SHIELD,
+	"max_shield": SHIELD,
 	"shield_generation": SHIELD_GENERATION,
 	"power": POWER,
 	"power_generation": POWER_GENERATION,

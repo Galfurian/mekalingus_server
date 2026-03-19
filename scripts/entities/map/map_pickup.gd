@@ -17,9 +17,13 @@ var item_data: Dictionary
 
 
 func _init(
-	p_position: Vector2i, p_owner: EntityOwner, p_item_data: Dictionary, p_blocking: bool = false
+	p_position: Vector2i,
+	p_owner: EntityOwner,
+	p_passable: bool,
+	p_active: bool,
+	p_item_data: Dictionary,
 ) -> void:
-	super(p_position, p_owner, p_blocking)
+	super(p_position, p_owner, p_passable, p_active)
 	item_data = p_item_data
 
 
@@ -53,13 +57,16 @@ static func from_dict(data: Dictionary) -> MapEntity:
 		push_error("Invalid MapPickup data: failed to deserialize owner")
 		return null
 
-	var loaded_pickup := MapPickup.new(
-		Utils.deserialize_position(data["position"]),
-		parsed_owner,
-		data["item_data"],
-		bool(data.get("blocking", false))
+	var loaded_pickup := (
+		MapPickup
+		. new(
+			Utils.deserialize_position(data["position"]),
+			parsed_owner,
+			bool(data["passable"]),
+			bool(data["active"]),
+			data["item_data"],
+		)
 	)
-	loaded_pickup.active = bool(data["active"])
 	return loaded_pickup
 
 
@@ -68,7 +75,7 @@ func to_dict() -> Dictionary:
 	return {
 		"position": Utils.serialize_position(position),
 		"owner": owner.to_dict(),
+		"passable": passable,
+		"active": active,
 		"item_data": item_data,
-		"blocking": blocking,
-		"active": active
 	}

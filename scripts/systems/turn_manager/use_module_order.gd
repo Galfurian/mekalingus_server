@@ -78,8 +78,8 @@ func _is_target_in_module_range(_game_map) -> bool:
 
 
 func _apply_damage_effect(game_map, effect: BaseEffect) -> void:
-	var source_actor: CombatActor = source.combatant
-	var target_actor: CombatActor = target.combatant
+	var source_actor: CombatEntity = source.combatant
+	var target_actor: CombatEntity = target.combatant
 	if source_actor.is_dead() or target_actor.is_dead():
 		return
 	# Handle SELF damage.
@@ -100,7 +100,7 @@ func _apply_damage_effect(game_map, effect: BaseEffect) -> void:
 			source, center.position, effect.radius, true, true
 		)
 		for entity in affected:
-			var actor: CombatActor = entity.combatant
+			var actor: CombatEntity = entity.combatant
 			if actor.is_dead():
 				continue
 			var result = actor.take_damage_from_effect(effect)
@@ -128,8 +128,8 @@ func _apply_damage_effect(game_map, effect: BaseEffect) -> void:
 
 
 func _apply_repair_effect(game_map, effect: BaseEffect) -> void:
-	var source_actor: CombatActor = source.combatant
-	var target_actor: CombatActor = target.combatant
+	var source_actor: CombatEntity = source.combatant
+	var target_actor: CombatEntity = target.combatant
 	if source_actor.is_dead() or target_actor.is_dead():
 		return
 	# Handle SELF repair.
@@ -151,7 +151,7 @@ func _apply_repair_effect(game_map, effect: BaseEffect) -> void:
 			source, center.position, effect.radius, include_allies, include_enemies, []
 		)
 		for entity in affected:
-			var actor: CombatActor = entity.combatant
+			var actor: CombatEntity = entity.combatant
 			if actor.is_dead():
 				continue
 			var result = actor.repair_from_effect(effect)
@@ -177,8 +177,8 @@ func _apply_repair_effect(game_map, effect: BaseEffect) -> void:
 
 
 func _apply_modifier_effect(game_map, effect: BaseEffect) -> void:
-	var source_actor: CombatActor = source.combatant
-	var target_actor: CombatActor = target.combatant
+	var source_actor: CombatEntity = source.combatant
+	var target_actor: CombatEntity = target.combatant
 	if source_actor.is_dead() or target_actor.is_dead():
 		return
 	# Handle SELF-targeted effects.
@@ -201,7 +201,7 @@ func _apply_modifier_effect(game_map, effect: BaseEffect) -> void:
 			source, center.position, effect.radius, include_allies, include_enemies, [source]
 		)
 		for entity in affected:
-			var actor: CombatActor = entity.combatant
+			var actor: CombatEntity = entity.combatant
 			if actor.is_dead():
 				continue
 			actor.add_effect(equipped_module.module, effect, source)

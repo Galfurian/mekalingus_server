@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://kqlung7v31tq"]
 
-[ext_resource type="Script" uid="uid://61y6ypw405hc" path="res://scripts/ui/gameplay/item_inspector.gd" id="1_inspector"]
+[ext_resource type="Script" uid="uid://43k0x3k8ukgt" path="res://scripts/ui/gameplay/item_inspector.gd" id="1_inspector"]
 [ext_resource type="PackedScene" uid="uid://77eou844yvq7" path="res://scenes/gameplay/equipment_panel.tscn" id="2_equipment"]
 [ext_resource type="PackedScene" uid="uid://bijaving70etq" path="res://scenes/gameplay/plan_panel.tscn" id="3_plan"]
 

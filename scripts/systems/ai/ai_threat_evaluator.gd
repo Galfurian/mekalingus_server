@@ -6,8 +6,9 @@ static func get_threat_level(game_map, tile: Vector2i, source: MapCombatEntity) 
 	"""
 	Estimates how dangerous it would be to stand on this tile.
 	"""
-	var enemies: Array[MapCombatEntity] = AIUnitQueries.get_enemies_in_range(
-		game_map, source, AITuning.get_global_scan_radius(game_map)
+	var sensor_range: int = source.combatant.get_sensor_range()
+	var enemies = AIUnitQueries.get_enemies_in_range(
+		game_map, source, source.position, sensor_range
 	)
 	var modules_cache: Dictionary = {}
 	for enemy: MapCombatEntity in enemies:

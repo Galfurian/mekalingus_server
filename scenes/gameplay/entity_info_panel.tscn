@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://tf2613r6o8gj"]
 
-[ext_resource type="Script" uid="uid://btfdvd5b2n5fu" path="res://scripts/ui/gameplay/entity_info_panel.gd" id="1_entity"]
+[ext_resource type="Script" uid="uid://cssjl2pb143gt" path="res://scripts/ui/gameplay/entity_info_panel.gd" id="1_entity"]
 
 [node name="EntityInfo" type="ScrollContainer" unique_id=546779531]
 size_flags_vertical = 3

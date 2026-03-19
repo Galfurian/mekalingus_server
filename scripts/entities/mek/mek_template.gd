@@ -59,11 +59,6 @@ func is_valid() -> bool:
 	)
 
 
-func build_mek(uuid: String = GameServer.generate_uuid()) -> Mek:
-	"""Builds a Mek starting from this template."""
-	return Mek.new({"mek_id": id, "uuid": uuid})
-
-
 # =============================================================================
 # POWER COMPUTATION
 # =============================================================================

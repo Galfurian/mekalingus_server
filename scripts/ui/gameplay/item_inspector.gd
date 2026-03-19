@@ -25,7 +25,7 @@ var _last_selected_tab: int = 0
 @onready var item_info: RichTextLabel = $ScrollContainer/ItemInfo
 @onready var plan_info: RichTextLabel = plan_panel.plan_info
 
-var _mind_log_combatant: CombatActor = null
+var _mind_log_combatant: CombatEntity = null
 
 
 func _ready() -> void:
@@ -83,7 +83,7 @@ func _on_equipment_loadout_changed(selected_item: Item) -> void:
 	loadout_changed.emit()
 
 
-func _set_mind_log_combatant(combatant: CombatActor) -> void:
+func _set_mind_log_combatant(combatant: CombatEntity) -> void:
 	# Disconnect previous combatant signal (if any).
 	if _mind_log_combatant and _mind_log_combatant.ai_thought_logged.is_connected(_on_ai_thought_logged):
 		_mind_log_combatant.ai_thought_logged.disconnect(_on_ai_thought_logged)

@@ -1,11 +1,13 @@
 class_name StructureTemplate
 extends Node
 
-# Unique identifier for the Structure template.
+# Unique identifier for the Mek template.
 var id: String
+# The name of the Structure.
+var structure_name: String
 # The size category of the Structure.
 var size: Enums.EntitySize
-# The base health of the Mek, determining its durability.
+# The base health of the Structure, determining its durability.
 var health: int
 # The base armor value, reducing incoming kinetic and explosive damage.
 var armor: int
@@ -13,17 +15,18 @@ var armor: int
 var shield: int
 # The rate at which shields regenerate per turn.
 var shield_generation: int
-# The total power capacity of the Mek, used for activating items.
+# The total power capacity of the Structure, used for activating items.
 var power: int
 # The amount of power regenerated per turn.
 var power_generation: int
-# The movement speed of the Mek, affecting turn order and repositioning.
+# The movement speed of the Structure, affecting turn order and repositioning.
 var speed: int
 # The sensor range of the Structure, defining how far it can detect enemies.
 var sensor_range: int
-# The types of slots available on the Structure.
+# Slot configuration for equipping items.
+# Each index represents a slot size (e.g., small, medium, large, utility).
 var slots: Array[int]
-# The path to the icon representing the Structure.
+# The icon representing the Structure in the UI.
 var icon: String
 # The type of the Structure.
 var structure_type: String
@@ -43,15 +46,12 @@ func is_valid() -> bool:
 	return id != "" and health > 0 and armor >= 0 and shield >= 0 and sensor_range > 0
 
 
-func build_structure(uuid: String = GameServer.generate_uuid()) -> Structure:
-	return Structure.new({"structure_id": id, "uuid": uuid})
-
-
 func from_dict(data: Dictionary):
 	if not data.has("name"):
 		push_error("Invalid StructureTemplate data: Missing required fields")
 		return
 
+	structure_name = str(data["name"])
 	size = Utils.string_to_enum(Enums.EntitySize, data["size"])
 	health = int(data["health"])
 	armor = int(data["armor"])
@@ -71,6 +71,7 @@ func from_dict(data: Dictionary):
 func to_dict() -> Dictionary:
 	return {
 		"id": id,
+		"name": structure_name,
 		"size": Utils.enum_to_string(Enums.EntitySize, size),
 		"health": health,
 		"armor": armor,

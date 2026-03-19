@@ -31,33 +31,8 @@ static func get_units_in_range(
 	"""
 	Returns all units within the specified range of a position.
 	"""
-	return get_units_in_range_from_candidates(
-		game_map,
-		source,
-		position,
-		radius,
-		get_all_units(game_map),
-		include_allies,
-		include_enemies,
-		exclude_units
-	)
-
-
-static func get_units_in_range_from_candidates(
-	game_map,
-	source: MapCombatEntity,
-	position: Vector2i,
-	radius: int,
-	candidates: Array[MapCombatEntity],
-	include_allies: bool = true,
-	include_enemies: bool = true,
-	exclude_units: Array[MapCombatEntity] = []
-) -> Array[MapCombatEntity]:
-	"""
-	Returns all units within the specified range from pre-collected candidates.
-	"""
 	var units_in_range: Array[MapCombatEntity] = []
-	for entity: MapCombatEntity in candidates:
+	for entity: MapCombatEntity in get_all_units(game_map):
 		if entity == source:
 			continue
 		if entity in exclude_units:
@@ -74,8 +49,9 @@ static func get_units_in_range_from_candidates(
 static func get_enemies_in_range(
 	game_map,
 	source: MapCombatEntity,
+	position: Vector2i,
 	radius: int,
-	exclude_units: Array[MapCombatEntity] = [],
+	exclude_units: Array[MapCombatEntity] = []
 ) -> Array[MapCombatEntity]:
 	"""
 	Returns all enemy units within a specified range of the source unit.
@@ -83,7 +59,7 @@ static func get_enemies_in_range(
 	return get_units_in_range(
 		game_map,
 		source,
-		source.position,
+		position,
 		radius,
 		false,
 		true,
@@ -94,6 +70,7 @@ static func get_enemies_in_range(
 static func get_allies_in_range(
 	game_map,
 	source: MapCombatEntity,
+	position: Vector2i,
 	radius: int,
 	exclude_units: Array[MapCombatEntity] = [],
 ) -> Array[MapCombatEntity]:
@@ -103,38 +80,9 @@ static func get_allies_in_range(
 	return get_units_in_range(
 		game_map,
 		source,
-		source.position,
+		position,
 		radius,
 		true,
 		false,
 		exclude_units,
 	)
-
-
-static func get_most_vulnerable_enemy(
-	game_map,
-	source: MapCombatEntity,
-	max_distance: int,
-) -> MapCombatEntity:
-	"""
-	Returns the enemy with the lowest combined survivability ratio within range.
-	"""
-	var weakest: MapCombatEntity = null
-	var lowest_score := INF
-
-	for enemy in get_units_in_range(game_map, source, source.position, max_distance, false, true):
-		var current_total = float(
-			enemy.combatant.health + enemy.combatant.armor + enemy.combatant.shield
-		)
-		var max_total = float(
-			enemy.combatant.max_health + enemy.combatant.max_armor + enemy.combatant.max_shield
-		)
-		if max_total <= 0:
-			continue
-
-		var ratio: float = current_total / max_total
-		if ratio < lowest_score:
-			lowest_score = ratio
-			weakest = enemy
-
-	return weakest

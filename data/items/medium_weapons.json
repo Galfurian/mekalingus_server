@@ -182,7 +182,7 @@
 					{
 						"effect_class": "RegenEffect",
 						"target": "SELF",
-						"stat": "POWER_REGEN",
+						"stat": "POWER_GENERATION",
 						"amount": -5.0,
 						"duration": 2.0
 					}
@@ -213,7 +213,7 @@
 					{
 						"effect_class": "RegenEffect",
 						"target": "ENEMY",
-						"stat": "SHIELD_REGEN",
+						"stat": "SHIELD_GENERATION",
 						"amount": -10.0,
 						"duration": 2.0
 					}
@@ -249,7 +249,7 @@
 					{
 						"effect_class": "RegenEffect",
 						"target": "ENEMY",
-						"stat": "SHIELD_REGEN",
+						"stat": "SHIELD_GENERATION",
 						"amount": -10.0,
 						"duration": 2.0
 					}
@@ -489,7 +489,7 @@
 					{
 						"effect_class": "RegenEffect",
 						"target": "SELF",
-						"stat": "POWER_REGEN",
+						"stat": "POWER_GENERATION",
 						"amount": -5.0,
 						"duration": 4.0
 					}
@@ -519,7 +519,7 @@
 					{
 						"effect_class": "RegenEffect",
 						"target": "SELF",
-						"stat": "POWER_REGEN",
+						"stat": "POWER_GENERATION",
 						"amount": -10.0,
 						"duration": 3.0
 					}

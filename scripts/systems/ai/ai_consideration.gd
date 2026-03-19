@@ -1,7 +1,6 @@
 class_name AIConsideration
 extends Resource
 
-
 @export var consideration_name: String = "Unnamed Consideration"
 @export var weight: float = 1.0
 @export var response_curve: Curve

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bic16d6uw0g6y"]
 
-[ext_resource type="Script" uid="uid://c4dkolmhly6aw" path="res://scripts/ui/gameplay/map_hud.gd" id="1_daorq"]
+[ext_resource type="Script" uid="uid://vflbjobbh0ag" path="res://scripts/ui/gameplay/map_hud.gd" id="1_daorq"]
 [ext_resource type="PackedScene" uid="uid://cdsk2ml3347yf" path="res://scenes/gameplay/log_panel.tscn" id="3_7afkc"]
 [ext_resource type="PackedScene" uid="uid://cosbr482fkmyp" path="res://scenes/gameplay/InfoPanel.tscn" id="3_0206q"]
 [ext_resource type="PackedScene" uid="uid://cid4owatwb65x" path="res://scenes/gameplay/grid_map.tscn" id="3_vm2jc"]

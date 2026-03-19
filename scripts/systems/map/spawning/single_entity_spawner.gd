@@ -91,18 +91,23 @@ static func build_owner_from_request(request: Dictionary, index: int) -> EntityO
 
 
 static func spawn_mek(
-	game_map: GameMap, position: Vector2i, request: Dictionary, entity_owner: EntityOwner
+	game_map: GameMap,
+	position: Vector2i,
+	request: Dictionary,
+	entity_owner: EntityOwner,
 ) -> void:
 	var template_id: String = str(request.get("template_id", ""))
 	var template: MekTemplate = TemplateManager.get_mek_template(template_id)
 	if not template:
 		push_error("Spawn failed: unknown Mek template '%s'." % template_id)
 		return
-
-	var mek: Mek = template.build_mek()
-	var loadout: String = str(request.get("loadout", "none"))
-	if loadout != "none":
-		apply_random_loadout(mek, loadout)
+	# Generate a UUID.
+	var uuid: String = GameServer.generate_uuid()
+	# Create the Mek.
+	var mek: Mek = Mek.new(uuid, template_id, template)
+	# Load the template data into the Mek instance.
+	apply_random_loadout(mek, request.get("loadout", "none"))
+	# Add the Mek to the map.
 	var map_mek: MapMek = MapMek.new(position, entity_owner, mek)
 	if entity_owner.is_player():
 		game_map.player_units[mek.uuid] = map_mek
@@ -111,28 +116,28 @@ static func spawn_mek(
 
 
 static func spawn_structure(
-	game_map: GameMap, position: Vector2i, request: Dictionary, entity_owner: EntityOwner
+	game_map: GameMap,
+	position: Vector2i,
+	request: Dictionary,
+	entity_owner: EntityOwner,
 ) -> void:
 	var template_id: String = str(request.get("template_id", ""))
 	var template: StructureTemplate = TemplateManager.get_structure_template(template_id)
 	if not template:
 		push_error("Spawn failed: unknown Structure template '%s'." % template_id)
 		return
-
-	var structure: Structure = template.build_structure()
-	var loadout: String = str(request.get("loadout", "none"))
-	if loadout != "none":
-		apply_random_loadout(structure, loadout)
-	var is_blocking: bool = not template.passable
-	if request.has("blocking_override"):
-		is_blocking = bool(request["blocking_override"])
-	var map_structure: MapStructure = MapStructure.new(
-		position, entity_owner, structure, is_blocking
-	)
-	game_map.structures[structure.uuid] = map_structure
+	# Generate a UUID.
+	var uuid: String = GameServer.generate_uuid()
+	# Create the Structure.
+	var structure: Structure = Structure.new(uuid, template_id, template)
+	# Load the template data into the Structure instance.
+	apply_random_loadout(structure, request.get("loadout", "none"))
+	# Determine if the structure should be passable based on the template and any overrides in the
+	# request.
+	game_map.structures[structure.uuid] = MapStructure.new(position, entity_owner, structure)
 
 
-static func apply_random_loadout(actor: CombatActor, loadout: String = "preset_balanced") -> void:
+static func apply_random_loadout(actor: CombatEntity, loadout: String = "preset_balanced") -> void:
 	var preset: String = loadout
 	if preset == "random":
 		preset = "preset_balanced"
@@ -190,12 +195,12 @@ static func _preset_weight_for_item(item_template: ItemTemplate, preset: String)
 
 	for module: ItemModule in item_template.modules:
 		for effect: BaseEffect in module.effects:
-			if effect.target == Enums.TargetType.ENEMY and (effect.is_damage() or effect.is_dot()):
+			if effect.is_offensive():
 				offense += 4
-			elif effect.is_repair() or (effect.is_buff() and not effect.is_damage() and not effect.is_dot()):
+			elif effect.is_defensive():
 				defense += 4
-			else:
-				utility += 3
+			elif effect.is_utility():
+				utility += 4
 
 	match preset:
 		"preset_offense":

@@ -1,4 +1,6 @@
 {
+    "rewrap.reformat": true,
+    "rewrap.wrappingColumn": 100,
     "files.exclude": {
         "**/.git": true,
         "**/.godot": true,

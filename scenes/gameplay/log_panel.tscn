@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cdsk2ml3347yf"]
 
-[ext_resource type="Script" uid="uid://ds76ug8p5bi2i" path="res://scripts/ui/gameplay/log_panel.gd" id="1_lv157"]
+[ext_resource type="Script" uid="uid://clv8n0o6pcs51" path="res://scripts/ui/gameplay/log_panel.gd" id="1_lv157"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d761l"]
 bg_color = Color(0.21, 0.456, 0.354, 0.5)

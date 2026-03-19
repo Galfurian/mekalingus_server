@@ -1,26 +1,30 @@
 class_name Mek
-extends CombatActor
+extends CombatEntity
 
 # =============================================================================
 # PROPERTIES
 # =============================================================================
 
 # Unique identifier of the Mek template.
-var mek_id: String
+var mek_id: String = ""
 # Reference to the Mek template.
-var template = null
+var template: MekTemplate = null
 
 # =============================================================================
 # GENERAL
 # =============================================================================
 
 
-func _init(data: Dictionary = {}):
-	"""Initializes a Mek instance from a dictionary."""
-	items = []
-	slots = []
-	initialize_runtime_managers()
-	from_dict(data)
+func _init(
+	p_uuid: String,
+	p_mek_id: String,
+	p_template: MekTemplate,
+) -> void:
+	super(p_uuid)
+	mek_id = p_mek_id
+	template = p_template
+	# Simply intialize the combat state based on the template values.
+	rebuild_combat_state()
 
 
 static func compare_meks(a: Mek, b: Mek) -> bool:
@@ -35,14 +39,14 @@ func rebuild_combat_state():
 	var stats_payload: Dictionary = {
 		"health": template.health,
 		"max_health": template.health,
+		"health_generation": 0,
 		"armor": template.armor,
 		"max_armor": template.armor,
+		"armor_generation": 0,
 		"shield": template.shield,
 		"max_shield": template.shield,
 		"power": template.power,
 		"max_power": template.power,
-		"health_generation": 0,
-		"armor_generation": 0,
 		"shield_generation": template.shield_generation,
 		"power_generation": template.power_generation,
 		"speed": template.speed,
@@ -82,30 +86,42 @@ func _to_string() -> String:
 	return "Mek<" + mek_id + ", " + uuid + ">"
 
 
-func from_dict(data: Dictionary = {}) -> bool:
+static func from_dict(data: Dictionary = {}) -> Mek:
 	"""Loads Mek instance data from a dictionary."""
 	if not data.has("mek_id"):
 		push_error("Invalid Mek data: Missing required fields")
-		return false
-
-	# Load basic fields.
-	super(data)
-
-	# Load mek-specific fields.
-	mek_id = str(data["mek_id"])
-
-	# Load the template.
-	template = TemplateManager.get_mek_template(mek_id)
-	assert(template, "Cannot find the template: " + mek_id + "\n")
-
+		return null
+	# Get the UUID
+	var p_uuid = str(data["uuid"])
+	# Get the Mek ID.
+	var p_mek_id = str(data["mek_id"])
+	# Get the template.
+	var p_template = TemplateManager.get_mek_template(p_mek_id)
+	if not p_template:
+		push_error("Invalid Mek data: unknown Mek template '%s'" % p_mek_id)
+		return null
+	# Creat the Mek instance.
+	var mek: Mek = Mek.new(p_uuid, p_mek_id, p_template)
+	# Set the alias if it exists.
+	mek.alias = str(data.get("alias", ""))
+	# Reconstruct items.
+	mek.items.clear()
+	for item_data: Dictionary in data.get("items", []):
+		mek.items.append(Item.new(item_data))
+	mek.items.sort_custom(Item.compare_items)
+	# Get the slots.
+	mek.slots = Utils.to_array_int(data.get("slots", []))
+	# Load the AI thought log.
+	mek.ai_thought_log.clear()
+	for thought_data: Dictionary in data.get("ai_thought_log", []):
+		mek.ai_thought_log.append(thought_data)
 	# Rebuild combat state based on template values and items.
-	rebuild_combat_state()
-
-	return true
+	mek.rebuild_combat_state()
+	return mek
 
 
 func to_dict() -> Dictionary:
 	"""Converts Mek instance data to a dictionary."""
-	var data: Dictionary = super()
+	var data: Dictionary = super.to_dict()
 	data["mek_id"] = mek_id
 	return data

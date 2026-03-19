@@ -276,20 +276,16 @@ func _populate_templates() -> void:
 				template_option.add_item(entry["name"])
 				template_option.set_item_metadata(template_option.item_count - 1, entry["id"])
 	elif entity_type == "structure":
-		var structure_ids: Array[String] = []
+		var structures: Array[Dictionary] = []
 		for template_id: String in TemplateManager.structure_templates.keys():
-			structure_ids.append(template_id)
-		structure_ids.sort_custom(
-			func(a: String, b: String):
-				var sa: StructureTemplate = TemplateManager.structure_templates[a]
-				var sb: StructureTemplate = TemplateManager.structure_templates[b]
-				return sa.alias.to_lower() < sb.alias.to_lower()
-		)
-		for index in range(structure_ids.size()):
-			var template_id: String = structure_ids[index]
 			var template: StructureTemplate = TemplateManager.structure_templates[template_id]
-			template_option.add_item(template.alias)
-			template_option.set_item_metadata(index, template_id)
+			structures.append({"id": template_id, "name": template.structure_name})
+		structures.sort_custom(
+			func(a: Dictionary, b: Dictionary): return a["name"].to_lower() < b["name"].to_lower()
+		)
+		for entry: Dictionary in structures:
+			template_option.add_item(entry["name"])
+			template_option.set_item_metadata(template_option.item_count - 1, entry["id"])
 
 	if template_option.item_count > 0:
 		template_option.select(0)

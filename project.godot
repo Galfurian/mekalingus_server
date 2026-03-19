@@ -17,7 +17,6 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="MekalingusServer"
 run/main_scene="uid://bhgt3rn4bd6v0"
 config/features=PackedStringArray("4.6", "Forward Plus")
-config/icon="uid://b3ikks6mjyo28"
 
 [autoload]
 

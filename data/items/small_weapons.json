@@ -588,7 +588,7 @@
 					{
 						"effect_class": "RegenEffect",
 						"target": "ENEMY",
-						"stat": "POWER_REGEN",
+						"stat": "POWER_GENERATION",
 						"amount": -8.0,
 						"duration": 3.0
 					}

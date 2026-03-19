@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bijaving70etq"]
 
-[ext_resource type="Script" uid="uid://ckhb3rryeaxui" path="res://scripts/ui/gameplay/plan_panel.gd" id="1_plan"]
+[ext_resource type="Script" uid="uid://3pr3nicdx3xc" path="res://scripts/ui/gameplay/plan_panel.gd" id="1_plan"]
 
 [node name="Plan" type="Control" unique_id=270092182]
 visible = false

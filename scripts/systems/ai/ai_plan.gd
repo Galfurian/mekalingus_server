@@ -13,7 +13,6 @@ var intent: Intent = Intent.NONE
 # A status enum describing where the plan currently stands.
 var status: Status = Status.NONE
 
-
 # ========== PLAN DATA ==========
 
 # The game map associated with this plan.
@@ -28,11 +27,16 @@ var destination: Vector2i
 var equipped_module: EquippedModule = null
 # The priority ranking assigned during planning.
 var score: float = 0.0
+
+
 func set_status(val: Status) -> void:
 	status = val
 
+
 func get_status() -> Status:
 	return status
+
+
 # ========== CORE METHODS ==========
 
 
@@ -182,10 +186,13 @@ func _generate_move_order_for_destination() -> Order:
 
 
 func _to_string() -> String:
-	var s := "AIPlan(intent=%s, status=%s" % [
-		AIPlan.Intent.keys()[intent],
-		AIPlan.Status.keys()[status],
-	]
+	var s := (
+		"AIPlan(intent=%s, status=%s"
+		% [
+			AIPlan.Intent.keys()[intent],
+			AIPlan.Status.keys()[status],
+		]
+	)
 	if source:
 		s += ", source=%s" % source.combatant.get_chat_tag()
 	if target:

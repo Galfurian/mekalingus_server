@@ -209,17 +209,21 @@ static func find_closest_reachable_tile(
 
 
 static func find_best_attack_tile(
-	game_map, source, target, min_range: int, max_range: int, max_movement: int
+	game_map,
+	source,
+	target,
+	min_range: int,
+	max_range: int,
+	max_movement: int,
 ) -> Vector2i:
 	var best_tile := Vector2i.ZERO
 	var best_score := -INF
 	var ideal_range := maxf(float(min_range), float(max_range) - 0.5)
-	var enemies: Array[MapCombatEntity] = AIUnitQueries.get_enemies_in_range(
-		game_map, source, AITuning.get_global_scan_radius(game_map)
+	var sensor_range: int = source.combatant.get_sensor_range()
+	var enemies = AIUnitQueries.get_enemies_in_range(
+		game_map, source, source.position, sensor_range
 	)
-	var allies: Array[MapCombatEntity] = AIUnitQueries.get_allies_in_range(
-		game_map, source, AITuning.get_global_scan_radius(game_map)
-	)
+	var allies = AIUnitQueries.get_allies_in_range(game_map, source, source.position, sensor_range)
 	var enemy_modules_cache: Dictionary = {}
 	for enemy: MapCombatEntity in enemies:
 		enemy_modules_cache[enemy.combatant.uuid] = AIUtils.find_matching_modules(

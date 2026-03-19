@@ -9,7 +9,7 @@ static func take_damage_from_effect(actor, effect: BaseEffect) -> Dictionary:
 	Applies damage from a given effect using actor resistances and damage-type modifiers.
 	"""
 	var result = {
-		"shield": 0,
+		"max_shield": 0,
 		"armor": 0,
 		"health": 0,
 		"total": 0,
@@ -19,14 +19,14 @@ static func take_damage_from_effect(actor, effect: BaseEffect) -> Dictionary:
 	}
 
 	const TYPE_MODIFIERS = {
-		Enums.DamageType.KINETIC: { "armor": 0.8, "shield": 0.6, "health": 1.0 },
-		Enums.DamageType.ENERGY: { "armor": 0.8, "shield": 1.4, "health": 1.0 },
-		Enums.DamageType.PLASMA: { "armor": 1.2, "shield": 1.2, "health": 0.9 },
-		Enums.DamageType.EXPLOSIVE: { "armor": 1.3, "shield": 0.7, "health": 1.3 },
-		Enums.DamageType.CORROSIVE: { "armor": 1.2, "shield": 0.8, "health": 1.1 },
+		Enums.DamageType.KINETIC: { "armor": 0.8, "max_shield": 0.6, "health": 1.0 },
+		Enums.DamageType.ENERGY: { "armor": 0.8, "max_shield": 1.4, "health": 1.0 },
+		Enums.DamageType.PLASMA: { "armor": 1.2, "max_shield": 1.2, "health": 0.9 },
+		Enums.DamageType.EXPLOSIVE: { "armor": 1.3, "max_shield": 0.7, "health": 1.3 },
+		Enums.DamageType.CORROSIVE: { "armor": 1.2, "max_shield": 0.8, "health": 1.1 },
 	}
 	var modifiers = TYPE_MODIFIERS.get(
-		effect.damage_type, { "shield": 1.0, "armor": 1.0, "health": 1.0 }
+		effect.damage_type, { "max_shield": 1.0, "armor": 1.0, "health": 1.0 }
 	)
 
 	var reduction: int = max(0, actor.get_stat(Enums.StatType.DAMAGE_REDUCTION_ALL))
@@ -77,7 +77,7 @@ static func take_dot_damage(actor) -> Dictionary:
 	"""
 	Applies all active DOT effects and returns a breakdown.
 	"""
-	var total_damage = { "shield": 0, "armor": 0, "health": 0, "total": 0 }
+	var total_damage = { "max_shield": 0, "armor": 0, "health": 0, "total": 0 }
 	if not actor.active_effect_manager:
 		return total_damage
 

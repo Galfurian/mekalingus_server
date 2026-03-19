@@ -33,13 +33,13 @@ func get_ai_utility_priority(_target) -> int:
 		return 0
 
 	match stat:
-		Enums.StatType.HEALTH_REGEN:
+		Enums.StatType.HEALTH_GENERATION:
 			return 5 if _target.combatant.health < _target.combatant.max_health * 0.3 else 3
-		Enums.StatType.SHIELD_REGEN:
+		Enums.StatType.SHIELD_GENERATION:
 			return 5 if _target.combatant.shield < _target.combatant.max_shield * 0.3 else 3
-		Enums.StatType.ARMOR_REGEN:
+		Enums.StatType.ARMOR_GENERATION:
 			return 5 if _target.combatant.armor < _target.combatant.max_armor * 0.3 else 3
-		Enums.StatType.POWER_REGEN:
+		Enums.StatType.POWER_GENERATION:
 			return 5 if _target.combatant.power < _target.combatant.max_power * 0.3 else 3
 		_:
 			return 0
@@ -47,7 +47,19 @@ func get_ai_utility_priority(_target) -> int:
 
 func from_dict(data: Dictionary) -> void:
 	super.from_dict(data)
-	stat = Utils.string_to_enum(Enums.StatType, str(data.get("stat", "HEALTH_REGEN")))
+	assert(data.has("stat"))
+	stat = Utils.string_to_enum(Enums.StatType, data["stat"])
+	assert(
+		(
+			stat
+			in [
+				Enums.StatType.HEALTH_GENERATION,
+				Enums.StatType.SHIELD_GENERATION,
+				Enums.StatType.ARMOR_GENERATION,
+				Enums.StatType.POWER_GENERATION
+			]
+		)
+	)
 
 
 func to_dict() -> Dictionary:

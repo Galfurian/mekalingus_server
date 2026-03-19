@@ -6,7 +6,7 @@ class_name EquippedModule extends RefCounted
 # =============================================================================
 
 # The combat actor that has the module equipped.
-var mek: CombatActor
+var mek: CombatEntity
 # The item that is equipped.
 var item: Item
 # The module of that item.
@@ -17,7 +17,7 @@ var module: ItemModule
 # =============================================================================
 
 
-func _init(p_mek: CombatActor, p_item: Item, p_module: ItemModule) -> void:
+func _init(p_mek: CombatEntity, p_item: Item, p_module: ItemModule) -> void:
 	"""
 	Initializes the EquippedModule.
 	"""

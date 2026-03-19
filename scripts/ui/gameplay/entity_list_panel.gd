@@ -200,7 +200,7 @@ func _entity_name(entity: MapEntity) -> String:
 	return "Entity"
 
 
-func _combatant_display_name(combatant: CombatActor) -> String:
+func _combatant_display_name(combatant: CombatEntity) -> String:
 	if combatant == null:
 		return "Unknown"
 	if combatant.has_method("get_mek_name"):

@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="AIActionProfile" format=3 uid="uid://b8bv3lpa573wn"]
 
-[ext_resource type="Script" uid="uid://rh4iy81im0ti" path="res://scripts/systems/ai/ai_action_profile.gd" id="1"]
-[ext_resource type="Script" uid="uid://ntamvh1f06xl" path="res://scripts/systems/ai/considerations/ally_health_consideration.gd" id="2"]
-[ext_resource type="Script" uid="uid://df75e74obpmtx" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="3"]
-[ext_resource type="Script" uid="uid://cybt2e8q65ee6" path="res://scripts/systems/ai/considerations/utility_module_effectiveness_consideration.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/systems/ai/ai_action_profile.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/systems/ai/considerations/target_survivability_consideration.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/systems/ai/considerations/utility_module_effectiveness_consideration.gd" id="4"]
 
 [sub_resource type="Curve" id="1"]
 _data = [Vector2(0, 1), 0.0, -1.6, 0, 0, Vector2(1, 0), -1.6, 0.0, 0, 0]
@@ -11,7 +11,7 @@ point_count = 2
 
 [sub_resource type="Resource" id="4"]
 script = ExtResource("2")
-consideration_name = "ally_health"
+consideration_name = "target_survivability"
 weight = 16.0
 response_curve = SubResource("1")
 

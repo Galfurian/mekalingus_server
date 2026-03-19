@@ -13,7 +13,7 @@ const SLOT_ORDER: Array[int] = [
 ]
 
 
-var _actor: CombatActor = null
+var _actor: CombatEntity = null
 var _slot_editor_rows: Dictionary = {}
 var _is_rebuilding_editors: bool = false
 
@@ -27,7 +27,7 @@ func clear() -> void:
 	_slot_editor_rows.clear()
 
 
-func display_combatant(actor: CombatActor) -> void:
+func display_combatant(actor: CombatEntity) -> void:
 	_actor = actor
 	_rebuild_slot_editors()
 
@@ -176,7 +176,7 @@ func _build_templates_by_slot() -> Dictionary:
 	return templates_by_slot
 
 
-func _build_equipped_items_by_slot(actor: CombatActor) -> Dictionary:
+func _build_equipped_items_by_slot(actor: CombatEntity) -> Dictionary:
 	var equipped_by_slot: Dictionary = {}
 	for slot_type: int in SLOT_ORDER:
 		equipped_by_slot[slot_type] = []
@@ -193,7 +193,7 @@ func _build_equipped_items_by_slot(actor: CombatActor) -> Dictionary:
 	return equipped_by_slot
 
 
-func _build_slot_capacities(actor: CombatActor, equipped_by_slot: Dictionary) -> Dictionary:
+func _build_slot_capacities(actor: CombatEntity, equipped_by_slot: Dictionary) -> Dictionary:
 	var capacities: Dictionary = {}
 	for slot_type: int in SLOT_ORDER:
 		var equipped_count: int = _as_item_array(equipped_by_slot.get(slot_type, [])).size()

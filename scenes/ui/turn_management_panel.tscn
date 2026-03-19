@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dt3nhvenrb57r"]
 
-[ext_resource type="Script" uid="uid://bg32a664x2xsj" path="res://scripts/ui/server_admin/turn_management_panel.gd" id="1_yedch"]
+[ext_resource type="Script" uid="uid://dp51q5hiug2w1" path="res://scripts/ui/server_admin/turn_management_panel.gd" id="1_yedch"]
 [ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_lfdsg"]
 
 [node name="TurnManagementPanel" type="VBoxContainer" unique_id=1554689394]

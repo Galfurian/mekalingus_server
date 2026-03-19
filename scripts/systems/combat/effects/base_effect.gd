@@ -1,7 +1,6 @@
 class_name BaseEffect
 extends RefCounted
 
-
 var target: Enums.TargetType = Enums.TargetType.ENEMY
 var chance: int = 100
 var duration: int = 0
@@ -45,16 +44,26 @@ func is_modifier() -> bool:
 	return false
 
 
-func is_debuff() -> bool:
-	return (is_regen() or is_damage_reduction() or is_modifier()) and amount < 0
-
-
 func is_buff() -> bool:
 	return (is_regen() or is_damage_reduction() or is_modifier()) and amount > 0
 
 
+func is_debuff() -> bool:
+	return (is_regen() or is_damage_reduction() or is_modifier()) and amount < 0
+
+
 func is_offensive() -> bool:
-	return is_damage() or is_dot() or is_debuff()
+	var negative_effect: bool = is_damage() or is_dot()
+	return negative_effect and target in [Enums.TargetType.ENEMY, Enums.TargetType.AREA]
+
+
+func is_defensive() -> bool:
+	var positive_effect: bool = is_repair() or is_regen() or is_damage_reduction()
+	return positive_effect and target in [Enums.TargetType.SELF, Enums.TargetType.ALLY]
+
+
+func is_utility() -> bool:
+	return is_modifier()
 
 
 func get_effect_class_name() -> String:
@@ -175,14 +184,14 @@ static func get_stat_label(stat_type: int) -> String:
 			return "Shield Modifier"
 		Enums.StatType.MAX_POWER:
 			return "Power Modifier"
-		Enums.StatType.HEALTH_REGEN:
-			return "Health Regen"
-		Enums.StatType.ARMOR_REGEN:
-			return "Armor Regen"
-		Enums.StatType.SHIELD_REGEN:
-			return "Shield Regen"
-		Enums.StatType.POWER_REGEN:
-			return "Power Regen"
+		Enums.StatType.HEALTH_GENERATION:
+			return "Health Generation"
+		Enums.StatType.ARMOR_GENERATION:
+			return "Armor Generation"
+		Enums.StatType.SHIELD_GENERATION:
+			return "Shield Generation"
+		Enums.StatType.POWER_GENERATION:
+			return "Power Generation"
 		Enums.StatType.SPEED:
 			return "Speed Modifier"
 		Enums.StatType.DAMAGE_REDUCTION_ALL:
@@ -237,13 +246,13 @@ static func adjust_actor_current_stat(actor, stat_type: int, delta: int) -> int:
 
 static func get_regen_target_stat(stat_type: int) -> int:
 	match stat_type:
-		Enums.StatType.HEALTH_REGEN:
+		Enums.StatType.HEALTH_GENERATION:
 			return Enums.StatType.HEALTH
-		Enums.StatType.ARMOR_REGEN:
+		Enums.StatType.ARMOR_GENERATION:
 			return Enums.StatType.ARMOR
-		Enums.StatType.SHIELD_REGEN:
+		Enums.StatType.SHIELD_GENERATION:
 			return Enums.StatType.SHIELD
-		Enums.StatType.POWER_REGEN:
+		Enums.StatType.POWER_GENERATION:
 			return Enums.StatType.POWER
 		_:
 			return stat_type

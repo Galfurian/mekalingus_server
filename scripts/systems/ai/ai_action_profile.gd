@@ -58,7 +58,6 @@ func _evaluate_considerations_breakdown(
 			continue
 		if not consideration.has_method("evaluate"):
 			continue
-
 		var normalized_input: float = clampf(
 			consideration.get_normalized_input(context),
 			0.0,
@@ -71,20 +70,18 @@ func _evaluate_considerations_breakdown(
 				0.0,
 				1.0,
 			)
+		# Compute the contribution of this consideration to the overall score.
 		var contribution: float = curve_multiplier * consideration.weight
+		# Generate a breakdown component for this consideration.
+		var component: Dictionary = {}
+		component["name"] = consideration.consideration_name
+		component["normalized_input"] = normalized_input
+		component["curve"] = curve_multiplier
+		component["weight"] = consideration.weight
+		component["contribution"] = contribution
+		components.append(component)
+		# Update the total score with this consideration's contribution.
 		score += contribution
-		(
-			components
-			. append(
-				{
-					"name": consideration.consideration_name,
-					"normalized_input": normalized_input,
-					"curve": curve_multiplier,
-					"weight": consideration.weight,
-					"contribution": contribution,
-				}
-			)
-		)
 
 	return {
 		"score": score,

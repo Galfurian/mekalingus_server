@@ -85,12 +85,12 @@ static func _evaluate_retreat_necessity(
 	source: MapCombatEntity,
 	context: AIPlanningContext,
 ) -> Dictionary:
-	var combatant: CombatActor = source.combatant
+	var combatant: CombatEntity = source.combatant
 	if not combatant:
 		return {"should_retreat": false, "health_score": 0.0, "threat_score": 0.0}
 
 	# Health score: 1.0 = full health, 0.0 = dead
-	var health_ratio: float = float(combatant.current_health) / float(combatant.max_health)
+	var health_ratio: float = float(combatant.health) / float(combatant.max_health)
 	# Inverted: low health = high retreat score
 	var health_score: float = 1.0 - clampf(health_ratio, 0.0, 1.0)
 

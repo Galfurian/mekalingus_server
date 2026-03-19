@@ -26,8 +26,8 @@ func _format_pos_tag(pos: Vector2i) -> String:
 
 
 func execute(game_map) -> bool:
-	var source_actor: CombatActor = source.combatant
-	var target_actor: CombatActor = target.combatant
+	var source_actor: CombatEntity = source.combatant
+	var target_actor: CombatEntity = target.combatant
 	if source_actor.is_dead() or target_actor.is_dead():
 		return false
 	if not _is_target_in_module_range(game_map):

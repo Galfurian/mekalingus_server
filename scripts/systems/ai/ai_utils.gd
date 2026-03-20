@@ -1,7 +1,11 @@
 extends Node
 
+# =====================================================================
+# AI UTILITY FUNCTIONS
+# =====================================================================
 
-static func get_entity_max_survivability(entity: MapCombatEntity) -> float:
+
+func get_entity_max_survivability(entity: MapCombatEntity) -> float:
 	var max_survivability: float = 0.0
 	max_survivability += entity.combatant.get_stat(Enums.StatType.MAX_HEALTH)
 	max_survivability += entity.combatant.get_stat(Enums.StatType.MAX_ARMOR)
@@ -9,7 +13,7 @@ static func get_entity_max_survivability(entity: MapCombatEntity) -> float:
 	return max_survivability
 
 
-static func get_entity_current_survivability(entity: MapCombatEntity) -> float:
+func get_entity_current_survivability(entity: MapCombatEntity) -> float:
 	var current_survivability: float = 0.0
 	current_survivability += entity.combatant.get_stat(Enums.StatType.HEALTH)
 	current_survivability += entity.combatant.get_stat(Enums.StatType.ARMOR)

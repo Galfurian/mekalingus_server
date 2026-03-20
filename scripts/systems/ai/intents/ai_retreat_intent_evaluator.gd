@@ -5,7 +5,9 @@ const INTENT_LABEL: String = "Retreat"
 const RETREAT_THREAT_WEIGHT: float = 1.0
 const RETREAT_DIRECTION_WEIGHT: float = 0.8
 const RETREAT_MAX_THREAT: float = 100.0
+
 const RETREAT_DEFAULT_DIRECTION_SCORE: float = 0.5
+const RETREAT_FORCE_RATIO_MAX: float = 2.0
 
 
 static func evaluate(context: AIPlanningContext) -> AIPlan:
@@ -22,8 +24,8 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		_log(
 			source,
 			(
-				"no retreat needed: health=%.2f threat=%.2f"
-				% [retreat_decision["health_score"], retreat_decision["threat_score"]]
+				"no retreat needed: survivability=%.2f threat=%.2f"
+				% [retreat_decision["survivability_score"], retreat_decision["threat_score"]]
 			),
 		)
 		return null
@@ -31,8 +33,8 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 	_log(
 		source,
 		(
-			"retreat triggered: health=%.2f threat=%.2f"
-			% [retreat_decision["health_score"], retreat_decision["threat_score"]]
+			"retreat triggered: survivability=%.2f threat=%.2f"
+			% [retreat_decision["survivability_score"], retreat_decision["threat_score"]]
 		),
 	)
 
@@ -102,41 +104,83 @@ static func _evaluate_retreat_necessity(
 ) -> Dictionary:
 	var combatant: CombatEntity = source.combatant
 	if not combatant:
-		return {"should_retreat": false, "health_score": 0.0, "threat_score": 0.0}
+		return {"should_retreat": false, "survivability_score": 0.0, "threat_score": 0.0}
 
-	# Health score: 1.0 = full health, 0.0 = dead
-	var health_ratio: float = float(combatant.health) / float(combatant.max_health)
-	# Inverted: low health = high retreat score
-	var health_score: float = 1.0 - clampf(health_ratio, 0.0, 1.0)
+	# Get the maximum survivability score.
+	var max_survivability: float = AIUtils.get_entity_max_survivability(source)
+	# Get the current survivability score.
+	var current_survivability: float = AIUtils.get_entity_current_survivability(source)
+	# Surivability ratio: 1.0 = full health, 0.0 = dead
+	var survivability_ratio: float = float(current_survivability) / float(max_survivability)
+	# Inverted: low survivability = high retreat score
+	var survivability_score: float = 1.0 - clampf(survivability_ratio, 0.0, 1.0)
 
-	# Threat score: how dangerous is current position? (0.0 to 1.0)
+	# Threat score: how dangerous is the local force balance (0.0..1.0)
+	var force_data: Dictionary = _calculate_force_retreat_pressure(context)
+	var force_ratio: float = force_data["force_ratio"]
+	var threat_score: float = force_data["normalized"]
+	var ally_power: float = force_data["ally_power"]
+	var enemy_power: float = force_data["enemy_power"]
+
+	# Optional local map threat still available for debug (not used in final formula)
 	var current_threat: float = context.get_threat(source.position)
-	var threat_score: float = clampf(current_threat / 100.0, 0.0, 1.0)
 
-	# Simple logic: retreat if EITHER is high (health critical OR threat extreme)
+	# Simple logic: retreat if EITHER is high (health critical OR force disadvantage)
 	# Threshold: combined score > 1.0 triggers retreat
-	var combined_score: float = health_score + threat_score
+	var combined_score: float = survivability_score + threat_score
 	var should_retreat: bool = combined_score > 1.0
 	_log(
 		source,
 		(
-			"retreat necessity calc (health=%.2f [%.2f/%.2f] threat=%.2f [%.2f] combined=%.2f)"
+			"retreat necessity calc (survivability=%.2f [%.1f/%.1f] force=%.2f [enemy=%.1f ally=%.1f] map=%.1f combined=%.2f)"
 			% [
-				health_score,
-				combatant.health,
-				combatant.max_health,
-				threat_score,
+				survivability_score,
+				current_survivability,
+				max_survivability,
+				force_ratio,
+				enemy_power,
+				ally_power,
 				current_threat,
-				combined_score
+				combined_score,
 			]
 		)
 	)
 
 	return {
 		"should_retreat": should_retreat,
-		"health_score": health_score,
+		"survivability_score": survivability_score,
 		"threat_score": threat_score,
+		"combat_power_ratio": force_ratio,
 		"combined_score": combined_score,
+	}
+
+
+## Combat power-based enemy pressure: 0 (friendly dominates) .. 1 (enemies dominate 2x or more).
+static func _calculate_force_retreat_pressure(
+	context: AIPlanningContext,
+) -> Dictionary:
+	var active_allies: Array[MapCombatEntity] = context.get_allies_with_self()
+	var total_ally_power: float = 0.0
+	for ally: MapCombatEntity in active_allies:
+		if ally and ally.combatant and not ally.combatant.is_dead():
+			total_ally_power += AIForceScaling.get_scaled_combat_power(ally.combatant)
+
+	var total_enemy_power: float = 0.0
+	for enemy: MapCombatEntity in context.get_enemies():
+		if not enemy or enemy.combatant.is_dead():
+			continue
+		total_enemy_power += AIForceScaling.get_scaled_combat_power(enemy.combatant)
+
+	if total_ally_power <= 0.0:
+		total_ally_power = 1.0
+
+	var force_ratio: float = total_enemy_power / total_ally_power
+	var normalized_force: float = clampf(force_ratio / RETREAT_FORCE_RATIO_MAX, 0.0, 1.0)
+	return {
+		"force_ratio": force_ratio,
+		"normalized": normalized_force,
+		"ally_power": total_ally_power,
+		"enemy_power": total_enemy_power,
 	}
 
 

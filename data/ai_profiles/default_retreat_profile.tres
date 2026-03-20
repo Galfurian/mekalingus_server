@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/systems/ai/considerations/utility_module_effectiveness_consideration.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/systems/ai/considerations/local_force_superiority_consideration.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/systems/ai/considerations/retreat_direction_consideration.gd" id="6"]
 
 [sub_resource type="Curve" id="1"]
 _data = [Vector2(0, 1), 0.0, -1.8, 0, 0, Vector2(1, 0), -1.8, 0.0, 0, 0]
@@ -41,17 +42,27 @@ response_curve = SubResource("7")
 _data = [Vector2(0, 0.2), 1.3, 0.0, 0, 0, Vector2(0.5, 0.7), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 3
 
+[sub_resource type="Curve" id="8"]
+_data = [Vector2(0, 0), 0.0, 1.0, 0, 0, Vector2(1, 1), 1.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="Resource" id="6"]
 script = ExtResource("4")
 consideration_name = "utility_module_effectiveness"
 weight = 8.0
 response_curve = SubResource("3")
 
+[sub_resource type="Resource" id="8"]
+script = ExtResource("6")
+consideration_name = "retreat_direction"
+weight = 12.8
+response_curve = SubResource("8")
+
 [resource]
 script = ExtResource("1")
 profile_name = "default_retreat_profile"
 preliminary_considerations = Array[Resource]([SubResource("4"), SubResource("5"), SubResource("7")])
-final_considerations = Array[Resource]([SubResource("4"), SubResource("5"), SubResource("6")])
+final_considerations = Array[Resource]([SubResource("4"), SubResource("5"), SubResource("6"), SubResource("8")])
 max_targets_to_narrow_phase = 4
 in_range_los_bonus = 0.0
 reachable_bonus = 7.0

@@ -38,7 +38,13 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		),
 	)
 
-	# Phase 2: Find safest reachable retreat tile
+	# Phase 2: Resolve retreat profile for dynamic scoring
+	var profile: AIActionProfile = AITacticalBrainResolver.resolve_retreat_profile(source)
+	if not profile:
+		_log(source, "intent unavailable: missing retreat profile")
+		return null
+
+	# Phase 3: Find safest reachable retreat tile
 	var enemy_centroid: Vector2 = _get_known_enemy_centroid(source, context)
 	if enemy_centroid != Vector2.ZERO:
 		var centroid_tile: Vector2i = Vector2i(round(enemy_centroid.x), round(enemy_centroid.y))
@@ -51,32 +57,36 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		_log(source, "intent unavailable: no reachable tiles")
 		return null
 
-	var best_tile: Vector2i = _find_safest_retreat_tile(
+	var tile_evaluation_result: Dictionary = _find_safest_retreat_tile(
 		source,
 		context,
+		profile,
 		reachable_tiles,
-		enemy_centroid,
 	)
+	var best_tile: Vector2i = tile_evaluation_result["tile"]
+	var best_score: float = tile_evaluation_result["score"]
+
 	if best_tile == source.position:
 		_log(source, "no safe retreat destination found")
 		return null
 
-	# Phase 3: Select utility module for escape
+	# Phase 4: Select utility module for escape
 	var utility_modules: Array[EquippedModule] = context.get_utility_modules()
 
 	var selected_module: EquippedModule = _select_retreat_module(
 		source, context, best_tile, utility_modules
 	)
 
-	# Phase 4: Log escape plan
+	# Phase 5: Log escape plan
 	_log(
 		source,
 		(
-			"retreating to %s (threat: current=%.2f dest=%.2f)"
+			"retreating to %s (threat: current=%.2f dest=%.2f) score=%.2f"
 			% [
 				MetaTag.pos_tag(best_tile),
 				context.get_threat(source.position),
 				context.get_threat(best_tile),
+				best_score,
 			]
 		)
 	)
@@ -88,7 +98,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		. build_plan(
 			context,
 			AIPlan.Intent.RETREAT,
-			75.0,
+			clampf(best_score, 0.0, 100.0),
 			source,
 			selected_module,
 			best_tile,
@@ -132,7 +142,8 @@ static func _evaluate_retreat_necessity(
 	_log(
 		source,
 		(
-			"retreat necessity calc (survivability=%.2f [%.1f/%.1f] force=%.2f [enemy=%.1f ally=%.1f] map=%.1f combined=%.2f)"
+			"retreat necessity calc (survivability=%.2f [%.1f/%.1f] "
+			+ "force=%.2f [enemy=%.1f ally=%.1f] map=%.1f combined=%.2f)"
 			% [
 				survivability_score,
 				current_survivability,
@@ -221,47 +232,17 @@ static func _get_known_enemy_centroid(
 	return Vector2.ZERO
 
 
-## Score direction for retreat: 0 (into enemy) .. 1 (away from enemy).
-static func _calculate_direction_score(
-	source_pos: Vector2i,
-	tile_pos: Vector2i,
-	enemy_centroid: Vector2,
-) -> float:
-	if enemy_centroid == Vector2.ZERO:
-		return RETREAT_DEFAULT_DIRECTION_SCORE
-
-	var source_dir: Vector2 = Vector2(source_pos) - enemy_centroid
-	var candidate_dir: Vector2 = Vector2(tile_pos) - enemy_centroid
-	if source_dir.length() == 0 or candidate_dir.length() == 0:
-		return RETREAT_DEFAULT_DIRECTION_SCORE
-	source_dir = source_dir.normalized()
-	candidate_dir = candidate_dir.normalized()
-
-	var dot: float = clampf(source_dir.dot(candidate_dir), -1.0, 1.0)
-	return (dot + 1.0) * 0.5
-
-
-static func _calculate_retreat_tile_score(
-	source: MapCombatEntity,
-	context: AIPlanningContext,
-	tile: Vector2i,
-	enemy_centroid: Vector2,
-) -> float:
-	var threat: float = context.get_threat(tile)
-	var threat_score: float = 1.0 - clampf(threat / RETREAT_MAX_THREAT, 0.0, 1.0)
-	var direction_score: float = _calculate_direction_score(source.position, tile, enemy_centroid)
-	return threat_score * RETREAT_THREAT_WEIGHT + direction_score * RETREAT_DIRECTION_WEIGHT
-
-
-## Find the safest reachable tile to retreat to (lowest threat among reachable tiles).
+## Find the safest reachable tile to retreat to using profile-based scoring.
+## Returns dict with "tile" (Vector2i) and "score" (float) for plan builder.
 static func _find_safest_retreat_tile(
 	source: MapCombatEntity,
 	context: AIPlanningContext,
+	profile: AIActionProfile,
 	reachable_tiles: Array[Vector2i],
-	enemy_centroid: Vector2,
-) -> Vector2i:
+) -> Dictionary:
 	var safest_tile: Vector2i = source.position
 	var best_score: float = -INF
+	var best_breakdown: Dictionary = {}
 
 	for tile: Vector2i in reachable_tiles:
 		# Skip occupied tiles
@@ -281,14 +262,50 @@ static func _find_safest_retreat_tile(
 			if path.is_empty():
 				continue
 
-		var tile_score: float = _calculate_retreat_tile_score(source, context, tile, enemy_centroid)
+		# Evaluate tile using profile considerations
+		var evaluation_context: Dictionary = {
+			"source": source,
+			"tile": tile,
+			"planning_context": context,
+		}
+		var tile_score: float = profile.evaluate_final(evaluation_context)
+		_log(source, "option: tile=%s score=%.2f" % [MetaTag.pos_tag(tile), tile_score])
+
 		if tile_score > best_score:
 			best_score = tile_score
 			safest_tile = tile
+			best_breakdown = profile.evaluate_final_breakdown(evaluation_context)
+			_log(
+				source,
+				(
+					"best updated: tile=%s score=%.2f"
+					% [MetaTag.pos_tag(safest_tile), best_score]
+				)
+			)
 
-	_log(source, "selected retreat tile %s score=%.3f" % [MetaTag.pos_tag(safest_tile), best_score])
+	_log(source, "selected retreat tile %s score=%.2f" % [MetaTag.pos_tag(safest_tile), best_score])
 
-	return safest_tile
+	# Log breakdown if available
+	if best_breakdown.has("components"):
+		for component in best_breakdown.components:
+			_log(
+				source,
+				(
+					"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
+					% [
+						component.get("name"),
+						component.get("normalized_input"),
+						component.get("curve"),
+						component.get("weight"),
+						component.get("contribution"),
+					]
+				)
+			)
+
+	return {
+		"tile": safest_tile,
+		"score": best_score,
+	}
 
 
 ## Select utility module for escape (secondary benefit, not part of retreat decision).

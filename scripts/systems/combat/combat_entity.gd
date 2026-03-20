@@ -11,6 +11,7 @@ const AI_THOUGHT_LOG_LIMIT: int = 5_000
 
 var uuid: String = ""
 var alias: String = ""
+var last_enemy_centroid: Vector2 = Vector2.ZERO
 var items: Array[Item] = []
 var slots: Array[int] = []
 var ai_thought_log: Array[String] = []

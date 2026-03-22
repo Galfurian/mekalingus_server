@@ -16,6 +16,13 @@ func _init(_npc_name: String, _clan: Clan) -> void:
 	npc_name = _npc_name
 
 
+func get_name() -> String:
+	"""
+	Returns the name of the NPC owner.
+	"""
+	return npc_name
+
+
 func is_player() -> bool:
 	"""
 	By default, NPCs are not players.

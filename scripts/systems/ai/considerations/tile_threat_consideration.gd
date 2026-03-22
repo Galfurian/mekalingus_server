@@ -12,7 +12,7 @@ func get_normalized_input(context: Dictionary) -> float:
 		return 0.0
 
 	var tile: Vector2i = context.get("tile", source.position)
-	var threat: float = planning_context.get_threat(tile)
+	var threat: float = planning_context.get_tile_threat_score(source, tile)
 	if DEFAULT_MAX_THREAT <= 0.0:
 		return 0.0
 

@@ -8,18 +8,20 @@ static func _log(source: MapCombatEntity, message: String) -> void:
 	_add_thought(source, "%s %s" % [INTENT_LABEL, message])
 
 
-static func evaluate(context: AIPlanningContext) -> AIPlan:
-	_add_thought(context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()])
-	var source: MapCombatEntity = context.source
+static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
+	_add_thought(
+		planning_context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()]
+	)
+	var source: MapCombatEntity = planning_context.source
 	var profile: AIActionProfile = AITacticalBrainResolver.resolve_support_profile(source)
 	if not profile:
 		return null
 
-	var utility_modules: Array[EquippedModule] = context.get_utility_modules()
+	var utility_modules: Array[EquippedModule] = planning_context.get_unit_utility_modules()
 	if utility_modules.is_empty():
 		return null
 
-	var allies_with_self: Array[MapCombatEntity] = context.get_allies_with_self()
+	var allies_with_self: Array[MapCombatEntity] = planning_context.get_allies(true)
 	var max_module_range: int = _get_max_module_range(source, utility_modules)
 	var max_candidate_distance: int = source.combatant.speed + max_module_range
 	var candidate_targets: Array[Dictionary] = []
@@ -31,7 +33,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		var preliminary_context: Dictionary = {
 			"source": source,
 			"target": target,
-			"planning_context": context,
+			"planning_context": planning_context,
 			"tile": source.position,
 			"max_distance": float(max_candidate_distance),
 		}
@@ -96,7 +98,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 
 			if not can_use_from_source:
 				var move_data: Dictionary = _find_support_destination(
-					context,
+					planning_context,
 					source,
 					target,
 					module_range,
@@ -109,7 +111,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 				"source": source,
 				"target": target,
 				"module": equipped_module.module,
-				"planning_context": context,
+				"planning_context": planning_context,
 				"tile": destination,
 				"max_distance": float(max_candidate_distance),
 			}
@@ -161,7 +163,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		"source": source,
 		"target": best_target,
 		"module": best_equipped_module.module,
-		"planning_context": context,
+		"planning_context": planning_context,
 		"tile": best_destination,
 	}
 	var support_breakdown: Dictionary = profile.evaluate_final_breakdown(support_breakdown_context)
@@ -190,35 +192,33 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			),
 		)
 	_log(source, "scored %.2f" % best_score)
-	return (
-		AIPlanBuilder
-		. build_plan(
-			context,
-			AIPlan.Intent.SUPPORT,
-			clampf(best_score, 0.0, 100.0),
-			best_target,
-			best_equipped_module,
-			best_destination,
-		)
+	return AIPlanBuilder.build_plan(
+		source,
+		planning_context.get_game_map(),
+		AIPlan.Intent.SUPPORT,
+		clampf(best_score, 0.0, 100.0),
+		best_target,
+		best_equipped_module,
+		best_destination
 	)
 
 
 static func _find_support_destination(
-	context: AIPlanningContext,
+	planning_context: AIPlanningContext,
 	source: MapCombatEntity,
 	target: MapCombatEntity,
 	module_range: int,
 ) -> Dictionary:
 	var candidate_tiles: Array[Dictionary] = []
-	for tile: Vector2i in context.get_reachable_tiles():
-		if tile != source.position and context.game_map.is_occupied(tile):
+	for tile: Vector2i in planning_context.get_reachable_tiles():
+		if tile != source.position:
 			continue
 
 		var distance_to_target: int = _manhattan_distance(tile, target.position)
 		if distance_to_target > module_range:
 			continue
 
-		var tile_threat: float = context.get_threat(tile)
+		var tile_threat: float = planning_context.get_tile_threat_score(source, tile)
 		(
 			candidate_tiles
 			. append(
@@ -244,14 +244,7 @@ static func _find_support_destination(
 	)
 
 	var destination: Vector2i = candidate_tiles[0]["tile"]
-	var path: Array[Vector2i] = (
-		AIPathfinder
-		. get_shortest_path(
-			context.game_map,
-			source.position,
-			destination,
-		)
-	)
+	var path: Array[Vector2i] = planning_context.get_path(source.position, destination)
 	if path.is_empty():
 		return {
 			"reachable": false,

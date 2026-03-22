@@ -49,26 +49,3 @@ static func _score_module_threat(module: ItemModule) -> float:
 		score += effect.get_threat_score()
 	return score
 
-
-static func can_reach_target_this_turn(
-	game_map,
-	source: MapCombatEntity,
-	target: MapCombatEntity,
-	range_min: int,
-	range_max: int,
-	max_movement: int,
-) -> bool:
-	"""
-	Determines if the source can reach a tile from which it can attack the target this turn.
-	"""
-	var reachable_tiles: Array[Vector2i] = AIPathfinder.get_reachable_tiles(
-		game_map, source.position, max_movement
-	)
-	for tile: Vector2i in reachable_tiles:
-		if game_map.is_occupied(tile):
-			continue
-
-		var distance: float = tile.distance_to(target.position)
-		if distance >= range_min and distance <= range_max:
-			return true
-	return false

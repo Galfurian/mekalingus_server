@@ -9,25 +9,19 @@ static func _log(source: MapCombatEntity, message: String) -> void:
 	_add_thought(source, "%s %s" % [INTENT_LABEL, message])
 
 
-static func evaluate(context: AIPlanningContext) -> AIPlan:
-	_add_thought(context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()])
-	var source: MapCombatEntity = context.source
-	var sensor_range: int = context.source.combatant.get_sensor_range()
-
-	var visible_enemies: Array[MapCombatEntity] = (
-		AIUnitQueries
-		. get_enemies_in_range(
-			context.game_map,
-			source,
-			source.position,
-			sensor_range,
-		)
+static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
+	_add_thought(
+		planning_context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()]
 	)
+	var source: MapCombatEntity = planning_context.source
+
+	var visible_enemies: Array[MapCombatEntity] = planning_context.get_enemies()
+
 	if visible_enemies.is_empty():
-		_log(source, "intent unavailable: no visible enemies in sensor range (%d)" % sensor_range)
+		_log(source, "intent unavailable: no visible enemies in sensor range")
 		return null
 
-	var offensive_modules: Array[EquippedModule] = context.get_offensive_modules()
+	var offensive_modules: Array[EquippedModule] = planning_context.get_unit_offensive_modules()
 	if offensive_modules.is_empty():
 		_log(source, "intent unavailable: no offensive modules available")
 		return null
@@ -82,16 +76,12 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		func(a: Dictionary, b: Dictionary): return a["preliminary_score"] > b["preliminary_score"]
 	)
 
-	var los_cache: Dictionary = {}
 	var best_score: float = -INF
 	var best_in_range: bool = false
 	var best_target: MapCombatEntity = null
 	var best_equipped_module: EquippedModule = null
 	var best_destination: Vector2i = Vector2i.ZERO
-	var max_targets: int = mini(
-		profile.get_max_targets_to_narrow_phase(),
-		candidate_targets.size(),
-	)
+	var max_targets: int = mini(profile.get_max_targets_to_narrow_phase(), candidate_targets.size())
 
 	for candidate_index in range(max_targets):
 		var candidate: Dictionary = candidate_targets[candidate_index]
@@ -104,12 +94,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			),
 		)
 
-		var has_los_from_source: bool = _get_or_compute_los(
-			context,
-			source,
-			target,
-			los_cache,
-		)
+		var has_los: bool = planning_context.has_line_of_sight(source.position, target.position)
 
 		for equipped_module: EquippedModule in offensive_modules:
 			var module_range: int = (
@@ -119,15 +104,13 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			var min_range: int = AIUtils.get_offensive_min_range(module_range)
 			var source_distance: int = _manhattan_distance(source.position, target.position)
 			var can_attack_from_source: bool = (
-				has_los_from_source
-				and source_distance >= min_range
-				and source_distance <= module_range
+				has_los and source_distance >= min_range and source_distance <= module_range
 			)
 			var destination: Vector2i = source.position
 
 			if not can_attack_from_source:
 				var move_data: Dictionary = _find_attack_destination_with_los(
-					context,
+					planning_context,
 					source,
 					target,
 					min_range,
@@ -244,50 +227,26 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 
 	_log(source, "scored %.2f" % best_score)
 
-	return (
-		AIPlanBuilder
-		. build_plan(
-			context,
-			AIPlan.Intent.ATTACK,
-			clampf(best_score, 0.0, 100.0),
-			best_target,
-			best_equipped_module,
-			best_destination,
-		)
+	return AIPlanBuilder.build_plan(
+		source,
+		planning_context.get_game_map(),
+		AIPlan.Intent.ATTACK,
+		clampf(best_score, 0.0, 100.0),
+		best_target,
+		best_equipped_module,
+		best_destination
 	)
-
-
-static func _get_or_compute_los(
-	context: AIPlanningContext,
-	source: MapCombatEntity,
-	target: MapCombatEntity,
-	los_cache: Dictionary,
-) -> bool:
-	var cache_key: String = target.combatant.uuid
-	if los_cache.has(cache_key):
-		return los_cache[cache_key]
-
-	var has_los: bool = _has_line_of_sight(
-		context.game_map,
-		source.position,
-		target.position,
-	)
-	los_cache[cache_key] = has_los
-	return has_los
 
 
 static func _find_attack_destination_with_los(
-	context: AIPlanningContext,
+	planning_context: AIPlanningContext,
 	source: MapCombatEntity,
 	target: MapCombatEntity,
 	min_range: int,
 	max_range: int,
 ) -> Dictionary:
 	var candidate_tiles: Array[Dictionary] = []
-	for tile: Vector2i in context.get_reachable_tiles():
-		if tile != source.position and context.game_map.is_occupied(tile):
-			continue
-
+	for tile: Vector2i in planning_context.get_reachable_tiles():
 		var distance_to_target: int = _manhattan_distance(tile, target.position)
 		if distance_to_target < min_range or distance_to_target > max_range:
 			continue
@@ -317,7 +276,7 @@ static func _find_attack_destination_with_los(
 
 	for tile_index in range(max_los_candidates):
 		var tile: Vector2i = candidate_tiles[tile_index]["tile"]
-		if _has_line_of_sight(context.game_map, tile, target.position):
+		if planning_context.has_line_of_sight(tile, target.position):
 			destination = tile
 			break
 
@@ -327,14 +286,7 @@ static func _find_attack_destination_with_los(
 			"destination": Vector2i.ZERO,
 		}
 
-	var path: Array[Vector2i] = (
-		AIPathfinder
-		. get_shortest_path(
-			context.game_map,
-			source.position,
-			destination,
-		)
-	)
+	var path: Array[Vector2i] = planning_context.get_path(source.position, destination)
 	if path.is_empty():
 		return {
 			"reachable": false,
@@ -345,44 +297,6 @@ static func _find_attack_destination_with_los(
 		"reachable": true,
 		"destination": destination,
 	}
-
-
-static func _has_line_of_sight(game_map, from_tile: Vector2i, to_tile: Vector2i) -> bool:
-	if from_tile == to_tile:
-		return true
-
-	var x0: int = from_tile.x
-	var y0: int = from_tile.y
-	var x1: int = to_tile.x
-	var y1: int = to_tile.y
-	var dx: int = absi(x1 - x0)
-	var dy: int = -absi(y1 - y0)
-	var step_x: int = 1 if x0 < x1 else -1
-	var step_y: int = 1 if y0 < y1 else -1
-	var error: int = dx + dy
-
-	while true:
-		var tile: Vector2i = Vector2i(x0, y0)
-		if tile != from_tile and tile != to_tile:
-			if not game_map.is_in_bounds(tile):
-				return false
-			if game_map.is_tile_blocked_for_pathfinding(tile):
-				return false
-			if game_map.get_blocking_entity_at(tile):
-				return false
-
-		if x0 == x1 and y0 == y1:
-			break
-
-		var e2: int = 2 * error
-		if e2 >= dy:
-			error += dy
-			x0 += step_x
-		if e2 <= dx:
-			error += dx
-			y0 += step_y
-
-	return true
 
 
 static func _get_max_module_range(

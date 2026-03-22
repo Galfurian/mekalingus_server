@@ -2,25 +2,29 @@ class_name AIRepositionIntentEvaluator
 extends RefCounted
 
 
-static func evaluate(context: AIPlanningContext) -> AIPlan:
-	_add_thought(context.source, "----- Evaluating REPOSITION intent -----")
-	var source: MapCombatEntity = context.source
+static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
+	_add_thought(planning_context.source, "----- Evaluating REPOSITION intent -----")
+	var source: MapCombatEntity = planning_context.source
 	if not source.can_move():
 		return null
-	if not context.get_enemies().is_empty():
+	if not planning_context.get_enemies().is_empty():
 		return null
+	# Get the game map.
+	var game_map: GameMap = planning_context.get_game_map()
 
-	var owner_key: String = context.game_map.get_owner_key(source.owner)
+	# Get the owner key for the source unit.
+	var owner_key: String = game_map.get_owner_key(source.owner)
 	if owner_key.is_empty():
 		return null
 
-	var state: RefCounted = context.game_map.directive_planner.get_owner_directive_by_key(
+	# Get the directive state for the source unit's owner.
+	var state: RefCounted = game_map.directive_planner.get_owner_directive_by_key(
 		owner_key, source.position
 	)
 	if not state:
 		return null
 
-	var squad_center: Vector2i = context.get_squad_center(source.position)
+	var squad_center: Vector2i = planning_context.get_squad_center()
 	var destination: Vector2i = source.position
 	var score: float = 0.0
 
@@ -30,7 +34,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 			if hold_anchor == Vector2i.ZERO:
 				hold_anchor = squad_center
 			destination = _pick_destination_for_objective(
-				context,
+				planning_context,
 				hold_anchor,
 				hold_anchor,
 				hold_anchor,
@@ -43,7 +47,13 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		NpcDirectiveState.Directive.PATROL:
 			var patrol_target: Vector2i = state.get_patrol_target()
 			destination = _pick_destination_for_objective(
-				context, squad_center, patrol_target, Vector2i.ZERO, 0, state.compact_radius, false
+				planning_context,
+				squad_center,
+				patrol_target,
+				Vector2i.ZERO,
+				0,
+				state.compact_radius,
+				false
 			)
 			score = AITuning.REPOSITION_PATROL_SCORE
 
@@ -54,12 +64,18 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		return null
 
 	return AIPlanBuilder.build_plan(
-		context, AIPlan.Intent.REPOSITION, score, null, null, destination
+		source,
+		planning_context.get_game_map(),
+		AIPlan.Intent.REPOSITION,
+		score,
+		null,
+		null,
+		destination
 	)
 
 
 static func _pick_destination_for_objective(
-	context: AIPlanningContext,
+	planning_context: AIPlanningContext,
 	squad_center: Vector2i,
 	objective: Vector2i,
 	leash_center: Vector2i,
@@ -67,19 +83,17 @@ static func _pick_destination_for_objective(
 	compact_radius: int,
 	prefer_low_threat: bool
 ) -> Vector2i:
-	var source: MapCombatEntity = context.source
+	var source: MapCombatEntity = planning_context.source
 	var best_tile: Vector2i = source.position
 	var best_score: float = -INF
 
-	for tile: Vector2i in context.get_reachable_tiles():
-		if context.game_map.is_occupied(tile):
-			continue
+	for tile: Vector2i in planning_context.get_reachable_tiles():
 		if leash_center != Vector2i.ZERO and tile.distance_to(leash_center) > leash_radius:
 			continue
 		if tile.distance_to(squad_center) > compact_radius:
 			continue
 
-		var threat: float = context.get_threat(tile)
+		var threat: float = planning_context.get_tile_threat_score(source, tile)
 		var objective_distance: float = tile.distance_to(objective)
 		var cohesion_distance: float = tile.distance_to(squad_center)
 

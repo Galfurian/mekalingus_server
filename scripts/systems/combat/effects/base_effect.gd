@@ -75,7 +75,7 @@ func get_effect_type_label() -> String:
 
 
 func get_threat_score() -> float:
-	return 2.0
+	return 0.0
 
 
 func apply(_actor) -> void:

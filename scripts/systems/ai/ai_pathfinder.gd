@@ -151,7 +151,10 @@ static func get_distance(game_map, from: Vector2i, to: Vector2i) -> float:
 
 
 static func find_furthest_progress_along_path(
-	game_map, start: Vector2i, target: Vector2i, max_movement: int
+	game_map,
+	start: Vector2i,
+	target: Vector2i,
+	max_movement: int,
 ) -> Vector2i:
 	"""
 	Returns the farthest tile along the path toward the target that the unit

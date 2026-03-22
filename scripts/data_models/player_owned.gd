@@ -13,6 +13,13 @@ func _init(_player: Player, _clan: Clan) -> void:
 	player = _player
 
 
+func get_name() -> String:
+	"""
+	Returns the name of the player owner.
+	"""
+	return player.name
+
+
 func is_player() -> bool:
 	"""
 	By default, players are players.

@@ -15,7 +15,10 @@ func get_effect_type_label() -> String:
 
 
 func get_threat_score() -> float:
-	return float(amount)
+	"""
+	Normalized threat score based on the amount of damage dealt.
+	"""
+	return clampf(float(amount) / 100.0, 0.0, 1.0)
 
 
 func get_ai_offensive_priority(_target) -> int:

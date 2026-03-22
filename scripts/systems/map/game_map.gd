@@ -425,6 +425,17 @@ func remove_map_entity(entity: MapEntity) -> bool:
 	return false
 
 
+func get_all_combat_entities() -> Array[MapCombatEntity]:
+	var entities: Array[MapCombatEntity] = []
+	for entity in npc_units.values():
+		if entity and entity.combatant and entity.combatant.is_alive():
+			entities.append(entity)
+	for entity in player_units.values():
+		if entity and entity.combatant and entity.combatant.is_alive():
+			entities.append(entity)
+	return entities
+
+
 func has_hostile_pairs() -> bool:
 	"""
 	Returns true if at least one pair of living combat entities can attack each other.

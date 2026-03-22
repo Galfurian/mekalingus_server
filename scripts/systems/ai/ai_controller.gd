@@ -13,10 +13,10 @@ const ENABLE_ACTION_RECOVERY: bool = true
 # =============================================================================
 
 # A reference to the game map.
-var game_map: Object
-
+var game_map: GameMap
 # Create a planner instance and generate a plan.
-var _planner: AIPlanner = AIPlanner.new()
+var planner: AIPlanner
+
 # The current plans for the AI.
 var _current_plans: Dictionary[String, AIPlan] = {}
 # The orders for offensive modules.
@@ -27,19 +27,19 @@ var _use_utility_module_orders: Dictionary[String, UseUtilityModuleOrder] = {}
 var _move_orders: Dictionary[String, MoveOrder] = {}
 # Tiles reserved by queued movement to reduce allied collisions.
 var _reserved_move_tiles: Dictionary = {}
-# Turn-scoped cache to reduce repeated queries across unit planning.
-var _turn_context: RefCounted = null
 
 # =============================================================================
 # GENERIC FUNCTIONS
 # =============================================================================
 
 
-func _init(p_game_map) -> void:
+func _init(p_game_map: GameMap) -> void:
 	"""
 	Initialize the AI controller with a game map.
 	"""
+	assert(p_game_map, "AIController requires a valid GameMap reference.")
 	game_map = p_game_map
+	planner = AIPlanner.new(p_game_map)
 
 
 func log_message(msg: String) -> void:
@@ -54,9 +54,10 @@ func clear() -> void:
 	Clears the internal state of the AI controller.
 	"""
 	_current_plans.clear()
+	_use_offensive_module_orders.clear()
+	_use_utility_module_orders.clear()
+	_move_orders.clear()
 	_reserved_move_tiles.clear()
-	_turn_context = null
-	_clear_orders()
 
 
 func _add_action_log(message: String) -> void:
@@ -252,14 +253,7 @@ func plan_for_unit(source: MapCombatEntity) -> void:
 		return
 
 	# Generate the plan for the source unit.
-	var new_plan: AIPlan = (
-		_planner
-		. generate_plan(
-			source,
-			game_map,
-			_turn_context,
-		)
-	)
+	var new_plan: AIPlan = planner.generate_plan(source)
 
 	if not new_plan or not new_plan.is_valid():
 		return
@@ -378,7 +372,6 @@ func generate_ai_orders() -> void:
 	Generates and queues one order for each AI-controlled combat entity.
 	"""
 	_reserved_move_tiles.clear()
-	_turn_context = AITurnContext.new(game_map)
 	game_map.directive_planner.advance_patrol_directives()
 	var units: Array[MapCombatEntity] = _iter_ai_controlled_entities()
 	units.sort_custom(
@@ -392,8 +385,6 @@ func generate_ai_orders() -> void:
 		# Generate the next order based on the current plan.
 		generate_orders_for_unit(unit)
 
-	_turn_context = null
-
 
 func precompute_next_turn_plans() -> void:
 	"""
@@ -406,12 +397,9 @@ func precompute_next_turn_plans() -> void:
 		return
 
 	_reserved_move_tiles.clear()
-	_turn_context = AITurnContext.new(game_map)
 
 	for unit: MapCombatEntity in _iter_ai_controlled_entities():
 		plan_for_unit(unit)
-
-	_turn_context = null
 
 
 func _filter_order_with_dead_mek(_key: String, order) -> bool:
@@ -423,16 +411,6 @@ func _filter_order_with_dead_mek(_key: String, order) -> bool:
 	if is_instance_of(order, MoveOrder):
 		return order.source.combatant.is_dead()
 	return false
-
-
-func _clear_orders() -> void:
-	"""
-	Clears all orders for the AI controller.
-	"""
-	_use_offensive_module_orders.clear()
-	_use_utility_module_orders.clear()
-	_move_orders.clear()
-	_reserved_move_tiles.clear()
 
 
 func _tile_key(tile: Vector2i) -> String:

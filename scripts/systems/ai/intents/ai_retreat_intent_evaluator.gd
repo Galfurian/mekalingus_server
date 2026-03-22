@@ -10,16 +10,18 @@ const RETREAT_DEFAULT_DIRECTION_SCORE: float = 0.5
 const RETREAT_FORCE_RATIO_MAX: float = 2.0
 
 
-static func evaluate(context: AIPlanningContext) -> AIPlan:
-	_add_thought(context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()])
+static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
+	_add_thought(
+		planning_context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()]
+	)
 
-	var source: MapCombatEntity = context.source
+	var source: MapCombatEntity = planning_context.source
 	if not source.can_move():
 		_log(source, "intent unavailable: cannot move")
 		return null
 
 	# Phase 1: Decide IF we should retreat from current tile (self_health + current_threat only)
-	var retreat_decision: Dictionary = _evaluate_retreat_necessity(source, context)
+	var retreat_decision: Dictionary = _evaluate_retreat_necessity(source, planning_context)
 	if not retreat_decision["should_retreat"]:
 		_log(
 			source,
@@ -45,21 +47,21 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		return null
 
 	# Phase 3: Find safest reachable retreat tile
-	var enemy_centroid: Vector2 = _get_known_enemy_centroid(source, context)
+	var enemy_centroid: Vector2 = _get_known_enemy_centroid(source, planning_context)
 	if enemy_centroid != Vector2.ZERO:
 		var centroid_tile: Vector2i = Vector2i(round(enemy_centroid.x), round(enemy_centroid.y))
 		_log(source, "enemy centroid found at %s" % [MetaTag.pos_tag(centroid_tile)])
 	else:
 		_log(source, "no enemy centroid available (visible or remembered)")
 
-	var reachable_tiles: Array[Vector2i] = context.get_reachable_tiles()
+	var reachable_tiles: Array[Vector2i] = planning_context.get_reachable_tiles()
 	if reachable_tiles.is_empty():
 		_log(source, "intent unavailable: no reachable tiles")
 		return null
 
 	var tile_evaluation_result: Dictionary = _find_safest_retreat_tile(
 		source,
-		context,
+		planning_context,
 		profile,
 		reachable_tiles,
 	)
@@ -71,38 +73,25 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 		return null
 
 	# Phase 4: Select utility module for escape
-	var utility_modules: Array[EquippedModule] = context.get_utility_modules()
+	var utility_modules: Array[EquippedModule] = planning_context.get_unit_utility_modules()
 
 	var selected_module: EquippedModule = _select_retreat_module(
-		source, context, best_tile, utility_modules
+		source, planning_context, best_tile, utility_modules
 	)
 
 	# Phase 5: Log escape plan
-	_log(
-		source,
-		(
-			"retreating to %s (threat: current=%.2f dest=%.2f) score=%.2f"
-			% [
-				MetaTag.pos_tag(best_tile),
-				context.get_threat(source.position),
-				context.get_threat(best_tile),
-				best_score,
-			]
-		)
-	)
+	_log(source, "retreating to %s score=%.2f" % [MetaTag.pos_tag(best_tile), best_score])
 	if selected_module:
 		_log(source, "with module: %s" % [selected_module.get_chat_tag()])
 
-	return (
-		AIPlanBuilder
-		. build_plan(
-			context,
-			AIPlan.Intent.RETREAT,
-			clampf(best_score, 0.0, 100.0),
-			source,
-			selected_module,
-			best_tile,
-		)
+	return AIPlanBuilder.build_plan(
+		source,
+		planning_context.get_game_map(),
+		AIPlan.Intent.RETREAT,
+		clampf(best_score, 0.0, 100.0),
+		source,
+		selected_module,
+		best_tile
 	)
 
 
@@ -110,7 +99,7 @@ static func evaluate(context: AIPlanningContext) -> AIPlan:
 ## Returns dict with "should_retreat" bool and component scores.
 static func _evaluate_retreat_necessity(
 	source: MapCombatEntity,
-	context: AIPlanningContext,
+	planning_context: AIPlanningContext,
 ) -> Dictionary:
 	var combatant: CombatEntity = source.combatant
 	if not combatant:
@@ -126,14 +115,14 @@ static func _evaluate_retreat_necessity(
 	var survivability_score: float = 1.0 - clampf(survivability_ratio, 0.0, 1.0)
 
 	# Threat score: how dangerous is the local force balance (0.0..1.0)
-	var force_data: Dictionary = _calculate_force_retreat_pressure(context)
+	var force_data: Dictionary = _calculate_force_retreat_pressure(planning_context)
 	var force_ratio: float = force_data["force_ratio"]
 	var threat_score: float = force_data["normalized"]
 	var ally_power: float = force_data["ally_power"]
 	var enemy_power: float = force_data["enemy_power"]
 
 	# Optional local map threat still available for debug (not used in final formula)
-	var current_threat: float = context.get_threat(source.position)
+	var current_threat: float = planning_context.get_tile_threat_score()
 
 	# Simple logic: retreat if EITHER is high (health critical OR force disadvantage)
 	# Threshold: combined score > 1.0 triggers retreat
@@ -167,30 +156,26 @@ static func _evaluate_retreat_necessity(
 
 ## Combat power-based enemy pressure: 0 (friendly dominates) .. 1 (enemies dominate 2x or more).
 static func _calculate_force_retreat_pressure(
-	context: AIPlanningContext,
+	planning_context: AIPlanningContext,
 ) -> Dictionary:
-	var active_allies: Array[MapCombatEntity] = context.get_allies_with_self()
-	var total_ally_power: float = 0.0
+	var active_allies: Array[MapCombatEntity] = planning_context.get_allies(true)
+	var total_allies_threat_score: float = 0.0
 	for ally: MapCombatEntity in active_allies:
-		if ally and ally.combatant and not ally.combatant.is_dead():
-			total_ally_power += AIForceScaling.get_scaled_combat_power(ally.combatant)
+		total_allies_threat_score += planning_context.get_unit_threat_score(ally)
+	var total_enemies_threat_score: float = 0.0
+	for enemy: MapCombatEntity in planning_context.get_enemies():
+		total_enemies_threat_score += planning_context.get_unit_threat_score(enemy)
 
-	var total_enemy_power: float = 0.0
-	for enemy: MapCombatEntity in context.get_enemies():
-		if not enemy or enemy.combatant.is_dead():
-			continue
-		total_enemy_power += AIForceScaling.get_scaled_combat_power(enemy.combatant)
+	if total_allies_threat_score <= 0.0:
+		total_allies_threat_score = 1.0
 
-	if total_ally_power <= 0.0:
-		total_ally_power = 1.0
-
-	var force_ratio: float = total_enemy_power / total_ally_power
+	var force_ratio: float = total_enemies_threat_score / total_allies_threat_score
 	var normalized_force: float = clampf(force_ratio / RETREAT_FORCE_RATIO_MAX, 0.0, 1.0)
 	return {
 		"force_ratio": force_ratio,
 		"normalized": normalized_force,
-		"ally_power": total_ally_power,
-		"enemy_power": total_enemy_power,
+		"ally_power": total_allies_threat_score,
+		"enemy_power": total_enemies_threat_score,
 	}
 
 
@@ -216,9 +201,9 @@ static func _compute_enemy_centroid(enemies: Array[MapCombatEntity]) -> Vector2:
 ## Determine which enemy centroid to use (visible > remembered fallback).
 static func _get_known_enemy_centroid(
 	source: MapCombatEntity,
-	context: AIPlanningContext,
+	planning_context: AIPlanningContext,
 ) -> Vector2:
-	var visible_enemies: Array[MapCombatEntity] = context.get_enemies()
+	var visible_enemies: Array[MapCombatEntity] = planning_context.get_enemies()
 	if not visible_enemies.is_empty():
 		var centroid: Vector2 = _compute_enemy_centroid(visible_enemies)
 		if source.combatant:
@@ -235,7 +220,7 @@ static func _get_known_enemy_centroid(
 ## Returns dict with "tile" (Vector2i) and "score" (float) for plan builder.
 static func _find_safest_retreat_tile(
 	source: MapCombatEntity,
-	context: AIPlanningContext,
+	planning_context: AIPlanningContext,
 	profile: AIActionProfile,
 	reachable_tiles: Array[Vector2i],
 ) -> Dictionary:
@@ -244,20 +229,9 @@ static func _find_safest_retreat_tile(
 	var best_breakdown: Dictionary = {}
 
 	for tile: Vector2i in reachable_tiles:
-		# Skip occupied tiles
-		if tile != source.position and context.game_map.is_occupied(tile):
-			continue
-
-		# Verify pathfinding
+		# Verify pathfinding.
 		if tile != source.position:
-			var path: Array[Vector2i] = (
-				AIPathfinder
-				. get_shortest_path(
-					context.game_map,
-					source.position,
-					tile,
-				)
-			)
+			var path: Array[Vector2i] = planning_context.get_path(source.position, tile)
 			if path.is_empty():
 				continue
 
@@ -265,7 +239,7 @@ static func _find_safest_retreat_tile(
 		var evaluation_context: Dictionary = {
 			"source": source,
 			"tile": tile,
-			"planning_context": context,
+			"planning_context": planning_context,
 		}
 		var tile_score: float = profile.evaluate_final(evaluation_context)
 		if tile_score > best_score:

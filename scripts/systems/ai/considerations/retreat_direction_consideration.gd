@@ -43,11 +43,14 @@ func _get_known_enemy_centroid(
 	source: MapCombatEntity,
 	planning_context: AIPlanningContext,
 ) -> Vector2:
-	var visible_enemies: Array[MapCombatEntity] = AIUnitQueries.get_enemies_in_range(
-		planning_context.game_map,
-		source,
-		source.position,
-		source.combatant.get_sensor_range(),
+	var visible_enemies: Array[MapCombatEntity] = (
+		AIUnitQueries
+		. get_enemies_in_range(
+			planning_context.game_map,
+			source,
+			source.position,
+			source.combatant.get_sensor_range(),
+		)
 	)
 
 	if visible_enemies.is_empty():
@@ -55,7 +58,7 @@ func _get_known_enemy_centroid(
 		return source.combatant.last_enemy_centroid
 
 	# Compute centroid of visible enemies
-	var centroid: Vector2 = Vector2.ZERO
+	var centroid: Vector2i = Vector2i.ZERO
 	for enemy: MapCombatEntity in visible_enemies:
 		centroid += enemy.position
 	centroid /= visible_enemies.size()

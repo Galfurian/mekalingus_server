@@ -142,8 +142,7 @@ static func _evaluate_retreat_necessity(
 	_log(
 		source,
 		(
-			"retreat necessity calc (survivability=%.2f [%.1f/%.1f] "
-			+ "force=%.2f [enemy=%.1f ally=%.1f] map=%.1f combined=%.2f)"
+			"retreat necessity calc (survivability=%.2f [%.1f/%.1f] force=%.2f [enemy=%.1f ally=%.1f] map=%.1f combined=%.2f)"
 			% [
 				survivability_score,
 				current_survivability,
@@ -269,8 +268,6 @@ static func _find_safest_retreat_tile(
 			"planning_context": context,
 		}
 		var tile_score: float = profile.evaluate_final(evaluation_context)
-		_log(source, "option: tile=%s score=%.2f" % [MetaTag.pos_tag(tile), tile_score])
-
 		if tile_score > best_score:
 			best_score = tile_score
 			safest_tile = tile
@@ -278,8 +275,8 @@ static func _find_safest_retreat_tile(
 			_log(
 				source,
 				(
-					"best updated: tile=%s score=%.2f"
-					% [MetaTag.pos_tag(safest_tile), best_score]
+					"new best retreat tile candidate: %s score=%.2f (prev=%.2f)"
+					% [MetaTag.pos_tag(tile), tile_score, best_score]
 				)
 			)
 

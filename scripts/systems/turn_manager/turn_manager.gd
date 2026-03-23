@@ -200,6 +200,15 @@ func tick(delta: float) -> void:
 func _execute_turn() -> void:
 	if _is_processing_turn:
 		return
+
+	game_map.combat_logger.add_log(
+		Enums.LogType.SYSTEM,
+		(
+			"===== Combat turn %d started (time of day: %.2f hours) ====="
+			% [_current_turn, get_time_of_day() * 24.0]
+		)
+	)
+
 	_is_processing_turn = true
 	# Reset the timer.
 	_timer = 0.0
@@ -239,13 +248,9 @@ func _execute_turn() -> void:
 	var combat_continues: bool = game_map.has_hostile_pairs()
 	if not combat_continues:
 		_is_active = false
-		(
-			game_map
-			. combat_logger
-			. add_log(
-				Enums.LogType.SYSTEM,
-				"Combat ended on turn %d: no hostile units remain." % _current_turn,
-			)
+		game_map.combat_logger.add_log(
+			Enums.LogType.SYSTEM,
+			"Combat ended on turn %d: no hostile units remain." % _current_turn
 		)
 
 	_is_processing_turn = false

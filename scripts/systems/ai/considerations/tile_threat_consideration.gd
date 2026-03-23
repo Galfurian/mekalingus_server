@@ -5,6 +5,18 @@ extends AIConsideration
 const DEFAULT_MAX_THREAT: float = 100.0
 
 
+func _init() -> void:
+	consideration_name = "tile_threat"
+	allowed_phases = PackedInt32Array(
+		[
+			AIEvaluationContext.Phase.INTENT,
+			AIEvaluationContext.Phase.TILE,
+			AIEvaluationContext.Phase.TARGET,
+		]
+	)
+	required_keys = PackedStringArray(["planning_context", "source"])
+
+
 func get_normalized_input(context: Dictionary) -> float:
 	var planning_context: AIPlanningContext = context.get("planning_context", null)
 	var source: MapCombatEntity = context.get("source", null)

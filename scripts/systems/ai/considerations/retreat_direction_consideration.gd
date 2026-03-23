@@ -2,6 +2,17 @@ class_name RetreatDirectionConsideration
 extends AIConsideration
 
 
+func _init() -> void:
+	consideration_name = "retreat_direction"
+	allowed_phases = PackedInt32Array(
+		[
+			AIEvaluationContext.Phase.INTENT,
+			AIEvaluationContext.Phase.TILE,
+		]
+	)
+	required_keys = PackedStringArray(["planning_context", "source", "tile"])
+
+
 func get_normalized_input(context: Dictionary) -> float:
 	var planning_context: AIPlanningContext = context.get("planning_context")
 	if not planning_context:

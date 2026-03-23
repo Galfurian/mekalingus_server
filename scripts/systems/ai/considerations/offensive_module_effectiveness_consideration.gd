@@ -4,6 +4,12 @@ extends AIConsideration
 const NORMALIZATION_SCALE: float = 120.0
 
 
+func _init() -> void:
+	consideration_name = "offensive_module_effectiveness"
+	allowed_phases = PackedInt32Array([AIEvaluationContext.Phase.TARGET])
+	required_keys = PackedStringArray(["module", "source", "target"])
+
+
 func get_normalized_input(context: Dictionary) -> float:
 	var module: ItemModule = context.get("module", null)
 	var source: MapCombatEntity = context.get("source", null)

@@ -13,11 +13,10 @@ func evaluate(
 
 
 func evaluate_variant(context: Variant) -> float:
-	var normalized_context: Dictionary = _normalize_context(context)
 	var score: float = 0.0
 	for consideration in considerations:
 		if consideration:
-			score += consideration.evaluate(normalized_context)
+			score += consideration.evaluate_variant(context)
 	return score
 
 

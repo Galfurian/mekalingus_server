@@ -2,6 +2,18 @@ class_name SourceSurvivabilityConsideration
 extends AIConsideration
 
 
+func _init() -> void:
+	consideration_name = "source_survivability"
+	allowed_phases = PackedInt32Array(
+		[
+			AIEvaluationContext.Phase.INTENT,
+			AIEvaluationContext.Phase.TILE,
+			AIEvaluationContext.Phase.TARGET,
+		]
+	)
+	required_keys = PackedStringArray(["source"])
+
+
 func get_normalized_input(context: Dictionary) -> float:
 	var source: MapCombatEntity = context.get("source", null)
 	if not source:

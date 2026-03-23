@@ -2,6 +2,12 @@ class_name TargetDistanceConsideration
 extends AIConsideration
 
 
+func _init() -> void:
+	consideration_name = "target_distance"
+	allowed_phases = PackedInt32Array([AIEvaluationContext.Phase.TARGET])
+	required_keys = PackedStringArray(["source", "target", "max_distance"])
+
+
 func get_normalized_input(context: Dictionary) -> float:
 	var source: MapCombatEntity = context.get("source", null)
 	var target: MapCombatEntity = context.get("target", null)

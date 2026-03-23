@@ -4,6 +4,12 @@ class_name TargetSurvivabilityConsideration
 extends AIConsideration
 
 
+func _init() -> void:
+	consideration_name = "target_survivability"
+	allowed_phases = PackedInt32Array([AIEvaluationContext.Phase.TARGET])
+	required_keys = PackedStringArray(["target"])
+
+
 func get_normalized_input(context: Dictionary) -> float:
 	var target: MapCombatEntity = context.get("target", null)
 	if not target:

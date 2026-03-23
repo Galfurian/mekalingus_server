@@ -5,6 +5,17 @@ class_name LocalForceSuperioritConsideration
 extends AIConsideration
 
 
+func _init() -> void:
+	consideration_name = "local_force_superiority"
+	allowed_phases = PackedInt32Array(
+		[
+			AIEvaluationContext.Phase.INTENT,
+			AIEvaluationContext.Phase.TILE,
+		]
+	)
+	required_keys = PackedStringArray(["planning_context"])
+
+
 func get_normalized_input(context: Dictionary) -> float:
 	var planning_context: AIPlanningContext = context.get("planning_context", null)
 	if not planning_context:

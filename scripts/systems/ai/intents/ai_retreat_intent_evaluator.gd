@@ -23,19 +23,24 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	# Get the AI Profile.
 	var ai_profile: AIProfile = AIProfileManager.get_profile(source)
 
-	if not ai_profile or not ai_profile.retreat_profile:
+	if (
+		not ai_profile
+		or not ai_profile.retreat
+		or not ai_profile.retreat.activation_phase
+		or not ai_profile.retreat.destination_phase
+	):
 		# No retreat profile means this brain contributes zero utility to RETREAT intents.
-		_log(source, "intent unavailable: missing profile or retreat profile")
+		_log(source, "intent unavailable: missing profile or retreat phases")
 		return null
 
-	# Get the retreat profile for this unit.
-	var profile: AIActionProfile = ai_profile.retreat_profile
+	var activation_phase: AIActionProfile = ai_profile.retreat.activation_phase
+	var destination_phase: AIActionProfile = ai_profile.retreat.destination_phase
 
 	# Decide if we should retreat from current position.
 	var retreat_decision: Dictionary = _evaluate_retreat_necessity(
 		source,
 		planning_context,
-		profile,
+		activation_phase,
 	)
 	if not retreat_decision["should_retreat"]:
 		_log(
@@ -79,7 +84,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	var tile_evaluation_result: Dictionary = _find_safest_retreat_tile(
 		source,
 		planning_context,
-		profile,
+		destination_phase,
 		reachable_tiles,
 	)
 	var best_tile: Vector2i = tile_evaluation_result["tile"]
@@ -211,9 +216,9 @@ static func _evaluate_retreat_necessity(
 static func _resolve_retreat_threshold(
 	source: MapCombatEntity,
 	planning_context: AIPlanningContext,
-	profile: AIActionProfile,
+	activation_phase: AIActionProfile,
 ) -> Dictionary:
-	var base_threshold: float = profile.activation_threshold
+	var base_threshold: float = activation_phase.activation_threshold
 	var prior_plan: AIPlan = null
 	if (
 		planning_context

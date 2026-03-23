@@ -19,6 +19,15 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	if not planning_context.get_enemies().is_empty():
 		_log(source, "intent unavailable: enemies visible")
 		return null
+
+	var ai_profile: AIProfile = AIProfileManager.get_profile(source)
+	if not ai_profile or not ai_profile.reposition:
+		_log(source, "intent unavailable: missing profile or reposition intent profile")
+		return null
+
+	var intent_bias: float = 1.0
+	if ai_profile.reposition.get("intent_bias") != null:
+		intent_bias = float(ai_profile.reposition.get("intent_bias"))
 	# Get the game map.
 	var game_map: GameMap = planning_context.get_game_map()
 
@@ -76,13 +85,21 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		_log(source, "intent produced no movement destination")
 		return null
 
-	_log(source, "selected destination=%s score=%.2f" % [MetaTag.pos_tag(destination), score])
+	var final_score: float = clampf(score * intent_bias, 0.0, 100.0)
+
+	_log(
+		source,
+		(
+			"selected destination=%s score=%.2f (bias=%.2f final=%.2f)"
+			% [MetaTag.pos_tag(destination), score, intent_bias, final_score]
+		),
+	)
 
 	var plan: AIPlan = AIPlanBuilder.build_plan(
 		source,
 		planning_context.get_game_map(),
 		AIPlan.Intent.REPOSITION,
-		score,
+		final_score,
 		null,
 		null,
 		destination
@@ -91,6 +108,8 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		"directive": NpcDirectiveState.Directive.keys()[state.directive],
 		"destination": destination,
 		"objective_score": score,
+		"intent_bias": intent_bias,
+		"final_score": final_score,
 	}
 	return plan
 

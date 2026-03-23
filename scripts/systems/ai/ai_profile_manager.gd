@@ -103,17 +103,38 @@ func _validate_profile(profile: AIProfile, profile_id: String) -> bool:
 		push_error("AI profile '%s' is null." % profile_id)
 		return false
 
-	if not profile.attack_profile:
-		push_error("AI profile '%s' missing attack_profile." % profile_id)
-		return false
-	if not profile.support_profile:
-		push_error("AI profile '%s' missing support_profile." % profile_id)
-		return false
-	if not profile.retreat_profile:
-		push_error("AI profile '%s' missing retreat_profile." % profile_id)
-		return false
-	if not profile.reposition_profile:
-		push_error("AI profile '%s' missing reposition_profile." % profile_id)
-		return false
+	var attack_intent = profile.get("attack")
+	var support_intent = profile.get("support")
+	var retreat_intent = profile.get("retreat")
+	var reposition_intent = profile.get("reposition")
 
-	return true
+	var errors: Array[String] = []
+
+	if not attack_intent:
+		errors.append("missing attack intent profile")
+	elif not attack_intent.get("target_phase"):
+		errors.append("missing attack.target_phase")
+
+	if not support_intent:
+		errors.append("missing support intent profile")
+	elif not support_intent.get("target_phase"):
+		errors.append("missing support.target_phase")
+
+	if not retreat_intent:
+		errors.append("missing retreat intent profile")
+	else:
+		if not retreat_intent.get("activation_phase"):
+			errors.append("missing retreat.activation_phase")
+		if not retreat_intent.get("destination_phase"):
+			errors.append("missing retreat.destination_phase")
+
+	if not reposition_intent:
+		errors.append("missing reposition intent profile")
+
+	if errors.is_empty():
+		return true
+
+	for error_message: String in errors:
+		push_error("AI profile '%s' %s." % [profile_id, error_message])
+
+	return false

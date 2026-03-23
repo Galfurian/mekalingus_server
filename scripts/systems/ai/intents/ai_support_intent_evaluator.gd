@@ -17,13 +17,13 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	# Get the AI Profile.
 	var ai_profile: AIProfile = AIProfileManager.get_profile(source)
 
-	if not ai_profile or not ai_profile.support_profile:
+	if not ai_profile or not ai_profile.support or not ai_profile.support.target_phase:
 		# No support profile means this brain contributes zero utility to SUPPORT intents.
-		_log(source, "intent unavailable: missing profile or support profile")
+		_log(source, "intent unavailable: missing profile or support target phase")
 		return null
 
-	# Get the support profile for this unit.
-	var profile: AIActionProfile = ai_profile.support_profile
+	# Get the support target phase profile for this unit.
+	var profile: AIActionProfile = ai_profile.support.target_phase
 
 	var utility_modules: Array[EquippedModule] = planning_context.get_unit_utility_modules()
 	if utility_modules.is_empty():

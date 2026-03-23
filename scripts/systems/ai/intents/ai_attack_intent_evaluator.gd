@@ -29,13 +29,13 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	# Get the AI Profile.
 	var ai_profile: AIProfile = AIProfileManager.get_profile(source)
 
-	if not ai_profile or not ai_profile.attack_profile:
+	if not ai_profile or not ai_profile.attack or not ai_profile.attack.target_phase:
 		# No attack profile means this brain contributes zero utility to ATTACK intents.
-		_log(source, "intent unavailable: missing profile or attack profile")
+		_log(source, "intent unavailable: missing profile or attack target phase")
 		return null
 
-	# Get the attack profile for this unit.
-	var profile: AIActionProfile = ai_profile.attack_profile
+	# Get the attack target phase profile for this unit.
+	var profile: AIActionProfile = ai_profile.attack.target_phase
 
 	var max_module_range: int = _get_max_module_range(source, offensive_modules)
 	var max_candidate_distance: int = (

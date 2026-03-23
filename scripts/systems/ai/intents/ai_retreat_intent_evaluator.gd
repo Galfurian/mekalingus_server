@@ -7,7 +7,7 @@ const RETREAT_FORCE_RATIO_MAX: float = 2.0
 
 static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	_add_thought(
-		planning_context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()]
+		planning_context.source, "----- Evaluating intent %10s -----" % [INTENT_LABEL.to_upper()]
 	)
 
 	var source: MapCombatEntity = planning_context.source
@@ -28,7 +28,9 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 
 	# Decide if we should retreat from current position.
 	var retreat_decision: Dictionary = _evaluate_retreat_necessity(
-		source, planning_context, profile
+		source,
+		planning_context,
+		profile,
 	)
 	if not retreat_decision["should_retreat"]:
 		_log(
@@ -94,7 +96,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	if selected_module:
 		_log(source, "with module: %s" % [selected_module.get_chat_tag()])
 
-	return AIPlanBuilder.build_plan(
+	var plan: AIPlan = AIPlanBuilder.build_plan(
 		source,
 		planning_context.get_game_map(),
 		AIPlan.Intent.RETREAT,
@@ -103,6 +105,15 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		selected_module,
 		best_tile
 	)
+	plan.debug_details = {
+		"retreat_raw_score": retreat_decision["raw_score"],
+		"retreat_normalized_score": retreat_decision["normalized_score"],
+		"retreat_max_score": retreat_decision["max_score"],
+		"retreat_destination_score": best_score,
+		"best_destination": best_tile,
+		"selected_module": selected_module.get_chat_tag() if selected_module else "none",
+	}
+	return plan
 
 
 ## Evaluate current position: should we retreat based on profile-configured considerations?
@@ -119,16 +130,6 @@ static func _evaluate_retreat_necessity(
 			"normalized_score": 0.0,
 			"max_score": 0.0,
 		}
-
-	var current_survivability: float = AIUtils.get_entity_current_survivability(source)
-	var max_survivability: float = AIUtils.get_entity_max_survivability(source)
-	var survivability_score: float = 0.0
-	if max_survivability > 0.0:
-		survivability_score = 1.0 - clampf(current_survivability / max_survivability, 0.0, 1.0)
-
-	var force_data: Dictionary = _calculate_force_retreat_pressure(planning_context)
-	var threat_score: float = force_data.get("normalized", 0.0)
-
 	var evaluation_context: Dictionary = {
 		"source": source,
 		"planning_context": planning_context,
@@ -139,22 +140,16 @@ static func _evaluate_retreat_necessity(
 	var normalized_score: float = 0.0
 	if max_score > 0.0:
 		normalized_score = clampf(raw_score / max_score, 0.0, 1.0)
-
 	var should_retreat: bool = profile.should_activate(evaluation_context)
 
-	var retreat_template: String = (
-		"retreat necessity profile calc (survivability=%.2f force=%.2f "
-		+ "profile=%.2f/%.2f normalized=%.2f threshold=%.2f)"
-	)
 	var retreat_message: String = (
-		retreat_template
+		"retreat evaluation: normalized=%.2f (score=%.2f/%.2f) vs threshold %.2f -> %s"
 		% [
-			survivability_score,
-			threat_score,
+			normalized_score,
 			raw_score,
 			max_score,
-			normalized_score,
 			profile.activation_threshold,
+			"RETREAT" if should_retreat else "HOLD POSITION",
 		]
 	)
 	_log(source, retreat_message)

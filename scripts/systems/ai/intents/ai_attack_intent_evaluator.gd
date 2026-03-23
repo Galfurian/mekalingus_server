@@ -11,7 +11,7 @@ static func _log(source: MapCombatEntity, message: String) -> void:
 
 static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	_add_thought(
-		planning_context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()]
+		planning_context.source, "----- Evaluating intent %10s -----" % [INTENT_LABEL.to_upper()]
 	)
 	var source: MapCombatEntity = planning_context.source
 
@@ -43,10 +43,11 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	)
 
 	var best_score: float = -INF
-	var best_in_range: bool = false
 	var best_target: MapCombatEntity = null
 	var best_equipped_module: EquippedModule = null
 	var best_destination: Vector2i = Vector2i.ZERO
+	var evaluated_options: int = 0
+	var rejected_unreachable: int = 0
 
 	for target: MapCombatEntity in visible_enemies:
 		if target.combatant.is_dead():
@@ -59,6 +60,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		var has_los: bool = planning_context.has_line_of_sight(source.position, target.position)
 
 		for equipped_module: EquippedModule in offensive_modules:
+			evaluated_options += 1
 			var module_range: int = (
 				equipped_module.module.module_range
 				+ source.combatant.get_stat(Enums.StatType.RANGE_MODIFIER)
@@ -79,6 +81,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 					module_range,
 				)
 				if not move_data["reachable"]:
+					rejected_unreachable += 1
 					_log(
 						source,
 						(
@@ -100,22 +103,8 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 			var base_score: float = profile.evaluate(score_context)
 			var score: float = base_score
 
-			_log(
-				source,
-				(
-					"option: target=%s module=%s score=%.2f tile=%s"
-					% [
-						target.combatant.get_chat_tag(),
-						equipped_module.get_chat_tag(),
-						score,
-						MetaTag.pos_tag(destination),
-					]
-				),
-			)
-
 			if score > best_score:
 				best_score = score
-				best_in_range = can_attack_from_source
 				best_target = target
 				best_equipped_module = equipped_module
 				best_destination = destination
@@ -150,7 +139,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 
 	_log(source, "scored %.2f" % best_score)
 
-	return AIPlanBuilder.build_plan(
+	var plan: AIPlan = AIPlanBuilder.build_plan(
 		source,
 		planning_context.get_game_map(),
 		AIPlan.Intent.ATTACK,
@@ -159,6 +148,14 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		best_equipped_module,
 		best_destination
 	)
+	plan.debug_details = {
+		"evaluated_options": evaluated_options,
+		"rejected_unreachable": rejected_unreachable,
+		"best_target": best_target.combatant.get_chat_tag(),
+		"best_module": best_equipped_module.get_chat_tag(),
+		"best_destination": best_destination,
+	}
+	return plan
 
 
 static func _find_attack_destination_with_los(

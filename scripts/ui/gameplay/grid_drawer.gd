@@ -18,6 +18,8 @@ const AI_FRIENDLY_TARGET_DOT_COLOR = Color(0.5, 1.0, 0.5, 0.95)
 const PATROL_PATH_COLOR = Color(0.9, 0.3, 1.0, 0.7)
 const PATROL_WAYPOINT_DOT_COLOR = Color(0.95, 0.5, 1.0, 0.9)
 const AI_LINE_WIDTH = 3.0
+const AI_SCORE_LABEL_COLOR = Color(1.0, 1.0, 1.0, 0.92)
+const AI_SCORE_LABEL_FONT_SIZE = 12
 
 # =============================================================================
 # VARIABLES
@@ -154,6 +156,7 @@ func _draw_ai_plan_for_entity(entity: MapCombatEntity) -> void:
 		return
 
 	var source_center: Vector2 = _tile_center(entity.position)
+	_draw_plan_score_label(source_center, plan)
 
 	if plan.intent == AIPlan.Intent.REPOSITION or plan.intent == AIPlan.Intent.RETREAT:
 		if plan.destination == Vector2i.ZERO or plan.destination == entity.position:
@@ -284,3 +287,22 @@ func _draw_patrol_path(directive: NpcDirectiveState) -> void:
 	for waypoint in waypoints:
 		var waypoint_center: Vector2 = _tile_center(waypoint)
 		draw_circle(waypoint_center, maxf(2.5, grid_size * 0.12), PATROL_WAYPOINT_DOT_COLOR)
+
+
+func _draw_plan_score_label(source_center: Vector2, plan: AIPlan) -> void:
+	var font: Font = ThemeDB.fallback_font
+	if not font:
+		return
+
+	var intent_name: String = AIPlan.Intent.keys()[plan.intent]
+	var label: String = "%s %.1f" % [intent_name, plan.score]
+	var label_pos: Vector2 = source_center + Vector2(6.0, -6.0)
+	draw_string(
+		font,
+		label_pos,
+		label,
+		HORIZONTAL_ALIGNMENT_LEFT,
+		-1.0,
+		AI_SCORE_LABEL_FONT_SIZE,
+		AI_SCORE_LABEL_COLOR,
+	)

@@ -62,5 +62,15 @@ func display_plan(game_map: GameMap, map_entity: MapCombatEntity) -> void:
 		var distance: float = map_entity.position.distance_to(plan.target.position)
 		text += "Air Dist  : %.1f\n" % distance
 
+	if plan.decision_trace:
+		text += "\n[center][b]Decision Trace[/b][/center]\n"
+		for line: String in plan.decision_trace.format_panel_lines():
+			text += "%s\n" % line
+
+	if not plan.debug_details.is_empty():
+		text += "\n[center][b]Intent Details[/b][/center]\n"
+		for key: String in plan.debug_details.keys():
+			text += "%s: %s\n" % [key, str(plan.debug_details[key])]
+
 	plan_info.clear()
 	plan_info.append_text(text)

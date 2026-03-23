@@ -27,6 +27,10 @@ var destination: Vector2i
 var equipped_module: EquippedModule = null
 # The priority ranking assigned during planning.
 var score: float = 0.0
+# Structured details emitted during intent evaluation.
+var debug_details: Dictionary = {}
+# Planner-level trace of intent arbitration for this plan.
+var decision_trace: AIDecisionTrace = null
 
 
 func set_status(val: Status) -> void:
@@ -51,6 +55,8 @@ func _init(p_source, p_game_map) -> void:
 	destination = Vector2i.ZERO
 	equipped_module = null
 	score = 0.0
+	debug_details = {}
+	decision_trace = null
 
 
 func _format_pos_tag(pos: Vector2i) -> String:

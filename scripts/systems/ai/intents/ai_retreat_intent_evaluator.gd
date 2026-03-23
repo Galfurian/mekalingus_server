@@ -3,6 +3,10 @@ extends RefCounted
 
 const INTENT_LABEL: String = "Retreat"
 const RETREAT_FORCE_RATIO_MAX: float = 2.0
+const RETREAT_ENTER_THRESHOLD_OFFSET: float = 0.10
+const RETREAT_CONTINUE_THRESHOLD_OFFSET: float = -0.10
+const ACTIVATION_UTILITY_WEIGHT: float = 0.85
+const DESTINATION_UTILITY_WEIGHT: float = 0.15
 const AI_EVALUATION_CONTEXT = preload("res://scripts/systems/ai/contexts/ai_evaluation_context.gd")
 
 
@@ -79,7 +83,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		reachable_tiles,
 	)
 	var best_tile: Vector2i = tile_evaluation_result["tile"]
-	var best_score: float = tile_evaluation_result["score"]
+	var best_destination_score: float = tile_evaluation_result["score"]
 
 	if best_tile == source.position:
 		_log(source, "no safe retreat destination found")
@@ -92,8 +96,37 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		source, planning_context, best_tile, utility_modules
 	)
 
+	var destination_quality: float = retreat_decision["destination_quality"]
+	if retreat_decision["max_score"] > 0.0:
+		destination_quality = clampf(
+			best_destination_score / float(retreat_decision["max_score"]),
+			0.0,
+			1.0,
+		)
+
+	var activation_utility: float = retreat_decision["normalized_score"]
+	var final_utility: float = clampf(
+		(
+			activation_utility * ACTIVATION_UTILITY_WEIGHT
+			+ destination_quality * DESTINATION_UTILITY_WEIGHT
+		) * 100.0,
+		0.0,
+		100.0,
+	)
+
 	# Log escape plan.
-	_log(source, "retreating to %s score=%.2f" % [MetaTag.pos_tag(best_tile), best_score])
+	_log(
+		source,
+		(
+			"retreating to %s utility=%.2f (activation=%.2f destination=%.2f)"
+			% [
+				MetaTag.pos_tag(best_tile),
+				final_utility,
+				activation_utility,
+				destination_quality,
+			]
+		),
+	)
 	if selected_module:
 		_log(source, "with module: %s" % [selected_module.get_chat_tag()])
 
@@ -101,7 +134,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		source,
 		planning_context.get_game_map(),
 		AIPlan.Intent.RETREAT,
-		clampf(best_score, 0.0, 100.0),
+		final_utility,
 		source,
 		selected_module,
 		best_tile
@@ -110,7 +143,13 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		"retreat_raw_score": retreat_decision["raw_score"],
 		"retreat_normalized_score": retreat_decision["normalized_score"],
 		"retreat_max_score": retreat_decision["max_score"],
-		"retreat_destination_score": best_score,
+		"retreat_destination_score": best_destination_score,
+		"retreat_threshold": retreat_decision["threshold"],
+		"retreat_hysteresis_mode": retreat_decision["hysteresis_mode"],
+		"retreat_destination_quality": destination_quality,
+		"retreat_activation_weight": ACTIVATION_UTILITY_WEIGHT,
+		"retreat_destination_weight": DESTINATION_UTILITY_WEIGHT,
+		"retreat_final_utility": final_utility,
 		"best_destination": best_tile,
 		"selected_module": selected_module.get_chat_tag() if selected_module else "none",
 	}
@@ -140,7 +179,11 @@ static func _evaluate_retreat_necessity(
 	var normalized_score: float = 0.0
 	if max_score > 0.0:
 		normalized_score = clampf(raw_score / max_score, 0.0, 1.0)
-	var should_retreat: bool = profile.should_activate_variant(evaluation_context)
+
+	var threshold_data: Dictionary = _resolve_retreat_threshold(source, planning_context, profile)
+	var threshold: float = threshold_data["threshold"]
+	var hysteresis_mode: String = threshold_data["mode"]
+	var should_retreat: bool = normalized_score >= threshold
 
 	var retreat_message: String = (
 		"retreat evaluation: normalized=%.2f (score=%.2f/%.2f) vs threshold %.2f -> %s"
@@ -148,7 +191,7 @@ static func _evaluate_retreat_necessity(
 			normalized_score,
 			raw_score,
 			max_score,
-			profile.activation_threshold,
+			threshold,
 			"RETREAT" if should_retreat else "HOLD POSITION",
 		]
 	)
@@ -159,6 +202,35 @@ static func _evaluate_retreat_necessity(
 		"raw_score": raw_score,
 		"normalized_score": normalized_score,
 		"max_score": max_score,
+		"threshold": threshold,
+		"hysteresis_mode": hysteresis_mode,
+		"destination_quality": 0.0,
+	}
+
+
+static func _resolve_retreat_threshold(
+	source: MapCombatEntity,
+	planning_context: AIPlanningContext,
+	profile: AIActionProfile,
+) -> Dictionary:
+	var base_threshold: float = profile.activation_threshold
+	var prior_plan: AIPlan = null
+	if (
+		planning_context
+		and planning_context.get_game_map()
+		and planning_context.get_game_map().ai_controller
+	):
+		prior_plan = planning_context.get_game_map().ai_controller.get_current_plan(source)
+
+	if prior_plan and prior_plan.intent == AIPlan.Intent.RETREAT:
+		return {
+			"threshold": clampf(base_threshold + RETREAT_CONTINUE_THRESHOLD_OFFSET, 0.0, 1.0),
+			"mode": "continue",
+		}
+
+	return {
+		"threshold": clampf(base_threshold + RETREAT_ENTER_THRESHOLD_OFFSET, 0.0, 1.0),
+		"mode": "enter",
 	}
 
 

@@ -252,30 +252,6 @@ static func _resolve_retreat_threshold(
 
 
 ## Combat power-based enemy pressure: 0 (friendly dominates) .. 1 (enemies dominate 2x or more).
-static func _calculate_force_retreat_pressure(
-	planning_context: AIPlanningContext,
-) -> Dictionary:
-	var active_allies: Array[MapCombatEntity] = planning_context.get_allies(true)
-	var total_allies_threat_score: float = 0.0
-	for ally: MapCombatEntity in active_allies:
-		total_allies_threat_score += planning_context.get_unit_threat_score(ally)
-	var total_enemies_threat_score: float = 0.0
-	for enemy: MapCombatEntity in planning_context.get_enemies():
-		total_enemies_threat_score += planning_context.get_unit_threat_score(enemy)
-
-	if total_allies_threat_score <= 0.0:
-		total_allies_threat_score = 1.0
-
-	var force_ratio: float = total_enemies_threat_score / total_allies_threat_score
-	var normalized_force: float = clampf(force_ratio / RETREAT_FORCE_RATIO_MAX, 0.0, 1.0)
-	return {
-		"force_ratio": force_ratio,
-		"normalized": normalized_force,
-		"ally_power": total_allies_threat_score,
-		"enemy_power": total_enemies_threat_score,
-	}
-
-
 ## Compute centroid from visible enemies.
 static func _compute_enemy_centroid(enemies: Array[MapCombatEntity]) -> Vector2:
 	if enemies.is_empty():

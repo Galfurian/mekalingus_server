@@ -40,12 +40,3 @@ func should_activate_variant(context: Variant) -> bool:
 		return false
 	var normalized_score: float = evaluate_variant(context) / max_score
 	return normalized_score >= activation_threshold
-
-
-func _normalize_context(context: Variant) -> Dictionary:
-	if context is AIEvaluationContext:
-		return (context as AIEvaluationContext).to_dict()
-	if context is Dictionary:
-		return context
-	push_error("AIActionProfile received unsupported context type: %s" % typeof(context))
-	return {}

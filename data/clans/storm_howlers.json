@@ -4,7 +4,7 @@
     "description": "Fast-moving, high-impact combatants that bring the storm to their enemies.",
     "color": "#3498DB",
     "emblem_path": "res://assets/emblems/storm_howlers.png",
-    "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
+    "ai_profile_path": "default_basic",
     "is_player_joinable": true,
     "allies": ["nova_regents", "standard_player_clan"]
 }

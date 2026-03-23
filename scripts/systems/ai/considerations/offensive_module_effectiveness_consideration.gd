@@ -9,13 +9,13 @@ func get_normalized_input(context: Dictionary) -> float:
 	var source: MapCombatEntity = context.get("source", null)
 	var target: MapCombatEntity = context.get("target", null)
 	if not module:
-		push_error("Missing 'module' in context.")
+		push_error("Missing module for OffensiveModuleEffectivenessConsideration.")
 		return 0.0
 	if not source:
-		push_error("Missing 'source' in context.")
+		push_error("Missing source for OffensiveModuleEffectivenessConsideration.")
 		return 0.0
 	if not target:
-		push_error("Missing 'target' in context.")
+		push_error("Missing target for OffensiveModuleEffectivenessConsideration.")
 		return 0.0
 	if source.owner == target.owner:
 		return 0.0

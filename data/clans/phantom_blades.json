@@ -4,7 +4,7 @@
     "description": "Stealthy and precise, the Phantom Blades excel at hit-and-run tactics.",
     "color": "#5D6D7E",
     "emblem_path": "res://assets/emblems/phantom_blades.png",
-    "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
+    "ai_profile_path": "default_basic",
     "is_player_joinable": true,
     "allies": ["nova_regents", "ember_guard", "standard_player_clan"]
 }

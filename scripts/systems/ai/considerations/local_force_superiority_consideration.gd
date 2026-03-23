@@ -8,7 +8,7 @@ extends AIConsideration
 func get_normalized_input(context: Dictionary) -> float:
 	var planning_context: AIPlanningContext = context.get("planning_context", null)
 	if not planning_context:
-		push_error("Missing `planning_context` in context.")
+		push_error("Missing planning_context for LocalForceSuperioritConsideration.")
 		return 0.0
 	# Get the source threat level.
 	var source_threat: float = planning_context.get_unit_threat_score()

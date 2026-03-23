@@ -26,17 +26,27 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		_log(source, "intent unavailable: no offensive modules available")
 		return null
 
-	var profile: AIActionProfile = AITacticalBrainResolver.resolve_attack_profile(source)
-	if not profile:
+	# Get the AI Profile.
+	var ai_profile: AIProfile = AIProfileManager.get_profile(source)
+
+	if not ai_profile or not ai_profile.attack_profile:
 		# No attack profile means this brain contributes zero utility to ATTACK intents.
-		_log(source, "intent unavailable: missing profile")
+		_log(source, "intent unavailable: missing profile or attack profile")
 		return null
+
+	# Get the attack profile for this unit.
+	var profile: AIActionProfile = ai_profile.attack_profile
 
 	var max_module_range: int = _get_max_module_range(source, offensive_modules)
 	var max_candidate_distance: int = (
 		source.combatant.get_stat(Enums.StatType.SPEED) + max_module_range
 	)
-	var candidate_targets: Array[Dictionary] = []
+
+	var best_score: float = -INF
+	var best_in_range: bool = false
+	var best_target: MapCombatEntity = null
+	var best_equipped_module: EquippedModule = null
+	var best_destination: Vector2i = Vector2i.ZERO
 
 	for target: MapCombatEntity in visible_enemies:
 		if target.combatant.is_dead():
@@ -45,54 +55,6 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		var distance: int = _manhattan_distance(source.position, target.position)
 		if distance > max_candidate_distance:
 			continue
-
-		var preliminary_context: Dictionary = {
-			"source": source,
-			"target": target,
-			"max_distance": float(max_candidate_distance),
-		}
-		var preliminary_score: float = profile.evaluate_preliminary(preliminary_context)
-		_log(
-			source,
-			(
-				"prelim: target=%s dist=%d prelim=%.2f"
-				% [
-					target.combatant.get_chat_tag(),
-					distance,
-					preliminary_score,
-				]
-			),
-		)
-		var candidate_data: Dictionary = {
-			"target": target,
-			"preliminary_score": preliminary_score,
-		}
-		candidate_targets.append(candidate_data)
-
-	if candidate_targets.is_empty():
-		return null
-
-	candidate_targets.sort_custom(
-		func(a: Dictionary, b: Dictionary): return a["preliminary_score"] > b["preliminary_score"]
-	)
-
-	var best_score: float = -INF
-	var best_in_range: bool = false
-	var best_target: MapCombatEntity = null
-	var best_equipped_module: EquippedModule = null
-	var best_destination: Vector2i = Vector2i.ZERO
-	var max_targets: int = mini(profile.get_max_targets_to_narrow_phase(), candidate_targets.size())
-
-	for candidate_index in range(max_targets):
-		var candidate: Dictionary = candidate_targets[candidate_index]
-		var target: MapCombatEntity = candidate["target"]
-		_log(
-			source,
-			(
-				"narrow-phase target=%s prelim=%.2f"
-				% [target.combatant.get_chat_tag(), float(candidate["preliminary_score"])]
-			),
-		)
 
 		var has_los: bool = planning_context.has_line_of_sight(source.position, target.position)
 
@@ -131,18 +93,12 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 				"source": source,
 				"target": target,
 				"module": equipped_module.module,
+				"planning_context": planning_context,
+				"tile": destination,
 				"max_distance": float(max_candidate_distance),
 			}
-			var base_score: float = profile.evaluate_final(score_context)
+			var base_score: float = profile.evaluate(score_context)
 			var score: float = base_score
-			var in_range_bonus: float = 0.0
-			var reachable_bonus: float = 0.0
-			if can_attack_from_source:
-				in_range_bonus = profile.in_range_los_bonus
-				score += in_range_bonus
-			else:
-				reachable_bonus = profile.reachable_bonus
-				score += reachable_bonus
 
 			_log(
 				source,
@@ -191,39 +147,6 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 			]
 		),
 	)
-
-	var attack_breakdown_context: Dictionary = {
-		"source": source,
-		"target": best_target,
-		"module": best_equipped_module.module,
-		"max_distance": float(max_candidate_distance),
-	}
-	var attack_breakdown: Dictionary = profile.evaluate_final_breakdown(attack_breakdown_context)
-	var attack_bonus: float = (
-		profile.in_range_los_bonus if best_in_range else profile.reachable_bonus
-	)
-	var attack_bonus_name: String = "in_range_los_bonus" if best_in_range else "reachable_bonus"
-	_log(
-		source,
-		(
-			"breakdown: base=%.2f %s=%.2f total=%.2f"
-			% [attack_breakdown.score, attack_bonus_name, attack_bonus, best_score]
-		),
-	)
-	for component in attack_breakdown.components:
-		_log(
-			source,
-			(
-				"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
-				% [
-					component.get("name"),
-					component.get("normalized_input"),
-					component.get("curve"),
-					component.get("weight"),
-					component.get("contribution"),
-				]
-			),
-		)
 
 	_log(source, "scored %.2f" % best_score)
 

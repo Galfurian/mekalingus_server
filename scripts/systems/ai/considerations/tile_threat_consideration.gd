@@ -1,5 +1,5 @@
 class_name TileThreatConsideration
-extends "res://scripts/systems/ai/ai_consideration.gd"
+extends AIConsideration
 
 
 const DEFAULT_MAX_THREAT: float = 100.0

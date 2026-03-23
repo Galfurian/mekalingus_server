@@ -1,15 +1,8 @@
 class_name AITuning
 extends RefCounted
 
-const FALLBACK_GLOBAL_SCAN_RADIUS: int = 256
-const GLOBAL_SCAN_RADIUS_MARGIN: int = 4
-const RETREAT_HEALTH_THRESHOLD: float = 0.5
-const RETREAT_THREAT_THRESHOLD: float = 10.0
 const REPOSITION_HOLD_SCORE: float = 3.0
 const REPOSITION_PATROL_SCORE: float = 4.0
-
-const ATTACK_STANDOFF_BONUS: float = 8.0
-const ATTACK_REACHABLE_BONUS: float = 4.0
 
 const HOLD_THREAT_WEIGHT: float = 1.6
 const HOLD_OBJECTIVE_WEIGHT: float = 1.1

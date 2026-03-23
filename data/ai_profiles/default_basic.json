@@ -1,0 +1,32 @@
+{
+	"id": "default_basic",
+	"attack_profile": {
+		"profile_name": "default_attack_profile",
+		"activation_threshold": 0.5,
+		"considerations": [
+			{ "type": "target_survivability", "weight": 14.0 },
+			{ "type": "target_distance", "weight": 7.0 },
+			{ "type": "offensive_module_effectiveness", "weight": 14.0 }
+		]
+	},
+	"support_profile": {
+		"profile_name": "default_support_profile",
+		"activation_threshold": 0.5,
+		"considerations": [
+			{ "type": "target_survivability", "weight": 16.0 },
+			{ "type": "tile_threat", "weight": 8.0 },
+			{ "type": "utility_module_effectiveness", "weight": 14.0 }
+		]
+	},
+	"retreat_profile": {
+		"profile_name": "default_retreat_profile",
+		"activation_threshold": 0.5,
+		"considerations": [
+			{ "type": "source_survivability", "weight": 18.0 },
+			{ "type": "tile_threat", "weight": 16.0 },
+			{ "type": "local_force_superiority", "weight": 20.0 },
+			{ "type": "utility_module_effectiveness", "weight": 8.0 },
+			{ "type": "retreat_direction", "weight": 12.8 }
+		]
+	}
+}

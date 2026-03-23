@@ -1,15 +1,8 @@
 class_name RetreatDirectionConsideration
 extends AIConsideration
 
-## Evaluates how well a retreat tile moves away from the enemy centroid.
-## Returns 0 (toward enemies) to 1 (away from enemies), favoring strategic retreat.
 
-
-func _init() -> void:
-	consideration_name = "RetreatDirection"
-
-
-func evaluate(context: Dictionary) -> float:
+func get_normalized_input(context: Dictionary) -> float:
 	var planning_context: AIPlanningContext = context.get("planning_context")
 	if not planning_context:
 		return 0.0
@@ -36,7 +29,7 @@ func evaluate(context: Dictionary) -> float:
 	# Normalize: clamp at 1.0 so very far away tiles don't over-influence
 	var direction_score: float = minf(1.0, maxf(0.0, dot_product / 1_000.0))
 
-	return direction_score
+	return clampf(direction_score, 0.0, 1.0)
 
 
 func _get_known_enemy_centroid(

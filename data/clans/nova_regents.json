@@ -4,7 +4,7 @@
     "description": "Advanced tech warriors wielding energy weapons and plasma artillery.",
     "color": "#9B59B6",
     "emblem_path": "res://assets/emblems/nova_regents.png",
-    "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
+    "ai_profile_path": "default_basic",
     "is_player_joinable": true,
     "allies": ["phantom_blades", "storm_howlers"]
 }

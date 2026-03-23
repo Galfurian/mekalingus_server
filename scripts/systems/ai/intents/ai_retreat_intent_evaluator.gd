@@ -2,11 +2,6 @@ class_name AIRetreatIntentEvaluator
 extends RefCounted
 
 const INTENT_LABEL: String = "Retreat"
-const RETREAT_THREAT_WEIGHT: float = 1.0
-const RETREAT_DIRECTION_WEIGHT: float = 0.8
-const RETREAT_MAX_THREAT: float = 100.0
-
-const RETREAT_DEFAULT_DIRECTION_SCORE: float = 0.5
 const RETREAT_FORCE_RATIO_MAX: float = 2.0
 
 
@@ -20,33 +15,48 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		_log(source, "intent unavailable: cannot move")
 		return null
 
-	# Phase 1: Decide IF we should retreat from current tile (self_health + current_threat only)
-	var retreat_decision: Dictionary = _evaluate_retreat_necessity(source, planning_context)
+	# Get the AI Profile.
+	var ai_profile: AIProfile = AIProfileManager.get_profile(source)
+
+	if not ai_profile or not ai_profile.retreat_profile:
+		# No retreat profile means this brain contributes zero utility to RETREAT intents.
+		_log(source, "intent unavailable: missing profile or retreat profile")
+		return null
+
+	# Get the retreat profile for this unit.
+	var profile: AIActionProfile = ai_profile.retreat_profile
+
+	# Decide if we should retreat from current position.
+	var retreat_decision: Dictionary = _evaluate_retreat_necessity(
+		source, planning_context, profile
+	)
 	if not retreat_decision["should_retreat"]:
 		_log(
 			source,
 			(
-				"no retreat needed: survivability=%.2f threat=%.2f"
-				% [retreat_decision["survivability_score"], retreat_decision["threat_score"]]
-			),
+				"no retreat needed: normalized=%.2f (score=%.2f/%0.2f)"
+				% [
+					retreat_decision["normalized_score"],
+					retreat_decision["raw_score"],
+					retreat_decision["max_score"],
+				]
+			)
 		)
 		return null
 
 	_log(
 		source,
 		(
-			"retreat triggered: survivability=%.2f threat=%.2f"
-			% [retreat_decision["survivability_score"], retreat_decision["threat_score"]]
-		),
+			"retreat triggered: normalized=%.2f (score=%.2f/%0.2f)"
+			% [
+				retreat_decision["normalized_score"],
+				retreat_decision["raw_score"],
+				retreat_decision["max_score"],
+			]
+		)
 	)
 
-	# Phase 2: Resolve retreat profile for dynamic scoring
-	var profile: AIActionProfile = AITacticalBrainResolver.resolve_retreat_profile(source)
-	if not profile:
-		_log(source, "intent unavailable: missing retreat profile")
-		return null
-
-	# Phase 3: Find safest reachable retreat tile
+	# Find safest reachable retreat tile.
 	var enemy_centroid: Vector2 = _get_known_enemy_centroid(source, planning_context)
 	if enemy_centroid != Vector2.ZERO:
 		var centroid_tile: Vector2i = Vector2i(round(enemy_centroid.x), round(enemy_centroid.y))
@@ -72,14 +82,14 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		_log(source, "no safe retreat destination found")
 		return null
 
-	# Phase 4: Select utility module for escape
+	# Select utility module for escape.
 	var utility_modules: Array[EquippedModule] = planning_context.get_unit_utility_modules()
 
 	var selected_module: EquippedModule = _select_retreat_module(
 		source, planning_context, best_tile, utility_modules
 	)
 
-	# Phase 5: Log escape plan
+	# Log escape plan.
 	_log(source, "retreating to %s score=%.2f" % [MetaTag.pos_tag(best_tile), best_score])
 	if selected_module:
 		_log(source, "with module: %s" % [selected_module.get_chat_tag()])
@@ -95,62 +105,65 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	)
 
 
-## Evaluate current position: should we retreat based on self_health and current tile threat?
+## Evaluate current position: should we retreat based on profile-configured considerations?
 ## Returns dict with "should_retreat" bool and component scores.
 static func _evaluate_retreat_necessity(
 	source: MapCombatEntity,
 	planning_context: AIPlanningContext,
+	profile: AIActionProfile,
 ) -> Dictionary:
-	var combatant: CombatEntity = source.combatant
-	if not combatant:
-		return {"should_retreat": false, "survivability_score": 0.0, "threat_score": 0.0}
+	if not source or not source.combatant:
+		return {
+			"should_retreat": false,
+			"raw_score": 0.0,
+			"normalized_score": 0.0,
+			"max_score": 0.0,
+		}
 
-	# Get the maximum survivability score.
-	var max_survivability: float = AIUtils.get_entity_max_survivability(source)
-	# Get the current survivability score.
 	var current_survivability: float = AIUtils.get_entity_current_survivability(source)
-	# Surivability ratio: 1.0 = full health, 0.0 = dead
-	var survivability_ratio: float = float(current_survivability) / float(max_survivability)
-	# Inverted: low survivability = high retreat score
-	var survivability_score: float = 1.0 - clampf(survivability_ratio, 0.0, 1.0)
+	var max_survivability: float = AIUtils.get_entity_max_survivability(source)
+	var survivability_score: float = 0.0
+	if max_survivability > 0.0:
+		survivability_score = 1.0 - clampf(current_survivability / max_survivability, 0.0, 1.0)
 
-	# Threat score: how dangerous is the local force balance (0.0..1.0)
 	var force_data: Dictionary = _calculate_force_retreat_pressure(planning_context)
-	var force_ratio: float = force_data["force_ratio"]
-	var threat_score: float = force_data["normalized"]
-	var ally_power: float = force_data["ally_power"]
-	var enemy_power: float = force_data["enemy_power"]
+	var threat_score: float = force_data.get("normalized", 0.0)
 
-	# Optional local map threat still available for debug (not used in final formula)
-	var current_threat: float = planning_context.get_tile_threat_score()
+	var evaluation_context: Dictionary = {
+		"source": source,
+		"planning_context": planning_context,
+		"tile": source.position,
+	}
+	var raw_score: float = profile.evaluate(evaluation_context)
+	var max_score: float = profile.get_max_score()
+	var normalized_score: float = 0.0
+	if max_score > 0.0:
+		normalized_score = clampf(raw_score / max_score, 0.0, 1.0)
 
-	# Simple logic: retreat if EITHER is high (health critical OR force disadvantage)
-	# Threshold: combined score > 1.0 triggers retreat
-	var combined_score: float = survivability_score + threat_score
-	var should_retreat: bool = combined_score > 1.0
-	_log(
-		source,
-		(
-			"retreat necessity calc (survivability=%.2f [%.1f/%.1f] force=%.2f [enemy=%.1f ally=%.1f] map=%.1f combined=%.2f)"
-			% [
-				survivability_score,
-				current_survivability,
-				max_survivability,
-				force_ratio,
-				enemy_power,
-				ally_power,
-				current_threat,
-				combined_score,
-			]
-		)
+	var should_retreat: bool = profile.should_activate(evaluation_context)
+
+	var retreat_template: String = (
+		"retreat necessity profile calc (survivability=%.2f force=%.2f "
+		+ "profile=%.2f/%.2f normalized=%.2f threshold=%.2f)"
 	)
+	var retreat_message: String = (
+		retreat_template
+		% [
+			survivability_score,
+			threat_score,
+			raw_score,
+			max_score,
+			normalized_score,
+			profile.activation_threshold,
+		]
+	)
+	_log(source, retreat_message)
 
 	return {
 		"should_retreat": should_retreat,
-		"survivability_score": survivability_score,
-		"threat_score": threat_score,
-		"combat_power_ratio": force_ratio,
-		"combined_score": combined_score,
+		"raw_score": raw_score,
+		"normalized_score": normalized_score,
+		"max_score": max_score,
 	}
 
 
@@ -226,7 +239,6 @@ static func _find_safest_retreat_tile(
 ) -> Dictionary:
 	var safest_tile: Vector2i = source.position
 	var best_score: float = -INF
-	var best_breakdown: Dictionary = {}
 
 	for tile: Vector2i in reachable_tiles:
 		# Verify pathfinding.
@@ -235,43 +247,26 @@ static func _find_safest_retreat_tile(
 			if path.is_empty():
 				continue
 
-		# Evaluate tile using profile considerations
+		# Evaluate tile using profile considerations.
 		var evaluation_context: Dictionary = {
 			"source": source,
-			"tile": tile,
 			"planning_context": planning_context,
+			"tile": tile,
 		}
-		var tile_score: float = profile.evaluate_final(evaluation_context)
+		var tile_score: float = profile.evaluate(evaluation_context)
 		if tile_score > best_score:
+			var previous_best_score: float = best_score
 			best_score = tile_score
 			safest_tile = tile
-			best_breakdown = profile.evaluate_final_breakdown(evaluation_context)
 			_log(
 				source,
 				(
 					"new best retreat tile candidate: %s score=%.2f (prev=%.2f)"
-					% [MetaTag.pos_tag(tile), tile_score, best_score]
+					% [MetaTag.pos_tag(tile), tile_score, previous_best_score]
 				)
 			)
 
 	_log(source, "selected retreat tile %s score=%.2f" % [MetaTag.pos_tag(safest_tile), best_score])
-
-	# Log breakdown if available
-	if best_breakdown.has("components"):
-		for component in best_breakdown.components:
-			_log(
-				source,
-				(
-					"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
-					% [
-						component.get("name"),
-						component.get("normalized_input"),
-						component.get("curve"),
-						component.get("weight"),
-						component.get("contribution"),
-					]
-				)
-			)
 
 	return {
 		"tile": safest_tile,

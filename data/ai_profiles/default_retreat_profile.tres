@@ -1,68 +1,6 @@
-[gd_resource type="Resource" script_class="AIActionProfile" format=3 uid="uid://7p8nxc68slq1"]
+[gd_resource type="Resource" script_class="AIActionProfile" format=3 uid="uid://d087h1y3b583j"]
 
 [ext_resource type="Script" path="res://scripts/systems/ai/ai_action_profile.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/source_survivability_consideration.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="3"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/utility_module_effectiveness_consideration.gd" id="4"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/local_force_superiority_consideration.gd" id="5"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/retreat_direction_consideration.gd" id="6"]
-
-[sub_resource type="Curve" id="1"]
-_data = [Vector2(0, 1), 0.0, -1.8, 0, 0, Vector2(1, 0), -1.8, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="Resource" id="4"]
-script = ExtResource("2")
-consideration_name = "source_survivability"
-weight = 18.0
-response_curve = SubResource("1")
-
-[sub_resource type="Curve" id="2"]
-_data = [Vector2(0, 1), 0.0, -1.5, 0, 0, Vector2(1, 0), -1.5, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="Resource" id="5"]
-script = ExtResource("3")
-consideration_name = "tile_threat"
-weight = 16.0
-response_curve = SubResource("2")
-
-[sub_resource type="Curve" id="7"]
-_data = [Vector2(0, 0), 0.0, 0.5, 0, 0, Vector2(1, 1), 0.5, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="Resource" id="7"]
-script = ExtResource("5")
-consideration_name = "local_force_superiority"
-weight = 20.0
-response_curve = SubResource("7")
-
-
-[sub_resource type="Curve" id="3"]
-_data = [Vector2(0, 0.2), 1.3, 0.0, 0, 0, Vector2(0.5, 0.7), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
-point_count = 3
-
-[sub_resource type="Curve" id="8"]
-_data = [Vector2(0, 0), 0.0, 1.0, 0, 0, Vector2(1, 1), 1.0, 0.0, 0, 0]
-point_count = 2
-
-[sub_resource type="Resource" id="6"]
-script = ExtResource("4")
-consideration_name = "utility_module_effectiveness"
-weight = 8.0
-response_curve = SubResource("3")
-
-[sub_resource type="Resource" id="8"]
-script = ExtResource("6")
-consideration_name = "retreat_direction"
-weight = 12.8
-response_curve = SubResource("8")
 
 [resource]
 script = ExtResource("1")
-profile_name = "default_retreat_profile"
-preliminary_considerations = Array[Resource]([SubResource("4"), SubResource("5"), SubResource("7")])
-final_considerations = Array[Resource]([SubResource("4"), SubResource("5"), SubResource("6"), SubResource("8")])
-max_targets_to_narrow_phase = 4
-in_range_los_bonus = 0.0
-reachable_bonus = 7.0

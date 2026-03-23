@@ -13,9 +13,17 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		planning_context.source, "----- Evaluating %s intent -----" % [INTENT_LABEL.to_upper()]
 	)
 	var source: MapCombatEntity = planning_context.source
-	var profile: AIActionProfile = AITacticalBrainResolver.resolve_support_profile(source)
-	if not profile:
+
+	# Get the AI Profile.
+	var ai_profile: AIProfile = AIProfileManager.get_profile(source)
+
+	if not ai_profile or not ai_profile.support_profile:
+		# No support profile means this brain contributes zero utility to SUPPORT intents.
+		_log(source, "intent unavailable: missing profile or support profile")
 		return null
+
+	# Get the support profile for this unit.
+	var profile: AIActionProfile = ai_profile.support_profile
 
 	var utility_modules: Array[EquippedModule] = planning_context.get_unit_utility_modules()
 	if utility_modules.is_empty():
@@ -24,61 +32,15 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	var allies_with_self: Array[MapCombatEntity] = planning_context.get_allies(true)
 	var max_module_range: int = _get_max_module_range(source, utility_modules)
 	var max_candidate_distance: int = source.combatant.speed + max_module_range
-	var candidate_targets: Array[Dictionary] = []
-
-	for target: MapCombatEntity in allies_with_self:
-		if target.combatant.is_dead():
-			continue
-
-		var preliminary_context: Dictionary = {
-			"source": source,
-			"target": target,
-			"planning_context": planning_context,
-			"tile": source.position,
-			"max_distance": float(max_candidate_distance),
-		}
-		var preliminary_score: float = profile.evaluate_preliminary(preliminary_context)
-		var distance: int = _manhattan_distance(source.position, target.position)
-		_log(
-			source,
-			(
-				"prelim: target=%s dist=%d prelim=%.2f"
-				% [
-					target.combatant.get_chat_tag(),
-					distance,
-					preliminary_score,
-				]
-			),
-		)
-		(
-			candidate_targets
-			. append(
-				{
-					"target": target,
-					"preliminary_score": preliminary_score,
-				}
-			)
-		)
-
-	if candidate_targets.is_empty():
-		return null
-
-	candidate_targets.sort_custom(
-		func(a: Dictionary, b: Dictionary): return a["preliminary_score"] > b["preliminary_score"]
-	)
 
 	var best_score: float = -INF
 	var best_target: MapCombatEntity = null
 	var best_equipped_module: EquippedModule = null
 	var best_destination: Vector2i = source.position
-	var max_targets: int = mini(
-		profile.get_max_targets_to_narrow_phase(),
-		candidate_targets.size(),
-	)
 
-	for candidate_index in range(max_targets):
-		var candidate: Dictionary = candidate_targets[candidate_index]
-		var target: MapCombatEntity = candidate["target"]
+	for target: MapCombatEntity in allies_with_self:
+		if target.combatant.is_dead():
+			continue
 
 		for equipped_module: EquippedModule in utility_modules:
 			if not _can_module_target(equipped_module.module, source, target):
@@ -115,15 +77,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 				"tile": destination,
 				"max_distance": float(max_candidate_distance),
 			}
-			var score: float = profile.evaluate_final(score_context)
-			var in_range_bonus: float = 0.0
-			var reachable_bonus: float = 0.0
-			if can_use_from_source:
-				in_range_bonus = profile.in_range_los_bonus
-				score += in_range_bonus
-			else:
-				reachable_bonus = profile.reachable_bonus
-				score += reachable_bonus
+			var score: float = profile.evaluate(score_context)
 
 			_log(
 				source,
@@ -159,38 +113,6 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		_log(source, "intent produced no valid target")
 		return null
 
-	var support_breakdown_context: Dictionary = {
-		"source": source,
-		"target": best_target,
-		"module": best_equipped_module.module,
-		"planning_context": planning_context,
-		"tile": best_destination,
-	}
-	var support_breakdown: Dictionary = profile.evaluate_final_breakdown(support_breakdown_context)
-	var support_bonus: float = (
-		0.0 if best_destination == source.position else profile.reachable_bonus
-	)
-	_log(
-		source,
-		(
-			"breakdown: base=%.2f reachable=%.2f total=%.2f"
-			% [support_breakdown.score, support_bonus, best_score]
-		),
-	)
-	for component in support_breakdown.components:
-		_log(
-			source,
-			(
-				"  - %s: input=%.2f curve=%.2f weight=%.2f contrib=%.2f"
-				% [
-					component.get("name"),
-					component.get("normalized_input"),
-					component.get("curve"),
-					component.get("weight"),
-					component.get("contribution"),
-				]
-			),
-		)
 	_log(source, "scored %.2f" % best_score)
 	return AIPlanBuilder.build_plan(
 		source,
@@ -211,7 +133,7 @@ static func _find_support_destination(
 ) -> Dictionary:
 	var candidate_tiles: Array[Dictionary] = []
 	for tile: Vector2i in planning_context.get_reachable_tiles():
-		if tile != source.position:
+		if tile == source.position:
 			continue
 
 		var distance_to_target: int = _manhattan_distance(tile, target.position)

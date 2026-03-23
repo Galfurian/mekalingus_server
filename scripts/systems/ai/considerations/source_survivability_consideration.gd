@@ -5,7 +5,7 @@ extends AIConsideration
 func get_normalized_input(context: Dictionary) -> float:
 	var source: MapCombatEntity = context.get("source", null)
 	if not source:
-		push_error("Missing `source` entity in context.")
+		push_error("Missing source entity for SourceSurvivabilityConsideration.")
 		return 0.0
 
 	var max_survivability: float = AIUtils.get_entity_max_survivability(source)

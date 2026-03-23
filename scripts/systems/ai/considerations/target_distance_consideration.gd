@@ -7,10 +7,10 @@ func get_normalized_input(context: Dictionary) -> float:
 	var target: MapCombatEntity = context.get("target", null)
 	var max_distance: float = float(context.get("max_distance", 1.0))
 	if not source:
-		push_error("Missing `source` entity in context.")
+		push_error("Missing source entity for TargetDistanceConsideration.")
 		return 0.0
 	if not target:
-		push_error("Missing `target` entity in context.")
+		push_error("Missing target entity for TargetDistanceConsideration.")
 		return 0.0
 	if max_distance <= 0.0:
 		return 0.0

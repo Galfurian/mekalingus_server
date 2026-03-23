@@ -25,12 +25,14 @@ func clear() -> void:
 	"""
 	Clears the planner's internal state and caches.
 	"""
+	AIProfileManager.clear_cache()
 	turn_context.reset_context()
 
 
 func generate_plan(source: MapCombatEntity) -> AIPlan:
 	var plan: AIPlan = null
 	var best_score := -INF
+	AIProfileManager.warm_source(source)
 
 	# Planning context that holds shared data and caches for the current planning session.
 	var planning_context: AIPlanningContext = AIPlanningContext.new(turn_context, source)

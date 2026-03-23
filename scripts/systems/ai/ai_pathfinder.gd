@@ -249,9 +249,6 @@ static func find_best_attack_tile(
 			game_map.get_tile_height(tile) - game_map.get_tile_height(target.position)
 		)
 		var range_penalty = abs(distance - ideal_range)
-		var threat: float = AIThreatEvaluator.get_threat_level_from_enemy_cache(
-			tile, enemies, enemy_modules_cache
-		)
 		var adjacent_enemies: int = _count_adjacent_entities(enemies, tile)
 		var adjacent_allies: int = _count_adjacent_entities(allies, tile)
 		var contact_penalty: float = 0.0
@@ -262,7 +259,6 @@ static func find_best_attack_tile(
 		score += -range_penalty * AITuning.ATTACK_RANGE_WEIGHT
 		score += -move_cost * AITuning.ATTACK_MOVE_COST_WEIGHT
 		score += height_difference * AITuning.ATTACK_HEIGHT_WEIGHT
-		score += -threat * AITuning.ATTACK_THREAT_WEIGHT
 		score += -float(adjacent_enemies) * AITuning.ATTACK_ADJACENT_ENEMY_WEIGHT
 		score += -float(max(0, adjacent_allies - 1)) * AITuning.ATTACK_ADJACENT_ALLY_WEIGHT
 		score += -contact_penalty

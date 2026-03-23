@@ -4,7 +4,7 @@
     "description": "A decentralized band of freelance pilots, mercenaries, and scavengers. United only by their will to survive and adapt.",
     "color": "#B0C4DE",
     "emblem_path": "clans/freebooters_emblem.png",
-    "ai_profile_path": "res://data/ai_profiles/default_basic.tres",
+    "ai_profile_path": "default_basic",
     "is_player_joinable": true,
     "allies": ["phantom_blades", "ember_guard", "storm_howlers"]
 }

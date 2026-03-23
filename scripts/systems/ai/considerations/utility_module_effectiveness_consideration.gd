@@ -1,5 +1,5 @@
 class_name UtilityModuleEffectivenessConsideration
-extends "res://scripts/systems/ai/ai_consideration.gd"
+extends AIConsideration
 
 
 const NORMALIZATION_SCALE: float = 120.0

@@ -26,6 +26,7 @@ TemplateManager="*res://scripts/core/template_manager.gd"
 DataManager="*res://scripts/core/data_manager.gd"
 UIColor="*res://scripts/utils/ui_color.gd"
 AIUtils="*res://scripts/systems/ai/ai_utils.gd"
+AIProfileManager="*res://scripts/systems/ai/ai_profile_manager.gd"
 
 [display]
 

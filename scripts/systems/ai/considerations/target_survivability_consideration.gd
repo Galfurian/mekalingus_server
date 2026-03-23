@@ -7,7 +7,7 @@ extends AIConsideration
 func get_normalized_input(context: Dictionary) -> float:
 	var target: MapCombatEntity = context.get("target", null)
 	if not target:
-		push_error("Missing `target` entity in context.")
+		push_error("Missing target entity for TargetSurvivabilityConsideration.")
 		return 0.0
 
 	var max_survivability: float = AIUtils.get_entity_max_survivability(target)

@@ -114,19 +114,47 @@ func _validate_profile(profile: AIProfile, profile_id: String) -> bool:
 		errors.append("missing attack intent profile")
 	elif not attack_intent.get("target_phase"):
 		errors.append("missing attack.target_phase")
+	elif not _validate_phase_profile(
+		attack_intent.get("target_phase"),
+		AIEvaluationContext.Phase.TARGET,
+		"attack.target_phase",
+		profile_id,
+	):
+		errors.append("has invalid considerations in attack.target_phase")
 
 	if not support_intent:
 		errors.append("missing support intent profile")
 	elif not support_intent.get("target_phase"):
 		errors.append("missing support.target_phase")
+	elif not _validate_phase_profile(
+		support_intent.get("target_phase"),
+		AIEvaluationContext.Phase.TARGET,
+		"support.target_phase",
+		profile_id,
+	):
+		errors.append("has invalid considerations in support.target_phase")
 
 	if not retreat_intent:
 		errors.append("missing retreat intent profile")
 	else:
 		if not retreat_intent.get("activation_phase"):
 			errors.append("missing retreat.activation_phase")
+		elif not _validate_phase_profile(
+			retreat_intent.get("activation_phase"),
+			AIEvaluationContext.Phase.INTENT,
+			"retreat.activation_phase",
+			profile_id,
+		):
+			errors.append("has invalid considerations in retreat.activation_phase")
 		if not retreat_intent.get("destination_phase"):
 			errors.append("missing retreat.destination_phase")
+		elif not _validate_phase_profile(
+			retreat_intent.get("destination_phase"),
+			AIEvaluationContext.Phase.TILE,
+			"retreat.destination_phase",
+			profile_id,
+		):
+			errors.append("has invalid considerations in retreat.destination_phase")
 
 	if not reposition_intent:
 		errors.append("missing reposition intent profile")
@@ -138,3 +166,37 @@ func _validate_profile(profile: AIProfile, profile_id: String) -> bool:
 		push_error("AI profile '%s' %s." % [profile_id, error_message])
 
 	return false
+
+
+func _validate_phase_profile(
+	phase_profile: AIActionProfile,
+	required_phase: int,
+	phase_label: String,
+	profile_id: String,
+) -> bool:
+	if not phase_profile:
+		return false
+
+	for consideration: AIConsideration in phase_profile.considerations:
+		if not consideration:
+			continue
+
+		if (
+			not consideration.allowed_phases.is_empty()
+			and not consideration.allowed_phases.has(required_phase)
+		):
+			push_error(
+				(
+					"AI profile '%s' invalid phase binding: %s contains consideration '%s' not"
+					+ " allowed in phase '%s'."
+				)
+				% [
+					profile_id,
+					phase_label,
+					consideration.consideration_name,
+					AIEvaluationContext.Phase.keys()[required_phase],
+				]
+			)
+			return false
+
+	return true

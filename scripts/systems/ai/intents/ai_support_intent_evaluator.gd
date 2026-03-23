@@ -1,11 +1,23 @@
 class_name AISupportIntentEvaluator
-extends RefCounted
+extends "res://scripts/systems/ai/intents/ai_intent_evaluator.gd"
 
 const INTENT_LABEL: String = "Support"
 
 
 static func _log(source: MapCombatEntity, message: String) -> void:
 	_add_thought(source, "%s %s" % [INTENT_LABEL, message])
+
+
+func get_intent() -> AIPlan.Intent:
+	return AIPlan.Intent.SUPPORT
+
+
+func get_unavailable_reason() -> String:
+	return "no valid support candidate"
+
+
+func evaluate_intent(planning_context: AIPlanningContext) -> AIPlan:
+	return evaluate(planning_context)
 
 
 static func evaluate(planning_context: AIPlanningContext) -> AIPlan:

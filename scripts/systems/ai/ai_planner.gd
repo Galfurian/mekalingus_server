@@ -5,6 +5,19 @@ extends RefCounted
 # DATA
 # ============================================================================
 
+const ATTACK_INTENT_EVALUATOR = preload(
+	"res://scripts/systems/ai/intents/ai_attack_intent_evaluator.gd"
+)
+const SUPPORT_INTENT_EVALUATOR = preload(
+	"res://scripts/systems/ai/intents/ai_support_intent_evaluator.gd"
+)
+const RETREAT_INTENT_EVALUATOR = preload(
+	"res://scripts/systems/ai/intents/ai_retreat_intent_evaluator.gd"
+)
+const REPOSITION_INTENT_EVALUATOR = preload(
+	"res://scripts/systems/ai/intents/ai_reposition_intent_evaluator.gd"
+)
+
 # Reference to the game map for pathfinding and queries.
 var game_map: GameMap
 # Turn context that holds shared data and caches for the entire turn.
@@ -32,24 +45,16 @@ func clear() -> void:
 func _get_intent_registry() -> Array[Dictionary]:
 	return [
 		{
-			"intent": AIPlan.Intent.ATTACK,
-			"reason": "no valid attack candidate",
-			"evaluator": Callable(AIAttackIntentEvaluator, "evaluate"),
+			"evaluator": ATTACK_INTENT_EVALUATOR.new(),
 		},
 		{
-			"intent": AIPlan.Intent.SUPPORT,
-			"reason": "no valid support candidate",
-			"evaluator": Callable(AISupportIntentEvaluator, "evaluate"),
+			"evaluator": SUPPORT_INTENT_EVALUATOR.new(),
 		},
 		{
-			"intent": AIPlan.Intent.RETREAT,
-			"reason": "retreat threshold not met or no tile",
-			"evaluator": Callable(AIRetreatIntentEvaluator, "evaluate"),
+			"evaluator": RETREAT_INTENT_EVALUATOR.new(),
 		},
 		{
-			"intent": AIPlan.Intent.REPOSITION,
-			"reason": "no valid directive destination",
-			"evaluator": Callable(AIRepositionIntentEvaluator, "evaluate"),
+			"evaluator": REPOSITION_INTENT_EVALUATOR.new(),
 		},
 	]
 
@@ -69,15 +74,19 @@ func generate_plan(source: MapCombatEntity) -> AIPlan:
 
 	# Evaluate registered intent candidates and select the one with the highest score.
 	for intent_entry: Dictionary in _get_intent_registry():
-		var intent: AIPlan.Intent = intent_entry["intent"]
-		var evaluator: Callable = intent_entry["evaluator"]
-		var unavailable_reason: String = intent_entry["reason"]
-
-		if not evaluator.is_valid():
-			decision_trace.record_intent_result(intent, null, "invalid evaluator binding")
+		var evaluator = intent_entry["evaluator"]
+		if not evaluator:
+			decision_trace.record_intent_result(
+				AIPlan.Intent.NONE,
+				null,
+				"missing evaluator instance",
+			)
 			continue
 
-		var candidate: AIPlan = evaluator.call(planning_context)
+		var intent: AIPlan.Intent = evaluator.get_intent()
+		var unavailable_reason: String = evaluator.get_unavailable_reason()
+
+		var candidate: AIPlan = evaluator.evaluate_intent(planning_context)
 		decision_trace.record_intent_result(intent, candidate, unavailable_reason)
 
 		if candidate and candidate.score > best_score:

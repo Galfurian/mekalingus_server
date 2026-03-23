@@ -1,5 +1,5 @@
 class_name AIAttackIntentEvaluator
-extends RefCounted
+extends "res://scripts/systems/ai/intents/ai_intent_evaluator.gd"
 
 const DEFAULT_MAX_LOS_TILE_CANDIDATES: int = 6
 const INTENT_LABEL: String = "Attack"
@@ -7,6 +7,18 @@ const INTENT_LABEL: String = "Attack"
 
 static func _log(source: MapCombatEntity, message: String) -> void:
 	_add_thought(source, "%s %s" % [INTENT_LABEL, message])
+
+
+func get_intent() -> AIPlan.Intent:
+	return AIPlan.Intent.ATTACK
+
+
+func get_unavailable_reason() -> String:
+	return "no valid attack candidate"
+
+
+func evaluate_intent(planning_context: AIPlanningContext) -> AIPlan:
+	return evaluate(planning_context)
 
 
 static func evaluate(planning_context: AIPlanningContext) -> AIPlan:

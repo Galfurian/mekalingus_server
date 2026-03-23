@@ -1,5 +1,5 @@
 class_name AIRetreatIntentEvaluator
-extends RefCounted
+extends "res://scripts/systems/ai/intents/ai_intent_evaluator.gd"
 
 const INTENT_LABEL: String = "Retreat"
 const RETREAT_FORCE_RATIO_MAX: float = 2.0
@@ -8,6 +8,18 @@ const RETREAT_CONTINUE_THRESHOLD_OFFSET: float = -0.10
 const ACTIVATION_UTILITY_WEIGHT: float = 0.85
 const DESTINATION_UTILITY_WEIGHT: float = 0.15
 const AI_EVALUATION_CONTEXT = preload("res://scripts/systems/ai/contexts/ai_evaluation_context.gd")
+
+
+func get_intent() -> AIPlan.Intent:
+	return AIPlan.Intent.RETREAT
+
+
+func get_unavailable_reason() -> String:
+	return "retreat threshold not met or no tile"
+
+
+func evaluate_intent(planning_context: AIPlanningContext) -> AIPlan:
+	return evaluate(planning_context)
 
 
 static func evaluate(planning_context: AIPlanningContext) -> AIPlan:

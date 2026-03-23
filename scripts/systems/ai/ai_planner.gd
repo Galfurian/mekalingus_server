@@ -73,6 +73,16 @@ func generate_plan(source: MapCombatEntity) -> AIPlan:
 		plan = retreat_candidate
 		best_score = retreat_candidate.score
 
+	var reposition_candidate: AIPlan = AIRepositionIntentEvaluator.evaluate(planning_context)
+	decision_trace.record_intent_result(
+		AIPlan.Intent.REPOSITION,
+		reposition_candidate,
+		"no valid directive destination",
+	)
+	if reposition_candidate and reposition_candidate.score > best_score:
+		plan = reposition_candidate
+		best_score = reposition_candidate.score
+
 	if plan:
 		decision_trace.mark_selected(plan)
 		plan.decision_trace = decision_trace

@@ -1,13 +1,23 @@
 class_name AIRepositionIntentEvaluator
 extends RefCounted
 
+const INTENT_LABEL: String = "Reposition"
+
+
+static func _log(source: MapCombatEntity, message: String) -> void:
+	_add_thought(source, "%s %s" % [INTENT_LABEL, message])
+
 
 static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
-	_add_thought(planning_context.source, "----- Evaluating REPOSITION intent -----")
+	_add_thought(
+		planning_context.source, "----- Evaluating intent %10s -----" % [INTENT_LABEL.to_upper()]
+	)
 	var source: MapCombatEntity = planning_context.source
 	if not source.can_move():
+		_log(source, "intent unavailable: cannot move")
 		return null
 	if not planning_context.get_enemies().is_empty():
+		_log(source, "intent unavailable: enemies visible")
 		return null
 	# Get the game map.
 	var game_map: GameMap = planning_context.get_game_map()
@@ -15,6 +25,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	# Get the owner key for the source unit.
 	var owner_key: String = game_map.get_owner_key(source.owner)
 	if owner_key.is_empty():
+		_log(source, "intent unavailable: missing owner key")
 		return null
 
 	# Get the directive state for the source unit's owner.
@@ -22,6 +33,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		owner_key, source.position
 	)
 	if not state:
+		_log(source, "intent unavailable: missing directive state")
 		return null
 
 	var squad_center: Vector2i = planning_context.get_squad_center()
@@ -61,9 +73,12 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 			destination = source.position
 
 	if destination == Vector2i.ZERO or destination == source.position:
+		_log(source, "intent produced no movement destination")
 		return null
 
-	return AIPlanBuilder.build_plan(
+	_log(source, "selected destination=%s score=%.2f" % [MetaTag.pos_tag(destination), score])
+
+	var plan: AIPlan = AIPlanBuilder.build_plan(
 		source,
 		planning_context.get_game_map(),
 		AIPlan.Intent.REPOSITION,
@@ -72,6 +87,12 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		null,
 		destination
 	)
+	plan.debug_details = {
+		"directive": NpcDirectiveState.Directive.keys()[state.directive],
+		"destination": destination,
+		"objective_score": score,
+	}
+	return plan
 
 
 static func _pick_destination_for_objective(

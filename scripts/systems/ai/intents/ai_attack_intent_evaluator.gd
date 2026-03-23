@@ -3,6 +3,8 @@ extends "res://scripts/systems/ai/intents/ai_intent_evaluator.gd"
 
 const DEFAULT_MAX_LOS_TILE_CANDIDATES: int = 6
 const INTENT_LABEL: String = "Attack"
+const ACTIVATION_UTILITY_WEIGHT: float = 0.50
+const OPTION_UTILITY_WEIGHT: float = 0.50
 
 
 static func _log(source: MapCombatEntity, message: String) -> void:
@@ -48,6 +50,30 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 
 	# Get the attack target phase profile for this unit.
 	var profile: AIActionProfile = ai_profile.attack.target_phase
+	var intent_bias_value = ai_profile.attack.get("intent_bias")
+	var intent_bias: float = 1.0 if intent_bias_value == null else float(intent_bias_value)
+	var activation_phase: AIActionProfile = ai_profile.attack.get("activation_phase")
+
+	var activation_normalized: float = 1.0
+	var activation_threshold: float = 0.0
+	if activation_phase:
+		var activation_context = AIEvaluationContext.for_intent(source, planning_context)
+		var activation_max: float = activation_phase.get_max_score()
+		if activation_max <= 0.0:
+			_log(source, "intent unavailable: attack activation phase has zero max score")
+			return null
+		var activation_raw: float = activation_phase.evaluate_variant(activation_context)
+		activation_normalized = clampf(activation_raw / activation_max, 0.0, 1.0)
+		activation_threshold = activation_phase.activation_threshold
+		if activation_normalized < activation_threshold:
+			_log(
+				source,
+				(
+					"intent unavailable: activation %.2f below threshold %.2f"
+					% [activation_normalized, activation_threshold]
+				),
+			)
+			return null
 
 	var max_module_range: int = _get_max_module_range(source, offensive_modules)
 	var max_candidate_distance: int = (
@@ -151,11 +177,25 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 
 	_log(source, "scored %.2f" % best_score)
 
+	var option_quality: float = 0.0
+	var option_max: float = profile.get_max_score()
+	if option_max > 0.0:
+		option_quality = clampf(best_score / option_max, 0.0, 1.0)
+
+	var final_utility: float = clampf(
+		(
+			activation_normalized * ACTIVATION_UTILITY_WEIGHT
+			+ option_quality * OPTION_UTILITY_WEIGHT
+		) * 100.0 * intent_bias,
+		0.0,
+		100.0,
+	)
+
 	var plan: AIPlan = AIPlanBuilder.build_plan(
 		source,
 		planning_context.get_game_map(),
 		AIPlan.Intent.ATTACK,
-		clampf(best_score, 0.0, 100.0),
+		final_utility,
 		best_target,
 		best_equipped_module,
 		best_destination
@@ -163,6 +203,11 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	plan.debug_details = {
 		"evaluated_options": evaluated_options,
 		"rejected_unreachable": rejected_unreachable,
+		"activation_normalized": activation_normalized,
+		"activation_threshold": activation_threshold,
+		"option_quality": option_quality,
+		"intent_bias": intent_bias,
+		"final_utility": final_utility,
 		"best_target": best_target.combatant.get_chat_tag(),
 		"best_module": best_equipped_module.get_chat_tag(),
 		"best_destination": best_destination,

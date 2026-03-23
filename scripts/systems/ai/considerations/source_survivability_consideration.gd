@@ -17,4 +17,8 @@ func get_normalized_input(context: Dictionary) -> float:
 	if current_survivability < 0.0:
 		push_error("source has negative current survivability, cannot normalize health.")
 		return 0.0
-	return clampf(current_survivability / max_survivability, 0.0, 1.0)
+
+	# For retreat, a lower current survivability should increase urgency.
+	# Source survivability = 0.0 (full health) -> 0.0 retreat pressure.
+	# Source survivability = 1.0 (dead or no health) -> 1.0 retreat pressure.
+	return clampf(1.0 - (current_survivability / max_survivability), 0.0, 1.0)

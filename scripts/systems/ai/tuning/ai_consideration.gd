@@ -1,8 +1,8 @@
 @abstract class_name AIConsideration
 extends Resource
 
-var consideration_name: String = "Unnamed Consideration"
-var weight: float = 1.0
+@export var consideration_name: String = "Unnamed Consideration"
+@export var weight: float = 1.0
 
 
 func _init(
@@ -27,33 +27,3 @@ func evaluate(
 
 
 @abstract func get_normalized_input(context: Dictionary) -> float
-
-
-static func from_dict(data: Dictionary) -> AIConsideration:
-	var consideration_type: String = data.get("type", "")
-	var consideration: AIConsideration = null
-
-	match consideration_type:
-		"target_survivability":
-			consideration = TargetSurvivabilityConsideration.new()
-		"target_distance":
-			consideration = TargetDistanceConsideration.new()
-		"offensive_module_effectiveness":
-			consideration = OffensiveModuleEffectivenessConsideration.new()
-		"utility_module_effectiveness":
-			consideration = UtilityModuleEffectivenessConsideration.new()
-		"source_survivability":
-			consideration = SourceSurvivabilityConsideration.new()
-		"tile_threat":
-			consideration = TileThreatConsideration.new()
-		"local_force_superiority":
-			consideration = LocalForceSuperioritConsideration.new()
-		"retreat_direction":
-			consideration = RetreatDirectionConsideration.new()
-		_:
-			push_warning("Unknown AI consideration type '%s'" % consideration_type)
-	if not consideration:
-		return null
-	consideration.consideration_name = consideration_type
-	consideration.weight = float(data.get("weight", 1.0))
-	return consideration

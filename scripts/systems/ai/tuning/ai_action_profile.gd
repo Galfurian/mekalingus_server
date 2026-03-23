@@ -1,19 +1,9 @@
 class_name AIActionProfile
-extends RefCounted
+extends Resource
 
-var profile_name: String = "default"
-var considerations: Array[AIConsideration] = []
-var activation_threshold: float = 0.5
-
-
-func _init(
-	p_profile_name: String = "default",
-	p_activation_threshold: float = 0.5,
-	p_considerations: Array[AIConsideration] = [],
-) -> void:
-	profile_name = p_profile_name
-	activation_threshold = clampf(p_activation_threshold, 0.0, 1.0)
-	considerations = p_considerations
+@export var profile_name: String = "default"
+@export_range(0.0, 1.0, 0.01) var activation_threshold: float = 0.5
+@export var considerations: Array[AIConsideration] = []
 
 
 func evaluate(
@@ -60,15 +50,3 @@ func _normalize_context(context: Variant) -> Dictionary:
 		return context
 	push_error("AIActionProfile received unsupported context type: %s" % typeof(context))
 	return {}
-
-
-static func from_dict(data: Dictionary) -> AIActionProfile:
-	var d_profile_name: String = data.get("profile_name", "default")
-	var d_activation_threshold: float = float(data.get("activation_threshold", 0.5))
-	var d_considerations_data: Array = data.get("considerations", [])
-	var d_considerations: Array[AIConsideration] = []
-	for consideration_entry in d_considerations_data:
-		var consideration: AIConsideration = AIConsideration.from_dict(consideration_entry)
-		if consideration:
-			d_considerations.append(consideration)
-	return AIActionProfile.new(d_profile_name, d_activation_threshold, d_considerations)

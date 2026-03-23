@@ -32,33 +32,20 @@ func _resolve_profile_bundle(source: MapCombatEntity) -> AIProfile:
 	if _profile_cache.has(profile_id):
 		return _profile_cache[profile_id]
 
-	# Load profile data from JSON file, with fallback to default profile if specified profile fails
-	# to load.
-	var profile_data: Dictionary = _load_profile_data(profile_id)
-	if profile_data.is_empty():
-		push_error(
-			(
-				(
-					"Failed to load AI profile data for profile_id '%s'. "
-					+ "Falling back to default profile '%s'."
-				)
-				% [profile_id, DEFAULT_PROFILE_ID]
-			)
-		)
-		return null
-
-	# Build the profile bundle from the loaded data.
-	var ai_profile: AIProfile = AIProfile.from_dict(profile_data)
+	var ai_profile: AIProfile = _load_profile_resource(profile_id)
 	if not ai_profile:
 		push_error(
 			(
 				(
-					"Failed to build AI profile from data for profile_id '%s'. "
-					+ "Falling back to default profile '%s'."
+					"Failed to load AI profile resource for profile_id '%s'. "
+					+ "Expected .tres profile in '%s'."
 				)
-				% [profile_id, DEFAULT_PROFILE_ID]
+				% [profile_id, PROFILE_FOLDER_PATH]
 			)
 		)
+		return null
+
+	if not _validate_profile(ai_profile, profile_id):
 		return null
 
 	# Store the loaded profile bundle in cache for future retrievals.
@@ -86,9 +73,29 @@ func _resolve_profile_id(source: MapCombatEntity) -> String:
 	return DEFAULT_PROFILE_ID
 
 
-func _load_profile_data(profile_id: String) -> Dictionary:
-	var profile_path: String = PROFILE_FOLDER_PATH + profile_id + ".json"
-	var data = JsonStore.read_json_file(profile_path)
-	if typeof(data) != TYPE_DICTIONARY:
-		return {}
-	return data
+func _load_profile_resource(profile_id: String) -> AIProfile:
+	var profile_path: String = PROFILE_FOLDER_PATH + profile_id + ".tres"
+	if not ResourceLoader.exists(profile_path):
+		return null
+	return load(profile_path) as AIProfile
+
+
+func _validate_profile(profile: AIProfile, profile_id: String) -> bool:
+	if not profile:
+		push_error("AI profile '%s' is null." % profile_id)
+		return false
+
+	if not profile.attack_profile:
+		push_error("AI profile '%s' missing attack_profile." % profile_id)
+		return false
+	if not profile.support_profile:
+		push_error("AI profile '%s' missing support_profile." % profile_id)
+		return false
+	if not profile.retreat_profile:
+		push_error("AI profile '%s' missing retreat_profile." % profile_id)
+		return false
+	if not profile.reposition_profile:
+		push_error("AI profile '%s' missing reposition_profile." % profile_id)
+		return false
+
+	return true

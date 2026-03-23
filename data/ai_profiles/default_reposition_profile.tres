@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="AIActionProfile" format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/ai/tuning/ai_action_profile.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+profile_name = "default_reposition_profile"
+activation_threshold = 0.0
+considerations = []

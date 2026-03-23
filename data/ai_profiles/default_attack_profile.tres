@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="AIActionProfile" format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/ai/tuning/ai_action_profile.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/systems/ai/considerations/target_survivability_consideration.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/systems/ai/considerations/target_distance_consideration.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/systems/ai/considerations/offensive_module_effectiveness_consideration.gd" id="4"]
+
+[sub_resource type="Resource" id="TargetSurvivabilityConsideration_1"]
+script = ExtResource("2")
+consideration_name = "target_survivability"
+weight = 14.0
+
+[sub_resource type="Resource" id="TargetDistanceConsideration_2"]
+script = ExtResource("3")
+consideration_name = "target_distance"
+weight = 7.0
+
+[sub_resource type="Resource" id="OffensiveModuleEffectivenessConsideration_3"]
+script = ExtResource("4")
+consideration_name = "offensive_module_effectiveness"
+weight = 14.0
+
+[resource]
+script = ExtResource("1")
+profile_name = "default_attack_profile"
+activation_threshold = 0.5
+considerations = [SubResource("TargetSurvivabilityConsideration_1"), SubResource("TargetDistanceConsideration_2"), SubResource("OffensiveModuleEffectivenessConsideration_3")]

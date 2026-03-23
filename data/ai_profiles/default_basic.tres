@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="AIProfile" format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/ai/tuning/ai_profile.gd" id="1"]
+[ext_resource type="Resource" path="res://data/ai_profiles/default_attack_profile.tres" id="2"]
+[ext_resource type="Resource" path="res://data/ai_profiles/default_support_profile.tres" id="3"]
+[ext_resource type="Resource" path="res://data/ai_profiles/default_retreat_profile.tres" id="4"]
+[ext_resource type="Resource" path="res://data/ai_profiles/default_reposition_profile.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+profile_id = "default_basic"
+attack_profile = ExtResource("2")
+support_profile = ExtResource("3")
+retreat_profile = ExtResource("4")
+reposition_profile = ExtResource("5")

@@ -10,6 +10,24 @@ func clear_cache() -> void:
 	_profile_cache.clear()
 
 
+func validate_profile_id(profile_id: String) -> bool:
+	var resolved_id: String = profile_id.strip_edges()
+	if resolved_id.is_empty():
+		resolved_id = DEFAULT_PROFILE_ID
+
+	var profile: AIProfile = _load_profile_resource(resolved_id)
+	if not profile:
+		push_error(
+			(
+				"AI profile id '%s' is invalid. Missing resource at '%s%s.tres'."
+				% [resolved_id, PROFILE_FOLDER_PATH, resolved_id]
+			)
+		)
+		return false
+
+	return _validate_profile(profile, resolved_id)
+
+
 func warm_source(source: MapCombatEntity) -> void:
 	_resolve_profile_bundle(source)
 

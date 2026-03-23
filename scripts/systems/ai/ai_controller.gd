@@ -245,6 +245,10 @@ func plan_for_unit(source: MapCombatEntity) -> void:
 	if not source.combatant.is_alive():
 		return
 
+	if not _validate_profile_binding_for_source(source):
+		_add_thought(source, "Missing or invalid AI profile binding; planning skipped.")
+		return
+
 	# Check if we already have a valid plan.
 	var current_plan: AIPlan = get_current_plan(source)
 
@@ -261,6 +265,23 @@ func plan_for_unit(source: MapCombatEntity) -> void:
 	_current_plans[source.combatant.uuid] = new_plan
 
 	_add_thought(source, "Planned: %s" % str(new_plan))
+
+
+func _validate_profile_binding_for_source(source: MapCombatEntity) -> bool:
+	if not source or not source.owner:
+		return false
+
+	var profile_id: String = ""
+	if is_instance_of(source.owner, NPCOwned):
+		profile_id = (source.owner as NPCOwned).ai_profile_path
+
+	if profile_id.strip_edges().is_empty() and source.owner.clan:
+		profile_id = source.owner.clan.ai_profile_path
+
+	if profile_id.strip_edges().is_empty():
+		profile_id = AIProfileManager.DEFAULT_PROFILE_ID
+
+	return AIProfileManager.validate_profile_id(profile_id)
 
 
 func generate_orders_for_unit(source: MapCombatEntity) -> void:

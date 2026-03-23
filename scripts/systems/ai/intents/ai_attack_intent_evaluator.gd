@@ -92,15 +92,15 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 					continue
 				destination = move_data["destination"]
 
-			var score_context: Dictionary = {
-				"source": source,
-				"target": target,
-				"module": equipped_module.module,
-				"planning_context": planning_context,
-				"tile": destination,
-				"max_distance": float(max_candidate_distance),
-			}
-			var base_score: float = profile.evaluate(score_context)
+			var score_context: AIEvaluationContext = AIEvaluationContext.for_target(
+				source,
+				target,
+				equipped_module.module,
+				planning_context,
+				destination,
+				float(max_candidate_distance),
+			)
+			var base_score: float = profile.evaluate_variant(score_context)
 			var score: float = base_score
 
 			if score > best_score:

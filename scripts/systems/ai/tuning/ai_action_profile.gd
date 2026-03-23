@@ -19,10 +19,15 @@ func _init(
 func evaluate(
 	context: Dictionary,
 ) -> float:
+	return evaluate_variant(context)
+
+
+func evaluate_variant(context: Variant) -> float:
+	var normalized_context: Dictionary = _normalize_context(context)
 	var score: float = 0.0
 	for consideration in considerations:
 		if consideration:
-			score += consideration.evaluate(context)
+			score += consideration.evaluate(normalized_context)
 	return score
 
 
@@ -37,11 +42,24 @@ func get_max_score() -> float:
 func should_activate(
 	context: Dictionary,
 ) -> bool:
+	return should_activate_variant(context)
+
+
+func should_activate_variant(context: Variant) -> bool:
 	var max_score: float = get_max_score()
 	if max_score <= 0.0:
 		return false
-	var normalized_score: float = evaluate(context) / max_score
+	var normalized_score: float = evaluate_variant(context) / max_score
 	return normalized_score >= activation_threshold
+
+
+func _normalize_context(context: Variant) -> Dictionary:
+	if context is AIEvaluationContext:
+		return (context as AIEvaluationContext).to_dict()
+	if context is Dictionary:
+		return context
+	push_error("AIActionProfile received unsupported context type: %s" % typeof(context))
+	return {}
 
 
 static func from_dict(data: Dictionary) -> AIActionProfile:

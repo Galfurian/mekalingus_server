@@ -3,6 +3,7 @@ extends RefCounted
 
 const INTENT_LABEL: String = "Retreat"
 const RETREAT_FORCE_RATIO_MAX: float = 2.0
+const AI_EVALUATION_CONTEXT = preload("res://scripts/systems/ai/contexts/ai_evaluation_context.gd")
 
 
 static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
@@ -130,17 +131,16 @@ static func _evaluate_retreat_necessity(
 			"normalized_score": 0.0,
 			"max_score": 0.0,
 		}
-	var evaluation_context: Dictionary = {
-		"source": source,
-		"planning_context": planning_context,
-		"tile": source.position,
-	}
-	var raw_score: float = profile.evaluate(evaluation_context)
+	var evaluation_context = AI_EVALUATION_CONTEXT.for_intent(
+		source,
+		planning_context,
+	)
+	var raw_score: float = profile.evaluate_variant(evaluation_context)
 	var max_score: float = profile.get_max_score()
 	var normalized_score: float = 0.0
 	if max_score > 0.0:
 		normalized_score = clampf(raw_score / max_score, 0.0, 1.0)
-	var should_retreat: bool = profile.should_activate(evaluation_context)
+	var should_retreat: bool = profile.should_activate_variant(evaluation_context)
 
 	var retreat_message: String = (
 		"retreat evaluation: normalized=%.2f (score=%.2f/%.2f) vs threshold %.2f -> %s"
@@ -243,12 +243,12 @@ static func _find_safest_retreat_tile(
 				continue
 
 		# Evaluate tile using profile considerations.
-		var evaluation_context: Dictionary = {
-			"source": source,
-			"planning_context": planning_context,
-			"tile": tile,
-		}
-		var tile_score: float = profile.evaluate(evaluation_context)
+		var evaluation_context = AI_EVALUATION_CONTEXT.for_tile(
+			source,
+			planning_context,
+			tile,
+		)
+		var tile_score: float = profile.evaluate_variant(evaluation_context)
 		if tile_score > best_score:
 			var previous_best_score: float = best_score
 			best_score = tile_score

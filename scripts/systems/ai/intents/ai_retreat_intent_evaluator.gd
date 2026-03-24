@@ -7,7 +7,6 @@ const RETREAT_ENTER_THRESHOLD_OFFSET: float = 0.10
 const RETREAT_CONTINUE_THRESHOLD_OFFSET: float = -0.10
 const ACTIVATION_UTILITY_WEIGHT: float = 0.85
 const DESTINATION_UTILITY_WEIGHT: float = 0.15
-const AI_EVALUATION_CONTEXT = preload("res://scripts/systems/ai/contexts/ai_evaluation_context.gd")
 
 
 func get_intent() -> AIPlan.Intent:
@@ -124,9 +123,12 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	var activation_utility: float = retreat_decision["normalized_score"]
 	var final_utility: float = clampf(
 		(
-			activation_utility * ACTIVATION_UTILITY_WEIGHT
-			+ destination_quality * DESTINATION_UTILITY_WEIGHT
-		) * 100.0,
+			(
+				activation_utility * ACTIVATION_UTILITY_WEIGHT
+				+ destination_quality * DESTINATION_UTILITY_WEIGHT
+			)
+			* 100.0
+		),
 		0.0,
 		100.0,
 	)
@@ -187,10 +189,7 @@ static func _evaluate_retreat_necessity(
 			"normalized_score": 0.0,
 			"max_score": 0.0,
 		}
-	var evaluation_context = AI_EVALUATION_CONTEXT.for_intent(
-		source,
-		planning_context,
-	)
+	var evaluation_context = AIEvaluationContext.for_intent(source, planning_context)
 	var raw_score: float = profile.evaluate_variant(evaluation_context)
 	var max_score: float = profile.get_max_score()
 	var normalized_score: float = 0.0
@@ -308,23 +307,11 @@ static func _find_safest_retreat_tile(
 				continue
 
 		# Evaluate tile using profile considerations.
-		var evaluation_context = AI_EVALUATION_CONTEXT.for_tile(
-			source,
-			planning_context,
-			tile,
-		)
+		var evaluation_context = AIEvaluationContext.for_tile(source, planning_context, tile)
 		var tile_score: float = profile.evaluate_variant(evaluation_context)
 		if tile_score > best_score:
-			var previous_best_score: float = best_score
 			best_score = tile_score
 			safest_tile = tile
-			_log(
-				source,
-				(
-					"new best retreat tile candidate: %s score=%.2f (prev=%.2f)"
-					% [MetaTag.pos_tag(tile), tile_score, previous_best_score]
-				)
-			)
 
 	_log(source, "selected retreat tile %s score=%.2f" % [MetaTag.pos_tag(safest_tile), best_score])
 

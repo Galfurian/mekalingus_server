@@ -5,19 +5,6 @@ extends RefCounted
 # DATA
 # ============================================================================
 
-const ATTACK_INTENT_EVALUATOR = preload(
-	"res://scripts/systems/ai/intents/ai_attack_intent_evaluator.gd"
-)
-const SUPPORT_INTENT_EVALUATOR = preload(
-	"res://scripts/systems/ai/intents/ai_support_intent_evaluator.gd"
-)
-const RETREAT_INTENT_EVALUATOR = preload(
-	"res://scripts/systems/ai/intents/ai_retreat_intent_evaluator.gd"
-)
-const REPOSITION_INTENT_EVALUATOR = preload(
-	"res://scripts/systems/ai/intents/ai_reposition_intent_evaluator.gd"
-)
-
 # Reference to the game map for pathfinding and queries.
 var game_map: GameMap
 # Turn context that holds shared data and caches for the entire turn.
@@ -46,16 +33,16 @@ func clear() -> void:
 func _get_intent_registry() -> Array[Dictionary]:
 	return [
 		{
-			"evaluator": ATTACK_INTENT_EVALUATOR.new(),
+			"evaluator": AIAttackIntentEvaluator.new(),
 		},
 		{
-			"evaluator": SUPPORT_INTENT_EVALUATOR.new(),
+			"evaluator": AISupportIntentEvaluator.new(),
 		},
 		{
-			"evaluator": RETREAT_INTENT_EVALUATOR.new(),
+			"evaluator": AIRetreatIntentEvaluator.new(),
 		},
 		{
-			"evaluator": REPOSITION_INTENT_EVALUATOR.new(),
+			"evaluator": AIRepositionIntentEvaluator.new(),
 		},
 	]
 
@@ -114,10 +101,13 @@ func generate_plan(source: MapCombatEntity) -> AIPlan:
 	for intent_entry: Dictionary in _get_intent_registry():
 		var evaluator = intent_entry["evaluator"]
 		if not evaluator:
-			decision_trace.record_intent_result(
-				AIPlan.Intent.NONE,
-				null,
-				"missing evaluator instance",
+			(
+				decision_trace
+				. record_intent_result(
+					AIPlan.Intent.NONE,
+					null,
+					"missing evaluator instance",
+				)
 			)
 			continue
 

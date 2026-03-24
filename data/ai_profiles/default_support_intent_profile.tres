@@ -2,11 +2,12 @@
 
 [ext_resource type="Script" path="res://scripts/systems/ai/tuning/ai_intent_profile.gd" id="1"]
 [ext_resource type="Resource" path="res://data/ai_profiles/default_support_profile.tres" id="2"]
+[ext_resource type="Resource" path="res://data/ai_profiles/default_support_activation_profile.tres" id="3"]
 
 [resource]
 script = ExtResource("1")
 intent_name = "support"
-activation_phase = null
+activation_phase = ExtResource("3")
 target_phase = ExtResource("2")
 destination_phase = null
 module_phase = null

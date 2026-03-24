@@ -55,19 +55,19 @@ func get_normalized_input(context: Dictionary) -> float:
 	var clamped_disadvantage = clampf(normalized_disadvantage, 0.0, 1.0)
 
 	# Clamp to [0, 1] so that values above FORCE_RATIO_MAX are treated as maximum disadvantage.
-	_add_thought(
-		source,
-		(
-			"Local force superiority: %.2f (enemy threat: %.2f, source threat: %.2f, force ratio: %.2f -> %.2f -> %.2f)"
-			% [
-				clamped_disadvantage,
-				enemy_threat_level,
-				source_threat,
-				force_ratio,
-				normalized_disadvantage,
-				clamped_disadvantage,
-			]
-		)
-	)
+	# _add_thought(
+	# 	source,
+	# 	(
+	# 		"Local force superiority: %.2f (enemy threat: %.2f, source threat: %.2f, force ratio: %.2f -> %.2f -> %.2f)"
+	# 		% [
+	# 			clamped_disadvantage,
+	# 			enemy_threat_level,
+	# 			source_threat,
+	# 			force_ratio,
+	# 			normalized_disadvantage,
+	# 			clamped_disadvantage,
+	# 		]
+	# 	)
+	# )
 
 	return clamped_disadvantage

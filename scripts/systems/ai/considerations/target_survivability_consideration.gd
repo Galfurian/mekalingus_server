@@ -25,4 +25,21 @@ func get_normalized_input(context: Dictionary) -> float:
 	if current_survivability < 0.0:
 		push_error("Target has negative current survivability, cannot normalize health.")
 		return 0.0
-	return clampf(current_survivability / max_survivability, 0.0, 1.0)
+
+	# Compute the survivability score as a ratio of current to max survivability.
+	var score = current_survivability / max_survivability
+
+	# Normalize so that:
+	# - 0.0 means no health (current_survivability = 0)
+	# - 1.0 means full health (current_survivability = max_survivability)
+	var normnalized_score = clampf(score, 0.0, 1.0)
+
+	# _add_thought(
+	# 	target,
+	# 	(
+	# 		"Target survivability: %d/%d (%.2f -> %.2f)"
+	# 		% [current_survivability, max_survivability, score, normnalized_score]
+	# 	)
+	# )
+
+	return normnalized_score

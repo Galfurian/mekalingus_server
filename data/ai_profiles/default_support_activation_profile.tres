@@ -9,20 +9,21 @@
 script = ExtResource("2")
 consideration_name = "source_survivability"
 weight = 10.0
-invert_output = true
 
 [sub_resource type="Resource" id="TileThreatConsideration_2"]
 script = ExtResource("3")
 consideration_name = "tile_threat"
 weight = 10.0
+invert_output = true
 
 [sub_resource type="Resource" id="LocalForceSuperioritConsideration_3"]
 script = ExtResource("4")
 consideration_name = "local_force_superiority"
 weight = 10.0
+invert_output = true
 
 [resource]
 script = ExtResource("1")
-profile_name = "default_retreat_activation_profile"
+profile_name = "default_support_activation_profile"
 activation_threshold = 0.5
 considerations = [SubResource("SourceSurvivabilityConsideration_1"), SubResource("TileThreatConsideration_2"), SubResource("LocalForceSuperioritConsideration_3")]

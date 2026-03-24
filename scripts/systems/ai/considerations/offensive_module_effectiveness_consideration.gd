@@ -27,8 +27,24 @@ func get_normalized_input(context: Dictionary) -> float:
 		return 0.0
 	# Calculate the total power of the module's offensive effects.
 	var total_power: float = _get_offensive_module_total_power(module)
-	# Normalize the total power to a value between 0 and 1 based on the defined normalization scale.
-	return clampf(total_power / NORMALIZATION_SCALE, 0.0, 1.0)
+
+	# Compute the score as a ratio of the total power to the normalization scale.
+	var score = total_power / NORMALIZATION_SCALE
+
+	# Normalize so that:
+	# - 0.0 means no offensive power (total_power = 0)
+	# - 1.0 means maximum offensive power (total_power >= NORMALIZATION_SCALE)
+	var normalized_score = clampf(score, 0.0, 1.0)
+
+	# _add_thought(
+	# 	source,
+	# 	(
+	# 		"Offensive module effectiveness: %.2f (total power: %.2f, score: %.2f -> normalized: %.2f)"
+	# 		% [normalized_score, total_power, score, normalized_score]
+	# 	)
+	# )
+
+	return normalized_score
 
 
 ## Utility function to calculate the total power of a module's offensive effects without needing the

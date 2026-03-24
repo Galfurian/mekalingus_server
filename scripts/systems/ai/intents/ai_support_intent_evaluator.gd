@@ -121,19 +121,6 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 			)
 			var score: float = profile.evaluate_variant(score_context)
 
-			_log(
-				source,
-				(
-					"option: target=%s module=%s score=%.2f tile=%s"
-					% [
-						target.combatant.get_chat_tag(),
-						equipped_module.get_chat_tag(),
-						score,
-						MetaTag.pos_tag(destination),
-					]
-				),
-			)
-
 			if score > best_score:
 				best_score = score
 				best_target = target

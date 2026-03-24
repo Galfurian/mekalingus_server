@@ -8,7 +8,7 @@
 [sub_resource type="Resource" id="TargetSurvivabilityConsideration_1"]
 script = ExtResource("2")
 consideration_name = "target_survivability"
-weight = 16.0
+weight = 8.0
 invert_output = true
 
 [sub_resource type="Resource" id="TileThreatConsideration_2"]

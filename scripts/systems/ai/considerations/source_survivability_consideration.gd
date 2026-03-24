@@ -30,7 +30,20 @@ func get_normalized_input(context: Dictionary) -> float:
 		push_error("source has negative current survivability, cannot normalize health.")
 		return 0.0
 
-	# For retreat, a lower current survivability should increase urgency.
-	# Source survivability = 0.0 (full health)
-	# Source survivability = 1.0 (dead or no health)
-	return clampf(1.0 - (current_survivability / max_survivability), 0.0, 1.0)
+	# Compute the survivability score as a ratio of current to max survivability.
+	var score = current_survivability / max_survivability
+
+	# Normalize so that:
+	# - 0.0 means no health (current_survivability = 0)
+	# - 1.0 means full health (current_survivability = max_survivability)
+	var normnalized_score = clampf(score, 0.0, 1.0)
+
+	# _add_thought(
+	# 	source,
+	# 	(
+	# 		"Source survivability: %d/%d (%.2f -> %.2f)"
+	# 		% [current_survivability, max_survivability, score, normnalized_score]
+	# 	)
+	# )
+
+	return normnalized_score

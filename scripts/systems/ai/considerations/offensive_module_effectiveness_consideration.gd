@@ -7,13 +7,17 @@ const NORMALIZATION_SCALE: float = 120.0
 func _init() -> void:
 	consideration_name = "offensive_module_effectiveness"
 	allowed_phases = PackedInt32Array([AIEvaluationContext.Phase.TARGET])
-	required_keys = PackedStringArray(["module", "source", "target"])
+	required_keys = PackedStringArray(["item", "module", "source", "target"])
 
 
 func get_normalized_input(context: Dictionary) -> float:
+	var item: Item = context.get("item", null)
 	var module: ItemModule = context.get("module", null)
 	var source: MapCombatEntity = context.get("source", null)
 	var target: MapCombatEntity = context.get("target", null)
+	if not item:
+		push_error("Missing item for OffensiveModuleEffectivenessConsideration.")
+		return 0.0
 	if not module:
 		push_error("Missing module for OffensiveModuleEffectivenessConsideration.")
 		return 0.0
@@ -24,6 +28,8 @@ func get_normalized_input(context: Dictionary) -> float:
 		push_error("Missing target for OffensiveModuleEffectivenessConsideration.")
 		return 0.0
 	if source.owner == target.owner:
+		return 0.0
+	if _is_module_in_cooldown(source, item, module):
 		return 0.0
 	# Calculate the total power of the module's offensive effects.
 	var total_power: float = _get_offensive_module_total_power(module)
@@ -55,3 +61,10 @@ func _get_offensive_module_total_power(module: ItemModule) -> float:
 		if effect.is_offensive():
 			total_power += effect.evaluate_effect_power(module.repeats)
 	return total_power
+
+
+func _is_module_in_cooldown(source: MapCombatEntity, item: Item, module: ItemModule) -> bool:
+	assert(source and source.combatant and item and module)
+	if not source.combatant.cooldown_manager:
+		return false
+	return source.combatant.cooldown_manager.get_remaining_cooldown(item, module) > 0

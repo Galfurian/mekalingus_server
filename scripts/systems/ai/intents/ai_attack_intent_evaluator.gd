@@ -134,6 +134,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 				source,
 				target,
 				equipped_module.module,
+				equipped_module.item,
 				planning_context,
 				destination,
 				float(max_candidate_distance),

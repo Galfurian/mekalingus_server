@@ -7,14 +7,17 @@ const NORMALIZATION_SCALE: float = 120.0
 func _init() -> void:
 	consideration_name = "utility_module_effectiveness"
 	allowed_phases = PackedInt32Array([AIEvaluationContext.Phase.TARGET])
-	required_keys = PackedStringArray(["module", "source", "target"])
+	required_keys = PackedStringArray(["item", "module", "source", "target"])
 
 
 func get_normalized_input(context: Dictionary) -> float:
+	var item: Item = context.get("item", null)
 	var module: ItemModule = context.get("module", null)
 	var source: MapCombatEntity = context.get("source", null)
 	var target: MapCombatEntity = context.get("target", null)
-	if not module or not source or not target:
+	if not item or not module or not source or not target:
+		return 0.0
+	if _is_module_in_cooldown(source, item, module):
 		return 0.0
 
 	var total_power: float = 0.0
@@ -61,3 +64,10 @@ func _can_effect_apply_to_target(
 			return true
 		_:
 			return false
+
+
+func _is_module_in_cooldown(source: MapCombatEntity, item: Item, module: ItemModule) -> bool:
+	assert(source and source.combatant and item and module)
+	if not source.combatant.cooldown_manager:
+		return false
+	return source.combatant.cooldown_manager.get_remaining_cooldown(item, module) > 0

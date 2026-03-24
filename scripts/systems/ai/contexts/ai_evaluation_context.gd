@@ -1,7 +1,6 @@
 class_name AIEvaluationContext
 extends RefCounted
 
-
 enum Phase {
 	INTENT,
 	TARGET,
@@ -9,11 +8,11 @@ enum Phase {
 	MODULE,
 }
 
-
 var phase: Phase = Phase.INTENT
 var source: MapCombatEntity = null
 var planning_context: AIPlanningContext = null
 var target: MapCombatEntity = null
+var item: Item = null
 var module: ItemModule = null
 var tile: Vector2i = Vector2i.ZERO
 var max_distance: float = 0.0
@@ -35,6 +34,7 @@ static func for_target(
 	p_source: MapCombatEntity,
 	p_target: MapCombatEntity,
 	p_module: ItemModule,
+	p_item: Item,
 	p_planning_context: AIPlanningContext,
 	p_tile: Vector2i,
 	p_max_distance: float,
@@ -44,6 +44,7 @@ static func for_target(
 	context.source = p_source
 	context.target = p_target
 	context.module = p_module
+	context.item = p_item
 	context.planning_context = p_planning_context
 	context.tile = p_tile
 	context.max_distance = p_max_distance
@@ -67,6 +68,7 @@ func to_dict() -> Dictionary:
 	return {
 		"source": source,
 		"target": target,
+		"item": item,
 		"module": module,
 		"planning_context": planning_context,
 		"tile": tile,

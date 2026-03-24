@@ -447,7 +447,8 @@ func _get_plan_score(source_uuid: String) -> float:
 
 func export_ai_baseline_snapshot() -> Dictionary:
 	var snapshot: Dictionary = {
-		"turn": game_map.turn_manager.get_current_turn() if game_map and game_map.turn_manager else -1,
+		"turn":
+		game_map.turn_manager.get_current_turn() if game_map and game_map.turn_manager else -1,
 		"units": [],
 	}
 
@@ -467,6 +468,7 @@ func export_ai_baseline_snapshot() -> Dictionary:
 			if plan.target and plan.target.combatant:
 				unit_entry["target"] = plan.target.combatant.get_chat_tag()
 			if plan.equipped_module:
+				unit_entry["item"] = plan.equipped_module.item.item_id
 				unit_entry["module"] = plan.equipped_module.get_chat_tag()
 			if plan.decision_trace:
 				unit_entry["decision_trace"] = plan.decision_trace.to_dict()

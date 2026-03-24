@@ -4,7 +4,6 @@
 [ext_resource type="Script" path="res://scripts/systems/ai/considerations/source_survivability_consideration.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/systems/ai/considerations/local_force_superiority_consideration.gd" id="4"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/utility_module_effectiveness_consideration.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/systems/ai/considerations/retreat_direction_consideration.gd" id="6"]
 
 [sub_resource type="Resource" id="SourceSurvivabilityConsideration_1"]
@@ -22,11 +21,6 @@ script = ExtResource("4")
 consideration_name = "local_force_superiority"
 weight = 20.0
 
-[sub_resource type="Resource" id="UtilityModuleEffectivenessConsideration_4"]
-script = ExtResource("5")
-consideration_name = "utility_module_effectiveness"
-weight = 8.0
-
 [sub_resource type="Resource" id="RetreatDirectionConsideration_5"]
 script = ExtResource("6")
 consideration_name = "retreat_direction"
@@ -36,4 +30,4 @@ weight = 12.8
 script = ExtResource("1")
 profile_name = "default_retreat_profile"
 activation_threshold = 0.5
-considerations = [SubResource("SourceSurvivabilityConsideration_1"), SubResource("TileThreatConsideration_2"), SubResource("LocalForceSuperioritConsideration_3"), SubResource("UtilityModuleEffectivenessConsideration_4"), SubResource("RetreatDirectionConsideration_5")]
+considerations = [SubResource("SourceSurvivabilityConsideration_1"), SubResource("TileThreatConsideration_2"), SubResource("LocalForceSuperioritConsideration_3"), SubResource("RetreatDirectionConsideration_5")]

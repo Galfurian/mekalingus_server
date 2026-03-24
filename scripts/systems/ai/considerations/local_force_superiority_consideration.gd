@@ -4,7 +4,6 @@
 class_name LocalForceSuperioritConsideration
 extends AIConsideration
 
-
 const FORCE_RATIO_MAX: float = 2.0
 
 
@@ -39,10 +38,36 @@ func get_normalized_input(context: Dictionary) -> float:
 	if source_threat <= 0.0:
 		return 0.0 if enemy_threat_level <= 0.0 else 1.0
 
-	# Calculate and return the force superiority ratio (enemy_power / source_power).
+	# Calculate force ratio (enemy_power / source_power).
 	var force_ratio: float = enemy_threat_level / source_threat
-	# Normalize so that:
-	# - 0.0 means no nearby enemy threat (enemy_power = 0)
-	# - 0.5 means equal power (enemy_power = source_power)
-	# - 1.0 means enemy power is at least twice source power
-	return clampf(force_ratio / FORCE_RATIO_MAX, 0.0, 1.0)
+
+	# Only count disadvantage as retreat pressure.
+	# - <= 1.0 means parity or better, no pressure from force ratio.
+	# - >= FORCE_RATIO_MAX maps to full pressure.
+	if force_ratio <= 1.0:
+		return 0.0
+
+	# Normalize the disadvantage ratio to the range [0, 1] for scoring.
+	var normalized_disadvantage: float = (force_ratio - 1.0) / (FORCE_RATIO_MAX - 1.0)
+
+	# Clamp the normalized disadvantage to the range [0, 1] so that values above FORCE_RATIO_MAX are
+	# treated as maximum disadvantage.
+	var clamped_disadvantage = clampf(normalized_disadvantage, 0.0, 1.0)
+
+	# Clamp to [0, 1] so that values above FORCE_RATIO_MAX are treated as maximum disadvantage.
+	_add_thought(
+		source,
+		(
+			"Local force superiority: %.2f (enemy threat: %.2f, source threat: %.2f, force ratio: %.2f -> %.2f -> %.2f)"
+			% [
+				clamped_disadvantage,
+				enemy_threat_level,
+				source_threat,
+				force_ratio,
+				normalized_disadvantage,
+				clamped_disadvantage,
+			]
+		)
+	)
+
+	return clamped_disadvantage

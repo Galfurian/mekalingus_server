@@ -4,12 +4,7 @@ extends AIConsideration
 
 func _init() -> void:
 	consideration_name = "retreat_direction"
-	allowed_phases = PackedInt32Array(
-		[
-			AIEvaluationContext.Phase.INTENT,
-			AIEvaluationContext.Phase.TILE,
-		]
-	)
+	allowed_phases = PackedInt32Array([AIEvaluationContext.Phase.TILE])
 	required_keys = PackedStringArray(["planning_context", "source", "tile"])
 
 

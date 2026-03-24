@@ -32,6 +32,7 @@ func _init(p_game_map: GameMap) -> void:
 	assert(p_game_map, "AIPlanner requires a valid GameMap reference.")
 	game_map = p_game_map
 	turn_context = AITurnContext.new(p_game_map)
+	assert(_validate_intent_registry(), "AIPlanner intent registry validation failed.")
 
 
 func clear() -> void:
@@ -57,6 +58,43 @@ func _get_intent_registry() -> Array[Dictionary]:
 			"evaluator": REPOSITION_INTENT_EVALUATOR.new(),
 		},
 	]
+
+
+func _validate_intent_registry() -> bool:
+	var registry: Array[Dictionary] = _get_intent_registry()
+	var seen_intents: Dictionary = {}
+
+	for entry: Dictionary in registry:
+		if not entry.has("evaluator"):
+			push_error("AIPlanner intent registry entry missing evaluator.")
+			return false
+
+		var evaluator = entry["evaluator"]
+		if not evaluator:
+			push_error("AIPlanner intent registry contains null evaluator.")
+			return false
+
+		if not evaluator.has_method("get_intent"):
+			push_error("AIPlanner evaluator missing get_intent().")
+			return false
+
+		var intent: int = int(evaluator.get_intent())
+		if intent == AIPlan.Intent.NONE:
+			push_error("AIPlanner evaluator cannot register AIPlan.Intent.NONE.")
+			return false
+
+		if seen_intents.has(intent):
+			push_error(
+				(
+					"AIPlanner duplicate evaluator registration for intent '%s'."
+					% AIPlan.Intent.keys()[intent]
+				)
+			)
+			return false
+
+		seen_intents[intent] = true
+
+	return true
 
 
 func generate_plan(source: MapCombatEntity) -> AIPlan:

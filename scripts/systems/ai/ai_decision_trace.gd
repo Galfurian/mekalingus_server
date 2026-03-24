@@ -101,3 +101,14 @@ func get_intent_score(intent: AIPlan.Intent) -> float:
 		if int(entry.get("intent", -1)) == intent and bool(entry.get("has_candidate", false)):
 			return float(entry.get("score", 0.0))
 	return 0.0
+
+
+func to_dict() -> Dictionary:
+	return {
+		"source_uuid": source_uuid,
+		"source_tag": source_tag,
+		"turn_number": turn_number,
+		"selected_intent": AIPlan.Intent.keys()[selected_intent],
+		"selected_score": selected_score,
+		"intents": intents.duplicate(true),
+	}

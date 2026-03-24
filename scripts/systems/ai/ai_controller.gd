@@ -443,3 +443,34 @@ func _get_plan_score(source_uuid: String) -> float:
 	if not plan:
 		return -INF
 	return plan.score
+
+
+func export_ai_baseline_snapshot() -> Dictionary:
+	var snapshot: Dictionary = {
+		"turn": game_map.turn_manager.get_current_turn() if game_map and game_map.turn_manager else -1,
+		"units": [],
+	}
+
+	for unit: MapCombatEntity in _iter_ai_controlled_entities():
+		var plan: AIPlan = get_current_plan(unit)
+		var unit_entry: Dictionary = {
+			"uuid": unit.combatant.uuid,
+			"unit": unit.combatant.get_chat_tag(),
+			"position": unit.position,
+			"has_plan": plan != null,
+		}
+
+		if plan:
+			unit_entry["intent"] = AIPlan.Intent.keys()[plan.intent]
+			unit_entry["score"] = plan.score
+			unit_entry["destination"] = plan.destination
+			if plan.target and plan.target.combatant:
+				unit_entry["target"] = plan.target.combatant.get_chat_tag()
+			if plan.equipped_module:
+				unit_entry["module"] = plan.equipped_module.get_chat_tag()
+			if plan.decision_trace:
+				unit_entry["decision_trace"] = plan.decision_trace.to_dict()
+
+		snapshot["units"].append(unit_entry)
+
+	return snapshot

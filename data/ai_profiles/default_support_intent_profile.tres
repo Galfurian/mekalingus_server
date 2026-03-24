@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1")
 intent_name = "support"
-activation_phase = ExtResource("2")
+activation_phase = null
 target_phase = ExtResource("2")
 destination_phase = null
 module_phase = null

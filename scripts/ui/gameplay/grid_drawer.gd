@@ -20,6 +20,8 @@ const PATROL_WAYPOINT_DOT_COLOR = Color(0.95, 0.5, 1.0, 0.9)
 const AI_LINE_WIDTH = 3.0
 const AI_SCORE_LABEL_COLOR = Color(1.0, 1.0, 1.0, 0.92)
 const AI_SCORE_LABEL_FONT_SIZE = 12
+const AI_TRACE_LABEL_COLOR = Color(0.9, 0.95, 1.0, 0.9)
+const AI_TRACE_LABEL_FONT_SIZE = 11
 
 # =============================================================================
 # VARIABLES
@@ -158,6 +160,9 @@ func _draw_ai_plan_for_entity(entity: MapCombatEntity) -> void:
 	var source_center: Vector2 = _tile_center(entity.position)
 	_draw_plan_score_label(source_center, plan)
 
+	if selected_entity and selected_entity == entity:
+		_draw_selected_trace_labels(source_center, plan)
+
 	if plan.intent == AIPlan.Intent.REPOSITION or plan.intent == AIPlan.Intent.RETREAT:
 		if plan.destination == Vector2i.ZERO or plan.destination == entity.position:
 			return
@@ -215,6 +220,31 @@ func _compute_approach_tile(plan: AIPlan) -> Vector2i:
 		game_map, source, plan.target, 0, module_range, movement_speed
 	)
 
+
+func _draw_selected_trace_labels(source_center: Vector2, plan: AIPlan) -> void:
+	if not plan.decision_trace:
+		return
+
+	var font: Font = ThemeDB.fallback_font
+	if not font:
+		return
+
+	var lines: Array[String] = plan.decision_trace.format_panel_lines()
+	if lines.is_empty():
+		return
+
+	var y_offset: float = 10.0
+	for line: String in lines:
+		draw_string(
+			font,
+			source_center + Vector2(6.0, y_offset),
+			line,
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1.0,
+			AI_TRACE_LABEL_FONT_SIZE,
+			AI_TRACE_LABEL_COLOR,
+		)
+		y_offset += float(AI_TRACE_LABEL_FONT_SIZE + 2)
 
 func _plan_target_in_range(plan: AIPlan) -> bool:
 	if not plan.target or not plan.equipped_module:

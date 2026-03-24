@@ -17,6 +17,44 @@ executed in server/headless mode.
 - Profile and save file handling
 - Full separation from rendering or UI concerns
 
+## AI Architecture (Current)
+
+The AI pipeline is organized around typed, phase-based evaluation.
+
+- `AIPlanner` runs a registered intent pipeline (`ATTACK`, `SUPPORT`, `RETREAT`, `REPOSITION`).
+- Each intent evaluator implements a shared evaluator contract and returns an `AIPlan`.
+- Utility arbitration is based on comparable final utility scores.
+- `AIDecisionTrace` stores per-intent outcomes and the selected plan for inspection/debug.
+
+## AI Profile Configuration
+
+AI profiles now use Godot Resource assets (`.tres`) under `data/ai_profiles/`.
+
+- Root profile: `default_basic.tres` (`AIProfile`)
+- Intent resources: `default_*_intent_profile.tres` (`AIIntentProfile`)
+- Phase resources: `default_*_profile.tres` (`AIActionProfile`)
+- Considerations: Resource-based scripts in `scripts/systems/ai/considerations/`
+
+At load time, the profile manager validates:
+
+- required intent phase presence,
+- phase-to-consideration compatibility,
+- missing or invalid profile bindings.
+
+## AI Baseline Capture
+
+Use `AIBaselineCapture.capture(game_map)` to collect a snapshot dictionary with:
+
+- current turn,
+- per-unit selected plan intent/score/target/destination,
+- full decision trace data for evaluated intents.
+
+This is implemented in:
+
+- `scripts/systems/ai/debug/ai_baseline_capture.gd`
+
+and can be used to record scenario baselines for tuning/regression checks.
+
 ## Requirements
 
 - Godot Engine 4.x
@@ -56,5 +94,6 @@ Please try to keep changes focused and avoid mixing unrelated fixes in
 a single PR.
 
 ## License
+
 This project is licensed under the MIT License. See `LICENSE.md` for
 more information.

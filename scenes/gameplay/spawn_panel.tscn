@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://bnw3baaeo5u61"]
+[gd_scene format=3 ]
 
-[ext_resource type="Script" uid="uid://ciw7mhdd14vb6" path="res://scripts/ui/gameplay/spawn_panel.gd" id="1"]
-[ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_8r2pv"]
+[ext_resource type="Script"  path="res://scripts/ui/gameplay/spawn_panel.gd" id="1"]
+[ext_resource type="LabelSettings"  path="res://shaders/label_title.tres" id="2_8r2pv"]
 
 [node name="SpawnPanel" type="PopupPanel" unique_id=760807485]
 oversampling_override = 1.0

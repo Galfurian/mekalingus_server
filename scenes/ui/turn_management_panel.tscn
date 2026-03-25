@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://dt3nhvenrb57r"]
+[gd_scene format=3 ]
 
-[ext_resource type="Script" uid="uid://dp51q5hiug2w1" path="res://scripts/ui/server_admin/turn_management_panel.gd" id="1_yedch"]
-[ext_resource type="LabelSettings" uid="uid://c7lb6kuwr5mew" path="res://shaders/label_title.tres" id="2_lfdsg"]
+[ext_resource type="Script"  path="res://scripts/ui/server_admin/turn_management_panel.gd" id="1_yedch"]
+[ext_resource type="LabelSettings"  path="res://shaders/label_title.tres" id="2_lfdsg"]
 
 [node name="TurnManagementPanel" type="VBoxContainer" unique_id=1554689394]
 size_flags_horizontal = 3

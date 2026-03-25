@@ -1,10 +1,10 @@
-[gd_scene format=3 uid="uid://dkiovd48dvjqd"]
+[gd_scene format=3 ]
 
-[ext_resource type="Script" uid="uid://dk6dnygkjhf8q" path="res://scripts/ui/server_admin/map_panel.gd" id="1_54ar7"]
-[ext_resource type="PackedScene" uid="uid://bic16d6uw0g6y" path="res://scenes/gameplay/map_hud.tscn" id="2_5xqg1"]
-[ext_resource type="PackedScene" uid="uid://dt3nhvenrb57r" path="res://scenes/ui/turn_management_panel.tscn" id="3_j4d32"]
-[ext_resource type="PackedScene" uid="uid://dct1pd3p6nlaa" path="res://scenes/ui/map_management_panel.tscn" id="4_1a3kf"]
-[ext_resource type="PackedScene" uid="uid://coanqrlt58aby" path="res://scenes/ui/npc_directive_panel.tscn" id="4_nk2qv"]
+[ext_resource type="Script"  path="res://scripts/ui/server_admin/map_panel.gd" id="1_54ar7"]
+[ext_resource type="PackedScene"  path="res://scenes/gameplay/map_hud.tscn" id="2_5xqg1"]
+[ext_resource type="PackedScene"  path="res://scenes/ui/turn_management_panel.tscn" id="3_j4d32"]
+[ext_resource type="PackedScene"  path="res://scenes/ui/map_management_panel.tscn" id="4_1a3kf"]
+[ext_resource type="PackedScene"  path="res://scenes/ui/npc_directive_panel.tscn" id="4_nk2qv"]
 
 [node name="MapPanel" type="HSplitContainer" unique_id=44510272]
 anchors_preset = 15

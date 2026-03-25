@@ -8,7 +8,7 @@
         "**/.hg": true,
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
-        "**/*.gd.uid": true,
+        "**/*.uid": true,
         "**/*.import": true
     },
     "[json]": {

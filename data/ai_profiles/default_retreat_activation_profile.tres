@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="AIActionProfile" format=3]
 
 [ext_resource type="Script" path="res://scripts/systems/ai/tuning/ai_action_profile.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/systems/ai/tuning/ai_consideration.gd" id="1_oo0hs"]
 [ext_resource type="Script" path="res://scripts/systems/ai/considerations/source_survivability_consideration.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/systems/ai/considerations/local_force_superiority_consideration.gd" id="4"]
@@ -10,19 +11,24 @@ script = ExtResource("2")
 consideration_name = "source_survivability"
 weight = 10.0
 invert_output = true
+allowed_phases = null
+required_keys = null
 
 [sub_resource type="Resource" id="TileThreatConsideration_2"]
 script = ExtResource("3")
 consideration_name = "tile_threat"
 weight = 10.0
+allowed_phases = null
+required_keys = null
 
 [sub_resource type="Resource" id="LocalForceSuperioritConsideration_3"]
 script = ExtResource("4")
 consideration_name = "local_force_superiority"
 weight = 10.0
+allowed_phases = null
+required_keys = null
 
 [resource]
 script = ExtResource("1")
 profile_name = "default_retreat_activation_profile"
-activation_threshold = 0.5
-considerations = [SubResource("SourceSurvivabilityConsideration_1"), SubResource("TileThreatConsideration_2"), SubResource("LocalForceSuperioritConsideration_3")]
+considerations = Array[ExtResource("1_oo0hs")]([SubResource("SourceSurvivabilityConsideration_1"), SubResource("TileThreatConsideration_2"), SubResource("LocalForceSuperioritConsideration_3")])

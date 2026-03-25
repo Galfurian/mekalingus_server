@@ -1,8 +1,8 @@
-[gd_scene format=3 uid="uid://cosbr482fkmyp"]
+[gd_scene format=3 ]
 
-[ext_resource type="Script" uid="uid://dwt0qtv3c0l1j" path="res://scripts/ui/gameplay/info_panel.gd" id="1_x2cik"]
-[ext_resource type="PackedScene" uid="uid://tf2613r6o8gj" path="res://scenes/gameplay/entity_info_panel.tscn" id="2_entity"]
-[ext_resource type="PackedScene" uid="uid://kqlung7v31tq" path="res://scenes/gameplay/item_inspector.tscn" id="3_item"]
+[ext_resource type="Script"  path="res://scripts/ui/gameplay/info_panel.gd" id="1_x2cik"]
+[ext_resource type="PackedScene"  path="res://scenes/gameplay/entity_info_panel.tscn" id="2_entity"]
+[ext_resource type="PackedScene"  path="res://scenes/gameplay/item_inspector.tscn" id="3_item"]
 
 [node name="InfoPanel" type="Control" unique_id=1974716738]
 layout_mode = 3

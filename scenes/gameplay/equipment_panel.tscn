@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://77eou844yvq7"]
+[gd_scene format=3 ]
 
-[ext_resource type="Script" uid="uid://depatn37kln1c" path="res://scripts/ui/gameplay/equipment_panel.gd" id="1_equip"]
+[ext_resource type="Script"  path="res://scripts/ui/gameplay/equipment_panel.gd" id="1_equip"]
 
 [node name="Equipment" type="Control" unique_id=1194047911]
 layout_mode = 3

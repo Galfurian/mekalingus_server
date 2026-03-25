@@ -1,8 +1,8 @@
-[gd_scene format=3 uid="uid://kqlung7v31tq"]
+[gd_scene format=3 ]
 
-[ext_resource type="Script" uid="uid://43k0x3k8ukgt" path="res://scripts/ui/gameplay/item_inspector.gd" id="1_inspector"]
-[ext_resource type="PackedScene" uid="uid://77eou844yvq7" path="res://scenes/gameplay/equipment_panel.tscn" id="2_equipment"]
-[ext_resource type="PackedScene" uid="uid://bijaving70etq" path="res://scenes/gameplay/plan_panel.tscn" id="3_plan"]
+[ext_resource type="Script"  path="res://scripts/ui/gameplay/item_inspector.gd" id="1_inspector"]
+[ext_resource type="PackedScene"  path="res://scenes/gameplay/equipment_panel.tscn" id="2_equipment"]
+[ext_resource type="PackedScene"  path="res://scenes/gameplay/plan_panel.tscn" id="3_plan"]
 
 [node name="ItemInspector" type="VSplitContainer" unique_id=242995351]
 size_flags_vertical = 3

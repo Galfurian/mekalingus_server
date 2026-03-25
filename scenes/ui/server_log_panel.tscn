@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://dyh3xjp4f2j5c"]
+[gd_scene format=3 ]
 
-[ext_resource type="Script" uid="uid://cxkr85273188x" path="res://scripts/ui/server_admin/server_log_panel.gd" id="1_ulw3n"]
+[ext_resource type="Script"  path="res://scripts/ui/server_admin/server_log_panel.gd" id="1_ulw3n"]
 
 [node name="ServerLogPanel" type="VBoxContainer" unique_id=979045688]
 anchors_preset = 15

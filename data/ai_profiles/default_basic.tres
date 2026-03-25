@@ -1,15 +1,15 @@
-[gd_resource type="Resource" script_class="AIProfile" format=3]
+[gd_resource type="Resource" script_class="AIProfile" format=3 uid="uid://ci2ti0tlfrcnd"]
 
-[ext_resource type="Script" path="res://scripts/systems/ai/tuning/ai_profile.gd" id="1"]
-[ext_resource type="Resource" path="res://data/ai_profiles/default_attack_intent_profile.tres" id="2"]
-[ext_resource type="Resource" path="res://data/ai_profiles/default_support_intent_profile.tres" id="3"]
-[ext_resource type="Resource" path="res://data/ai_profiles/default_retreat_intent_profile.tres" id="4"]
-[ext_resource type="Resource" path="res://data/ai_profiles/default_reposition_intent_profile.tres" id="5"]
+[ext_resource type="Script" uid="uid://big7j8o8287d1" path="res://scripts/systems/ai/tuning/ai_profile.gd" id="AIProfile"]
+[ext_resource type="Resource" uid="uid://dmeqsanlppwph" path="res://data/ai_profiles/default_attack_intent_profile.tres" id="R1"]
+[ext_resource type="Resource" uid="uid://5ia5k81txdtj" path="res://data/ai_profiles/default_support_intent_profile.tres" id="R2"]
+[ext_resource type="Resource" uid="uid://cax12o5og2tia" path="res://data/ai_profiles/default_retreat_intent_profile.tres" id="R3"]
+[ext_resource type="Resource" uid="uid://kqkuxn4kgdjq" path="res://data/ai_profiles/default_reposition_intent_profile.tres" id="R4"]
 
 [resource]
-script = ExtResource("1")
+script = ExtResource("AIProfile")
 profile_id = "default_basic"
-attack = ExtResource("2")
-support = ExtResource("3")
-retreat = ExtResource("4")
-reposition = ExtResource("5")
+attack = ExtResource("R1")
+support = ExtResource("R2")
+retreat = ExtResource("R3")
+reposition = ExtResource("R4")

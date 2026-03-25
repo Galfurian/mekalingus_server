@@ -1,14 +1,14 @@
-[gd_resource type="Resource" script_class="AIIntentProfile" format=3]
+[gd_resource type="Resource" script_class="AIIntentProfile" format=3 uid="uid://5ia5k81txdtj"]
 
-[ext_resource type="Script" path="res://scripts/systems/ai/tuning/ai_intent_profile.gd" id="1"]
-[ext_resource type="Resource" path="res://data/ai_profiles/default_support_profile.tres" id="2"]
-[ext_resource type="Resource" path="res://data/ai_profiles/default_support_activation_profile.tres" id="3"]
+[ext_resource type="Script" uid="uid://de3ry0rcp2mg6" path="res://scripts/systems/ai/tuning/ai_intent_profile.gd" id="AIIntentProfile"]
+[ext_resource type="Resource" uid="uid://bphkf3ecm2sks" path="res://data/ai_profiles/default_support_activation_profile.tres" id="R1"]
+[ext_resource type="Resource" uid="uid://bxeuojq8fbmbt" path="res://data/ai_profiles/default_support_profile.tres" id="R2"]
 
 [resource]
-script = ExtResource("1")
+script = ExtResource("AIIntentProfile")
 intent_name = "support"
-activation_phase = ExtResource("3")
-target_phase = ExtResource("2")
+activation_phase = ExtResource("R1")
+target_phase = ExtResource("R2")
 destination_phase = null
 module_phase = null
 intent_bias = 1.0

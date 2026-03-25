@@ -1,9 +1,9 @@
 class_name AIActionProfile
 extends Resource
 
-@export var profile_name: String = "default"
-@export_range(0.0, 1.0, 0.01) var activation_threshold: float = 0.5
-@export var considerations: Array[AIConsideration] = []
+@export var profile_name: String
+@export_range(0.0, 1.0, 0.01) var activation_threshold: float
+@export var considerations: Array[AIConsideration]
 
 
 func evaluate(

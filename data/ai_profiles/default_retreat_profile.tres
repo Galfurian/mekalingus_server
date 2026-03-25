@@ -1,33 +1,34 @@
-[gd_resource type="Resource" script_class="AIActionProfile" format=3]
+[gd_resource type="Resource" script_class="AIActionProfile" format=3 uid="uid://clk4xpp5i18gv"]
 
-[ext_resource type="Script" path="res://scripts/systems/ai/tuning/ai_action_profile.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/source_survivability_consideration.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="3"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/local_force_superiority_consideration.gd" id="4"]
-[ext_resource type="Script" path="res://scripts/systems/ai/considerations/retreat_direction_consideration.gd" id="6"]
+[ext_resource type="Script" uid="uid://c80gicrr8jpkr" path="res://scripts/systems/ai/tuning/ai_action_profile.gd" id="AIActionProfile"]
+[ext_resource type="Script" uid="uid://cqn8crmyre1vw" path="res://scripts/systems/ai/tuning/ai_consideration.gd" id="AIConsideration"]
+[ext_resource type="Script" uid="uid://dciq311selnas" path="res://scripts/systems/ai/considerations/source_survivability_consideration.gd" id="S1"]
+[ext_resource type="Script" uid="uid://dtlddnm5a0kqq" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="S2"]
+[ext_resource type="Script" uid="uid://bgkcf1f1e6yeo" path="res://scripts/systems/ai/considerations/local_force_superiority_consideration.gd" id="S3"]
+[ext_resource type="Script" uid="uid://c5uhpkkf1x5t3" path="res://scripts/systems/ai/considerations/retreat_direction_consideration.gd" id="S4"]
 
-[sub_resource type="Resource" id="SourceSurvivabilityConsideration_1"]
-script = ExtResource("2")
+[sub_resource type="Resource" id="SR1"]
+script = ExtResource("S1")
 consideration_name = "source_survivability"
 weight = 18.0
 
-[sub_resource type="Resource" id="TileThreatConsideration_2"]
-script = ExtResource("3")
+[sub_resource type="Resource" id="SR2"]
+script = ExtResource("S2")
 consideration_name = "tile_threat"
 weight = 16.0
 
-[sub_resource type="Resource" id="LocalForceSuperioritConsideration_3"]
-script = ExtResource("4")
+[sub_resource type="Resource" id="SR3"]
+script = ExtResource("S3")
 consideration_name = "local_force_superiority"
 weight = 20.0
 
-[sub_resource type="Resource" id="RetreatDirectionConsideration_5"]
-script = ExtResource("6")
+[sub_resource type="Resource" id="SR4"]
+script = ExtResource("S4")
 consideration_name = "retreat_direction"
 weight = 12.8
 
 [resource]
-script = ExtResource("1")
+script = ExtResource("AIActionProfile")
 profile_name = "default_retreat_profile"
 activation_threshold = 0.5
-considerations = [SubResource("SourceSurvivabilityConsideration_1"), SubResource("TileThreatConsideration_2"), SubResource("LocalForceSuperioritConsideration_3"), SubResource("RetreatDirectionConsideration_5")]
+considerations = Array[ExtResource("AIConsideration")]([SubResource("SR1"), SubResource("SR2"), SubResource("SR3"), SubResource("SR4")])

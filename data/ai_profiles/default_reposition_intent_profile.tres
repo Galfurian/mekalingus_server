@@ -1,13 +1,13 @@
-[gd_resource type="Resource" script_class="AIIntentProfile" format=3]
+[gd_resource type="Resource" script_class="AIIntentProfile" format=3 uid="uid://kqkuxn4kgdjq"]
 
-[ext_resource type="Script" path="res://scripts/systems/ai/tuning/ai_intent_profile.gd" id="1"]
-[ext_resource type="Resource" path="res://data/ai_profiles/default_reposition_profile.tres" id="2"]
+[ext_resource type="Script" uid="uid://de3ry0rcp2mg6" path="res://scripts/systems/ai/tuning/ai_intent_profile.gd" id="AIIntentProfile"]
+[ext_resource type="Resource" uid="uid://ca5br6d4sg1u1" path="res://data/ai_profiles/default_reposition_profile.tres" id="R1"]
 
 [resource]
-script = ExtResource("1")
+script = ExtResource("AIIntentProfile")
 intent_name = "reposition"
-activation_phase = ExtResource("2")
+activation_phase = ExtResource("R1")
 target_phase = null
-destination_phase = ExtResource("2")
+destination_phase = ExtResource("R1")
 module_phase = null
 intent_bias = 1.0

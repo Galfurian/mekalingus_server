@@ -30,8 +30,7 @@ AIProfileManager="*res://scripts/systems/ai/ai_profile_manager.gd"
 
 [display]
 
-window/size/viewport_width=1280
-window/size/viewport_height=1024
+window/size/mode=2
 
 [gui]
 

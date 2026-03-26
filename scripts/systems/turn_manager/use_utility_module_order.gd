@@ -7,7 +7,7 @@ extends UseModuleOrder
 
 
 func _init(p_source, p_target, p_equipped_module: EquippedModule) -> void:
-	super (p_source, p_target, p_equipped_module)
+	super(p_source, p_target, p_equipped_module)
 
 
 func _add_utility_log(game_map, message: String) -> void:
@@ -34,13 +34,16 @@ func execute(game_map) -> bool:
 		var air_distance: float = source.position.distance_to(target.position)
 		_add_utility_log(
 			game_map,
-			"%s cannot use %s on %s (range: %d, distance: %.1f)" % [
-				source_actor.get_chat_tag(),
-				equipped_module.get_chat_tag(),
-				target_actor.get_chat_tag(),
-				_get_effective_module_range(),
-				air_distance,
-			],
+			(
+				"%s cannot use %s on %s (range: %d, distance: %.1f)"
+				% [
+					source_actor.get_chat_tag(),
+					equipped_module.get_chat_tag(),
+					target_actor.get_chat_tag(),
+					_get_effective_module_range(),
+					air_distance,
+				]
+			),
 		)
 		return false
 	var has_offensive_effect: bool = equipped_module.module.effects.any(
@@ -48,8 +51,8 @@ func execute(game_map) -> bool:
 	)
 	if has_offensive_effect and game_map.is_enemy_of(source, target):
 		var base_accuracy: int = 90 + source_actor.accuracy_modifier
-		var move_penalty: int = - min(source_actor.tiles_moved_last_turn * 5, 30)
-		var dodge_bonus: int = - min(target_actor.tiles_moved_last_turn * 3, 15)
+		var move_penalty: int = -min(source_actor.tiles_moved_last_turn * 5, 30)
+		var dodge_bonus: int = -min(target_actor.tiles_moved_last_turn * 3, 15)
 		var source_height: int = game_map.get_tile_height(source.position)
 		var target_height: int = game_map.get_tile_height(target.position)
 		var height_diff: int = source_height - target_height
@@ -59,13 +62,16 @@ func execute(game_map) -> bool:
 		if roll >= final_accuracy:
 			_add_utility_log(
 				game_map,
-				"%s used %s on %s and missed (accuracy=%d%%, roll=%d)" % [
-					source_actor.get_chat_tag(),
-					equipped_module.get_chat_tag(),
-					target_actor.get_chat_tag(),
-					final_accuracy,
-					roll,
-				],
+				(
+					"%s used %s on %s and missed (accuracy=%d%%, roll=%d)"
+					% [
+						source_actor.get_chat_tag(),
+						equipped_module.get_chat_tag(),
+						target_actor.get_chat_tag(),
+						final_accuracy,
+						roll,
+					]
+				),
 			)
 			return false
 	# Check if the Mek has enough power.
@@ -74,9 +80,10 @@ func execute(game_map) -> bool:
 	# Deduct power.
 	source_actor.power -= equipped_module.module.power_on_use
 	# Start cooldown if necessary.
-	if equipped_module.module.cooldown > 0:
-		source_actor.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
-	_add_utility_log(game_map, "%s used %s" % [source_actor.get_chat_tag(), equipped_module.get_chat_tag()])
+	source_actor.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
+	_add_utility_log(
+		game_map, "%s used %s" % [source_actor.get_chat_tag(), equipped_module.get_chat_tag()]
+	)
 	for effect in equipped_module.module.effects:
 		var effect_chance: int = clamp(effect.chance, 0, 100)
 		if effect_chance < 100:
@@ -84,12 +91,15 @@ func execute(game_map) -> bool:
 			if effect_roll >= effect_chance:
 				_add_utility_log(
 					game_map,
-					"%s effect %s failed (%d%%, roll=%d)" % [
-						equipped_module.get_chat_tag(),
-						effect.get_effect_type_label(),
-						effect_chance,
-						effect_roll,
-					],
+					(
+						"%s effect %s failed (%d%%, roll=%d)"
+						% [
+							equipped_module.get_chat_tag(),
+							effect.get_effect_type_label(),
+							effect_chance,
+							effect_roll,
+						]
+					),
 				)
 				continue
 		if effect.is_damage():
@@ -105,7 +115,9 @@ func execute(game_map) -> bool:
 		elif effect.is_modifier():
 			_apply_modifier_effect(game_map, effect)
 		else:
-			_add_utility_log(game_map, "Effect %s not yet implemented" % effect.get_effect_type_label())
+			_add_utility_log(
+				game_map, "Effect %s not yet implemented" % effect.get_effect_type_label()
+			)
 		if source_actor.is_dead() or target_actor.is_dead():
 			break
 	return true

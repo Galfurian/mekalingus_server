@@ -1,10 +1,10 @@
-[gd_scene format=3 ]
+[gd_scene format=3 uid="uid://dklupdtm1x5e6"]
 
-[ext_resource type="Script"  path="res://scripts/ui/server_admin/map_panel.gd" id="1_54ar7"]
-[ext_resource type="PackedScene"  path="res://scenes/gameplay/map_hud.tscn" id="2_5xqg1"]
-[ext_resource type="PackedScene"  path="res://scenes/ui/turn_management_panel.tscn" id="3_j4d32"]
-[ext_resource type="PackedScene"  path="res://scenes/ui/map_management_panel.tscn" id="4_1a3kf"]
-[ext_resource type="PackedScene"  path="res://scenes/ui/npc_directive_panel.tscn" id="4_nk2qv"]
+[ext_resource type="Script" uid="uid://dk6dnygkjhf8q" path="res://scripts/ui/server_admin/map_panel.gd" id="1_54ar7"]
+[ext_resource type="PackedScene" uid="uid://b17xklcmvx2cm" path="res://scenes/gameplay/map_hud.tscn" id="2_5xqg1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/turn_management_panel.tscn" id="3_j4d32"]
+[ext_resource type="PackedScene" path="res://scenes/ui/map_management_panel.tscn" id="4_1a3kf"]
+[ext_resource type="PackedScene" path="res://scenes/ui/npc_directive_panel.tscn" id="4_nk2qv"]
 
 [node name="MapPanel" type="HSplitContainer" unique_id=44510272]
 anchors_preset = 15
@@ -50,3 +50,4 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+size_flags_stretch_ratio = 1.2

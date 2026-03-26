@@ -1,11 +1,11 @@
-[gd_scene format=3 ]
+[gd_scene format=3 uid="uid://b17xklcmvx2cm"]
 
-[ext_resource type="Script"  path="res://scripts/ui/gameplay/map_hud.gd" id="1_daorq"]
-[ext_resource type="PackedScene"  path="res://scenes/gameplay/log_panel.tscn" id="3_7afkc"]
-[ext_resource type="PackedScene"  path="res://scenes/gameplay/InfoPanel.tscn" id="3_0206q"]
-[ext_resource type="PackedScene"  path="res://scenes/gameplay/grid_map.tscn" id="3_vm2jc"]
-[ext_resource type="PackedScene"  path="res://scenes/gameplay/entity_list_panel.tscn" id="4_g2adk"]
-[ext_resource type="PackedScene"  path="res://scenes/gameplay/spawn_panel.tscn" id="5_spawn"]
+[ext_resource type="Script" uid="uid://vflbjobbh0ag" path="res://scripts/ui/gameplay/map_hud.gd" id="1_daorq"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/log_panel.tscn" id="3_7afkc"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/InfoPanel.tscn" id="3_0206q"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/grid_map.tscn" id="3_vm2jc"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/entity_list_panel.tscn" id="4_g2adk"]
+[ext_resource type="PackedScene" path="res://scenes/gameplay/spawn_panel.tscn" id="5_spawn"]
 
 [node name="MapHud" type="Control" unique_id=372883053]
 layout_mode = 3
@@ -33,7 +33,7 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.2
+size_flags_stretch_ratio = 0.4
 
 [node name="InfoPanel" parent="RootSplit/MainSplit/LeftSidePanel" unique_id=1973888571 instance=ExtResource("3_0206q")]
 layout_mode = 2

@@ -33,85 +33,85 @@ var tiles_moved_last_turn: int = 0
 
 var health: int:
 	get:
-		return get_health()
+		return get_stat(Enums.StatType.HEALTH)
 	set(value):
 		set_base_stat(Enums.StatType.HEALTH, value)
 
 var armor: int:
 	get:
-		return get_armor()
+		return get_stat(Enums.StatType.ARMOR)
 	set(value):
 		set_base_stat(Enums.StatType.ARMOR, value)
 
 var shield: int:
 	get:
-		return get_shield()
+		return get_stat(Enums.StatType.SHIELD)
 	set(value):
 		set_base_stat(Enums.StatType.SHIELD, value)
 
 var power: int:
 	get:
-		return get_power()
+		return get_stat(Enums.StatType.POWER)
 	set(value):
 		set_base_stat(Enums.StatType.POWER, value)
 
 var max_health: int:
 	get:
-		return get_max_health()
+		return get_stat(Enums.StatType.MAX_HEALTH)
 	set(value):
 		set_base_stat(Enums.StatType.MAX_HEALTH, value)
 
 var max_armor: int:
 	get:
-		return get_max_armor()
+		return get_stat(Enums.StatType.MAX_ARMOR)
 	set(value):
 		set_base_stat(Enums.StatType.MAX_ARMOR, value)
 
 var max_shield: int:
 	get:
-		return get_max_shield()
+		return get_stat(Enums.StatType.MAX_SHIELD)
 	set(value):
 		set_base_stat(Enums.StatType.MAX_SHIELD, value)
 
 var max_power: int:
 	get:
-		return get_max_power()
+		return get_stat(Enums.StatType.MAX_POWER)
 	set(value):
 		set_base_stat(Enums.StatType.MAX_POWER, value)
 
 var health_generation: int:
 	get:
-		return get_health_generation()
+		return get_stat(Enums.StatType.HEALTH_GENERATION)
 	set(value):
 		set_base_stat(Enums.StatType.HEALTH_GENERATION, value)
 
 var armor_generation: int:
 	get:
-		return get_armor_generation()
+		return get_stat(Enums.StatType.ARMOR_GENERATION)
 	set(value):
 		set_base_stat(Enums.StatType.ARMOR_GENERATION, value)
 
 var shield_generation: int:
 	get:
-		return get_shield_generation()
+		return get_stat(Enums.StatType.SHIELD_GENERATION)
 	set(value):
 		set_base_stat(Enums.StatType.SHIELD_GENERATION, value)
 
 var power_generation: int:
 	get:
-		return get_power_generation()
+		return get_stat(Enums.StatType.POWER_GENERATION)
 	set(value):
 		set_base_stat(Enums.StatType.POWER_GENERATION, value)
 
 var speed: int:
 	get:
-		return get_speed()
+		return get_stat(Enums.StatType.SPEED)
 	set(value):
 		set_base_stat(Enums.StatType.SPEED, value)
 
 var sensor_range: int:
 	get:
-		return get_sensor_range()
+		return get_stat(Enums.StatType.SENSOR_RANGE)
 	set(value):
 		set_base_stat(Enums.StatType.SENSOR_RANGE, value)
 
@@ -153,19 +153,19 @@ var damage_reduction_corrosive: int:
 
 var accuracy_modifier: int:
 	get:
-		return get_accuracy_modifier()
+		return get_stat(Enums.StatType.ACCURACY_MODIFIER)
 	set(value):
 		set_base_stat(Enums.StatType.ACCURACY_MODIFIER, value)
 
 var range_modifier: int:
 	get:
-		return get_range_modifier()
+		return get_stat(Enums.StatType.RANGE_MODIFIER)
 	set(value):
 		set_base_stat(Enums.StatType.RANGE_MODIFIER, value)
 
 var cooldown_modifier: int:
 	get:
-		return get_cooldown_modifier()
+		return get_stat(Enums.StatType.COOLDOWN_MODIFIER)
 	set(value):
 		set_base_stat(Enums.StatType.COOLDOWN_MODIFIER, value)
 
@@ -456,79 +456,6 @@ func clear_items() -> void:
 	for item in items:
 		GameServer.free_uuid(item.uuid)
 	items.clear()
-
-
-# =============================================================================
-# COMPATIBILITY FACADE GETTERS
-# =============================================================================
-
-
-func get_health() -> int:
-	return get_stat(Enums.StatType.HEALTH)
-
-
-func get_armor() -> int:
-	return get_stat(Enums.StatType.ARMOR)
-
-
-func get_shield() -> int:
-	return get_stat(Enums.StatType.SHIELD)
-
-
-func get_power() -> int:
-	return get_stat(Enums.StatType.POWER)
-
-
-func get_max_health() -> int:
-	return get_stat(Enums.StatType.MAX_HEALTH)
-
-
-func get_max_armor() -> int:
-	return get_stat(Enums.StatType.MAX_ARMOR)
-
-
-func get_max_shield() -> int:
-	return get_stat(Enums.StatType.MAX_SHIELD)
-
-
-func get_max_power() -> int:
-	return get_stat(Enums.StatType.MAX_POWER)
-
-
-func get_health_generation() -> int:
-	return get_stat(Enums.StatType.HEALTH_GENERATION)
-
-
-func get_armor_generation() -> int:
-	return get_stat(Enums.StatType.ARMOR_GENERATION)
-
-
-func get_shield_generation() -> int:
-	return get_stat(Enums.StatType.SHIELD_GENERATION)
-
-
-func get_power_generation() -> int:
-	return get_stat(Enums.StatType.POWER_GENERATION)
-
-
-func get_speed() -> int:
-	return get_stat(Enums.StatType.SPEED)
-
-
-func get_sensor_range() -> int:
-	return get_stat(Enums.StatType.SENSOR_RANGE)
-
-
-func get_accuracy_modifier() -> int:
-	return get_stat(Enums.StatType.ACCURACY_MODIFIER)
-
-
-func get_range_modifier() -> int:
-	return get_stat(Enums.StatType.RANGE_MODIFIER)
-
-
-func get_cooldown_modifier() -> int:
-	return get_stat(Enums.StatType.COOLDOWN_MODIFIER)
 
 
 # =============================================================================

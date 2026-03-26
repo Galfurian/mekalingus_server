@@ -10,6 +10,7 @@
 script = ExtResource("S1")
 consideration_name = "tile_threat"
 weight = 16.0
+invert_output = true
 allowed_phases = null
 required_keys = null
 

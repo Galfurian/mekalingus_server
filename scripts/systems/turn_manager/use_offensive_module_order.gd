@@ -7,7 +7,7 @@ extends UseModuleOrder
 
 
 func _init(p_source, p_target, p_equipped_module: EquippedModule) -> void:
-	super (p_source, p_target, p_equipped_module)
+	super(p_source, p_target, p_equipped_module)
 
 
 func _add_combat_log(game_map, message: String) -> void:
@@ -34,13 +34,16 @@ func execute(game_map) -> bool:
 		var air_distance: float = source.position.distance_to(target.position)
 		_add_combat_log(
 			game_map,
-			"%s cannot use %s on %s (range: %d, distance: %.1f)" % [
-				source_actor.get_chat_tag(),
-				equipped_module.get_chat_tag(),
-				target_actor.get_chat_tag(),
-				_get_effective_module_range(),
-				air_distance,
-			],
+			(
+				"%s cannot use %s on %s (range: %d, distance: %.1f)"
+				% [
+					source_actor.get_chat_tag(),
+					equipped_module.get_chat_tag(),
+					target_actor.get_chat_tag(),
+					_get_effective_module_range(),
+					air_distance,
+				]
+			),
 		)
 		return false
 	# Check if the Mek has enough power.
@@ -49,21 +52,24 @@ func execute(game_map) -> bool:
 	# Deduct power.
 	source_actor.power -= equipped_module.module.power_on_use
 	# Start cooldown if necessary
-	if equipped_module.module.cooldown > 0:
-		source_actor.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
+	source_actor.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
 	# Perform accuracy check
-	var base_accuracy = 90 + source_actor.accuracy_modifier
-	# Adjust based on movement.
-	var move_penalty = - min(source_actor.tiles_moved_last_turn * 5, 30) # -5% per tile, up to -30%
-	# Adjust based on dodge.
-	var dodge_bonus = - min(target_actor.tiles_moved_last_turn * 3, 15) # -3% dodge per tile, up to -15%
+	var base_accuracy = 90
+	# Add modifiers to accuracy based on movement and height differences.
+	var modifier = source_actor.accuracy_modifier
+	# Adjust based on movement (-5% per tile, up to -30%)
+	var move_penalty = -min(source_actor.tiles_moved_last_turn * 5, 30)
+	# Adjust based on dodge (3% dodge per tile, up to -15%)
+	var dodge_bonus = -min(target_actor.tiles_moved_last_turn * 3, 15)
 	# Height-based adjustment
 	var source_height = game_map.get_tile_height(source.position)
 	var target_height = game_map.get_tile_height(target.position)
 	var height_diff = source_height - target_height
 	# Rule of thumb: +/-2% accuracy per height difference (capped at +-10%)
 	var height_bonus = clamp(height_diff * 2, -10, 10)
-	var final_accuracy = min(base_accuracy + move_penalty + dodge_bonus + height_bonus, 90)
+	var final_accuracy = min(
+		base_accuracy + modifier + move_penalty + dodge_bonus + height_bonus, 90
+	)
 	var roll = randi() % 100
 	var hit_success = roll < final_accuracy
 	# Generate the log.
@@ -72,14 +78,16 @@ func execute(game_map) -> bool:
 		% [source_actor.get_chat_tag(), target_actor.get_chat_tag(), equipped_module.get_chat_tag()]
 	)
 	log_text += (
-		" base=%d, move=%d, dodge=%d, height=%d"
-		% [base_accuracy, move_penalty, dodge_bonus, height_bonus]
+		" base=%d, modifier=%d, move=%d, dodge=%d, height=%d"
+		% [base_accuracy, modifier, move_penalty, dodge_bonus, height_bonus]
 	)
 	log_text += (
 		" -> accuracy=%d%% (roll=%d): %s" % [final_accuracy, roll, "HIT" if hit_success else "MISS"]
 	)
-	if equipped_module.module.cooldown:
-		log_text += " (cooldown: %d)" % equipped_module.module.cooldown
+	if equipped_module.cooldown:
+		log_text += " (cooldown: %d)" % equipped_module.cooldown
+	else:
+		log_text += " (instant use)"
 	_add_combat_log(game_map, log_text)
 
 	if not hit_success:
@@ -92,12 +100,15 @@ func execute(game_map) -> bool:
 			if effect_roll >= effect_chance:
 				_add_combat_log(
 					game_map,
-					"%s effect %s failed (%d%%, roll=%d)" % [
-						equipped_module.get_chat_tag(),
-						effect.get_effect_type_label(),
-						effect_chance,
-						effect_roll,
-					],
+					(
+						"%s effect %s failed (%d%%, roll=%d)"
+						% [
+							equipped_module.get_chat_tag(),
+							effect.get_effect_type_label(),
+							effect_chance,
+							effect_roll,
+						]
+					),
 				)
 				continue
 		if effect.is_damage():
@@ -113,7 +124,9 @@ func execute(game_map) -> bool:
 		elif effect.is_modifier():
 			_apply_modifier_effect(game_map, effect)
 		else:
-			_add_combat_log(game_map, "Effect %s not yet implemented" % effect.get_effect_type_label())
+			_add_combat_log(
+				game_map, "Effect %s not yet implemented" % effect.get_effect_type_label()
+			)
 		if source_actor.is_dead() or target_actor.is_dead():
 			break
 	return true

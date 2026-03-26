@@ -1,8 +1,8 @@
-[gd_scene format=3 ]
+[gd_scene format=3 uid="uid://bhk4higmmow8f"]
 
-[ext_resource type="Script"  path="res://scripts/ui/server_admin/server_gui.gd" id="1_v2it2"]
-[ext_resource type="PackedScene"  path="res://scenes/ui/server_log_panel.tscn" id="2_2ndow"]
-[ext_resource type="PackedScene"  path="res://scenes/ui/map_panel.tscn" id="3_qeaa5"]
+[ext_resource type="Script" uid="uid://dxse3gtmi3xk1" path="res://scripts/ui/server_admin/server_gui.gd" id="1_v2it2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/server_log_panel.tscn" id="2_2ndow"]
+[ext_resource type="PackedScene" path="res://scenes/ui/map_panel.tscn" id="3_qeaa5"]
 
 [node name="ServerGui" type="Control" unique_id=559978795]
 layout_mode = 3

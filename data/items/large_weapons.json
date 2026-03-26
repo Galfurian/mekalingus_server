@@ -68,7 +68,8 @@
 						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
 						"stat": "SPEED",
-						"amount": -3.0
+						"amount": -3.0,
+						"duration": 3.0
 					}
 				]
 			}
@@ -104,7 +105,8 @@
 						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
 						"stat": "MAX_POWER",
-						"amount": -15.0
+						"amount": -15.0,
+						"duration": 3.0
 					}
 				]
 			},
@@ -165,6 +167,7 @@
 						"target": "AREA",
 						"stat": "MAX_POWER",
 						"amount": -10.0,
+						"duration": 3.0,
 						"radius": 1
 					}
 				]

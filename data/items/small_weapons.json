@@ -198,7 +198,8 @@
 						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
 						"stat": "MAX_ARMOR",
-						"amount": -10.0
+						"amount": -10.0,
+						"duration": 3.0
 					}
 				]
 			}
@@ -378,7 +379,8 @@
 						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
 						"stat": "SPEED",
-						"amount": -2.0
+						"amount": -2.0,
+						"duration": 2.0
 					}
 				]
 			}
@@ -470,7 +472,8 @@
 						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
 						"stat": "SPEED",
-						"amount": -2.0
+						"amount": -2.0,
+						"duration": 2.0
 					}
 				]
 			}
@@ -560,7 +563,8 @@
 						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
 						"stat": "SPEED",
-						"amount": -2.0
+						"amount": -2.0,
+						"duration": 2.0
 					}
 				]
 			}

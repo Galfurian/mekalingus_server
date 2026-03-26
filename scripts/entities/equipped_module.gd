@@ -16,11 +16,42 @@ var module: ItemModule
 # PROPERTIES
 # =============================================================================
 
+var module_name: String:
+	get:
+		assert(is_instance_valid(module))
+		return module.module_name
+
+var passive: bool:
+	get:
+		assert(is_instance_valid(module))
+		return module.passive
+
+var power_on_use: int:
+	get:
+		assert(is_instance_valid(module))
+		return module.power_on_use
+
+var cooldown: int:
+	get:
+		assert(is_instance_valid(mek) and is_instance_valid(module))
+		if module.cooldown > 0:
+			return max(1, module.cooldown + mek.cooldown_modifier)
+		return 0
+
+var module_range: int:
+	get:
+		assert(is_instance_valid(mek) and is_instance_valid(module))
+		return max(0, module.module_range + mek.range_modifier)
+
+var repeats: int:
+	get:
+		assert(is_instance_valid(module))
+		return module.repeats
+
 var effects: Array[BaseEffect]:
 	get:
-		if module:
-			return module.effects
-		return []
+		assert(is_instance_valid(module))
+		return module.effects
 
 # =============================================================================
 # GENERAL FUNCTIONS

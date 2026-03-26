@@ -26,19 +26,21 @@ func get_entity_current_survivability(entity: MapCombatEntity) -> float:
 # =====================================================================
 
 
-func can_module_be_used_now(combatant: CombatEntity, item: Item, module: ItemModule) -> bool:
+func can_module_be_used_now(combatant: CombatEntity, equipped_module: EquippedModule) -> bool:
 	"""
 	Checks if a module can be used based on its cooldown and power requirements.
 	"""
-	if not combatant or not item or not module:
+	if not combatant or not equipped_module:
 		return false
-	if not has_item_equipped(combatant, item) or not has_item_module(item, module):
+	if not has_item_equipped(combatant, equipped_module.item):
 		return false
-	if module.passive or not combatant.cooldown_manager:
+	if not has_item_module(equipped_module.item, equipped_module.module):
 		return false
-	if combatant.cooldown_manager.is_on_cooldown(item, module):
+	if equipped_module.module.passive or not combatant.cooldown_manager:
 		return false
-	if combatant.power < module.power_on_use:
+	if combatant.cooldown_manager.is_on_cooldown(equipped_module.item, equipped_module.module):
+		return false
+	if combatant.power < equipped_module.module.power_on_use:
 		return false
 	return true
 

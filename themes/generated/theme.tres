@@ -1,6 +1,6 @@
 [gd_resource type="Theme" format=3 uid="uid://dlcybqhhxy7ei"]
 
-[ext_resource type="FontFile" uid="uid://d13s110878ko2" path="res://themes/fonts/SpaceMono-Regular.ttf" id="1_3xbcq"]
+[ext_resource type="FontFile" uid="uid://4n4st36ywq01" path="res://themes/fonts/SpaceMono-Regular.ttf" id="1_3xbcq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_prcma"]
 bg_color = Color(0.141176, 0.141176, 0.188235, 1)

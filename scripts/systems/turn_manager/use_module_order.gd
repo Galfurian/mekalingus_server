@@ -53,7 +53,7 @@ func validate() -> bool:
 		return false
 	if not AIUtils.is_equipped_module_available(source.combatant, equipped_module):
 		return false
-	if not AIUtils.can_module_be_used_now(source.combatant, equipped_module.item, equipped_module.module):
+	if not AIUtils.can_module_be_used_now(source.combatant, equipped_module):
 		return false
 	return true
 
@@ -85,46 +85,70 @@ func _apply_damage_effect(game_map, effect: BaseEffect) -> void:
 	# Handle SELF damage.
 	if effect.target == Enums.TargetType.SELF:
 		var result = source_actor.take_damage_from_effect(effect)
-		_add_log(game_map, Enums.LogType.ATTACK, "%s hurts itself with %s -> %d shield, %d armor, %d health (reduced %d %s)" % [
-			source_actor.get_chat_tag(),
-			equipped_module.module.module_name,
-			result.shield,
-			result.armor,
-			result.health,
-			result.reduced,
-			Enums.DamageType.keys()[effect.damage_type]])
+		_add_log(
+			game_map,
+			Enums.LogType.ATTACK,
+			(
+				"%s hurts itself with %s -> %d shield, %d armor, %d health (reduced %d %s)"
+				% [
+					source_actor.get_chat_tag(),
+					equipped_module.module.module_name,
+					result.shield,
+					result.armor,
+					result.health,
+					result.reduced,
+					Enums.DamageType.keys()[effect.damage_type]
+				]
+			)
+		)
 	# Handle AREA damage.
 	elif effect.target == Enums.TargetType.AREA:
 		var center = target if effect.center_on_target else source
-		var affected = AIUnitQueries.get_units_in_range(game_map,
-			source, center.position, effect.radius, true, true
+		var affected = AIUnitQueries.get_units_in_range(
+			game_map, source, center.position, effect.radius, true, true
 		)
 		for entity in affected:
 			var actor: CombatEntity = entity.combatant
 			if actor.is_dead():
 				continue
 			var result = actor.take_damage_from_effect(effect)
-			_add_log(game_map, Enums.LogType.ATTACK, "%s hits %s with AoE from %s -> %d shield, %d armor, %d health (reduced %d %s)" % [
-				source_actor.get_chat_tag(),
-				actor.get_chat_tag(),
-				equipped_module.module.module_name,
-				result.shield,
-				result.armor,
-				result.health,
-				result.reduced,
-				Enums.DamageType.keys()[effect.damage_type]])
+			_add_log(
+				game_map,
+				Enums.LogType.ATTACK,
+				(
+					"%s hits %s with AoE from %s -> %d shield, %d armor, %d health (reduced %d %s)"
+					% [
+						source_actor.get_chat_tag(),
+						actor.get_chat_tag(),
+						equipped_module.module.module_name,
+						result.shield,
+						result.armor,
+						result.health,
+						result.reduced,
+						Enums.DamageType.keys()[effect.damage_type]
+					]
+				)
+			)
 	# Handle regular ENEMY / ALLY targeting.
 	else:
 		var result = target_actor.take_damage_from_effect(effect)
-		_add_log(game_map, Enums.LogType.ATTACK, "%s hits %s with %s -> %d shield, %d armor, %d health (reduced %d %s)" % [
-			source_actor.get_chat_tag(),
-			target_actor.get_chat_tag(),
-			equipped_module.module.module_name,
-			result.shield,
-			result.armor,
-			result.health,
-			result.reduced,
-			Enums.DamageType.keys()[effect.damage_type]])
+		_add_log(
+			game_map,
+			Enums.LogType.ATTACK,
+			(
+				"%s hits %s with %s -> %d shield, %d armor, %d health (reduced %d %s)"
+				% [
+					source_actor.get_chat_tag(),
+					target_actor.get_chat_tag(),
+					equipped_module.module.module_name,
+					result.shield,
+					result.armor,
+					result.health,
+					result.reduced,
+					Enums.DamageType.keys()[effect.damage_type]
+				]
+			)
+		)
 
 
 func _apply_repair_effect(game_map, effect: BaseEffect) -> void:
@@ -135,11 +159,19 @@ func _apply_repair_effect(game_map, effect: BaseEffect) -> void:
 	# Handle SELF repair.
 	if effect.target == Enums.TargetType.SELF:
 		var result = source_actor.repair_from_effect(effect)
-		_add_log(game_map, Enums.LogType.SUPPORT, "%s restores %d %s to itself using %s" % [
-			source_actor.get_chat_tag(),
-			result.amount,
-			result.stat,
-			equipped_module.module.module_name])
+		_add_log(
+			game_map,
+			Enums.LogType.SUPPORT,
+			(
+				"%s restores %d %s to itself using %s"
+				% [
+					source_actor.get_chat_tag(),
+					result.amount,
+					result.stat,
+					equipped_module.module.module_name
+				]
+			)
+		)
 	# Handle AREA repair.
 	elif effect.target == Enums.TargetType.AREA:
 		var center = target if effect.center_on_target else source
@@ -147,33 +179,47 @@ func _apply_repair_effect(game_map, effect: BaseEffect) -> void:
 			effect.target == Enums.TargetType.ALLY or effect.target == Enums.TargetType.SELF
 		)
 		var include_enemies = effect.target == Enums.TargetType.ENEMY
-		var affected = AIUnitQueries.get_units_in_range(game_map,
-			source, center.position, effect.radius, include_allies, include_enemies, []
+		var affected = AIUnitQueries.get_units_in_range(
+			game_map, source, center.position, effect.radius, include_allies, include_enemies, []
 		)
 		for entity in affected:
 			var actor: CombatEntity = entity.combatant
 			if actor.is_dead():
 				continue
 			var result = actor.repair_from_effect(effect)
-			_add_log(game_map, Enums.LogType.SUPPORT, "%s restores %d %s to %s using %s (AoE)" % [
-					source_actor.get_chat_tag(),
-					result.amount,
-					result.stat,
-					actor.get_chat_tag(),
-					equipped_module.module.module_name
-				]
+			_add_log(
+				game_map,
+				Enums.LogType.SUPPORT,
+				(
+					"%s restores %d %s to %s using %s (AoE)"
+					% [
+						source_actor.get_chat_tag(),
+						result.amount,
+						result.stat,
+						actor.get_chat_tag(),
+						equipped_module.module.module_name
+					]
+				)
 			)
 	# Handle ENEMY / ALLY repair.
 	else:
 		if target_actor.is_dead():
 			return
 		var result = target_actor.repair_from_effect(effect)
-		_add_log(game_map, Enums.LogType.SUPPORT, "%s restores %d %s to %s using %s" % [
-			source_actor.get_chat_tag(),
-			result.amount,
-			result.stat,
-			target_actor.get_chat_tag(),
-			equipped_module.module.module_name])
+		_add_log(
+			game_map,
+			Enums.LogType.SUPPORT,
+			(
+				"%s restores %d %s to %s using %s"
+				% [
+					source_actor.get_chat_tag(),
+					result.amount,
+					result.stat,
+					target_actor.get_chat_tag(),
+					equipped_module.module.module_name
+				]
+			)
+		)
 
 
 func _apply_modifier_effect(game_map, effect: BaseEffect) -> void:
@@ -184,12 +230,20 @@ func _apply_modifier_effect(game_map, effect: BaseEffect) -> void:
 	# Handle SELF-targeted effects.
 	if effect.target == Enums.TargetType.SELF:
 		source_actor.add_effect(equipped_module.module, effect, source)
-		_add_log(game_map, Enums.LogType.SUPPORT, "%s applies %s to itself -> %d for %d turns (%s)" % [
-			source_actor.get_chat_tag(),
-			effect.get_effect_type_label(),
-			effect.amount,
-			effect.duration,
-			equipped_module.module.module_name])
+		_add_log(
+			game_map,
+			Enums.LogType.SUPPORT,
+			(
+				"%s applies %s to itself -> %d for %d turns (%s)"
+				% [
+					source_actor.get_chat_tag(),
+					effect.get_effect_type_label(),
+					effect.amount,
+					effect.duration,
+					equipped_module.module.module_name
+				]
+			)
+		)
 	# Handle AREA-based effects.
 	elif effect.target == Enums.TargetType.AREA:
 		var center = target if effect.center_on_target else source
@@ -197,28 +251,50 @@ func _apply_modifier_effect(game_map, effect: BaseEffect) -> void:
 			effect.target == Enums.TargetType.ALLY or effect.target == Enums.TargetType.SELF
 		)
 		var include_enemies = effect.target == Enums.TargetType.ENEMY
-		var affected = AIUnitQueries.get_units_in_range(game_map,
-			source, center.position, effect.radius, include_allies, include_enemies, [source]
+		var affected = AIUnitQueries.get_units_in_range(
+			game_map,
+			source,
+			center.position,
+			effect.radius,
+			include_allies,
+			include_enemies,
+			[source]
 		)
 		for entity in affected:
 			var actor: CombatEntity = entity.combatant
 			if actor.is_dead():
 				continue
 			actor.add_effect(equipped_module.module, effect, source)
-			_add_log(game_map, Enums.LogType.SUPPORT, "%s applies %s to %s -> %d for %d turns (%s, AoE)" % [
-				source_actor.get_chat_tag(),
-				effect.get_effect_type_label(),
-				actor.get_chat_tag(),
-				effect.amount,
-				effect.duration,
-				equipped_module.module.module_name])
+			_add_log(
+				game_map,
+				Enums.LogType.SUPPORT,
+				(
+					"%s applies %s to %s -> %d for %d turns (%s, AoE)"
+					% [
+						source_actor.get_chat_tag(),
+						effect.get_effect_type_label(),
+						actor.get_chat_tag(),
+						effect.amount,
+						effect.duration,
+						equipped_module.module.module_name
+					]
+				)
+			)
 	# Handle direct ENEMY / ALLY targeting.
 	else:
 		target_actor.add_effect(equipped_module.module, effect, source)
-		_add_log(game_map, Enums.LogType.SUPPORT, "%s applies %s to %s -> %d for %d turns (%s)" % [
-			source_actor.get_chat_tag(),
-			effect.get_effect_type_label(),
-			target_actor.get_chat_tag(),
-			effect.amount,
-			effect.duration,
-			equipped_module.module.module_name])
+		_add_log(
+			game_map,
+			Enums.LogType.SUPPORT,
+			(
+				"%s applies %s to %s -> %d for %d turns (%s)"
+				% [
+					source_actor.get_chat_tag(),
+					effect.get_effect_type_label(),
+					target_actor.get_chat_tag(),
+					effect.amount,
+					effect.duration,
+					equipped_module.module.module_name
+				]
+			)
+		)

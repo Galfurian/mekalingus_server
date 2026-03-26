@@ -17,14 +17,14 @@ required_keys = null
 [sub_resource type="Resource" id="SR2"]
 script = ExtResource("S2")
 consideration_name = "tile_threat"
-weight = 10.0
+weight = 3.0
 allowed_phases = null
 required_keys = null
 
 [sub_resource type="Resource" id="SR3"]
 script = ExtResource("S3")
 consideration_name = "local_force_superiority"
-weight = 10.0
+weight = 3.0
 allowed_phases = null
 required_keys = null
 

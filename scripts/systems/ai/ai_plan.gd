@@ -75,9 +75,7 @@ func is_valid() -> bool:
 		if valid:
 			valid = AIUtils.is_equipped_module_available(source.combatant, equipped_module)
 		if valid:
-			valid = AIUtils.can_module_be_used_now(
-				source.combatant, equipped_module.item, equipped_module.module
-			)
+			valid = AIUtils.can_module_be_used_now(source.combatant, equipped_module)
 	elif intent == Intent.RETREAT or intent == Intent.REPOSITION:
 		valid = destination != Vector2i.ZERO
 

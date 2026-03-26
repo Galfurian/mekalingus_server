@@ -1,10 +1,8 @@
 [gd_resource type="Resource" script_class="AIActionProfile" format=3 uid="uid://ca5br6d4sg1u1"]
 
 [ext_resource type="Script" uid="uid://c80gicrr8jpkr" path="res://scripts/systems/ai/tuning/ai_action_profile.gd" id="AIActionProfile"]
-[ext_resource type="Script" uid="uid://cqn8crmyre1vw" path="res://scripts/systems/ai/tuning/ai_consideration.gd" id="AIConsideration"]
+[ext_resource type="Script" uid="uid://bb67v600xgwnt" path="res://scripts/systems/ai/tuning/ai_consideration.gd" id="AIConsideration"]
 
 [resource]
 script = ExtResource("AIActionProfile")
-profile_name = "default_reposition_profile"
-activation_threshold = 0.0
-considerations = []
+profile_name = "default_reposition_destination_profile"

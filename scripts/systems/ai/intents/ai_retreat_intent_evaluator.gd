@@ -81,11 +81,12 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 
 	# Find safest reachable retreat tile.
 	var enemy_centroid: Vector2 = _get_known_enemy_centroid(source, planning_context)
-	if enemy_centroid != Vector2.ZERO:
-		var centroid_tile: Vector2i = Vector2i(round(enemy_centroid.x), round(enemy_centroid.y))
-		_log(source, "enemy centroid found at %s" % [MetaTag.pos_tag(centroid_tile)])
-	else:
+	if enemy_centroid == Vector2.ZERO:
 		_log(source, "no enemy centroid available (visible or remembered)")
+		return null
+
+	var centroid_tile: Vector2i = Vector2i(round(enemy_centroid.x), round(enemy_centroid.y))
+	_log(source, "enemy centroid found at %s" % [MetaTag.pos_tag(centroid_tile)])
 
 	var reachable_tiles: Array[Vector2i] = planning_context.get_reachable_tiles()
 	if reachable_tiles.is_empty():
@@ -299,6 +300,9 @@ static func _find_safest_retreat_tile(
 	var safest_tile: Vector2i = source.position
 	var best_score: float = -INF
 
+	# Store scores for debug visualization.
+	var tile_scores: Dictionary = {}
+
 	for tile: Vector2i in reachable_tiles:
 		# Verify pathfinding.
 		if tile != source.position:
@@ -309,6 +313,10 @@ static func _find_safest_retreat_tile(
 		# Evaluate tile using profile considerations.
 		var evaluation_context = AIEvaluationContext.for_tile(source, planning_context, tile)
 		var tile_score: float = profile.evaluate_variant(evaluation_context)
+
+		# Save score for later debug dump.
+		tile_scores[tile] = tile_score
+
 		if tile_score > best_score:
 			best_score = tile_score
 			safest_tile = tile

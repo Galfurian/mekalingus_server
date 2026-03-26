@@ -222,7 +222,7 @@ static func find_best_attack_tile(
 	var best_tile := Vector2i.ZERO
 	var best_score := -INF
 	var ideal_range := maxf(float(min_range), float(max_range) - 0.5)
-	var sensor_range: int = source.combatant.get_sensor_range()
+	var sensor_range: int = source.combatant.sensor_range
 	var enemies = AIUnitQueries.get_enemies_in_range(
 		game_map, source, source.position, sensor_range
 	)

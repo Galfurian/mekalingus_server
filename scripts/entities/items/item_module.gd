@@ -85,8 +85,29 @@ func from_dict(data: Dictionary):
 	effects.clear()
 	for effect_data in data["effects"]:
 		var effect := EffectFactory.create_from_dict(effect_data)
-		if effect:
-			effects.append(effect)
+		if not effect:
+			push_error(
+				"Failed to create effect for module '%s' from data: %s" % [module_name, effect_data]
+			)
+			continue
+		if passive and effect.duration > 0:
+			push_error(
+				(
+					"Invalid module '%s': passive modules cannot have effects with duration (effect '%s')"
+					% [module_name, effect.get_effect_type_label()]
+				)
+			)
+			continue
+		if not passive and effect.duration <= 0:
+			if not effect.is_damage() and not effect.is_repair():
+				push_error(
+					(
+						"Invalid module '%s': effect '%s' requires a positive duration"
+						% [module_name, effect.get_effect_type_label()]
+					)
+				)
+				continue
+		effects.append(effect)
 
 
 func to_dict() -> Dictionary:

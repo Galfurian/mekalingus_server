@@ -23,6 +23,6 @@ weight = 14.0
 
 [resource]
 script = ExtResource("AIActionProfile")
-profile_name = "default_attack_profile"
+profile_name = "default_attack_target_profile"
 activation_threshold = 0.5
 considerations = Array[ExtResource("AIConsideration")]([SubResource("SR1"), SubResource("SR2"), SubResource("SR3")])

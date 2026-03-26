@@ -77,7 +77,7 @@ func get_allies(
 	include_self: bool = false,
 ) -> Array[MapCombatEntity]:
 	# Get the sensor range of the source unit.
-	var sensor_range: int = unit.combatant.get_sensor_range()
+	var sensor_range: int = unit.combatant.sensor_range
 	# Get the hash of the tile for caching purposes.
 	var tile_hash: String = _hash_position_range(unit, position, sensor_range)
 	# Check if the allies for this tile are already cached.
@@ -100,7 +100,7 @@ func get_enemies(
 	position: Vector2i,
 ) -> Array[MapCombatEntity]:
 	# Get the sensor range of the source unit.
-	var sensor_range: int = unit.combatant.get_sensor_range()
+	var sensor_range: int = unit.combatant.sensor_range
 	# Get the hash of the tile for caching purposes.
 	var tile_hash: String = _hash_position_range(unit, position, sensor_range)
 	# Check if the enemies for this tile are already cached.
@@ -240,7 +240,7 @@ func get_tile_threat_score(
 	position: Vector2i,
 ) -> float:
 	# Get the sensor range of the source unit.
-	var sensor_range: int = unit.combatant.get_sensor_range()
+	var sensor_range: int = unit.combatant.sensor_range
 	# Get the hash of the tile for caching purposes.
 	var tile_hash: String = _hash_position_range(unit, position, sensor_range)
 	# Check if the threat score for this tile is already cached.

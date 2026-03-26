@@ -47,54 +47,6 @@ func build_item(uuid: String = GameServer.generate_uuid()) -> Item:
 
 
 # =============================================================================
-# MODULE HANDLING
-# =============================================================================
-
-
-func get_passive_modules() -> Array[ItemModule]:
-	"""
-	Returns all passive modules this item provides.
-	"""
-	var passive_modules: Array[ItemModule] = []
-	for module in modules:
-		if module.passive:
-			passive_modules.append(module)
-	return passive_modules
-
-
-func get_active_modules() -> Array[ItemModule]:
-	"""
-	Returns all active modules this item provides.
-	"""
-	var active_modules: Array[ItemModule] = []
-	for module in modules:
-		if not module.passive:
-			active_modules.append(module)
-	return active_modules
-
-
-func get_cooldowns() -> Array[float]:
-	"""
-	Returns the cooldowns of all modules that have one.
-	"""
-	var cooldowns: Array[float] = []
-	for module in modules:
-		if module.cooldown > 0.0:
-			cooldowns.append(module.cooldown)
-	return cooldowns
-
-
-func has_cooldown() -> bool:
-	"""
-	Check if any of the modules has a cooldown.
-	"""
-	for module in modules:
-		if module.cooldown > 0.0:
-			return true
-	return false
-
-
-# =============================================================================
 # POWER COMPUTATION
 # =============================================================================
 

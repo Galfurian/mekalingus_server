@@ -1,27 +1,33 @@
 [gd_resource type="Resource" script_class="AIActionProfile" format=3 uid="uid://eedcp8jqend"]
 
 [ext_resource type="Script" uid="uid://c80gicrr8jpkr" path="res://scripts/systems/ai/tuning/ai_action_profile.gd" id="AIActionProfile"]
-[ext_resource type="Script" uid="uid://cqn8crmyre1vw" path="res://scripts/systems/ai/tuning/ai_consideration.gd" id="AIConsideration"]
-[ext_resource type="Script" uid="uid://dciq311selnas" path="res://scripts/systems/ai/considerations/source_survivability_consideration.gd" id="S1"]
-[ext_resource type="Script" uid="uid://dtlddnm5a0kqq" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="S2"]
-[ext_resource type="Script" uid="uid://bgkcf1f1e6yeo" path="res://scripts/systems/ai/considerations/local_force_superiority_consideration.gd" id="S3"]
+[ext_resource type="Script" uid="uid://bb67v600xgwnt" path="res://scripts/systems/ai/tuning/ai_consideration.gd" id="AIConsideration"]
+[ext_resource type="Script" uid="uid://svptu0j2rtl1" path="res://scripts/systems/ai/considerations/source_survivability_consideration.gd" id="S1"]
+[ext_resource type="Script" uid="uid://bd1uocchhubj" path="res://scripts/systems/ai/considerations/tile_threat_consideration.gd" id="S2"]
+[ext_resource type="Script" uid="uid://dtku0bxku1u8v" path="res://scripts/systems/ai/considerations/local_force_superiority_consideration.gd" id="S3"]
 
 [sub_resource type="Resource" id="SR1"]
 script = ExtResource("S1")
 consideration_name = "source_survivability"
 weight = 10.0
+allowed_phases = null
+required_keys = null
 
 [sub_resource type="Resource" id="SR2"]
 script = ExtResource("S2")
 consideration_name = "tile_threat"
 weight = 10.0
 invert_output = true
+allowed_phases = null
+required_keys = null
 
 [sub_resource type="Resource" id="SR3"]
 script = ExtResource("S3")
 consideration_name = "local_force_superiority"
 weight = 10.0
 invert_output = true
+allowed_phases = null
+required_keys = null
 
 [resource]
 script = ExtResource("AIActionProfile")

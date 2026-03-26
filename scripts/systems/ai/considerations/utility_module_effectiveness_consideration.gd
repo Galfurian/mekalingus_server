@@ -24,18 +24,32 @@ func get_normalized_input(context: Dictionary) -> float:
 	for effect: BaseEffect in module.effects:
 		if not _can_effect_apply_to_target(effect, source, target):
 			continue
-		total_power += effect.evaluate_effect_power(module.repeats)
+
+		# Measure raw tool power and weight by contextual utility for this target.
+		var raw_effect_power: float = effect.evaluate_effect_power(module.repeats)
+		var effect_priority: int = effect.get_ai_utility_priority(target)
+		# Prefer clear utility signals over purely mechanical values.
+		# Use 1.0 when no priority information is available.
+		var effect_weight: float = 1.0
+		if effect_priority > 0:
+			effect_weight = clampf(float(effect_priority) / 12.0, 0.0, 1.0)
+		# Slight soft minimum to avoid zeroing a valid effect that has no AI metadata.
+		if effect_weight <= 0.0:
+			effect_weight = 0.05
+		total_power += raw_effect_power * effect_weight
 
 	if total_power <= 0.0:
 		return 0.0
 
-	# Compute the score as a ratio of the total power to the normalization scale.
-	var score = total_power / NORMALIZATION_SCALE
-
-	# Normalize so that:
-	# - 0.0 means no utility power (total_power = 0)
-	# - 1.0 means maximum utility power (total_power >= NORMALIZATION_SCALE)
-	var normalized_score = clampf(score, 0.0, 1.0)
+	# Map total power into a bounded [0.0, 1.0] utility value in a smooth, diminishing return way.
+	# This avoids linear saturation and keeps extreme values bounded without hard cutoffs.
+	# Mathematically: logistic-like scaling using exponential decay.
+	# - 0 power => 0.0
+	# - ~NORMALIZATION_SCALE ~~ 0.63 (1 - e^-1)
+	# - very high power ~~ 1.0
+	var normalized_score: float = 1.0 - exp(-total_power / NORMALIZATION_SCALE)
+	# Defend against potential numerical edge cases.
+	normalized_score = clampf(normalized_score, 0.0, 1.0)
 
 	# _add_thought(
 	# 	source,

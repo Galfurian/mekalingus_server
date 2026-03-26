@@ -2,6 +2,7 @@ class_name UtilityModuleEffectivenessConsideration
 extends AIConsideration
 
 const NORMALIZATION_SCALE: float = 120.0
+const MAX_EFFECT_PRIORITY: float = 16.0
 
 
 func _init() -> void:
@@ -20,6 +21,9 @@ func get_normalized_input(context: Dictionary) -> float:
 	if _is_module_in_cooldown(source, item, module):
 		return 0.0
 
+	# Compute total power for this module’s effects, scaled by absolute utility priority.
+	# This procedure is independent of other module options in the same item; it
+	# estimates this module’s intrinsic usefulness for this target.
 	var total_power: float = 0.0
 	for effect: BaseEffect in module.effects:
 		if not _can_effect_apply_to_target(effect, source, target):
@@ -32,7 +36,7 @@ func get_normalized_input(context: Dictionary) -> float:
 		# Use 1.0 when no priority information is available.
 		var effect_weight: float = 1.0
 		if effect_priority > 0:
-			effect_weight = clampf(float(effect_priority) / 12.0, 0.0, 1.0)
+			effect_weight = clampf(float(effect_priority) / MAX_EFFECT_PRIORITY, 0.0, 1.0)
 		# Slight soft minimum to avoid zeroing a valid effect that has no AI metadata.
 		if effect_weight <= 0.0:
 			effect_weight = 0.05

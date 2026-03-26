@@ -4,8 +4,6 @@
 class_name LocalForceSuperioritConsideration
 extends AIConsideration
 
-const FORCE_RATIO_MAX: float = 2.0
-
 
 func _init() -> void:
 	consideration_name = "local_force_superiority"
@@ -31,43 +29,31 @@ func get_normalized_input(context: Dictionary) -> float:
 	if tile == Vector2i.ZERO:
 		tile = source.position
 
-	# Get the source threat level.
+	# Get the source threat level (own combat value) from planning context.
 	var source_threat: float = planning_context.get_unit_threat_score(source)
-	# Get the nearby enemy combat power, scaled by unit size.
+	# Get the total threat of nearby enemies at this tile.
 	var enemy_threat_level: float = planning_context.get_tile_threat_score(source, tile)
+
+	# If source has no threat (e.g. uninitialized or dead), fallback:
+	# - no enemy threat -> 0 (safe)
+	# - enemy threat present -> 1 (max urgency)
 	if source_threat <= 0.0:
 		return 0.0 if enemy_threat_level <= 0.0 else 1.0
 
-	# Calculate force ratio (enemy_power / source_power).
-	var force_ratio: float = enemy_threat_level / source_threat
+	# Calculate force ratio (enemy_power / source_power), mainly for debugging or future tuning.
+	# var force_ratio: float = enemy_threat_level / source_threat
 
-	# Only count disadvantage as retreat pressure.
-	# - <= 1.0 means parity or better, no pressure from force ratio.
-	# - >= FORCE_RATIO_MAX maps to full pressure.
-	if force_ratio <= 1.0:
+	# Score local advantage by using a normalized difference fraction:
+	# 0.0 at parity or friendly advantage, approaching 1.0 as enemy threat grows.
+	# This avoids arbitrary hard max cutoffs and is globally bounded for all positive values.
+	# formula: (enemy - source) / (enemy + source)
+	# - enemy==source -> 0.0
+	# - enemy>>source -> 1.0
+	# - enemy<source -> negative (clamped to 0.0, no retreat pressure)
+	var diff: float = enemy_threat_level - source_threat
+	var total: float = enemy_threat_level + source_threat
+	if total <= 0.0:
 		return 0.0
 
-	# Normalize the disadvantage ratio to the range [0, 1] for scoring.
-	var normalized_disadvantage: float = (force_ratio - 1.0) / (FORCE_RATIO_MAX - 1.0)
-
-	# Clamp the normalized disadvantage to the range [0, 1] so that values above FORCE_RATIO_MAX are
-	# treated as maximum disadvantage.
-	var clamped_disadvantage = clampf(normalized_disadvantage, 0.0, 1.0)
-
-	# Clamp to [0, 1] so that values above FORCE_RATIO_MAX are treated as maximum disadvantage.
-	# _add_thought(
-	# 	source,
-	# 	(
-	# 		"Local force superiority: %.2f (enemy threat: %.2f, source threat: %.2f, force ratio: %.2f -> %.2f -> %.2f)"
-	# 		% [
-	# 			clamped_disadvantage,
-	# 			enemy_threat_level,
-	# 			source_threat,
-	# 			force_ratio,
-	# 			normalized_disadvantage,
-	# 			clamped_disadvantage,
-	# 		]
-	# 	)
-	# )
-
-	return clamped_disadvantage
+	var normalized_force_disadvantage: float = diff / total
+	return clampf(normalized_force_disadvantage, 0.0, 1.0)

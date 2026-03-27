@@ -333,11 +333,15 @@ func _compute_unit_threat_score(unit: MapCombatEntity) -> float:
 	# Get the unit maximum survivability.
 	var max_survivability: float = AIUtils.get_entity_max_survivability(unit)
 	max_survivability = 1.0 if max_survivability > 0.0 else 0.0
-	# Get the unit current survivability.
-	var current_survivability: float = AIUtils.get_entity_current_survivability(unit)
-	current_survivability = current_survivability if max_survivability > 0.0 else 0.0
-	# Add to the threat score a factor based on the unit's current survivability.
-	threat_score += current_survivability / max_survivability
+	# Get the unit current durability (health + armor + shield).
+	var current_durability: float = (
+		float(unit.combatant.health)
+		+ float(unit.combatant.armor)
+		+ float(unit.combatant.shield)
+	)
+	current_durability = current_durability if max_survivability > 0.0 else 0.0
+	# Add to the threat score a factor based on the unit's current durability.
+	threat_score += current_durability / max_survivability
 	# Store the result in the cache for future queries.
 	_threat_unit_cache[unit_hash] = threat_score
 	return threat_score

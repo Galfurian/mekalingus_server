@@ -21,13 +21,17 @@ func get_normalized_input(context: Dictionary) -> float:
 		push_error("Target has non-positive max survivability, cannot normalize health.")
 		return 0.0
 
-	var current_survivability: float = AIUtils.get_entity_current_survivability(target)
-	if current_survivability < 0.0:
-		push_error("Target has negative current survivability, cannot normalize health.")
+	var current_durability: float = (
+		float(target.combatant.health)
+		+ float(target.combatant.armor)
+		+ float(target.combatant.shield)
+	)
+	if current_durability < 0.0:
+		push_error("Target has negative current durability, cannot normalize health.")
 		return 0.0
 
-	# Compute the survivability score as a ratio of current to max survivability.
-	var score = current_survivability / max_survivability
+	# Compute the survivability score as a ratio of current durability to max survivability.
+	var score = current_durability / max_survivability
 
 	# Normalize so that:
 	# - 0.0 means no health (current_survivability = 0)

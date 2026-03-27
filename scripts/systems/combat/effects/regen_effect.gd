@@ -22,10 +22,20 @@ func remove(actor) -> void:
 	BaseEffect.add_to_actor_stat(actor, stat, -amount)
 
 
-func get_ai_offensive_priority(_target) -> int:
+func get_module_offensive_score(_target) -> float:
+	# Only negative regen (debuff) is offensive in this context.
 	if amount >= 0:
-		return 0
-	return clamp(abs(amount), 3, 12)
+		return 0.0
+	if not _target or not _target.combatant:
+		return 0.0
+	# Estimate debuff effectiveness against the most relevant stat.
+	var raw_value: float = float(abs(amount) * duration)
+
+	var current_regen: float = float(_target.combatant.get_stat(stat))
+	if current_regen <= 0.0:
+		return 0.0
+	return clampf(raw_value / (current_regen + 1.0), 0.0, 1.0)
+
 
 
 func get_ai_utility_priority(_target) -> int:

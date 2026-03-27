@@ -4,9 +4,10 @@ extends RefCounted
 const MAX_DAMAGE_REDUCTION_RATIO: float = 0.95
 
 
-static func take_damage_from_effect(actor, effect: BaseEffect) -> Dictionary:
+static func take_damage_from_effect(actor, effect: BaseEffect, dry_run: bool = false) -> Dictionary:
 	"""
 	Applies damage from a given effect using actor resistances and damage-type modifiers.
+	Set dry_run=true to compute expected damage without mutating stats (for AI evaluation).
 	"""
 	var result = {
 		"shield": 0,
@@ -53,20 +54,23 @@ static func take_damage_from_effect(actor, effect: BaseEffect) -> Dictionary:
 	if shield_value > 0:
 		var shield_damage = int(round(remaining * modifiers.shield))
 		shield_damage = min(shield_damage, shield_value)
-		actor.adjust_shield(-shield_damage)
+		if not dry_run:
+			actor.adjust_shield(-shield_damage)
 		remaining -= shield_damage / modifiers.shield
 		result.shield = shield_damage
 
 	if armor_value > 0 and remaining > 0:
 		var armor_raw: float = min(remaining, float(armor_value) / modifiers.armor)
 		var armor_damage = int(round(armor_raw * modifiers.armor))
-		actor.adjust_armor(-armor_damage)
+		if not dry_run:
+			actor.adjust_armor(-armor_damage)
 		remaining -= armor_raw
 		result.armor = armor_damage
 
 	if remaining > 0:
 		var health_damage = int(round(remaining * modifiers.health))
-		actor.adjust_health(-health_damage)
+		if not dry_run:
+			actor.adjust_health(-health_damage)
 		result.health = health_damage
 
 	result.total = result.shield + result.armor + result.health

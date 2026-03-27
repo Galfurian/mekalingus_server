@@ -22,7 +22,7 @@ func get_effect_type_label() -> String:
 			return "Repair"
 
 
-func get_ai_utility_priority(_target) -> int:
+func get_module_defensive_score(_target) -> float:
 	if not _target or not _target.combatant:
 		return 0
 

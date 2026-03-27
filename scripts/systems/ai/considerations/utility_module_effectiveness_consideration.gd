@@ -31,7 +31,7 @@ func get_normalized_input(context: Dictionary) -> float:
 
 		# Measure raw tool power and weight by contextual utility for this target.
 		var raw_effect_power: float = effect.evaluate_effect_power(module.repeats)
-		var effect_priority: int = effect.get_ai_utility_priority(target)
+		var effect_priority: int = effect.get_module_defensive_score(target)
 		# Prefer clear utility signals over purely mechanical values.
 		# Use 1.0 when no priority information is available.
 		var effect_weight: float = 1.0

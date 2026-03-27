@@ -99,12 +99,12 @@ func evaluate_effect_power(repeats: int) -> float:
 	)
 
 
-func get_ai_offensive_priority(_target) -> int:
-	return 0
+func get_module_offensive_score(_target) -> float:
+	return 0.0
 
 
-func get_ai_utility_priority(_target) -> int:
-	return 0
+func get_module_defensive_score(_target) -> float:
+	return 0.0
 
 
 func from_dict(data: Dictionary) -> void:

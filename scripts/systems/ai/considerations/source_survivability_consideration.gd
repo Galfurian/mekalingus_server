@@ -1,3 +1,5 @@
+## Evaluates the source entity’s durability to guide AI decisions for intent/tile/target phases.
+## Returns a normalized survivability value in [0.0, 1.0], where 1.0 means full health.
 class_name SourceSurvivabilityConsideration
 extends AIConsideration
 
@@ -36,7 +38,7 @@ func get_normalized_input(context: Dictionary) -> float:
 	# Normalize so that:
 	# - 0.0 means no health (current_survivability = 0)
 	# - 1.0 means full health (current_survivability = max_survivability)
-	var normnalized_score = clampf(score, 0.0, 1.0)
+	var normalized_score = clampf(score, 0.0, 1.0)
 
 	# _add_thought(
 	# 	source,
@@ -46,4 +48,4 @@ func get_normalized_input(context: Dictionary) -> float:
 	# 	)
 	# )
 
-	return normnalized_score
+	return normalized_score

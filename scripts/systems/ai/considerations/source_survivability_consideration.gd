@@ -22,29 +22,29 @@ func get_normalized_input(context: Dictionary) -> float:
 		push_error("Missing source entity for SourceSurvivabilityConsideration.")
 		return 0.0
 
-	var max_survivability: float = AIUtils.get_entity_max_survivability(source)
-	if max_survivability <= 0.0:
+	var max_durability: float = source.combatant.get_total_max_durability()
+	if max_durability <= 0.0:
 		push_error("source has non-positive max survivability, cannot normalize health.")
 		return 0.0
 
-	var current_survivability: float = AIUtils.get_entity_current_survivability(source)
-	if current_survivability < 0.0:
-		push_error("source has negative current survivability, cannot normalize health.")
+	var current_durability: float = source.combatant.get_total_current_durability()
+	if current_durability < 0.0:
+		push_error("source has negative current durability, cannot normalize health.")
 		return 0.0
 
-	# Compute the survivability score as a ratio of current to max survivability.
-	var score = current_survivability / max_survivability
+	# Compute the survivability score as a ratio of current durability to max survivability.
+	var score = current_durability / max_durability
 
 	# Normalize so that:
 	# - 0.0 means no health (current_survivability = 0)
-	# - 1.0 means full health (current_survivability = max_survivability)
+	# - 1.0 means full health (current_survivability = max_durability)
 	var normalized_score = clampf(score, 0.0, 1.0)
 
 	# _add_thought(
 	# 	source,
 	# 	(
 	# 		"Source survivability: %d/%d (%.2f -> %.2f)"
-	# 		% [current_survivability, max_survivability, score, normnalized_score]
+	# 		% [current_survivability, max_durability, score, normnalized_score]
 	# 	)
 	# )
 

@@ -240,6 +240,14 @@ func regenerate() -> void:
 	adjust_power(power_generation)
 
 
+func get_total_current_durability() -> float:
+	return health + armor + shield
+
+
+func get_total_max_durability() -> float:
+	return max_health + max_armor + max_shield
+
+
 func reset_combat_state(stats_payload: Dictionary, p_slots: Array[int] = []) -> void:
 	base_stats.clear()
 	for stat_key in stats_payload.keys():
@@ -252,17 +260,6 @@ func reset_combat_state(stats_payload: Dictionary, p_slots: Array[int] = []) -> 
 	_ensure_max_defaults()
 	_clamp_all_current_stats()
 	slots = p_slots.duplicate()
-
-
-func to_dict() -> Dictionary:
-	var data: Dictionary = {
-		"uuid": uuid,
-		"alias": alias,
-		"slots": slots,
-		"items": Utils.convert_objects_to_dict(items),
-		"ai_thought_log": ai_thought_log,
-	}
-	return data
 
 
 func rebuild_combat_state() -> void:
@@ -532,3 +529,19 @@ func _get_raw_stat(storage: Dictionary, stat: int) -> int:
 	if not storage.has(stat):
 		return 0
 	return int(storage.get(stat, 0))
+
+
+# =============================================================================
+# SERIALIZATION
+# =============================================================================
+
+
+func to_dict() -> Dictionary:
+	var data: Dictionary = {
+		"uuid": uuid,
+		"alias": alias,
+		"slots": slots,
+		"items": Utils.convert_objects_to_dict(items),
+		"ai_thought_log": ai_thought_log,
+	}
+	return data

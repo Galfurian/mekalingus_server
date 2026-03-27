@@ -34,14 +34,10 @@ func get_module_offensive_score(_target) -> float:
 	# Rough estimation of total output damage over duration.
 	var raw_total: float = float(amount * duration)
 
-	var total_defense: float = (
-		float(_target.combatant.health)
-		+ float(_target.combatant.armor)
-		+ float(_target.combatant.shield)
-	)
+	var current_durability: float = _target.combatant.get_total_current_durability()
 
 	# Returning 0..1 effectiveness w.r.t. target durability.
-	return clampf(raw_total / (total_defense + 1.0), 0.0, 1.0)
+	return clampf(raw_total / (current_durability + 1.0), 0.0, 1.0)
 
 
 func from_dict(data: Dictionary) -> void:

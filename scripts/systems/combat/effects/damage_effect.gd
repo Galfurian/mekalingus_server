@@ -21,8 +21,27 @@ func get_threat_score() -> float:
 	return clampf(float(amount) / 100.0, 0.0, 1.0)
 
 
-func get_ai_offensive_priority(_target) -> int:
-	return clamp(int(round(float(amount) / 10.0)), 1, 10)
+func get_module_offensive_score(_target) -> float:
+	if not _target or not _target.combatant:
+		return 0.0
+
+	# Estimate effective damage after target resistances and defenses (dry run, no mutation).
+	var damage_dict: Dictionary = CombatDamageCalculator.take_damage_from_effect(
+		_target.combatant,
+		self,
+		true,
+	)
+	var estimated_damage: float = float(damage_dict.total)
+
+	# Use target total durability as normalizer so result is 0..1.
+	var total_defense: float = (
+		float(_target.combatant.health)
+		+ float(_target.combatant.armor)
+		+ float(_target.combatant.shield)
+	)
+
+	# Straightforward fraction of baseline threat.
+	return clampf(estimated_damage / (total_defense + 1.0), 0.0, 1.0)
 
 
 func from_dict(data: Dictionary) -> void:

@@ -1,8 +1,8 @@
+## Utility consideration for evaluating module effectiveness on an enemy target.
+## Uses per-effect offensive/defensive module score (0..1) rather than a hardcoded constant scale.
+## Output is the mean normalized score across applicable effects, in the range [0.0, 1.0].
 class_name UtilityModuleEffectivenessConsideration
 extends AIConsideration
-
-const NORMALIZATION_SCALE: float = 120.0
-const MAX_EFFECT_PRIORITY: float = 16.0
 
 
 func _init() -> void:
@@ -20,19 +20,25 @@ func get_normalized_input(context: Dictionary) -> float:
 		return 0.0
 	if _is_module_in_cooldown(source, item, module):
 		return 0.0
+	# Calculate the average normalized offensive/defensive score across applicable effects.
+	var score: float = _get_utility_module_total_power(module, source, target)
+	# Normalize the score to the range [0.0, 1.0] and return it.
+	return clampf(score, 0.0, 1.0)
 
-	# Compute total power for this module’s effects, scaled by absolute utility priority.
-	# This procedure is independent of other module options in the same item; it
-	# estimates this module’s intrinsic usefulness for this target.
-	var total_power: float = 0.0
+
+func _get_utility_module_total_power(
+	module: ItemModule,
+	source: MapCombatEntity,
+	target: MapCombatEntity,
+) -> float:
+	var total_score: float = 0.0
+	var effect_count: int = 0
+
 	for effect: BaseEffect in module.effects:
 		if not _can_effect_apply_to_target(effect, source, target):
 			continue
 
-		# Measure raw tool power and weight by contextual utility for this target.
-		var raw_effect_power: float = effect.evaluate_effect_power(module.repeats)
 		var effect_priority: float = 0.0
-
 		if effect.is_offensive():
 			effect_priority = effect.get_module_offensive_score(target)
 		elif effect.is_defensive():
@@ -43,35 +49,17 @@ func get_normalized_input(context: Dictionary) -> float:
 				effect.get_module_defensive_score(target),
 			)
 
-		# Prefer clear utility signals over purely mechanical values.
-		var effect_weight: float = clampf(effect_priority, 0.0, 1.0)
-		# Slight soft minimum to avoid zeroing a valid effect that has no utility weight.
-		if effect_weight <= 0.0:
-			effect_weight = 0.05
-		total_power += raw_effect_power * effect_weight
+		effect_priority = clampf(effect_priority, 0.0, 1.0)
+		if effect_priority <= 0.0:
+			effect_priority = 0.05
 
-	if total_power <= 0.0:
+		total_score += effect_priority
+		effect_count += 1
+
+	if effect_count == 0:
 		return 0.0
 
-	# Map total power into a bounded [0.0, 1.0] utility value in a smooth, diminishing return way.
-	# This avoids linear saturation and keeps extreme values bounded without hard cutoffs.
-	# Mathematically: logistic-like scaling using exponential decay.
-	# - 0 power => 0.0
-	# - ~NORMALIZATION_SCALE ~~ 0.63 (1 - e^-1)
-	# - very high power ~~ 1.0
-	var normalized_score: float = 1.0 - exp(-total_power / NORMALIZATION_SCALE)
-	# Defend against potential numerical edge cases.
-	normalized_score = clampf(normalized_score, 0.0, 1.0)
-
-	# _add_thought(
-	# 	source,
-	# 	(
-	# 		"Utility module effectiveness: %.2f (total power: %.2f, score: %.2f -> normalized: %.2f)"
-	# 		% [normalized_score, total_power, score, normalized_score]
-	# 	)
-	# )
-
-	return normalized_score
+	return total_score / float(effect_count)
 
 
 func _can_effect_apply_to_target(

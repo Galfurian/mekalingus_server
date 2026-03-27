@@ -1,8 +1,6 @@
 class_name OffensiveModuleEffectivenessConsideration
 extends AIConsideration
 
-const NORMALIZATION_SCALE: float = 120.0
-
 
 func _init() -> void:
 	consideration_name = "offensive_module_effectiveness"
@@ -11,46 +9,35 @@ func _init() -> void:
 
 
 func get_normalized_input(context: Dictionary) -> float:
-	var result: float = 0.0
 	var item: Item = context.get("item", null)
 	var module: ItemModule = context.get("module", null)
 	var source: MapCombatEntity = context.get("source", null)
 	var target: MapCombatEntity = context.get("target", null)
-
-	var can_evaluate: bool = true
-
-	if not item:
-		push_error("Missing item for OffensiveModuleEffectivenessConsideration.")
-		can_evaluate = false
-	if not module:
-		push_error("Missing module for OffensiveModuleEffectivenessConsideration.")
-		can_evaluate = false
-	if not source:
-		push_error("Missing source for OffensiveModuleEffectivenessConsideration.")
-		can_evaluate = false
-	if not target:
-		push_error("Missing target for OffensiveModuleEffectivenessConsideration.")
-		can_evaluate = false
-	if can_evaluate and source.owner == target.owner:
-		can_evaluate = false
-	if can_evaluate and _is_module_in_cooldown(source, item, module):
-		can_evaluate = false
-
-	if can_evaluate:
-		# Calculate the average normalized offensive score across applicable effects.
-		result = _get_offensive_module_total_power(module, target)
-		result = clampf(result, 0.0, 1.0)
-
-	return result
+	if not item or not module or not source or not target:
+		return 0.0
+	if source.owner == target.owner:
+		return 0.0
+	if _is_module_in_cooldown(source, item, module):
+		return 0.0
+	# Calculate the average normalized offensive score across applicable effects.
+	var score: float = _get_offensive_module_total_power(module, source, target)
+	# Normalize the score to the range [0.0, 1.0] and return it.
+	return clampf(score, 0.0, 1.0)
 
 
-## Utility function to calculate the total power of a module's offensive effects without needing the
-## full context, useful for testing or other evaluations.
-func _get_offensive_module_total_power(module: ItemModule, target: MapCombatEntity) -> float:
+## Utility function to calculate the average normalized offensive effect score.
+## Considers only effects that are applicable to the target and are offensive.
+func _get_offensive_module_total_power(
+	module: ItemModule,
+	source: MapCombatEntity,
+	target: MapCombatEntity,
+) -> float:
 	var total_score: float = 0.0
 	var count: int = 0
 	for effect: BaseEffect in module.effects:
 		if not effect.is_offensive():
+			continue
+		if not _can_effect_apply_to_target(effect, source, target):
 			continue
 
 		var effect_score: float = effect.get_module_offensive_score(target)
@@ -62,6 +49,24 @@ func _get_offensive_module_total_power(module: ItemModule, target: MapCombatEnti
 		return 0.0
 
 	return total_score / float(count)
+
+
+func _can_effect_apply_to_target(
+	effect: BaseEffect,
+	source: MapCombatEntity,
+	target: MapCombatEntity,
+) -> bool:
+	match effect.target:
+		Enums.TargetType.SELF:
+			return target == source
+		Enums.TargetType.ALLY:
+			return target.owner == source.owner and target != source
+		Enums.TargetType.ENEMY:
+			return target.owner != source.owner
+		Enums.TargetType.AREA:
+			return true
+		_:
+			return false
 
 
 func _is_module_in_cooldown(source: MapCombatEntity, item: Item, module: ItemModule) -> bool:

@@ -21,12 +21,27 @@ func get_threat_score() -> float:
 	return clampf(float(amount * duration) / 100.0, 0.0, 1.0)
 
 
-func get_ai_offensive_priority(_target) -> int:
-	if not _target or not _target.combatant or not _target.combatant.active_effect_manager:
-		return clamp(int(round(float(amount * duration) / 5.0)), 1, 8)
-	if not _target.combatant.active_effect_manager.should_refresh_dot(self):
-		return -8
-	return clamp(int(round(float(amount * duration) / 5.0)), 1, 8)
+func get_module_offensive_score(_target) -> float:
+	# require target combat entity
+	if not _target or not _target.combatant:
+		return 0.0
+
+	# if DoT is already present and should not refresh, it is not useful.
+	if _target.combatant.active_effect_manager:
+		if not _target.combatant.active_effect_manager.should_refresh_dot(self):
+			return 0.0
+
+	# Rough estimation of total output damage over duration.
+	var raw_total: float = float(amount * duration)
+
+	var total_defense: float = (
+		float(_target.combatant.health)
+		+ float(_target.combatant.armor)
+		+ float(_target.combatant.shield)
+	)
+
+	# Returning 0..1 effectiveness w.r.t. target durability.
+	return clampf(raw_total / (total_defense + 1.0), 0.0, 1.0)
 
 
 func from_dict(data: Dictionary) -> void:

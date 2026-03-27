@@ -31,13 +31,21 @@ func get_normalized_input(context: Dictionary) -> float:
 
 		# Measure raw tool power and weight by contextual utility for this target.
 		var raw_effect_power: float = effect.evaluate_effect_power(module.repeats)
-		var effect_priority: int = effect.get_module_defensive_score(target)
+		var effect_priority: float = 0.0
+
+		if effect.is_offensive():
+			effect_priority = effect.get_module_offensive_score(target)
+		elif effect.is_defensive():
+			effect_priority = effect.get_module_defensive_score(target)
+		else:
+			effect_priority = max(
+				effect.get_module_offensive_score(target),
+				effect.get_module_defensive_score(target),
+			)
+
 		# Prefer clear utility signals over purely mechanical values.
-		# Use 1.0 when no priority information is available.
-		var effect_weight: float = 1.0
-		if effect_priority > 0:
-			effect_weight = clampf(float(effect_priority) / MAX_EFFECT_PRIORITY, 0.0, 1.0)
-		# Slight soft minimum to avoid zeroing a valid effect that has no AI metadata.
+		var effect_weight: float = clampf(effect_priority, 0.0, 1.0)
+		# Slight soft minimum to avoid zeroing a valid effect that has no utility weight.
 		if effect_weight <= 0.0:
 			effect_weight = 0.05
 		total_power += raw_effect_power * effect_weight

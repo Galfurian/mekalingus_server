@@ -341,8 +341,7 @@ func _update_action_button_labels() -> void:
 func _reissue_ai_orders() -> void:
 	if not game_map or not game_map.ai_controller:
 		return
-	game_map.ai_controller.clear()
-	await game_map.ai_controller.generate_ai_orders()
+	await game_map.ai_controller.precompute_next_turn_snapshot()
 
 
 func _get_selected_owner_key() -> String:

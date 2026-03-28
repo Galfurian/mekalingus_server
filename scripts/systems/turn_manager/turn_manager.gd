@@ -215,9 +215,6 @@ func _execute_turn() -> void:
 	# Emit the turn started signal.
 	on_turn_started.emit(_current_turn)
 
-	# 1) Generate AI orders for all AI-controlled combat entities.
-	await game_map.ai_controller.generate_ai_orders()
-
 	# 3.1) Process use of offensive module activations.
 	await game_map.ai_controller.execute_offensive_module_orders()
 	# 3.2) Process use of utility module activations.
@@ -235,10 +232,8 @@ func _execute_turn() -> void:
 	# 5.2) Check if any units are destroyed after executing the orders.
 	_erase_destroyed_units()
 
-	# Always precompute plans for the next turn so the UI can display intent, even when there are no
-	# hostile pairs remaining. This keeps the AI plan cache up to date for the next step.
-	if game_map and game_map.ai_controller:
-		await game_map.ai_controller.precompute_next_turn_plans()
+	# Compute the next-turn snapshot only after this turn is fully resolved.
+	await game_map.ai_controller.precompute_next_turn_snapshot()
 
 	# Emit the turn ended signal.
 	on_turn_ended.emit(_current_turn)

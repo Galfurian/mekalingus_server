@@ -71,9 +71,11 @@ func _init(
 	combat_rules.set_game_mode(p_game_mode)
 	combat_logger.set_combat_preset()
 	chat_logger.set_chat_preset()
+	directive_planner = DirectivePlanner.new(self)
 	ai_controller = AIController.new(self)
 	turn_manager = TurnManager.new(self)
-	directive_planner = DirectivePlanner.new(self)
+
+	ai_controller.precompute_next_turn_snapshot()
 
 
 func generate_map() -> void:

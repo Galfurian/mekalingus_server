@@ -2,13 +2,6 @@ class_name AIController
 extends Node
 
 # =============================================================================
-# CONSTANTS
-# =============================================================================
-
-# Enable AI action recovery (replan & reissue) when orders become invalid mid-turn.
-const ENABLE_ACTION_RECOVERY: bool = true
-
-# =============================================================================
 # PROPERTIES
 # =============================================================================
 
@@ -58,6 +51,54 @@ func clear() -> void:
 	_use_utility_module_orders.clear()
 	_move_orders.clear()
 	_reserved_move_tiles.clear()
+
+
+func _cancel_precomputed_order(source: MapCombatEntity, reason: String, order: Order) -> void:
+	if source:
+		_add_thought(source, "Canceled: %s (%s)" % [str(order), reason])
+	_add_action_log("Canceled precomputed order: %s (%s)" % [str(order), reason])
+
+
+func _describe_module_order_validation_failure(order: UseModuleOrder) -> String:
+	var reason: String = "order validation failed"
+	if not order:
+		reason = "missing order"
+	elif not order.source:
+		reason = "missing source"
+	elif not order.target:
+		reason = "missing target"
+	elif not order.equipped_module:
+		reason = "missing equipped module"
+	elif not order.source.combatant:
+		reason = "missing source combatant"
+	elif not order.target.combatant:
+		reason = "missing target combatant"
+	elif order.source.combatant.is_dead():
+		reason = "source is dead"
+	elif order.target.combatant.is_dead():
+		reason = "target is dead"
+	elif not AIUtils.is_equipped_module_available(order.source.combatant, order.equipped_module):
+		reason = "module is not available"
+	elif not AIUtils.can_module_be_used_now(order.source.combatant, order.equipped_module):
+		reason = "module cannot be used now"
+	return reason
+
+
+func _describe_move_order_cancellation(order: MoveOrder) -> String:
+	var reason: String = "move execution failed"
+	if not order:
+		reason = "missing order"
+	elif not order.source:
+		reason = "missing source"
+	elif not order.source.combatant:
+		reason = "missing source combatant"
+	elif order.source.combatant.is_dead():
+		reason = "source is dead"
+	elif order.destination == order.source.position:
+		reason = "already at destination"
+	elif game_map.is_occupied(order.destination):
+		reason = "destination is occupied"
+	return reason
 
 
 func _add_action_log(message: String) -> void:
@@ -132,24 +173,24 @@ func queue_move_order(order: MoveOrder) -> void:
 		_add_thought(order.source, "Queued: %s" % str(order))
 
 
-func _process_order_with_recovery(order: Order, expected_type: Object) -> void:
-	"""Executes an order and optionally reissues it if invalid."""
+func _process_precomputed_module_order(order: Order, expected_type: Object) -> void:
+	"""Executes a precomputed module order exactly once with no recomputation."""
 	if not order or not is_instance_of(order, expected_type):
 		return
 
-	if order.validate():
-		order.execute(game_map)
+	if not order.validate():
+		_cancel_precomputed_order(
+			order.source,
+			_describe_module_order_validation_failure(order as UseModuleOrder),
+			order,
+		)
+		return
+
+	var executed: bool = order.execute(game_map)
+	if executed:
 		_add_thought(order.source, "Executed: %s" % str(order))
 	else:
-		_add_thought(order.source, "Invalid: %s" % str(order))
-		if ENABLE_ACTION_RECOVERY:
-			var replacement: Order = _reissue_order_for_source(order.source)
-			if replacement:
-				if is_instance_of(replacement, expected_type):
-					replacement.execute(game_map)
-					_add_thought(replacement.source, "Executed replacement: %s" % str(replacement))
-				elif replacement:
-					_queue_generated_order(replacement)
+		_add_thought(order.source, "Failed: %s" % str(order))
 
 	var plan: AIPlan = get_current_plan(order.source)
 	if plan and plan.is_complete():
@@ -164,7 +205,7 @@ func execute_utility_module_orders() -> void:
 		var order: UseUtilityModuleOrder = _use_utility_module_orders[source_uuid]
 		if not order:
 			continue
-		_process_order_with_recovery(order, UseUtilityModuleOrder)
+		_process_precomputed_module_order(order, UseUtilityModuleOrder)
 	_use_utility_module_orders.clear()
 
 
@@ -176,32 +217,29 @@ func execute_offensive_module_orders() -> void:
 		var order: UseOffensiveModuleOrder = _use_offensive_module_orders[source_uuid]
 		if not order:
 			continue
-		_process_order_with_recovery(order, UseOffensiveModuleOrder)
+		_process_precomputed_module_order(order, UseOffensiveModuleOrder)
 	_use_offensive_module_orders.clear()
 
 
-func _process_move_order_with_recovery(order: MoveOrder) -> void:
-	"""Executes a move order, with optional recovery when it becomes invalid."""
+func _process_precomputed_move_order(order: MoveOrder) -> void:
+	"""Executes a precomputed move order exactly once with no recomputation."""
 	if not order or not order.source or order.source.combatant.is_dead():
 		return
 
 	if order.destination == order.source.position:
-		_add_thought(order.source, "Skipped move order (already at destination): %s" % str(order))
+		_cancel_precomputed_order(order.source, "already at destination", order)
 		return
 
 	if game_map.is_occupied(order.destination):
-		_add_thought(order.source, "Skipped move order (destination occupied): %s" % str(order))
-		if ENABLE_ACTION_RECOVERY:
-			var replacement: Order = _reissue_order_for_source(order.source)
-			if replacement and is_instance_of(replacement, MoveOrder):
-				_process_move_order_with_recovery(replacement)
-			elif replacement:
-				_queue_generated_order(replacement)
+		_cancel_precomputed_order(order.source, "destination is occupied", order)
 		return
 
 	_reserved_move_tiles[_tile_key(order.destination)] = true
-	order.execute(game_map)
-	_add_thought(order.source, "Executed: %s" % str(order))
+	var executed: bool = order.execute(game_map)
+	if executed:
+		_add_thought(order.source, "Executed: %s" % str(order))
+	else:
+		_cancel_precomputed_order(order.source, _describe_move_order_cancellation(order), order)
 
 	var plan: AIPlan = get_current_plan(order.source)
 	if plan and plan.is_complete():
@@ -231,7 +269,7 @@ func execute_move_orders() -> void:
 
 	for source_uuid: String in source_ids:
 		var order: MoveOrder = _move_orders.get(source_uuid, null)
-		_process_move_order_with_recovery(order)
+		_process_precomputed_move_order(order)
 
 	_move_orders.clear()
 	_reserved_move_tiles.clear()
@@ -313,20 +351,10 @@ func generate_orders_for_unit(source: MapCombatEntity) -> void:
 		_add_thought(
 			source,
 			(
-				"%s plan generated no order; attempting one replan pass."
+				"%s plan generated no order for the next tick snapshot."
 				% source.combatant.get_chat_tag()
 			)
 		)
-		_current_plans.erase(source.combatant.uuid)
-		plan_for_unit(source)
-		current_plan = get_current_plan(source)
-		if current_plan and current_plan.is_valid() and not current_plan.is_complete():
-			order = current_plan.generate_order(_reserved_move_tiles)
-		if not order:
-			_current_plans.erase(source.combatant.uuid)
-			_add_thought(
-				source, "%s has no actionable order this turn." % source.combatant.get_chat_tag()
-			)
 		return
 
 	_add_thought(source, "New order: %s" % str(order))
@@ -350,29 +378,6 @@ func _queue_generated_order(order: Order) -> void:
 		push_error("Unknown order type: %s" % str(order))
 
 
-func _reissue_order_for_source(source: MapCombatEntity) -> Order:
-	if not source or source.combatant.is_dead():
-		return null
-	_current_plans.erase(source.combatant.uuid)
-	plan_for_unit(source)
-	var refreshed_plan: AIPlan = get_current_plan(source)
-	if not refreshed_plan or not refreshed_plan.is_valid() or refreshed_plan.is_complete():
-		return null
-	var replacement: Order = refreshed_plan.generate_order()
-	if replacement:
-		_add_thought(
-			source,
-			(
-				"%s regenerated order after invalidation: %s"
-				% [
-					source.combatant.get_chat_tag(),
-					str(replacement),
-				]
-			)
-		)
-	return replacement
-
-
 func _iter_ai_controlled_entities() -> Array[MapCombatEntity]:
 	var entities: Array[MapCombatEntity] = []
 
@@ -388,11 +393,14 @@ func _iter_ai_controlled_entities() -> Array[MapCombatEntity]:
 	return entities
 
 
-func generate_ai_orders() -> void:
+func precompute_next_turn_snapshot() -> void:
 	"""
-	Generates and queues one order for each AI-controlled combat entity.
+	Computes and queues one order per AI-controlled entity for the next turn.
 	"""
 	_reserved_move_tiles.clear()
+	_use_offensive_module_orders.clear()
+	_use_utility_module_orders.clear()
+	_move_orders.clear()
 	game_map.directive_planner.advance_patrol_directives()
 	var units: Array[MapCombatEntity] = _iter_ai_controlled_entities()
 	units.sort_custom(
@@ -409,18 +417,9 @@ func generate_ai_orders() -> void:
 
 func precompute_next_turn_plans() -> void:
 	"""
-	Precomputes plans for the upcoming turn.
-
-	This is intended to populate the plan cache after the current turn
-	finishes so UI can display what the AI intends to do next.
+	Precomputes the upcoming turn snapshot (plans + queued orders).
 	"""
-	if not game_map:
-		return
-
-	_reserved_move_tiles.clear()
-
-	for unit: MapCombatEntity in _iter_ai_controlled_entities():
-		plan_for_unit(unit)
+	precompute_next_turn_snapshot()
 
 
 func _filter_order_with_dead_mek(_key: String, order) -> bool:

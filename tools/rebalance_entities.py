@@ -5,18 +5,23 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
-from core import (
+from tools.lib.balancing import rebalance_item_entity, rebalance_mek_or_structure_entity
+from tools.lib.core import (
     detect_entity_kind,
     filter_entity_ids,
     load_json_file,
     parse_slot_factor_map,
-    rebalance_item_entity,
-    rebalance_mek_or_structure_entity,
     resolve_json_targets,
     write_json_file,
+)
+from tools.lib.parsers import (
+    parse_mek,
+    parse_structure,
+    parse_item,
 )
 
 
@@ -137,6 +142,66 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def rebalance_one_file(
+    file_path: Path,
+    args: argparse.Namespace,
+    payload: dict[str, Any],
+):
+    selected_kind = args.kind if args.kind != "auto" else detect_entity_kind(file_path)
+    if selected_kind not in ("meks", "items", "structures"):
+        print("Skipping %s: cannot determine kind." % file_path, file=sys.stderr)
+        return None
+
+    slot_factors = parse_slot_factor_map(args.slot_factors)
+
+    if selected_kind == "meks" or selected_kind == "structures":
+        # Extract the catalog.
+        if selected_kind == "meks":
+            entity = parse_mek(payload)
+        else:
+            entity = parse_structure(payload)
+
+        # Rebalance each mek and track changes.
+        return rebalance_mek_or_structure_entity(
+            entity,
+            args.power_scale,
+            args.power_offset,
+            args.power_gen_scale,
+            args.power_gen_offset,
+            args.power_gen_ratio,
+            args.power_min,
+            args.power_max,
+            args.power_gen_min,
+            args.power_gen_max,
+            args.rounding,
+            slot_factors,
+            args.power_gen_ratio_blend,
+        )
+
+    if selected_kind == "items":
+
+        entity = parse_item(payload)
+
+        return rebalance_item_entity(
+            entity,
+            args.base_power_scale,
+            args.base_power_offset,
+            args.base_power_min,
+            args.base_power_max,
+            args.module_power_scale,
+            args.module_power_offset,
+            args.module_power_min,
+            args.module_power_max,
+            args.module_glob,
+            args.rounding,
+            slot_factors,
+            args.turn_budget,
+            args.module_budget_share,
+        )
+
+    raise ValueError("Unsupported kind: %s" % selected_kind)
+
+
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
@@ -160,19 +225,27 @@ def main() -> int:
         print("No JSON files matched target(s).", file=sys.stderr)
         return 1
 
-    all_changes: List[Dict[str, Any]] = []
+    all_changes: list[Dict[str, Any]] = []
 
     for file_path in targets:
         try:
             payload = load_json_file(file_path)
             filtered_ids = set(filter_entity_ids(payload, args.entity_glob).keys())
 
-            selected_kind = args.kind if args.kind != "auto" else detect_entity_kind(file_path)
+            selected_kind = (
+                args.kind if args.kind != "auto" else detect_entity_kind(file_path)
+            )
             if selected_kind not in ("meks", "items", "structures"):
-                print("Skipping %s: cannot determine kind." % file_path, file=sys.stderr)
+                print(
+                    "Skipping %s: cannot determine kind." % file_path, file=sys.stderr
+                )
                 continue
 
-            file_changes: Dict[str, Any] = {"file": str(file_path), "kind": selected_kind, "entities": {}}
+            file_changes: Dict[str, Any] = {
+                "file": str(file_path),
+                "kind": selected_kind,
+                "entities": {},
+            }
 
             for entity_id, entity_data in payload.items():
                 if entity_id not in filtered_ids:

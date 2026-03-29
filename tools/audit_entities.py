@@ -9,16 +9,16 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from core import (
-    audit_combat_entities,
-    audit_items,
+from lib.audit import audit_combat_entities, audit_items, merge_audits
+from lib.core import (
+    Slot,
     detect_entity_kind,
     filter_entity_ids,
     load_json_file,
-    merge_audits,
     parse_slot_factor_map,
     resolve_json_targets,
 )
+from lib.parsers import parse_item_catalog, parse_mek_catalog, parse_structure_catalog
 
 
 def _base_kind(kind: str) -> str:
@@ -133,7 +133,7 @@ def metric_explanations_for_kind(kind: str) -> Dict[str, Dict[str, str]]:
     return {}
 
 
-def print_metric_explanations(results: List[Dict[str, Any]]) -> None:
+def print_metric_explanations(results: list[Dict[str, Any]]) -> None:
     printed: set[str] = set()
     print("\nMetric explanations")
     print("  Derived fields only (non-obvious).")
@@ -178,7 +178,9 @@ def _stat_max(report: Dict[str, Any], field: str) -> float | None:
     return None
 
 
-def _find_report_by_suffix(results: List[Dict[str, Any]], suffix: str) -> Dict[str, Any] | None:
+def _find_report_by_suffix(
+    results: list[Dict[str, Any]], suffix: str
+) -> Dict[str, Any] | None:
     target = suffix.lower()
     for entry in results:
         file_label = str(entry.get("file", "")).lower().replace("\\", "/")
@@ -187,7 +189,9 @@ def _find_report_by_suffix(results: List[Dict[str, Any]], suffix: str) -> Dict[s
     return None
 
 
-def _find_merged_report(results: List[Dict[str, Any]], kind: str) -> Dict[str, Any] | None:
+def _find_merged_report(
+    results: list[Dict[str, Any]], kind: str
+) -> Dict[str, Any] | None:
     marker = "<merged:%s>" % kind
     for entry in results:
         if str(entry.get("file", "")) == marker:
@@ -195,7 +199,7 @@ def _find_merged_report(results: List[Dict[str, Any]], kind: str) -> Dict[str, A
     return None
 
 
-def print_system_checks(results: List[Dict[str, Any]]) -> None:
+def print_system_checks(results: list[Dict[str, Any]]) -> None:
     print("\nSystem checks")
     print("  Cross-file anomaly checks for economy/progression consistency.")
 
@@ -205,13 +209,24 @@ def print_system_checks(results: List[Dict[str, Any]]) -> None:
     if items_merged is not None:
         slot_min = _stat_min(items_merged, "slot_factor_used")
         slot_max = _stat_max(items_merged, "slot_factor_used")
-        if slot_min is not None and slot_max is not None and slot_min == 1.0 and slot_max == 1.0:
-            print("  [warn] slot_factor_used is constant 1.0 across items; per-slot normalization is currently redundant.")
+        if (
+            slot_min is not None
+            and slot_max is not None
+            and slot_min == 1.0
+            and slot_max == 1.0
+        ):
+            print(
+                "  [warn] slot_factor_used is constant 1.0 across items; per-slot normalization is currently redundant."
+            )
         else:
-            print("  [ok] slot_factor_used has variation; slot normalization is informative.")
+            print(
+                "  [ok] slot_factor_used has variation; slot normalization is informative."
+            )
 
         peak_mean = _stat_mean(items_merged, "single_module_turn_cost_peak")
-        peak_eff_mean = _stat_mean(items_merged, "single_module_turn_cost_peak_effective")
+        peak_eff_mean = _stat_mean(
+            items_merged, "single_module_turn_cost_peak_effective"
+        )
         if peak_mean and peak_eff_mean:
             uplift = (peak_eff_mean / peak_mean) if peak_mean > 0.0 else 1.0
             if uplift > 1.15:
@@ -265,7 +280,9 @@ def print_system_checks(results: List[Dict[str, Any]]) -> None:
                 % (light_ratio, medium_ratio, heavy_ratio)
             )
             if medium_ratio > max(light_ratio, heavy_ratio) + 0.15:
-                print("  [warn] medium tier appears significantly more power-constrained than light/heavy.")
+                print(
+                    "  [warn] medium tier appears significantly more power-constrained than light/heavy."
+                )
             else:
                 print("  [ok] medium tier action-economy ratio is in-family.")
 
@@ -282,7 +299,9 @@ def print_system_checks(results: List[Dict[str, Any]]) -> None:
                         % ratio
                     )
                 else:
-                    print("  [ok] utility passive upkeep is not disproportionately high.")
+                    print(
+                        "  [ok] utility passive upkeep is not disproportionately high."
+                    )
 
     if medium_mek is not None and heavy_mek is not None:
         medium_health = _stat_mean(medium_mek, "health")
@@ -304,31 +323,45 @@ def print_system_checks(results: List[Dict[str, Any]]) -> None:
             armor_growth = (heavy_armor / medium_armor) - 1.0
             shield_growth = (heavy_shield / medium_shield) - 1.0
             if shield_growth < (0.5 * min(health_growth, armor_growth)):
-                print("  [warn] heavy shield progression is lagging health/armor progression.")
+                print(
+                    "  [warn] heavy shield progression is lagging health/armor progression."
+                )
             else:
                 print("  [ok] heavy shield progression is aligned with other defenses.")
 
     if meks_merged is not None:
         armor_gen_mean = _stat_mean(meks_merged, "armor_generation")
         armor_gen_median = meks_merged.get("armor_generation", {}).get("median")
-        if armor_gen_mean is not None and float(armor_gen_median) == 0.0 and armor_gen_mean < 1.0:
-            print("  [warn] armor_generation behaves like a ghost stat (mostly zero across meks).")
+        if (
+            armor_gen_mean is not None
+            and float(armor_gen_median) == 0.0
+            and armor_gen_mean < 1.0
+        ):
+            print(
+                "  [warn] armor_generation behaves like a ghost stat (mostly zero across meks)."
+            )
         else:
-            print("  [ok] armor_generation is materially present across the mek roster.")
+            print(
+                "  [ok] armor_generation is materially present across the mek roster."
+            )
 
         spread_ratio_cv = meks_merged.get("spread_power_ratio_cv")
         if isinstance(spread_ratio_cv, (int, float)):
             if float(spread_ratio_cv) < 0.08:
-                print("  [warn] spread_power_ratio_cv is low; regen behavior may be over-normalized.")
+                print(
+                    "  [warn] spread_power_ratio_cv is low; regen behavior may be over-normalized."
+                )
             else:
-                print("  [ok] spread_power_ratio_cv indicates meaningful within-tier energy identity.")
+                print(
+                    "  [ok] spread_power_ratio_cv indicates meaningful within-tier energy identity."
+                )
 
 
 def audit_one_file(
     file_path: Path,
     kind: str,
     entity_glob: str,
-    slot_factors: Dict[int, float],
+    slot_factors: Dict[Slot, float],
     turn_budget: float | None,
     module_budget_share: float,
 ) -> Tuple[Path, Dict[str, Any]]:
@@ -339,15 +372,32 @@ def audit_one_file(
     if selected_kind == "auto":
         selected_kind = detect_entity_kind(file_path)
 
-    if selected_kind == "meks" or selected_kind == "structures":
+    if selected_kind == "meks":
+        # Extract the catalog.
+        catalog = parse_mek_catalog(filtered_payload)
+
         return file_path, audit_combat_entities(
-            filtered_payload,
+            catalog,
             selected_kind,
             slot_factors,
         )
+
+    if selected_kind == "structures":
+        # Extract the catalog.
+        catalog = parse_structure_catalog(filtered_payload)
+
+        return file_path, audit_combat_entities(
+            catalog,
+            selected_kind,
+            slot_factors,
+        )
+
     if selected_kind == "items":
+        # Extract the catalog.
+        catalog = parse_item_catalog(filtered_payload)
+        
         return file_path, audit_items(
-            filtered_payload,
+            catalog,
             slot_factors,
             turn_budget=turn_budget,
             module_budget_share=module_budget_share,
@@ -356,7 +406,7 @@ def audit_one_file(
     raise ValueError("Unable to determine entity kind for %s" % file_path)
 
 
-def print_human_report(results: List[Dict[str, Any]], include_merged: bool) -> None:
+def print_human_report(results: list[Dict[str, Any]], include_merged: bool) -> None:
     for entry in results:
         print("\n%s" % entry["file"])
         print("  kind: %s" % entry["report"]["kind"])
@@ -481,8 +531,8 @@ def main() -> int:
         print("No JSON files matched target(s).", file=sys.stderr)
         return 1
 
-    results: List[Dict[str, Any]] = []
-    reports_for_merge: Dict[str, List[Dict[str, Any]]] = {}
+    results: list[Dict[str, Any]] = []
+    reports_for_merge: Dict[str, list[Dict[str, Any]]] = {}
 
     for file_path in targets:
         try:

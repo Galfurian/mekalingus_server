@@ -393,7 +393,7 @@ func _iter_ai_controlled_entities() -> Array[MapCombatEntity]:
 	return entities
 
 
-func precompute_next_turn_snapshot() -> void:
+func compute_next_turn_plans() -> void:
 	"""
 	Computes and queues one order per AI-controlled entity for the next turn.
 	"""
@@ -402,6 +402,9 @@ func precompute_next_turn_snapshot() -> void:
 	_use_offensive_module_orders.clear()
 	_use_utility_module_orders.clear()
 	_move_orders.clear()
+
+	# Reset turn context caches to ensure fresh enemy visibility and LOS queries each turn.
+	planner.turn_context.reset_context()
 	var units: Array[MapCombatEntity] = _iter_ai_controlled_entities()
 	units.sort_custom(
 		func(a: MapCombatEntity, b: MapCombatEntity):
@@ -413,13 +416,6 @@ func precompute_next_turn_snapshot() -> void:
 		plan_for_unit(unit)
 		# Generate the next order based on the current plan.
 		generate_orders_for_unit(unit)
-
-
-func precompute_next_turn_plans() -> void:
-	"""
-	Precomputes the upcoming turn snapshot (plans + queued orders).
-	"""
-	precompute_next_turn_snapshot()
 
 
 func _filter_order_with_dead_mek(_key: String, order) -> bool:

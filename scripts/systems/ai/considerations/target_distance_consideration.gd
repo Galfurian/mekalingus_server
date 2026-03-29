@@ -29,9 +29,9 @@ func get_normalized_input(context: Dictionary) -> float:
 	var score = distance / max_distance
 
 	# Normalize so that:
-	# - 0.0 means the target is at the same position as the source (distance = 0)
-	# - 1.0 means the target is at or beyond the maximum distance (distance >= max_distance)
-	var normalized_score = clampf(score, 0.0, 1.0)
+	# - 1.0 means the target is at the same position as the source (distance = 0)
+	# - 0.0 means the target is at or beyond the maximum distance (distance >= max_distance)
+	var normalized_score = clampf(1.0 - score, 0.0, 1.0)
 
 	# _add_thought(
 	# 	source,

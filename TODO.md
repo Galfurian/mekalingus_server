@@ -5,7 +5,7 @@ Each completed TODO must be committed before moving to the next one.
 
 ## Urgency 1 - Critical Reliability
 
-- [ ] T1: Fix `target_distance_consideration` semantics to prefer closer targets.
+- [x] T1: Fix `target_distance_consideration` semantics to prefer closer targets.
   - File: `scripts/systems/ai/considerations/target_distance_consideration.gd`
   - Rationale: Current normalization rewards distance, which can skew attack targeting.
   - Dependency: None.

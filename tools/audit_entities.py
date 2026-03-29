@@ -31,8 +31,37 @@ def _stats_to_dict(stats) -> Dict[str, float]:
     }
 
 
-def audit_meks(payload: Dict[str, Any]) -> Dict[str, Any]:
-    catalog = parse_mek_catalog(payload)
+def audit_combat_entities(
+    payload: Dict[str, Any], selected_kind: str
+) -> Dict[str, Any]:
+    if selected_kind == "meks":
+        catalog = parse_mek_catalog(payload)
+    elif selected_kind == "structures":
+        catalog = parse_structure_catalog(payload)
+    else:
+        raise ValueError(f"Unsupported entity kind: {selected_kind}")
+
+    health_values = [float(spec.health) for spec in catalog.values()]
+    health_gen_values = [float(spec.health_generation) for spec in catalog.values()]
+    health_gen_ratio_values = [
+        (float(spec.health_generation) / float(spec.health))
+        for spec in catalog.values()
+        if spec.health > 0
+    ]
+    armor_values = [float(spec.armor) for spec in catalog.values()]
+    armor_gen_values = [float(spec.armor_generation) for spec in catalog.values()]
+    armor_gen_ratio_values = [
+        (float(spec.armor_generation) / float(spec.armor))
+        for spec in catalog.values()
+        if spec.armor > 0
+    ]
+    shield_values = [float(spec.shield) for spec in catalog.values()]
+    shield_gen_values = [float(spec.shield_generation) for spec in catalog.values()]
+    shield_gen_ratio_values = [
+        (float(spec.shield_generation) / float(spec.shield))
+        for spec in catalog.values()
+        if spec.shield > 0
+    ]
     power_values = [float(spec.power) for spec in catalog.values()]
     regen_values = [float(spec.power_generation) for spec in catalog.values()]
     regen_ratio_values = [
@@ -44,28 +73,26 @@ def audit_meks(payload: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "kind": "meks",
         "entity_count": len(catalog),
+        "health": _stats_to_dict(compute_numeric_stats(health_values)),
+        "health_generation": _stats_to_dict(compute_numeric_stats(health_gen_values)),
+        "health_generation_to_health_ratio": _stats_to_dict(
+            compute_numeric_stats(health_gen_ratio_values)
+        ),
+        "armor": _stats_to_dict(compute_numeric_stats(armor_values)),
+        "armor_generation": _stats_to_dict(compute_numeric_stats(armor_gen_values)),
+        "armor_generation_to_armor_ratio": _stats_to_dict(
+            compute_numeric_stats(armor_gen_ratio_values)
+        ),
+        "shield": _stats_to_dict(compute_numeric_stats(shield_values)),
+        "shield_generation": _stats_to_dict(compute_numeric_stats(shield_gen_values)),
+        "shield_generation_to_shield_ratio": _stats_to_dict(
+            compute_numeric_stats(shield_gen_ratio_values)
+        ),
         "power": _stats_to_dict(compute_numeric_stats(power_values)),
         "power_generation": _stats_to_dict(compute_numeric_stats(regen_values)),
-        "power_generation_to_power_ratio": _stats_to_dict(compute_numeric_stats(regen_ratio_values)),
-    }
-
-
-def audit_structures(payload: Dict[str, Any]) -> Dict[str, Any]:
-    catalog = parse_structure_catalog(payload)
-    power_values = [float(spec.power) for spec in catalog.values()]
-    regen_values = [float(spec.power_generation) for spec in catalog.values()]
-    regen_ratio_values = [
-        (float(spec.power_generation) / float(spec.power))
-        for spec in catalog.values()
-        if spec.power > 0
-    ]
-
-    return {
-        "kind": "structures",
-        "entity_count": len(catalog),
-        "power": _stats_to_dict(compute_numeric_stats(power_values)),
-        "power_generation": _stats_to_dict(compute_numeric_stats(regen_values)),
-        "power_generation_to_power_ratio": _stats_to_dict(compute_numeric_stats(regen_ratio_values)),
+        "power_generation_to_power_ratio": _stats_to_dict(
+            compute_numeric_stats(regen_ratio_values)
+        ),
     }
 
 
@@ -80,18 +107,24 @@ def audit_items(payload: Dict[str, Any]) -> Dict[str, Any]:
         base_power_values.append(float(spec.base_power_usage))
         for module in spec.modules:
             module_power_values.append(float(module.power_on_use))
-            module_repeats_values.append(float(module.repeats if module.repeats is not None else 1))
+            module_repeats_values.append(
+                float(module.repeats if module.repeats is not None else 1)
+            )
 
     return {
         "kind": "items",
         "entity_count": len(catalog),
         "base_power_usage": _stats_to_dict(compute_numeric_stats(base_power_values)),
-        "module_power_on_use": _stats_to_dict(compute_numeric_stats(module_power_values)),
+        "module_power_on_use": _stats_to_dict(
+            compute_numeric_stats(module_power_values)
+        ),
         "module_repeats": _stats_to_dict(compute_numeric_stats(module_repeats_values)),
     }
 
 
-def audit_one_file(file_path: Path, kind: str, entity_glob: str) -> Tuple[Path, Dict[str, Any]]:
+def audit_one_file(
+    file_path: Path, kind: str, entity_glob: str
+) -> Tuple[Path, Dict[str, Any]]:
     payload = load_json_file(file_path)
     filtered_payload = filter_entity_ids(payload, entity_glob)
 
@@ -99,10 +132,8 @@ def audit_one_file(file_path: Path, kind: str, entity_glob: str) -> Tuple[Path, 
     if selected_kind == "auto":
         selected_kind = detect_entity_kind(file_path)
 
-    if selected_kind == "meks":
-        return file_path, audit_meks(filtered_payload)
-    if selected_kind == "structures":
-        return file_path, audit_structures(filtered_payload)
+    if selected_kind == "meks" or selected_kind == "structures":
+        return file_path, audit_combat_entities(filtered_payload, selected_kind)
     if selected_kind == "items":
         return file_path, audit_items(filtered_payload)
 
@@ -127,7 +158,9 @@ def merge_audits(audits: List[Dict[str, Any]], kind: str) -> Dict[str, Any]:
         ratio = gather("ratio")
 
         merged_payload["power"] = _stats_to_dict(compute_numeric_stats(power))
-        merged_payload["power_generation"] = _stats_to_dict(compute_numeric_stats(regen))
+        merged_payload["power_generation"] = _stats_to_dict(
+            compute_numeric_stats(regen)
+        )
         merged_payload["power_generation_to_power_ratio"] = _stats_to_dict(
             compute_numeric_stats(ratio)
         )
@@ -148,20 +181,28 @@ def merge_audits(audits: List[Dict[str, Any]], kind: str) -> Dict[str, Any]:
         module_repeats = gather("module_repeats")
 
         merged_payload["base_power_usage"] = _stats_to_dict(compute_numeric_stats(base))
-        merged_payload["module_power_on_use"] = _stats_to_dict(compute_numeric_stats(module_power))
-        merged_payload["module_repeats"] = _stats_to_dict(compute_numeric_stats(module_repeats))
+        merged_payload["module_power_on_use"] = _stats_to_dict(
+            compute_numeric_stats(module_power)
+        )
+        merged_payload["module_repeats"] = _stats_to_dict(
+            compute_numeric_stats(module_repeats)
+        )
         return merged_payload
 
     return {"kind": "unknown", "entity_count": 0}
 
 
-def enrich_with_raw_values(report: Dict[str, Any], payload: Dict[str, Any], kind: str) -> Dict[str, Any]:
+def enrich_with_raw_values(
+    report: Dict[str, Any], payload: Dict[str, Any], kind: str
+) -> Dict[str, Any]:
     # Internal helper for merged stats only.
     if kind == "meks":
         catalog = parse_mek_catalog(payload)
         report["_raw_values"] = {
             "power": [float(spec.power) for spec in catalog.values()],
-            "power_generation": [float(spec.power_generation) for spec in catalog.values()],
+            "power_generation": [
+                float(spec.power_generation) for spec in catalog.values()
+            ],
             "ratio": [
                 (float(spec.power_generation) / float(spec.power))
                 for spec in catalog.values()
@@ -172,7 +213,9 @@ def enrich_with_raw_values(report: Dict[str, Any], payload: Dict[str, Any], kind
         catalog = parse_structure_catalog(payload)
         report["_raw_values"] = {
             "power": [float(spec.power) for spec in catalog.values()],
-            "power_generation": [float(spec.power_generation) for spec in catalog.values()],
+            "power_generation": [
+                float(spec.power_generation) for spec in catalog.values()
+            ],
             "ratio": [
                 (float(spec.power_generation) / float(spec.power))
                 for spec in catalog.values()
@@ -188,7 +231,9 @@ def enrich_with_raw_values(report: Dict[str, Any], payload: Dict[str, Any], kind
             base_values.append(float(spec.base_power_usage))
             for module in spec.modules:
                 module_power_values.append(float(module.power_on_use))
-                module_repeat_values.append(float(module.repeats if module.repeats is not None else 1))
+                module_repeat_values.append(
+                    float(module.repeats if module.repeats is not None else 1)
+                )
         report["_raw_values"] = {
             "base_power_usage": base_values,
             "module_power_on_use": module_power_values,
@@ -207,14 +252,17 @@ def print_human_report(results: List[Dict[str, Any]], include_merged: bool) -> N
         for key, value in entry["report"].items():
             if key in ("kind", "entity_count", "_raw_values"):
                 continue
-            print("  %s: count=%d min=%s max=%s mean=%s median=%s" % (
-                key,
-                int(value["count"]),
-                value["min"],
-                value["max"],
-                value["mean"],
-                value["median"],
-            ))
+            print(
+                "  %s: count=%d min=%s max=%s mean=%s median=%s"
+                % (
+                    key,
+                    int(value["count"]),
+                    value["min"],
+                    value["max"],
+                    value["mean"],
+                    value["median"],
+                )
+            )
 
     if include_merged:
         print("\nMerged summary included above in JSON mode only when --json is used.")
@@ -275,7 +323,9 @@ def main() -> int:
             payload = load_json_file(file_path)
             filtered_payload = filter_entity_ids(payload, args.entity_glob)
 
-            selected_kind = args.kind if args.kind != "auto" else detect_entity_kind(file_path)
+            selected_kind = (
+                args.kind if args.kind != "auto" else detect_entity_kind(file_path)
+            )
             if selected_kind not in ("meks", "items", "structures"):
                 print(
                     "Skipping %s: could not detect kind (--kind auto)." % file_path,

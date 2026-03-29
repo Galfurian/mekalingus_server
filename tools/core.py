@@ -59,43 +59,34 @@ class ItemSpec:
 
 
 @dataclass
-class MekSpec:
+class CombatEntitySpec:
     name: str
     description: str
     appearance: str
     size: str
     health: int
+    health_generation: int
     armor: int
     armor_generation: int
     shield: int
     shield_generation: int
     power: int
     power_generation: int
-    speed: int
+    sensor_range: int
     slots: List[int]
     icon: str
-    sensor_range: int
 
 
 @dataclass
-class StructureSpec:
-    name: str
-    appearance: str
-    size: str
-    health: int
-    armor: int
-    armor_generation: int
-    shield: int
-    shield_generation: int
-    power: int
-    power_generation: int
+class MekSpec(CombatEntitySpec):
     speed: int
-    slots: List[int]
+
+
+@dataclass
+class StructureSpec(CombatEntitySpec):
     structure_type: str
     structure_sub_type: str
     passable: bool
-    icon: str
-    sensor_range: int
 
 
 # =============================================================================
@@ -215,7 +206,9 @@ def apply_rounding(value: float, mode: str) -> float:
     raise ValueError("Unknown rounding mode: %s" % mode)
 
 
-def clamp_optional(value: float, min_value: Optional[float], max_value: Optional[float]) -> float:
+def clamp_optional(
+    value: float, min_value: Optional[float], max_value: Optional[float]
+) -> float:
     if min_value is not None:
         value = max(value, min_value)
     if max_value is not None:
@@ -238,18 +231,28 @@ def _parse_effect(raw: Dict[str, Any]) -> EffectSpec:
         duration=(float(raw["duration"]) if "duration" in raw else None),
         chance=(float(raw["chance"]) if "chance" in raw else None),
         radius=(float(raw["radius"]) if "radius" in raw else None),
-        center_on_target=(bool(raw["center_on_target"]) if "center_on_target" in raw else None),
+        center_on_target=(
+            bool(raw["center_on_target"]) if "center_on_target" in raw else None
+        ),
     )
 
 
 def _parse_module(raw: Dict[str, Any]) -> ModuleSpec:
     effects = [_parse_effect(effect) for effect in raw.get("effects", [])]
+    is_active = not bool(raw["passive"])
+    zero_range = raw.get("module_range", 0) == 0
+    
+    if is_active and not raw.get("power_on_use", None):
+        raise ValueError(f"Active module '{raw['name']}' must have power_on_use.")
+    if zero_range and any(effect.target != "SELF" for effect in effects):
+        raise ValueError(f"Module '{raw['name']}' has zero range and non-self effects.")
+    
     return ModuleSpec(
         name=str(raw["name"]),
         passive=bool(raw["passive"]),
-        power_on_use=float(raw["power_on_use"]),
-        module_range=float(raw["module_range"]),
-        cooldown=float(raw["cooldown"]),
+        power_on_use=float(raw.get("power_on_use", 0)),
+        module_range=float(raw.get("module_range", 0)),
+        cooldown=float(raw.get("cooldown", 0)),
         effects=effects,
         repeats=(int(raw["repeats"]) if "repeats" in raw else None),
     )
@@ -278,16 +281,17 @@ def parse_mek_catalog(payload: Dict[str, Any]) -> Dict[str, MekSpec]:
             appearance=str(raw["appearance"]),
             size=str(raw["size"]),
             health=int(raw.get("health", 0)),
+            health_generation=int(raw.get("health_generation", 0)),
             armor=int(raw.get("armor", 0)),
             armor_generation=int(raw.get("armor_generation", 0)),
             shield=int(raw.get("shield", 0)),
             shield_generation=int(raw.get("shield_generation", 0)),
             power=int(raw.get("power", 0)),
             power_generation=int(raw.get("power_generation", 0)),
-            speed=int(raw.get("speed", 0)),
-            slots=[int(slot) for slot in raw["slots"]],
-            icon=str(raw["icon"]),
             sensor_range=int(raw.get("sensor_range", 0)),
+            icon=str(raw["icon"]),
+            slots=[int(slot) for slot in raw["slots"]],
+            speed=int(raw.get("speed", 0)),
         )
     return parsed
 
@@ -297,22 +301,23 @@ def parse_structure_catalog(payload: Dict[str, Any]) -> Dict[str, StructureSpec]
     for entity_id, raw in payload.items():
         parsed[entity_id] = StructureSpec(
             name=str(raw["name"]),
+            description=str(raw["description"]),
             appearance=str(raw["appearance"]),
             size=str(raw["size"]),
             health=int(raw.get("health", 0)),
+            health_generation=int(raw.get("health_generation", 0)),
             armor=int(raw.get("armor", 0)),
             armor_generation=int(raw.get("armor_generation", 0)),
             shield=int(raw.get("shield", 0)),
             shield_generation=int(raw.get("shield_generation", 0)),
             power=int(raw.get("power", 0)),
             power_generation=int(raw.get("power_generation", 0)),
-            speed=int(raw.get("speed", 0)),
+            sensor_range=int(raw.get("sensor_range", 0)),
+            icon=str(raw["icon"]),
             slots=[int(slot) for slot in raw["slots"]],
             structure_type=str(raw.get("structure_type", "")),
             structure_sub_type=str(raw.get("structure_sub_type", "")),
             passable=bool(raw.get("passable", False)),
-            icon=str(raw["icon"]),
-            sensor_range=int(raw.get("sensor_range", 0)),
         )
     return parsed
 

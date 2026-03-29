@@ -3,21 +3,21 @@
 		"name": "Rotary Cannon",
 		"description": "A high-speed kinetic gatling cannon, firing a continuous barrage of rounds with moderate damage.",
 		"slot": "medium",
-		"base_power_usage": 41.0,
+		"base_power_usage": 41,
 		"modules": [
 			{
 				"name": "Gatling Burst",
 				"passive": false,
-				"power_on_use": 21.0,
-				"module_range": 3.0,
-				"cooldown": 0.0,
+				"power_on_use": 21,
+				"module_range": 3,
+				"cooldown": 1,
 				"repeats": 4,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 20.0
+						"amount": 20
 					}
 				]
 			}
@@ -27,27 +27,27 @@
 		"name": "Impact Driver",
 		"description": "A kinetic-powered rail spike launcher designed to stagger enemies with its high impact force.",
 		"slot": "medium",
-		"base_power_usage": 46.0,
+		"base_power_usage": 46,
 		"modules": [
 			{
 				"name": "Piercing Strike",
 				"passive": false,
-				"power_on_use": 24.0,
-				"module_range": 5.0,
-				"cooldown": 0.0,
+				"power_on_use": 24,
+				"module_range": 5,
+				"cooldown": 1,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 47.0
+						"amount": 47
 					},
 					{
 						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
 						"stat": "SPEED",
-						"amount": -2.0,
-						"duration": 2.0
+						"amount": -2,
+						"duration": 2
 					}
 				]
 			}
@@ -57,20 +57,20 @@
 		"name": "Magnet Accelerator",
 		"description": "A long-range kinetic cannon that increases velocity over distance, dealing greater damage at range.",
 		"slot": "medium",
-		"base_power_usage": 63.0,
+		"base_power_usage": 63,
 		"modules": [
 			{
 				"name": "Accelerated Shot",
 				"passive": false,
-				"power_on_use": 32.0,
-				"module_range": 5.0,
-				"cooldown": 2.0,
+				"power_on_use": 32,
+				"module_range": 5,
+				"cooldown": 2,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 118.0
+						"amount": 118
 					}
 				]
 			}
@@ -80,22 +80,22 @@
 		"name": "Scatter Chaingun",
 		"description": "A close-range kinetic weapon that fires a burst of shredding rounds, effective against light armor.",
 		"slot": "medium",
-		"base_power_usage": 39.0,
+		"base_power_usage": 39,
 		"modules": [
 			{
 				"name": "Scatter Shot",
 				"passive": false,
-				"power_on_use": 21.0,
-				"module_range": 1.0,
-				"cooldown": 1.0,
+				"power_on_use": 21,
+				"module_range": 1,
+				"cooldown": 1,
 				"repeats": 5,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "KINETIC",
-						"amount": 22.0,
-						"radius": 1.0
+						"amount": 22,
+						"radius": 1
 					}
 				]
 			}
@@ -105,27 +105,27 @@
 		"name": "Armor-Piercing Shotgun",
 		"description": "A kinetic shotgun designed for devastating close-range damage, ignoring some armor resistance.",
 		"slot": "medium",
-		"base_power_usage": 41.0,
+		"base_power_usage": 41,
 		"modules": [
 			{
 				"name": "Shredder Rounds",
 				"passive": false,
-				"power_on_use": 21.0,
-				"module_range": 1.0,
-				"cooldown": 0.0,
+				"power_on_use": 21,
+				"module_range": 1,
+				"cooldown": 1,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 50.0
+						"amount": 50
 					},
 					{
 						"effect_class": "DamageReductionEffect",
 						"target": "ENEMY",
 						"stat": "DAMAGE_REDUCTION_ALL",
-						"amount": -10.0,
-						"duration": 2.0
+						"amount": -10,
+						"duration": 2
 					}
 				]
 			}
@@ -135,27 +135,27 @@
 		"name": "Fusion Cutter",
 		"description": "A close-range energy beam that melts through armor with sustained exposure.",
 		"slot": "medium",
-		"base_power_usage": 68.0,
+		"base_power_usage": 68,
 		"modules": [
 			{
 				"name": "Thermal Burn",
 				"passive": false,
-				"power_on_use": 32.0,
-				"module_range": 1.0,
-				"cooldown": 1.0,
+				"power_on_use": 32,
+				"module_range": 1,
+				"cooldown": 1,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
-						"amount": 78.0
+						"amount": 78
 					},
 					{
 						"effect_class": "DamageOverTimeEffect",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
-						"amount": 14.0,
-						"duration": 2.0
+						"amount": 14,
+						"duration": 2
 					}
 				]
 			}
@@ -165,27 +165,27 @@
 		"name": "Overload Beam",
 		"description": "A directed energy beam that grows weaker the longer it is fired, requiring controlled bursts.",
 		"slot": "medium",
-		"base_power_usage": 59.0,
+		"base_power_usage": 59,
 		"modules": [
 			{
 				"name": "Overloaded Shot",
 				"passive": false,
-				"power_on_use": 48.0,
-				"module_range": 4.0,
-				"cooldown": 2.0,
+				"power_on_use": 48,
+				"module_range": 4,
+				"cooldown": 2,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
-						"amount": 168.0
+						"amount": 168
 					},
 					{
 						"effect_class": "RegenEffect",
 						"target": "SELF",
 						"stat": "POWER_GENERATION",
-						"amount": -5.0,
-						"duration": 2.0
+						"amount": -5,
+						"duration": 2
 					}
 				]
 			}
@@ -195,28 +195,28 @@
 		"name": "Ionic Pulse Cannon",
 		"description": "An energy weapon that disrupts enemy shields, dealing area damage and reducing shield regen.",
 		"slot": "medium",
-		"base_power_usage": 31.0,
+		"base_power_usage": 31,
 		"modules": [
 			{
 				"name": "EMP Wave",
 				"passive": false,
-				"power_on_use": 15.0,
-				"module_range": 3.0,
-				"cooldown": 2.0,
+				"power_on_use": 15,
+				"module_range": 3,
+				"cooldown": 2,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "ENERGY",
-						"amount": 36.0,
-						"radius": 2.0
+						"amount": 36,
+						"radius": 2
 					},
 					{
 						"effect_class": "RegenEffect",
 						"target": "ENEMY",
 						"stat": "SHIELD_GENERATION",
-						"amount": -10.0,
-						"duration": 2.0
+						"amount": -10,
+						"duration": 2
 					}
 				]
 			}
@@ -226,34 +226,34 @@
 		"name": "Disruptor Lance",
 		"description": "A precision energy bolt that destabilizes enemy shields, improving hit accuracy.",
 		"slot": "medium",
-		"base_power_usage": 52.0,
+		"base_power_usage": 52,
 		"modules": [
 			{
 				"name": "Precision Disruptor",
 				"passive": false,
-				"power_on_use": 27.0,
-				"module_range": 4.0,
-				"cooldown": 3.0,
+				"power_on_use": 27,
+				"module_range": 4,
+				"cooldown": 3,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
-						"amount": 68.0
+						"amount": 68
 					},
 					{
 						"effect_class": "StatModifierEffect",
 						"target": "SELF",
 						"stat": "ACCURACY_MODIFIER",
-						"amount": 10.0,
-						"duration": 2.0
+						"amount": 10,
+						"duration": 2
 					},
 					{
 						"effect_class": "RegenEffect",
 						"target": "ENEMY",
 						"stat": "SHIELD_GENERATION",
-						"amount": -10.0,
-						"duration": 2.0
+						"amount": -10,
+						"duration": 2
 					}
 				]
 			}
@@ -263,27 +263,27 @@
 		"name": "Resonance Emitter",
 		"description": "An energy beam that causes lingering damage through resonance buildup.",
 		"slot": "medium",
-		"base_power_usage": 48.0,
+		"base_power_usage": 48,
 		"modules": [
 			{
 				"name": "Focused Resonance",
 				"passive": false,
-				"power_on_use": 24.0,
-				"module_range": 3.0,
-				"cooldown": 0.0,
+				"power_on_use": 24,
+				"module_range": 3,
+				"cooldown": 0,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
-						"amount": 40.0
+						"amount": 40
 					},
 					{
 						"effect_class": "DamageOverTimeEffect",
 						"target": "ENEMY",
 						"damage_type": "ENERGY",
-						"amount": 10.0,
-						"duration": 3.0
+						"amount": 10,
+						"duration": 3
 					}
 				]
 			}
@@ -293,27 +293,27 @@
 		"name": "Guided Smart Missile",
 		"description": "A self-adjusting missile that tracks enemies within range, ensuring impact.",
 		"slot": "medium",
-		"base_power_usage": 71.0,
+		"base_power_usage": 71,
 		"modules": [
 			{
 				"name": "Homing Payload",
 				"passive": false,
-				"power_on_use": 34.0,
-				"module_range": 5.0,
-				"cooldown": 2.0,
+				"power_on_use": 34,
+				"module_range": 5,
+				"cooldown": 2,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "EXPLOSIVE",
-						"amount": 76.0
+						"amount": 76
 					},
 					{
 						"effect_class": "StatModifierEffect",
 						"target": "SELF",
 						"stat": "ACCURACY_MODIFIER",
-						"amount": 15.0,
-						"duration": 3.0
+						"amount": 15,
+						"duration": 3
 					}
 				]
 			}
@@ -323,21 +323,21 @@
 		"name": "Grenade Launcher",
 		"description": "Launches arcing explosives over cover, ideal for indirect attacks.",
 		"slot": "medium",
-		"base_power_usage": 43.0,
+		"base_power_usage": 43,
 		"modules": [
 			{
 				"name": "Arcing Blast",
 				"passive": false,
-				"power_on_use": 22.0,
-				"module_range": 4.0,
-				"cooldown": 1.0,
+				"power_on_use": 22,
+				"module_range": 4,
+				"cooldown": 1,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
-						"amount": 40.0,
-						"radius": 2.0
+						"amount": 40,
+						"radius": 2
 					}
 				]
 			}
@@ -347,28 +347,28 @@
 		"name": "Shockwave Bombard",
 		"description": "Mid-range artillery shells that create concussive shockwaves, slowing enemies.",
 		"slot": "medium",
-		"base_power_usage": 34.0,
+		"base_power_usage": 34,
 		"modules": [
 			{
 				"name": "Concussive Impact",
 				"passive": false,
-				"power_on_use": 16.0,
-				"module_range": 3.0,
-				"cooldown": 1.0,
+				"power_on_use": 16,
+				"module_range": 3,
+				"cooldown": 1,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
-						"amount": 35.0,
-						"radius": 2.0
+						"amount": 35,
+						"radius": 2
 					},
 					{
 						"effect_class": "StatModifierEffect",
 						"target": "ENEMY",
 						"stat": "SPEED",
-						"amount": -3.0,
-						"duration": 3.0
+						"amount": -3,
+						"duration": 3
 					}
 				]
 			}
@@ -378,21 +378,21 @@
 		"name": "HE Cluster Shells",
 		"description": "A fragmentation cannon that scatters multiple explosive rounds over a wide area.",
 		"slot": "medium",
-		"base_power_usage": 46.0,
+		"base_power_usage": 46,
 		"modules": [
 			{
 				"name": "Cluster Barrage",
 				"passive": false,
-				"power_on_use": 25.0,
-				"module_range": 5.0,
-				"cooldown": 2.0,
+				"power_on_use": 25,
+				"module_range": 5,
+				"cooldown": 2,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
-						"amount": 34.0,
-						"radius": 3.0
+						"amount": 34,
+						"radius": 3
 					}
 				]
 			}
@@ -402,21 +402,21 @@
 		"name": "Siege Mortar",
 		"description": "A slow-firing but devastating long-range mortar, useful for prolonged engagements.",
 		"slot": "medium",
-		"base_power_usage": 68.0,
+		"base_power_usage": 68,
 		"modules": [
 			{
 				"name": "Area Suppression",
 				"passive": false,
-				"power_on_use": 54.0,
-				"module_range": 6.0,
-				"cooldown": 4.0,
+				"power_on_use": 54,
+				"module_range": 6,
+				"cooldown": 4,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "EXPLOSIVE",
-						"amount": 43.0,
-						"radius": 3.0
+						"amount": 43,
+						"radius": 3
 					}
 				]
 			}
@@ -426,21 +426,21 @@
 		"name": "Thermal Lance Cannon",
 		"description": "A high-heat plasma weapon that rapidly burns through enemy shields.",
 		"slot": "medium",
-		"base_power_usage": 56.0,
+		"base_power_usage": 56,
 		"modules": [
 			{
 				"name": "Focused Plasma Beam",
 				"passive": false,
-				"power_on_use": 27.0,
-				"module_range": 4.0,
-				"cooldown": 1.0,
+				"power_on_use": 27,
+				"module_range": 4,
+				"cooldown": 1,
 				"repeats": 2,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
-						"amount": 45.0
+						"amount": 45
 					}
 				]
 			}
@@ -450,21 +450,21 @@
 		"name": "Plasma Arc Launcher",
 		"description": "A plasma projectile launcher that bounces off surfaces before exploding.",
 		"slot": "medium",
-		"base_power_usage": 59.0,
+		"base_power_usage": 59,
 		"modules": [
 			{
 				"name": "Arc Plasma",
 				"passive": false,
-				"power_on_use": 47.0,
-				"module_range": 4.0,
-				"cooldown": 2.0,
+				"power_on_use": 47,
+				"module_range": 4,
+				"cooldown": 2,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "AREA",
 						"damage_type": "PLASMA",
-						"amount": 52.0,
-						"radius": 2.0
+						"amount": 52,
+						"radius": 2
 					}
 				]
 			}
@@ -474,28 +474,28 @@
 		"name": "Volatile Plasma Repeater",
 		"description": "A rapid-fire plasma weapon that risks overheating with prolonged use.",
 		"slot": "medium",
-		"base_power_usage": 55.0,
+		"base_power_usage": 55,
 		"modules": [
 			{
 				"name": "Overheat Burst",
 				"passive": false,
-				"power_on_use": 39.0,
-				"module_range": 3.0,
-				"cooldown": 1.0,
+				"power_on_use": 39,
+				"module_range": 3,
+				"cooldown": 1,
 				"repeats": 4,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
-						"amount": 32.0
+						"amount": 32
 					},
 					{
 						"effect_class": "RegenEffect",
 						"target": "SELF",
 						"stat": "POWER_GENERATION",
-						"amount": -5.0,
-						"duration": 4.0
+						"amount": -5,
+						"duration": 4
 					}
 				]
 			}
@@ -505,27 +505,27 @@
 		"name": "Overcharged Plasma Blaster",
 		"description": "A slow-firing but highly powerful plasma cannon that overheats.",
 		"slot": "medium",
-		"base_power_usage": 65.0,
+		"base_power_usage": 65,
 		"modules": [
 			{
 				"name": "Overcharge Blast",
 				"passive": false,
-				"power_on_use": 54.0,
-				"module_range": 6.0,
-				"cooldown": 3.0,
+				"power_on_use": 54,
+				"module_range": 6,
+				"cooldown": 3,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
-						"amount": 148.0
+						"amount": 148
 					},
 					{
 						"effect_class": "RegenEffect",
 						"target": "SELF",
 						"stat": "POWER_GENERATION",
-						"amount": -10.0,
-						"duration": 3.0
+						"amount": -10,
+						"duration": 3
 					}
 				]
 			}
@@ -535,27 +535,27 @@
 		"name": "Heatwave Generator",
 		"description": "A close-range plasma spray weapon that applies a burning effect to enemies.",
 		"slot": "medium",
-		"base_power_usage": 51.0,
+		"base_power_usage": 51,
 		"modules": [
 			{
 				"name": "Heatwave Pulse",
 				"passive": false,
-				"power_on_use": 23.0,
-				"module_range": 3.0,
-				"cooldown": 2.0,
+				"power_on_use": 23,
+				"module_range": 3,
+				"cooldown": 2,
 				"effects": [
 					{
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
-						"amount": 65.0
+						"amount": 65
 					},
 					{
 						"effect_class": "DamageOverTimeEffect",
 						"target": "ENEMY",
 						"damage_type": "PLASMA",
-						"amount": 22.0,
-						"duration": 2.0
+						"amount": 22,
+						"duration": 2
 					}
 				]
 			}

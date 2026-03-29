@@ -9,6 +9,8 @@ extends RefCounted
 var game_map: GameMap
 # Turn context that holds shared data and caches for the entire turn.
 var turn_context: AITurnContext
+# Static evaluator registry reused across planning calls.
+var _intent_evaluators: Array[AIIntentEvaluator] = []
 
 # ============================================================================
 # PUBLIC METHODS
@@ -19,6 +21,11 @@ func _init(p_game_map: GameMap) -> void:
 	assert(p_game_map, "AIPlanner requires a valid GameMap reference.")
 	game_map = p_game_map
 	turn_context = AITurnContext.new(p_game_map)
+	_intent_evaluators = [
+		AIAttackIntentEvaluator.new(),
+		AISupportIntentEvaluator.new(),
+		AIRetreatIntentEvaluator.new(),
+	]
 	assert(_validate_intent_registry(), "AIPlanner intent registry validation failed.")
 
 
@@ -31,11 +38,7 @@ func clear() -> void:
 
 
 func _get_intent_registry() -> Array[AIIntentEvaluator]:
-	return [
-		AIAttackIntentEvaluator.new(),
-		AISupportIntentEvaluator.new(),
-		AIRetreatIntentEvaluator.new(),
-	]
+	return _intent_evaluators
 
 
 func _validate_intent_registry() -> bool:

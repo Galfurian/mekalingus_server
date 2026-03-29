@@ -22,7 +22,7 @@ Each completed TODO must be committed before moving to the next one.
 
 ## Urgency 2 - High Maintainability
 
-- [ ] T4: Cache intent evaluator instances in planner.
+- [x] T4: Cache intent evaluator instances in planner.
   - File: `scripts/systems/ai/ai_planner.gd`
   - Rationale: Avoid repeated evaluator allocation and make registry ownership explicit.
   - Dependency: None.

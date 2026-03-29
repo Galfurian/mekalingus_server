@@ -10,7 +10,7 @@ Each completed TODO must be committed before moving to the next one.
   - Rationale: Current normalization rewards distance, which can skew attack targeting.
   - Dependency: None.
 
-- [ ] T2: Fix `retreat_direction_consideration` normalization.
+- [x] T2: Fix `retreat_direction_consideration` normalization.
   - File: `scripts/systems/ai/considerations/retreat_direction_consideration.gd`
   - Rationale: Dot-product divided by `1000.0` collapses differentiation of retreat tiles.
   - Dependency: None.

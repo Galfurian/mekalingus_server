@@ -25,20 +25,19 @@ func get_normalized_input(context: Dictionary) -> float:
 	var source_pos: Vector2 = source.position
 	var tile_pos: Vector2 = tile
 
-	# Compute direction away from enemy centroid
+	# Compute normalized directions away from the enemy centroid.
 	var away_from_enemy: Vector2 = source_pos - enemy_centroid
 	var tile_direction: Vector2 = tile_pos - enemy_centroid
+	if away_from_enemy.length_squared() <= 0.0 or tile_direction.length_squared() <= 0.0:
+		return 0.0
+	away_from_enemy = away_from_enemy.normalized()
+	tile_direction = tile_direction.normalized()
 
-	# Dot product: high when tile moves in direction away from enemies
+	# Dot product: 1.0 means aligned away from enemies, -1.0 means toward enemies.
 	var dot_product: float = away_from_enemy.dot(tile_direction)
 
-	# Compute the score as a ratio of the dot product to a normalization factor.
-	var score: float = minf(1.0, maxf(0.0, dot_product / 1_000.0))
-
-	# Normalize so that:
-	# - 0.0 means tile is in the same direction as the enemy centroid (dot_product <= 0)
-	# - 1.0 means tile is in the opposite direction from the enemy centroid (dot_product >= 1_000)
-	var normalized_score = clampf(score, 0.0, 1.0)
+	# Map [-1.0, 1.0] to [0.0, 1.0].
+	var normalized_score = clampf((dot_product + 1.0) / 2.0, 0.0, 1.0)
 
 	# _add_thought(
 	# 	source,

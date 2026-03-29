@@ -153,10 +153,10 @@ func _show_item_details(item: Item) -> void:
 		if not equipped.passive:
 			var active_line: String = ""
 			if equipped.power_on_use > 0:
-				active_line += "Power on Use: "
+				active_line += "Power on Use "
 				active_line += UIColor.apply("power_on_use", str(equipped.power_on_use))
 			if equipped.cooldown > 0:
-				active_line += " | Cooldown: "
+				active_line += " | Cooldown "
 				active_line += UIColor.apply("cooldown", str(equipped.cooldown)) + "t"
 				if module.cooldown != equipped.cooldown:
 					active_line += "[%dt]" % module.cooldown
@@ -164,8 +164,10 @@ func _show_item_details(item: Item) -> void:
 					active_line += " ([color=#cf7a7a]Cooling Down[/color])"
 				else:
 					active_line += " ([color=#9fb3c8]Ready[/color])"
+			if equipped.repeats > 1:
+				active_line += " | Repeats " + str(equipped.repeats)
 			if equipped.module_range > 0:
-				active_line += " | Range: "
+				active_line += " | Range "
 				active_line += UIColor.apply("module_range", str(equipped.module_range))
 			text += active_line + "\n"
 

@@ -9,19 +9,16 @@ func can_module_be_used_now(combatant: CombatEntity, equipped_module: EquippedMo
 	"""
 	Checks if a module can be used based on its cooldown and power requirements.
 	"""
-	if not combatant or not equipped_module:
-		return false
-	if not has_item_equipped(combatant, equipped_module.item):
-		return false
-	if not has_item_module(equipped_module.item, equipped_module.module):
-		return false
-	if equipped_module.module.passive or not combatant.cooldown_manager:
-		return false
-	if combatant.cooldown_manager.is_on_cooldown(equipped_module.item, equipped_module.module):
-		return false
-	if combatant.power < equipped_module.module.power_on_use:
-		return false
-	return true
+	return (
+		combatant
+		and equipped_module
+		and has_item_equipped(combatant, equipped_module.item)
+		and has_item_module(equipped_module.item, equipped_module.module)
+		and not equipped_module.module.passive
+		and combatant.cooldown_manager
+		and not combatant.cooldown_manager.is_on_cooldown(equipped_module.item, equipped_module.module)
+		and combatant.power >= equipped_module.power_on_use
+	)
 
 
 func has_item_equipped(combatant: CombatEntity, item: Item) -> bool:
@@ -100,15 +97,22 @@ func find_matching_modules(
 		if not offensive and item.template.slot != Enums.SlotType.UTILITY:
 			continue
 		for module in item.template.modules:
+			var equipped_module := EquippedModule.new(combatant, item, module)
 			# Optionally skip passive modules.
-			if not include_passive and module.passive:
+			if not include_passive and equipped_module.passive:
 				continue
 			# Optionally skip modules on cooldown.
-			if not include_on_cooldown and combatant.cooldown_manager.is_on_cooldown(item, module):
+			if (
+				not include_on_cooldown
+				and combatant.cooldown_manager.is_on_cooldown(
+					equipped_module.item,
+					equipped_module.module,
+				)
+			):
 				continue
 			# Always skip if not enough power.
-			if combatant.power < module.power_on_use:
+			if combatant.power < equipped_module.power_on_use:
 				continue
 			# Add the module if all checks passed.
-			matching_modules.append(EquippedModule.new(combatant, item, module))
+			matching_modules.append(equipped_module)
 	return matching_modules

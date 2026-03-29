@@ -104,10 +104,10 @@ func _check_target_range_or_log(
 
 
 func _try_spend_power_and_start_cooldown(source_actor: CombatEntity) -> bool:
-	if source_actor.power < equipped_module.module.power_on_use:
+	if source_actor.power < equipped_module.power_on_use:
 		return false
 
-	source_actor.power -= equipped_module.module.power_on_use
+	source_actor.power -= equipped_module.power_on_use
 	source_actor.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
 	return true
 

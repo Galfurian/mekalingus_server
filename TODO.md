@@ -34,7 +34,7 @@ Each completed TODO must be committed before moving to the next one.
 
 ## Urgency 3 - Safety and Polish
 
-- [ ] T6: Harden AI profile validation with required-key checks per phase.
+- [x] T6: Harden AI profile validation with required-key checks per phase.
   - File: `scripts/systems/ai/ai_profile_manager.gd`
   - Rationale: Catch misconfigured considerations at profile load time instead of silently at runtime.
   - Dependency: None, but easier after phase behavior changes settle.

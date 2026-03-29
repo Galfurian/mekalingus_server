@@ -191,6 +191,8 @@ func _validate_phase_profile(
 	if not phase_profile:
 		return false
 
+	var available_keys: PackedStringArray = _get_context_keys_for_phase(required_phase)
+
 	for consideration: AIConsideration in phase_profile.considerations:
 		if not consideration:
 			continue
@@ -201,16 +203,67 @@ func _validate_phase_profile(
 		):
 			push_error(
 				(
-					"AI profile '%s' invalid phase binding: %s contains consideration '%s' not"
-					+ " allowed in phase '%s'."
+					"AI profile '%s' invalid phase binding: %s contains consideration '%s' not allowed in phase '%s'."
+					% [
+						profile_id,
+						phase_label,
+						consideration.consideration_name,
+						AIEvaluationContext.Phase.keys()[required_phase],
+					]
 				)
-				% [
-					profile_id,
-					phase_label,
-					consideration.consideration_name,
-					AIEvaluationContext.Phase.keys()[required_phase],
-				]
 			)
 			return false
 
+		for required_key: String in consideration.required_keys:
+			if not available_keys.has(required_key):
+				push_error(
+					(
+						"AI profile '%s' invalid required key: %s contains consideration '%s' requiring key '%s' not available in phase '%s'."
+						% [
+							profile_id,
+							phase_label,
+							consideration.consideration_name,
+							required_key,
+							AIEvaluationContext.Phase.keys()[required_phase],
+						]
+					)
+				)
+				return false
+
 	return true
+
+
+func _get_context_keys_for_phase(phase: int) -> PackedStringArray:
+	match phase:
+		AIEvaluationContext.Phase.INTENT:
+			return PackedStringArray(["source", "planning_context", "tile", "phase"])
+		AIEvaluationContext.Phase.TARGET:
+			return PackedStringArray(
+				[
+					"source",
+					"target",
+					"item",
+					"module",
+					"planning_context",
+					"tile",
+					"max_distance",
+					"phase",
+				]
+			)
+		AIEvaluationContext.Phase.TILE:
+			return PackedStringArray(["source", "planning_context", "tile", "phase"])
+		AIEvaluationContext.Phase.MODULE:
+			return PackedStringArray(
+				[
+					"source",
+					"target",
+					"item",
+					"module",
+					"planning_context",
+					"tile",
+					"max_distance",
+					"phase",
+				]
+			)
+		_:
+			return PackedStringArray()

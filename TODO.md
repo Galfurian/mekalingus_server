@@ -44,6 +44,10 @@ Each completed TODO must be committed before moving to the next one.
   - Rationale: Improve discoverability and consistency.
   - Dependency: Must be last or paired with a symbol-safe rename pass to avoid reference breakage.
 
+- [x] T8: Final AI folder validation sweep.
+  - Scope: `scripts/systems/ai/**`
+  - Result: No diagnostics errors found after all TODO changes.
+
 ## Execution Strategy
 
 1. Complete all Urgency 1 items first (behavior correctness baseline).

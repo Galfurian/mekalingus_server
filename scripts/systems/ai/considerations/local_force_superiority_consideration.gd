@@ -4,7 +4,7 @@
 ## Output is a bounded urgency score in [0.0, 1.0]:
 ## - 0.0 means equal or favorable local force balance (no retreat pressure)
 ## - 1.0 means strong enemy superiority (highest retreat pressure)
-class_name LocalForceSuperioritConsideration
+class_name LocalForceSuperiorityConsideration
 extends AIConsideration
 
 
@@ -25,10 +25,10 @@ func get_normalized_input(context: Dictionary) -> float:
 	var tile: Vector2i = context.get("tile", Vector2i.ZERO)
 
 	if not planning_context:
-		push_error("Missing planning_context for LocalForceSuperioritConsideration.")
+		push_error("Missing planning_context for LocalForceSuperiorityConsideration.")
 		return 0.0
 	if not source:
-		push_error("Missing source for LocalForceSuperioritConsideration.")
+		push_error("Missing source for LocalForceSuperiorityConsideration.")
 		return 0.0
 	if tile == Vector2i.ZERO:
 		tile = source.position

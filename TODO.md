@@ -39,7 +39,7 @@ Each completed TODO must be committed before moving to the next one.
   - Rationale: Catch misconfigured considerations at profile load time instead of silently at runtime.
   - Dependency: None, but easier after phase behavior changes settle.
 
-- [ ] T7: Rename typoed class `LocalForceSuperioritConsideration`.
+- [x] T7: Rename typoed class `LocalForceSuperioritConsideration`.
   - File: `scripts/systems/ai/considerations/local_force_superiority_consideration.gd`
   - Rationale: Improve discoverability and consistency.
   - Dependency: Must be last or paired with a symbol-safe rename pass to avoid reference breakage.

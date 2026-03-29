@@ -191,7 +191,7 @@ static func _evaluate_retreat_necessity(
 			"max_score": 0.0,
 		}
 	var evaluation_context = AIEvaluationContext.for_intent(source, planning_context)
-	var raw_score: float = profile.evaluate_variant(evaluation_context)
+	var raw_score: float = profile.evaluate(evaluation_context)
 	var max_score: float = profile.get_max_score()
 	var normalized_score: float = 0.0
 	if max_score > 0.0:
@@ -312,7 +312,7 @@ static func _find_safest_retreat_tile(
 
 		# Evaluate tile using profile considerations.
 		var evaluation_context = AIEvaluationContext.for_tile(source, planning_context, tile)
-		var tile_score: float = profile.evaluate_variant(evaluation_context)
+		var tile_score: float = profile.evaluate(evaluation_context)
 
 		# Save score for later debug dump.
 		tile_scores[tile] = tile_score

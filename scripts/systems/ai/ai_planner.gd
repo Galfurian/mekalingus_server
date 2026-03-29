@@ -30,36 +30,21 @@ func clear() -> void:
 	turn_context.reset_context()
 
 
-func _get_intent_registry() -> Array[Dictionary]:
+func _get_intent_registry() -> Array[AIIntentEvaluator]:
 	return [
-		{
-			"evaluator": AIAttackIntentEvaluator.new(),
-		},
-		{
-			"evaluator": AISupportIntentEvaluator.new(),
-		},
-		{
-			"evaluator": AIRetreatIntentEvaluator.new(),
-		},
+		AIAttackIntentEvaluator.new(),
+		AISupportIntentEvaluator.new(),
+		AIRetreatIntentEvaluator.new(),
 	]
 
 
 func _validate_intent_registry() -> bool:
-	var registry: Array[Dictionary] = _get_intent_registry()
+	var registry: Array[AIIntentEvaluator] = _get_intent_registry()
 	var seen_intents: Dictionary = {}
 
-	for entry: Dictionary in registry:
-		if not entry.has("evaluator"):
-			push_error("AIPlanner intent registry entry missing evaluator.")
-			return false
-
-		var evaluator = entry["evaluator"]
+	for evaluator: AIIntentEvaluator in registry:
 		if not evaluator:
 			push_error("AIPlanner intent registry contains null evaluator.")
-			return false
-
-		if not evaluator.has_method("get_intent"):
-			push_error("AIPlanner evaluator missing get_intent().")
 			return false
 
 		var intent: int = int(evaluator.get_intent())
@@ -95,19 +80,7 @@ func generate_plan(source: MapCombatEntity) -> AIPlan:
 	var planning_context: AIPlanningContext = AIPlanningContext.new(turn_context, source)
 
 	# Evaluate registered intent candidates and select the one with the highest score.
-	for intent_entry: Dictionary in _get_intent_registry():
-		var evaluator = intent_entry["evaluator"]
-		if not evaluator:
-			(
-				decision_trace
-				. record_intent_result(
-					AIPlan.Intent.NONE,
-					null,
-					"missing evaluator instance",
-				)
-			)
-			continue
-
+	for evaluator: AIIntentEvaluator in _get_intent_registry():
 		var intent: AIPlan.Intent = evaluator.get_intent()
 		var unavailable_reason: String = evaluator.get_unavailable_reason()
 

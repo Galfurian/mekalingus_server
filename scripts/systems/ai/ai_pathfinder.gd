@@ -25,7 +25,9 @@ static func round_position(vector: Vector2) -> Vector2i:
 	return Vector2i(round(vector.x), round(vector.y))
 
 
-static func get_shortest_path(game_map, start: Vector2i, end: Vector2i) -> Array[Vector2i]:
+static func get_shortest_path(
+	game_map: GameMap, start: Vector2i, end: Vector2i
+) -> Array[Vector2i]:
 	"""
 	Returns the shortest path between two tiles using AStar2D.
 	"""
@@ -46,7 +48,7 @@ static func get_shortest_path(game_map, start: Vector2i, end: Vector2i) -> Array
 	return result
 
 
-static func get_path_cost(game_map, path) -> float:
+static func get_path_cost(game_map: GameMap, path: Array[Vector2i]) -> float:
 	"""
 	Compute the total cost of a path.
 	"""
@@ -56,7 +58,9 @@ static func get_path_cost(game_map, path) -> float:
 	return cost
 
 
-static func get_tiles_in_range(game_map, position: Vector2i, max_range: int) -> Array[Vector2i]:
+static func get_tiles_in_range(
+	game_map: GameMap, position: Vector2i, max_range: int
+) -> Array[Vector2i]:
 	"""
 	Returns all tiles within a given range from a starting position.
 	"""
@@ -69,7 +73,9 @@ static func get_tiles_in_range(game_map, position: Vector2i, max_range: int) -> 
 	return visible
 
 
-static func get_reachable_tiles(game_map, start: Vector2i, max_cost: int) -> Array[Vector2i]:
+static func get_reachable_tiles(
+	game_map: GameMap, start: Vector2i, max_cost: int
+) -> Array[Vector2i]:
 	"""
 	Returns all reachable tiles from a starting position within a given cost.
 	"""
@@ -78,15 +84,16 @@ static func get_reachable_tiles(game_map, start: Vector2i, max_cost: int) -> Arr
 	)
 	var reachable: Array[Vector2i] = []
 	for entry: Dictionary in reachable_with_cost:
-		reachable.append(entry.tile)
+		reachable.append(entry["tile"])
 	return reachable
 
 
 static func get_reachable_tiles_with_cost(
-	game_map, start: Vector2i, max_cost: int
+	game_map: GameMap, start: Vector2i, max_cost: int
 ) -> Array[Dictionary]:
 	"""
 	Returns reachable tiles with their path cost using a single frontier traversal.
+	Each entry shape is: { "tile": Vector2i, "cost": float }.
 	"""
 	var reachable: Array[Dictionary] = []
 	var start_id = game_map.position_to_astar_id(start)
@@ -105,8 +112,8 @@ static func get_reachable_tiles_with_cost(
 		var current: Dictionary = frontier[current_index]
 		frontier.remove_at(current_index)
 
-		var current_id: int = current.id
-		var current_cost: float = current.cost
+		var current_id: int = current["id"]
+		var current_cost: float = current["cost"]
 
 		for neighbor_id in game_map.astar.get_point_connections(current_id):
 			var neighbor_tile: Vector2i = _astar_id_to_tile(game_map, neighbor_id)
@@ -140,7 +147,7 @@ static func get_reachable_tiles_with_cost(
 	return reachable
 
 
-static func get_distance(game_map, from: Vector2i, to: Vector2i) -> float:
+static func get_distance(game_map: GameMap, from: Vector2i, to: Vector2i) -> float:
 	"""
 	Returns the pathing distance between two tiles on the game map.
 	"""
@@ -151,7 +158,7 @@ static func get_distance(game_map, from: Vector2i, to: Vector2i) -> float:
 
 
 static func find_furthest_progress_along_path(
-	game_map,
+	game_map: GameMap,
 	start: Vector2i,
 	target: Vector2i,
 	max_movement: int,
@@ -183,13 +190,18 @@ static func find_furthest_progress_along_path(
 
 
 static func find_closest_reachable_tile(
-	game_map, source, target, min_range: int, max_range: int, max_movement: int
+	game_map: GameMap,
+	source: MapCombatEntity,
+	target: MapCombatEntity,
+	min_range: int,
+	max_range: int,
+	max_movement: int
 ) -> Vector2i:
 	var best_tile := Vector2i.ZERO
 	var shortest_distance := INF
 
 	for entry: Dictionary in get_reachable_tiles_with_cost(game_map, source.position, max_movement):
-		var tile: Vector2i = entry.tile
+		var tile: Vector2i = entry["tile"]
 		if game_map.is_occupied(tile):
 			continue
 		if _is_reserved_tile(tile, source.position):
@@ -212,9 +224,9 @@ static func find_closest_reachable_tile(
 
 
 static func find_best_attack_tile(
-	game_map,
-	source,
-	target,
+	game_map: GameMap,
+	source: MapCombatEntity,
+	target: MapCombatEntity,
 	min_range: int,
 	max_range: int,
 	max_movement: int,
@@ -234,8 +246,8 @@ static func find_best_attack_tile(
 		)
 
 	for entry: Dictionary in get_reachable_tiles_with_cost(game_map, source.position, max_movement):
-		var tile: Vector2i = entry.tile
-		var move_cost: float = entry.cost
+		var tile: Vector2i = entry["tile"]
+		var move_cost: float = entry["cost"]
 		if game_map.is_occupied(tile):
 			continue
 		if _is_reserved_tile(tile, source.position):
@@ -273,7 +285,9 @@ static func find_best_attack_tile(
 	return source.position
 
 
-static func find_random_reachable_tile(game_map, start: Vector2i, max_cost: int) -> Vector2i:
+static func find_random_reachable_tile(
+	game_map: GameMap, start: Vector2i, max_cost: int
+) -> Vector2i:
 	"""
 	Returns a random unoccupied reachable tile.
 	"""
@@ -304,5 +318,5 @@ static func _count_adjacent_entities(entities: Array[MapCombatEntity], tile: Vec
 	return count
 
 
-static func _astar_id_to_tile(game_map, astar_id: int) -> Vector2i:
+static func _astar_id_to_tile(game_map: GameMap, astar_id: int) -> Vector2i:
 	return Vector2i(game_map.astar.get_point_position(astar_id))

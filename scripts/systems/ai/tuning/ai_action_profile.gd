@@ -6,17 +6,11 @@ extends Resource
 @export var considerations: Array[AIConsideration]
 
 
-func evaluate(
-	context: Dictionary,
-) -> float:
-	return evaluate_variant(context)
-
-
-func evaluate_variant(context: Variant) -> float:
+func evaluate(context: Variant) -> float:
 	var score: float = 0.0
 	for consideration in considerations:
 		if consideration:
-			score += consideration.evaluate_variant(context)
+			score += consideration.evaluate(context)
 	return score
 
 
@@ -28,15 +22,9 @@ func get_max_score() -> float:
 	return max_score
 
 
-func should_activate(
-	context: Dictionary,
-) -> bool:
-	return should_activate_variant(context)
-
-
-func should_activate_variant(context: Variant) -> bool:
+func should_activate(context: Variant) -> bool:
 	var max_score: float = get_max_score()
 	if max_score <= 0.0:
 		return false
-	var normalized_score: float = evaluate_variant(context) / max_score
+	var normalized_score: float = evaluate(context) / max_score
 	return normalized_score >= activation_threshold

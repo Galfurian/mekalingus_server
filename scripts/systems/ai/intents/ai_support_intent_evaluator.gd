@@ -50,7 +50,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		if activation_max <= 0.0:
 			_log(source, "intent unavailable: support activation phase has zero max score")
 			return null
-		var activation_raw: float = activation_phase.evaluate_variant(activation_context)
+		var activation_raw: float = activation_phase.evaluate(activation_context)
 		activation_normalized = clampf(activation_raw / activation_max, 0.0, 1.0)
 		activation_threshold = activation_phase.activation_threshold
 		if activation_normalized < activation_threshold:
@@ -120,7 +120,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 				destination,
 				float(max_candidate_distance),
 			)
-			var score: float = profile.evaluate_variant(score_context)
+			var score: float = profile.evaluate(score_context)
 
 			if score > best_score:
 				best_score = score

@@ -44,7 +44,7 @@ func get_normalized_input(context: Dictionary) -> float:
 	# 	source,
 	# 	(
 	# 		"Source survivability: %d/%d (%.2f -> %.2f)"
-	# 		% [current_survivability, max_durability, score, normnalized_score]
+	# 		% [current_survivability, max_durability, score, normalized_score]
 	# 	)
 	# )
 

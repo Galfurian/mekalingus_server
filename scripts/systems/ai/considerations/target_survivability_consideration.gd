@@ -32,14 +32,14 @@ func get_normalized_input(context: Dictionary) -> float:
 	# Normalize so that:
 	# - 0.0 means no health (current_survivability = 0)
 	# - 1.0 means full health (current_survivability = max_durability)
-	var normnalized_score = clampf(score, 0.0, 1.0)
+	var normalized_score = clampf(score, 0.0, 1.0)
 
 	# _add_thought(
 	# 	target,
 	# 	(
 	# 		"Target survivability: %d/%d (%.2f -> %.2f)"
-	# 		% [current_survivability, max_durability, score, normnalized_score]
+	# 		% [current_survivability, max_durability, score, normalized_score]
 	# 	)
 	# )
 
-	return normnalized_score
+	return normalized_score

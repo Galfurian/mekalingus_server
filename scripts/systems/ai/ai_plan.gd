@@ -1,7 +1,7 @@
 class_name AIPlan
 extends RefCounted
 
-enum Intent { NONE, ATTACK, SUPPORT, RETREAT }
+enum Intent { NONE, ATTACK, SUPPORT, RETREAT, REPOSITION }
 
 # Plan lifecycle state.
 enum Status { NONE, PLANNED, ORDER_QUEUED, EXECUTING, COMPLETED }
@@ -76,7 +76,7 @@ func is_valid() -> bool:
 			valid = AIUtils.is_equipped_module_available(source.combatant, equipped_module)
 		if valid:
 			valid = AIUtils.can_module_be_used_now(source.combatant, equipped_module)
-	elif intent == Intent.RETREAT:
+	elif intent == Intent.RETREAT or intent == Intent.REPOSITION:
 		valid = destination != Vector2i.ZERO
 
 	if not valid:
@@ -99,7 +99,7 @@ func is_complete() -> bool:
 			)
 		):
 			return true
-	if intent == Intent.RETREAT:
+	if intent == Intent.RETREAT or intent == Intent.REPOSITION:
 		if source.position == destination:
 			status = Status.COMPLETED
 			return true
@@ -110,7 +110,7 @@ func generate_order(reserved_tiles: Dictionary = {}) -> Order:
 	if intent == Intent.ATTACK or intent == Intent.SUPPORT:
 		return _generate_combat_order(reserved_tiles)
 
-	if intent == Intent.RETREAT:
+	if intent == Intent.RETREAT or intent == Intent.REPOSITION:
 		return _generate_move_order_for_destination()
 
 	if intent == Intent.NONE:

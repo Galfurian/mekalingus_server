@@ -18,13 +18,7 @@ func _init(
 	invert_output = p_invert_output
 
 
-func evaluate(
-	context: Dictionary,
-) -> float:
-	return evaluate_variant(context)
-
-
-func evaluate_variant(context: Variant) -> float:
+func evaluate(context: Variant) -> float:
 	var normalized_context: Dictionary = _normalize_context(context)
 	if normalized_context.is_empty():
 		return 0.0

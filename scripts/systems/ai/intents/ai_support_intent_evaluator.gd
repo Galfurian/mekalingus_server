@@ -71,7 +71,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		return null
 
 	var allies_with_self: Array[MapCombatEntity] = planning_context.get_allies(true)
-	var max_module_range: int = _get_max_module_range(source, utility_modules)
+	var max_module_range: int = AIUtils.get_max_module_range(source, utility_modules)
 	var max_candidate_distance: int = source.combatant.speed + max_module_range
 
 	var best_score: float = -INF
@@ -96,7 +96,13 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 			var module_range: int = (
 				equipped_module.module.module_range + source.combatant.range_modifier
 			)
-			var source_distance: int = _manhattan_distance(source.position, target.position)
+			var source_distance: int = (
+				AIUtils
+				. manhattan_distance(
+					source.position,
+					target.position,
+				)
+			)
 			var can_use_from_source: bool = _is_in_range(
 				source_distance,
 				module_range,
@@ -278,21 +284,13 @@ static func _find_support_destination(
 	for tile: Vector2i in planning_context.get_reachable_tiles():
 		if tile == source.position:
 			continue
-
-		var distance_to_target: int = _manhattan_distance(tile, target.position)
+		var distance_to_target: int = AIUtils.manhattan_distance(tile, target.position)
 		if distance_to_target > module_range:
 			continue
-
+		var distance_to_source: int = AIUtils.manhattan_distance(tile, source.position)
 		var tile_threat: float = planning_context.get_tile_threat_score(source, tile)
-		(
-			candidate_tiles
-			. append(
-				{
-					"tile": tile,
-					"tile_threat": tile_threat,
-					"distance_to_source": _manhattan_distance(source.position, tile),
-				}
-			)
+		candidate_tiles.append(
+			{"tile": tile, "tile_threat": tile_threat, "distance_to_source": distance_to_source}
 		)
 
 	if candidate_tiles.is_empty():
@@ -349,23 +347,6 @@ static func _can_module_target(
 			Enums.TargetType.AREA:
 				return true
 	return false
-
-
-static func _get_max_module_range(
-	source: MapCombatEntity,
-	utility_modules: Array[EquippedModule],
-) -> int:
-	var max_range: int = 0
-	for equipped_module: EquippedModule in utility_modules:
-		var range_with_modifier: int = (
-			equipped_module.module.module_range + source.combatant.range_modifier
-		)
-		max_range = maxi(max_range, range_with_modifier)
-	return max_range
-
-
-static func _manhattan_distance(a: Vector2i, b: Vector2i) -> int:
-	return absi(a.x - b.x) + absi(a.y - b.y)
 
 
 static func _add_thought(source: MapCombatEntity, message: String) -> void:

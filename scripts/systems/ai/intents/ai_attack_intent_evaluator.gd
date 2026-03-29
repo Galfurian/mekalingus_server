@@ -75,7 +75,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 			)
 			return null
 
-	var max_module_range: int = _get_max_module_range(source, offensive_modules)
+	var max_module_range: int = AIUtils.get_max_module_range(source, offensive_modules)
 	var max_candidate_distance: int = (
 		source.combatant.get_stat(Enums.StatType.SPEED) + max_module_range
 	)
@@ -91,7 +91,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		if target.combatant.is_dead():
 			continue
 
-		var distance: int = _manhattan_distance(source.position, target.position)
+		var distance: int = AIUtils.manhattan_distance(source.position, target.position)
 		if distance > max_candidate_distance:
 			continue
 
@@ -104,7 +104,10 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 				+ source.combatant.get_stat(Enums.StatType.RANGE_MODIFIER)
 			)
 			var min_range: int = AIUtils.get_offensive_min_range(module_range)
-			var source_distance: int = _manhattan_distance(source.position, target.position)
+			var source_distance: int = AIUtils.manhattan_distance(
+				source.position,
+				target.position,
+			)
 			var can_attack_from_source: bool = (
 				has_los and source_distance >= min_range and source_distance <= module_range
 			)
@@ -225,7 +228,7 @@ static func _find_attack_destination_with_los(
 ) -> Dictionary:
 	var candidate_tiles: Array[Dictionary] = []
 	for tile: Vector2i in planning_context.get_reachable_tiles():
-		var distance_to_target: int = _manhattan_distance(tile, target.position)
+		var distance_to_target: int = AIUtils.manhattan_distance(tile, target.position)
 		if distance_to_target < min_range or distance_to_target > max_range:
 			continue
 
@@ -234,7 +237,10 @@ static func _find_attack_destination_with_los(
 			. append(
 				{
 					"tile": tile,
-					"distance_to_source": _manhattan_distance(source.position, tile),
+					"distance_to_source": AIUtils.manhattan_distance(
+						source.position,
+						tile,
+					),
 				}
 			)
 		)
@@ -275,25 +281,6 @@ static func _find_attack_destination_with_los(
 		"reachable": true,
 		"destination": destination,
 	}
-
-
-static func _get_max_module_range(
-	source: MapCombatEntity,
-	offensive_modules: Array[EquippedModule],
-) -> int:
-	var max_range: int = 0
-	for equipped_module: EquippedModule in offensive_modules:
-		var range_with_modifier: int = (
-			equipped_module.module.module_range
-			+ source.combatant.get_stat(Enums.StatType.RANGE_MODIFIER)
-		)
-		max_range = maxi(max_range, range_with_modifier)
-	return max_range
-
-
-static func _manhattan_distance(a: Vector2i, b: Vector2i) -> int:
-	return absi(a.x - b.x) + absi(a.y - b.y)
-
 
 static func _add_thought(source: MapCombatEntity, message: String) -> void:
 	if source and source.combatant:

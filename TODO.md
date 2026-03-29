@@ -27,7 +27,7 @@ Each completed TODO must be committed before moving to the next one.
   - Rationale: Avoid repeated evaluator allocation and make registry ownership explicit.
   - Dependency: None.
 
-- [ ] T5: Extract shared intent helper utilities.
+- [x] T5: Extract shared intent helper utilities.
   - Files: `scripts/systems/ai/` (new helper + intent evaluator updates)
   - Rationale: Remove duplicated Manhattan distance and common helper logic across intents.
   - Dependency: Prefer after T1/T2 to avoid immediate follow-up churn.

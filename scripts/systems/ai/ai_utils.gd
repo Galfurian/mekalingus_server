@@ -66,6 +66,22 @@ func get_offensive_min_range(module_range: int) -> int:
 	return 2
 
 
+func manhattan_distance(a: Vector2i, b: Vector2i) -> int:
+	return absi(a.x - b.x) + absi(a.y - b.y)
+
+
+func get_max_module_range(
+	source: MapCombatEntity,
+	modules: Array[EquippedModule],
+) -> int:
+	var max_range: int = 0
+	var range_modifier: int = source.combatant.get_stat(Enums.StatType.RANGE_MODIFIER)
+	for equipped_module: EquippedModule in modules:
+		var range_with_modifier: int = equipped_module.module.module_range + range_modifier
+		max_range = maxi(max_range, range_with_modifier)
+	return max_range
+
+
 func find_matching_modules(
 	combatant: CombatEntity,
 	offensive: bool,

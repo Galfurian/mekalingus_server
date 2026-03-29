@@ -96,6 +96,10 @@ def metric_explanations_for_kind(kind: str) -> Dict[str, Dict[str, str]]:
             "meaning": "Average one-turn draw: base_power_usage + average module cost.",
             "expected": "Lower than peak; indicates typical rather than spike burden.",
         },
+        "single_module_turn_cost_peak_effective": {
+            "meaning": "Repeat-aware worst-case one-turn draw: base_power_usage + max(module_power_on_use * repeats).",
+            "expected": "Use this to detect true spike bankrupt turns when repeat-heavy modules exist.",
+        },
         "single_module_turn_cost_peak_per_slot_factor": {
             "meaning": "Peak one-turn draw normalized by slot factor.",
             "expected": "Best field for cross-slot outlier detection.",
@@ -104,6 +108,10 @@ def metric_explanations_for_kind(kind: str) -> Dict[str, Dict[str, str]]:
             "meaning": "Mean one-turn draw normalized by slot factor.",
             "expected": "Useful for overall pacing fairness across slot classes.",
         },
+        "single_module_turn_cost_peak_effective_per_slot_factor": {
+            "meaning": "Repeat-aware peak one-turn draw normalized by slot factor.",
+            "expected": "Strong signal for mega-item spikes across different slot sizes.",
+        },
         "over_budget_peak_count": {
             "meaning": "Count of items whose peak one-turn draw exceeds configured turn budget.",
             "expected": "Lower is safer. Nonzero can be intentional for high-risk high-reward items.",
@@ -111,6 +119,10 @@ def metric_explanations_for_kind(kind: str) -> Dict[str, Dict[str, str]]:
         "over_budget_mean_count": {
             "meaning": "Count of items whose mean one-turn draw exceeds configured turn budget.",
             "expected": "Usually very low. High values imply broad economy pressure.",
+        },
+        "over_budget_peak_effective_count": {
+            "meaning": "Count of items whose repeat-aware peak one-turn draw exceeds configured turn budget.",
+            "expected": "Can be nonzero for super-mega repeat weapons by design; track deliberately.",
         },
     }
 
@@ -143,6 +155,173 @@ def print_metric_explanations(results: List[Dict[str, Any]]) -> None:
             print("    expected: %s" % details["expected"])
 
         printed.add(base)
+
+
+def _stat_mean(report: Dict[str, Any], field: str) -> float | None:
+    payload = report.get(field)
+    if isinstance(payload, dict) and "mean" in payload:
+        return float(payload["mean"])
+    return None
+
+
+def _stat_min(report: Dict[str, Any], field: str) -> float | None:
+    payload = report.get(field)
+    if isinstance(payload, dict) and "min" in payload:
+        return float(payload["min"])
+    return None
+
+
+def _stat_max(report: Dict[str, Any], field: str) -> float | None:
+    payload = report.get(field)
+    if isinstance(payload, dict) and "max" in payload:
+        return float(payload["max"])
+    return None
+
+
+def _find_report_by_suffix(results: List[Dict[str, Any]], suffix: str) -> Dict[str, Any] | None:
+    target = suffix.lower()
+    for entry in results:
+        file_label = str(entry.get("file", "")).lower().replace("\\", "/")
+        if file_label.endswith(target):
+            return entry.get("report")
+    return None
+
+
+def _find_merged_report(results: List[Dict[str, Any]], kind: str) -> Dict[str, Any] | None:
+    marker = "<merged:%s>" % kind
+    for entry in results:
+        if str(entry.get("file", "")) == marker:
+            return entry.get("report")
+    return None
+
+
+def print_system_checks(results: List[Dict[str, Any]]) -> None:
+    print("\nSystem checks")
+    print("  Cross-file anomaly checks for economy/progression consistency.")
+
+    meks_merged = _find_merged_report(results, "meks")
+    items_merged = _find_merged_report(results, "items")
+
+    if items_merged is not None:
+        slot_min = _stat_min(items_merged, "slot_factor_used")
+        slot_max = _stat_max(items_merged, "slot_factor_used")
+        if slot_min is not None and slot_max is not None and slot_min == 1.0 and slot_max == 1.0:
+            print("  [warn] slot_factor_used is constant 1.0 across items; per-slot normalization is currently redundant.")
+        else:
+            print("  [ok] slot_factor_used has variation; slot normalization is informative.")
+
+        peak_mean = _stat_mean(items_merged, "single_module_turn_cost_peak")
+        peak_eff_mean = _stat_mean(items_merged, "single_module_turn_cost_peak_effective")
+        if peak_mean and peak_eff_mean:
+            uplift = (peak_eff_mean / peak_mean) if peak_mean > 0.0 else 1.0
+            if uplift > 1.15:
+                print(
+                    "  [warn] repeat-aware peak turn draw is %.2fx higher than non-repeat peak; repeated modules materially change spike risk."
+                    % uplift
+                )
+            else:
+                print("  [ok] repeat-aware and non-repeat peak turn draw are close.")
+
+    light_mek = _find_report_by_suffix(results, "/meks/light_meks.json")
+    medium_mek = _find_report_by_suffix(results, "/meks/medium_meks.json")
+    heavy_mek = _find_report_by_suffix(results, "/meks/heavy_meks.json")
+    small_items = _find_report_by_suffix(results, "/items/small_weapons.json")
+    medium_items = _find_report_by_suffix(results, "/items/medium_weapons.json")
+    large_items = _find_report_by_suffix(results, "/items/large_weapons.json")
+
+    if (
+        light_mek is not None
+        and medium_mek is not None
+        and heavy_mek is not None
+        and small_items is not None
+        and medium_items is not None
+        and large_items is not None
+    ):
+        light_weapon_peak = _stat_mean(small_items, "single_module_turn_cost_peak")
+        medium_weapon_peak = _stat_mean(medium_items, "single_module_turn_cost_peak")
+        heavy_weapon_peak = _stat_mean(large_items, "single_module_turn_cost_peak")
+        light_regen = _stat_mean(light_mek, "power_generation")
+        medium_regen = _stat_mean(medium_mek, "power_generation")
+        heavy_regen = _stat_mean(heavy_mek, "power_generation")
+
+        if (
+            light_weapon_peak is not None
+            and medium_weapon_peak is not None
+            and heavy_weapon_peak is not None
+            and light_regen is not None
+            and medium_regen is not None
+            and heavy_regen is not None
+            and light_regen > 0.0
+            and medium_regen > 0.0
+            and heavy_regen > 0.0
+        ):
+            light_ratio = light_weapon_peak / light_regen
+            medium_ratio = medium_weapon_peak / medium_regen
+            heavy_ratio = heavy_weapon_peak / heavy_regen
+
+            print(
+                "  tier action-economy ratios (peak one-module draw / mek regen): "
+                "light=%.3f medium=%.3f heavy=%.3f"
+                % (light_ratio, medium_ratio, heavy_ratio)
+            )
+            if medium_ratio > max(light_ratio, heavy_ratio) + 0.15:
+                print("  [warn] medium tier appears significantly more power-constrained than light/heavy.")
+            else:
+                print("  [ok] medium tier action-economy ratio is in-family.")
+
+    if small_items is not None:
+        utility_items = _find_report_by_suffix(results, "/items/utilities.json")
+        if utility_items is not None:
+            util_base = _stat_mean(utility_items, "base_power_usage")
+            small_base = _stat_mean(small_items, "base_power_usage")
+            if util_base is not None and small_base is not None and small_base > 0.0:
+                ratio = util_base / small_base
+                if ratio >= 1.5:
+                    print(
+                        "  [warn] utility base upkeep is %.2fx small-weapon upkeep; utilities may behave as passive power hogs."
+                        % ratio
+                    )
+                else:
+                    print("  [ok] utility passive upkeep is not disproportionately high.")
+
+    if medium_mek is not None and heavy_mek is not None:
+        medium_health = _stat_mean(medium_mek, "health")
+        heavy_health = _stat_mean(heavy_mek, "health")
+        medium_armor = _stat_mean(medium_mek, "armor")
+        heavy_armor = _stat_mean(heavy_mek, "armor")
+        medium_shield = _stat_mean(medium_mek, "shield")
+        heavy_shield = _stat_mean(heavy_mek, "shield")
+        if (
+            medium_health
+            and heavy_health
+            and medium_armor
+            and heavy_armor
+            and medium_shield
+            and heavy_shield
+            and medium_shield > 0.0
+        ):
+            health_growth = (heavy_health / medium_health) - 1.0
+            armor_growth = (heavy_armor / medium_armor) - 1.0
+            shield_growth = (heavy_shield / medium_shield) - 1.0
+            if shield_growth < (0.5 * min(health_growth, armor_growth)):
+                print("  [warn] heavy shield progression is lagging health/armor progression.")
+            else:
+                print("  [ok] heavy shield progression is aligned with other defenses.")
+
+    if meks_merged is not None:
+        armor_gen_mean = _stat_mean(meks_merged, "armor_generation")
+        armor_gen_median = meks_merged.get("armor_generation", {}).get("median")
+        if armor_gen_mean is not None and float(armor_gen_median) == 0.0 and armor_gen_mean < 1.0:
+            print("  [warn] armor_generation behaves like a ghost stat (mostly zero across meks).")
+        else:
+            print("  [ok] armor_generation is materially present across the mek roster.")
+
+        spread_ratio_cv = meks_merged.get("spread_power_ratio_cv")
+        if isinstance(spread_ratio_cv, (int, float)):
+            if float(spread_ratio_cv) < 0.08:
+                print("  [warn] spread_power_ratio_cv is low; regen behavior may be over-normalized.")
+            else:
+                print("  [ok] spread_power_ratio_cv indicates meaningful within-tier energy identity.")
 
 
 def audit_one_file(
@@ -190,6 +369,7 @@ def print_human_report(results: List[Dict[str, Any]], include_merged: bool) -> N
                 "module_budget_share",
                 "over_budget_peak_count",
                 "over_budget_mean_count",
+                "over_budget_peak_effective_count",
                 "spread_power_cv",
                 "spread_power_generation_cv",
                 "spread_power_ratio_cv",
@@ -278,6 +458,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print explanations for derived audit fields and expected value bands.",
     )
+    parser.add_argument(
+        "--print-system-checks",
+        action="store_true",
+        help="Print cross-file anomaly checks with warnings for systemic balance issues.",
+    )
     return parser
 
 
@@ -331,6 +516,9 @@ def main() -> int:
 
     if args.print_explanation:
         print_metric_explanations(results)
+
+    if args.print_system_checks:
+        print_system_checks(results)
 
     # Remove internal raw values before final output.
     for entry in results:

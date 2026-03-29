@@ -570,12 +570,15 @@ def audit_items(
         "module_effective_power_per_slot_factor": [],
         "single_module_turn_cost_peak": [],
         "single_module_turn_cost_mean": [],
+        "single_module_turn_cost_peak_effective": [],
         "single_module_turn_cost_peak_per_slot_factor": [],
         "single_module_turn_cost_mean_per_slot_factor": [],
+        "single_module_turn_cost_peak_effective_per_slot_factor": [],
     }
 
     over_budget_peak = 0
     over_budget_mean = 0
+    over_budget_peak_effective = 0
 
     for spec in catalog.values():
         slot_factor = slot_factor_for_item(spec.slot, slot_factors)
@@ -588,22 +591,36 @@ def audit_items(
         )
 
         module_costs = [float(module.power_on_use) for module in spec.modules]
+        module_effective_costs = [
+            float(module.power_on_use) * float(module.repeats if module.repeats is not None else 1)
+            for module in spec.modules
+        ]
         peak_module_cost = max(module_costs) if module_costs else 0.0
         mean_module_cost = (
             (sum(module_costs) / float(len(module_costs)))
             if module_costs
             else 0.0
         )
+        peak_module_effective_cost = (
+            max(module_effective_costs)
+            if module_effective_costs
+            else 0.0
+        )
 
         peak_turn_cost = float(spec.base_power_usage) + peak_module_cost
         mean_turn_cost = float(spec.base_power_usage) + mean_module_cost
+        peak_turn_cost_effective = float(spec.base_power_usage) + peak_module_effective_cost
         raw["single_module_turn_cost_peak"].append(peak_turn_cost)
         raw["single_module_turn_cost_mean"].append(mean_turn_cost)
+        raw["single_module_turn_cost_peak_effective"].append(peak_turn_cost_effective)
         raw["single_module_turn_cost_peak_per_slot_factor"].append(
             peak_turn_cost / safe_factor
         )
         raw["single_module_turn_cost_mean_per_slot_factor"].append(
             mean_turn_cost / safe_factor
+        )
+        raw["single_module_turn_cost_peak_effective_per_slot_factor"].append(
+            peak_turn_cost_effective / safe_factor
         )
 
         if turn_budget is not None:
@@ -612,6 +629,8 @@ def audit_items(
                 over_budget_peak += 1
             if mean_turn_cost > budget:
                 over_budget_mean += 1
+            if peak_turn_cost_effective > budget:
+                over_budget_peak_effective += 1
 
         for module in spec.modules:
             repeats = float(module.repeats if module.repeats is not None else 1)
@@ -639,6 +658,7 @@ def audit_items(
         report["module_budget_share"] = float(module_budget_share)
         report["over_budget_peak_count"] = int(over_budget_peak)
         report["over_budget_mean_count"] = int(over_budget_mean)
+        report["over_budget_peak_effective_count"] = int(over_budget_peak_effective)
 
     return report
 
@@ -701,6 +721,9 @@ def merge_audits(audits: List[Dict[str, Any]], kind: str) -> Dict[str, Any]:
         )
         merged["over_budget_mean_count"] = int(
             sum(int(report.get("over_budget_mean_count", 0)) for report in audits)
+        )
+        merged["over_budget_peak_effective_count"] = int(
+            sum(int(report.get("over_budget_peak_effective_count", 0)) for report in audits)
         )
 
     return merged

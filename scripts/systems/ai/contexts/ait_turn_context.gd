@@ -125,11 +125,13 @@ func get_reachable_tiles(
 	if tile_hash in _reachable_tiles_cache:
 		return _reachable_tiles_cache[tile_hash]
 	# Get the reachable tiles using the game map and cache the result.
-	var reachable_tiles: Array[Vector2i] = _get_reachable_tiles(unit)
+	var raw_reachable_tiles: Array[Vector2i] = _get_reachable_tiles(unit)
+	var reachable_tiles: Array[Vector2i] = []
 	# Filter out occupied tiles (except the unit's current position) to avoid invalid move targets.
-	for tile in reachable_tiles:
+	for tile: Vector2i in raw_reachable_tiles:
 		if game_map.is_occupied(tile) and tile != unit.position:
-			reachable_tiles.erase(tile)
+			continue
+		reachable_tiles.append(tile)
 	# Store the result in the cache for future queries.
 	_reachable_tiles_cache[tile_hash] = reachable_tiles
 	return reachable_tiles

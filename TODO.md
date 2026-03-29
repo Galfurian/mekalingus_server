@@ -15,7 +15,7 @@ Each completed TODO must be committed before moving to the next one.
   - Rationale: Dot-product divided by `1000.0` collapses differentiation of retreat tiles.
   - Dependency: None.
 
-- [ ] T3: Fix reachable tile filtering mutation during iteration.
+- [x] T3: Fix reachable tile filtering mutation during iteration.
   - File: `scripts/systems/ai/contexts/ait_turn_context.gd`
   - Rationale: Erasing while iterating can skip elements and create nondeterministic filtering.
   - Dependency: None.

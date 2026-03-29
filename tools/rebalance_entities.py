@@ -62,6 +62,15 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="If provided, power_generation = power * ratio after power transform.",
     )
+    parser.add_argument(
+        "--power-gen-ratio-blend",
+        type=float,
+        default=1.0,
+        help=(
+            "Blend factor for --power-gen-ratio in [0,1]. "
+            "0 keeps existing per-mek ratio spread; 1 fully normalizes to target ratio."
+        ),
+    )
     parser.add_argument("--power-min", type=float, default=None)
     parser.add_argument("--power-max", type=float, default=None)
     parser.add_argument("--power-gen-min", type=float, default=None)
@@ -76,6 +85,24 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--module-power-offset", type=float, default=0.0)
     parser.add_argument("--module-power-min", type=float, default=None)
     parser.add_argument("--module-power-max", type=float, default=None)
+    parser.add_argument(
+        "--turn-budget",
+        type=float,
+        default=None,
+        help=(
+            "Optional per-turn budget reference for items. "
+            "Used with --module-budget-share to cap base + one module draw."
+        ),
+    )
+    parser.add_argument(
+        "--module-budget-share",
+        type=float,
+        default=None,
+        help=(
+            "If set with --turn-budget, enforce "
+            "base_power_usage + module_power_on_use <= turn_budget * share * slot_factor."
+        ),
+    )
     parser.add_argument(
         "--slot-factors",
         default="",
@@ -120,6 +147,14 @@ def main() -> int:
         print("Invalid --slot-factors: %s" % exc, file=sys.stderr)
         return 2
 
+    if args.power_gen_ratio_blend < 0.0 or args.power_gen_ratio_blend > 1.0:
+        print("--power-gen-ratio-blend must be in [0, 1].", file=sys.stderr)
+        return 2
+
+    if args.module_budget_share is not None and args.module_budget_share < 0.0:
+        print("--module-budget-share must be >= 0.", file=sys.stderr)
+        return 2
+
     targets = resolve_json_targets(args.targets, recursive=args.recursive)
     if not targets:
         print("No JSON files matched target(s).", file=sys.stderr)
@@ -158,6 +193,7 @@ def main() -> int:
                         args.power_gen_max,
                         args.rounding,
                         slot_factors,
+                        args.power_gen_ratio_blend,
                     )
                 elif selected_kind == "items":
                     entity_changes = rebalance_item_entity(
@@ -173,6 +209,8 @@ def main() -> int:
                         args.module_glob,
                         args.rounding,
                         slot_factors,
+                        args.turn_budget,
+                        args.module_budget_share,
                     )
 
                 if entity_changes:

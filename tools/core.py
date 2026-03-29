@@ -311,6 +311,20 @@ def stats_to_dict(stats: NumericStats) -> Dict[str, float]:
     }
 
 
+def coefficient_of_variation(values: Iterable[float]) -> float:
+    collected = list(values)
+    if not collected:
+        return 0.0
+
+    mean_value = sum(collected) / float(len(collected))
+    if mean_value == 0.0:
+        return 0.0
+
+    variance = sum((value - mean_value) ** 2 for value in collected) / float(len(collected))
+    std_dev = math.sqrt(variance)
+    return std_dev / abs(mean_value)
+
+
 def apply_rounding(value: float, mode: str) -> float:
     if mode == "none":
         return value
@@ -534,12 +548,14 @@ def audit_combat_entities(
     }
     for metric, values in raw.items():
         report[metric] = stats_to_dict(compute_numeric_stats(values))
-    return report
+    return apply_report_spread_metrics(report)
 
 
 def audit_items(
     payload: Dict[str, Any],
     slot_factors: Optional[Any] = None,
+    turn_budget: Optional[float] = None,
+    module_budget_share: float = 1.0,
 ) -> Dict[str, Any]:
     catalog = parse_item_catalog(payload)
 
@@ -552,7 +568,14 @@ def audit_items(
         "module_effective_power": [],
         "module_power_on_use_per_slot_factor": [],
         "module_effective_power_per_slot_factor": [],
+        "single_module_turn_cost_peak": [],
+        "single_module_turn_cost_mean": [],
+        "single_module_turn_cost_peak_per_slot_factor": [],
+        "single_module_turn_cost_mean_per_slot_factor": [],
     }
+
+    over_budget_peak = 0
+    over_budget_mean = 0
 
     for spec in catalog.values():
         slot_factor = slot_factor_for_item(spec.slot, slot_factors)
@@ -563,6 +586,32 @@ def audit_items(
         raw["base_power_usage_per_slot_factor"].append(
             float(spec.base_power_usage) / safe_factor
         )
+
+        module_costs = [float(module.power_on_use) for module in spec.modules]
+        peak_module_cost = max(module_costs) if module_costs else 0.0
+        mean_module_cost = (
+            (sum(module_costs) / float(len(module_costs)))
+            if module_costs
+            else 0.0
+        )
+
+        peak_turn_cost = float(spec.base_power_usage) + peak_module_cost
+        mean_turn_cost = float(spec.base_power_usage) + mean_module_cost
+        raw["single_module_turn_cost_peak"].append(peak_turn_cost)
+        raw["single_module_turn_cost_mean"].append(mean_turn_cost)
+        raw["single_module_turn_cost_peak_per_slot_factor"].append(
+            peak_turn_cost / safe_factor
+        )
+        raw["single_module_turn_cost_mean_per_slot_factor"].append(
+            mean_turn_cost / safe_factor
+        )
+
+        if turn_budget is not None:
+            budget = float(turn_budget) * module_budget_share * safe_factor
+            if peak_turn_cost > budget:
+                over_budget_peak += 1
+            if mean_turn_cost > budget:
+                over_budget_mean += 1
 
         for module in spec.modules:
             repeats = float(module.repeats if module.repeats is not None else 1)
@@ -584,6 +633,13 @@ def audit_items(
     }
     for metric, values in raw.items():
         report[metric] = stats_to_dict(compute_numeric_stats(values))
+
+    if turn_budget is not None:
+        report["turn_budget"] = float(turn_budget)
+        report["module_budget_share"] = float(module_budget_share)
+        report["over_budget_peak_count"] = int(over_budget_peak)
+        report["over_budget_mean_count"] = int(over_budget_mean)
+
     return report
 
 
@@ -623,6 +679,30 @@ def merge_audits(audits: List[Dict[str, Any]], kind: str) -> Dict[str, Any]:
     }
     for metric, values in merged_raw.items():
         merged[metric] = stats_to_dict(compute_numeric_stats(values))
+    if kind in ("meks", "structures"):
+        merged = apply_report_spread_metrics(merged)
+
+    if kind == "items":
+        if any("turn_budget" in report for report in audits):
+            merged["turn_budget"] = next(
+                float(report["turn_budget"])
+                for report in audits
+                if "turn_budget" in report
+            )
+        if any("module_budget_share" in report for report in audits):
+            merged["module_budget_share"] = next(
+                float(report["module_budget_share"])
+                for report in audits
+                if "module_budget_share" in report
+            )
+
+        merged["over_budget_peak_count"] = int(
+            sum(int(report.get("over_budget_peak_count", 0)) for report in audits)
+        )
+        merged["over_budget_mean_count"] = int(
+            sum(int(report.get("over_budget_mean_count", 0)) for report in audits)
+        )
+
     return merged
 
 
@@ -644,6 +724,7 @@ def rebalance_mek_or_structure_entity(
     power_gen_max: Optional[float],
     rounding: str,
     slot_factors: Optional[Any] = None,
+    power_gen_ratio_blend: float = 1.0,
 ) -> Dict[str, Dict[str, Any]]:
     changes: Dict[str, Dict[str, Any]] = {}
 
@@ -664,9 +745,13 @@ def rebalance_mek_or_structure_entity(
 
     old_power_generation = float(entity.get("power_generation", 0))
     if power_gen_ratio is not None:
-        target_generation = float(entity.get("power", new_power)) * (
-            power_gen_ratio * slot_multiplier
+        safe_power = float(entity.get("power", new_power))
+        current_ratio = (old_power_generation / safe_power) if safe_power > 0.0 else 0.0
+        blended_ratio = (
+            (current_ratio * (1.0 - power_gen_ratio_blend))
+            + (power_gen_ratio * power_gen_ratio_blend)
         )
+        target_generation = safe_power * (blended_ratio * slot_multiplier)
         new_power_generation = apply_rounding(
             clamp_optional(target_generation, power_gen_min, power_gen_max),
             rounding,
@@ -704,6 +789,8 @@ def rebalance_item_entity(
     module_glob: str,
     rounding: str,
     slot_factors: Optional[Any] = None,
+    turn_budget: Optional[float] = None,
+    module_budget_share: Optional[float] = None,
 ) -> Dict[str, Dict[str, Any]]:
     changes: Dict[str, Dict[str, Any]] = {}
 
@@ -722,6 +809,15 @@ def rebalance_item_entity(
         changes["base_power_usage"] = {"old": old_base, "new": new_base}
         entity["base_power_usage"] = as_json_number(new_base)
 
+    derived_module_max: Optional[float] = module_power_max
+    if turn_budget is not None and module_budget_share is not None:
+        budget_cap = (float(turn_budget) * float(module_budget_share) * slot_multiplier) - float(new_base)
+        budget_cap = max(0.0, budget_cap)
+        if derived_module_max is None:
+            derived_module_max = budget_cap
+        else:
+            derived_module_max = min(float(derived_module_max), budget_cap)
+
     modules = entity.get("modules", [])
     for index, module in enumerate(modules):
         module_name = str(module.get("name", "module_%d" % index))
@@ -734,7 +830,7 @@ def rebalance_item_entity(
             scale=(module_power_scale * slot_multiplier),
             offset=(module_power_offset * slot_multiplier),
             min_value=module_power_min,
-            max_value=module_power_max,
+            max_value=derived_module_max,
             rounding=rounding,
         )
         if old_module_power != new_module_power:
@@ -746,3 +842,21 @@ def rebalance_item_entity(
             module["power_on_use"] = as_json_number(new_module_power)
 
     return changes
+
+
+def apply_report_spread_metrics(report: Dict[str, Any]) -> Dict[str, Any]:
+    raw = report.get("_raw_values", {})
+    power_values = [float(v) for v in raw.get("power", [])]
+    power_generation_values = [float(v) for v in raw.get("power_generation", [])]
+    ratio_values = [float(v) for v in raw.get("power_generation_to_power_ratio", [])]
+
+    report["spread_power_cv"] = round(coefficient_of_variation(power_values), 4)
+    report["spread_power_generation_cv"] = round(
+        coefficient_of_variation(power_generation_values),
+        4,
+    )
+    report["spread_power_ratio_cv"] = round(
+        coefficient_of_variation(ratio_values),
+        4,
+    )
+    return report

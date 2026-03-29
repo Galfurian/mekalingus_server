@@ -26,6 +26,8 @@ def audit_one_file(
     kind: str,
     entity_glob: str,
     slot_factors: Dict[int, float],
+    turn_budget: float | None,
+    module_budget_share: float,
 ) -> Tuple[Path, Dict[str, Any]]:
     payload = load_json_file(file_path)
     filtered_payload = filter_entity_ids(payload, entity_glob)
@@ -41,7 +43,12 @@ def audit_one_file(
             slot_factors,
         )
     if selected_kind == "items":
-        return file_path, audit_items(filtered_payload, slot_factors)
+        return file_path, audit_items(
+            filtered_payload,
+            slot_factors,
+            turn_budget=turn_budget,
+            module_budget_share=module_budget_share,
+        )
 
     raise ValueError("Unable to determine entity kind for %s" % file_path)
 
@@ -53,6 +60,17 @@ def print_human_report(results: List[Dict[str, Any]], include_merged: bool) -> N
         print("  entity_count: %d" % entry["report"]["entity_count"])
         for key, value in entry["report"].items():
             if key in ("kind", "entity_count", "_raw_values"):
+                continue
+            if key in (
+                "turn_budget",
+                "module_budget_share",
+                "over_budget_peak_count",
+                "over_budget_mean_count",
+                "spread_power_cv",
+                "spread_power_generation_cv",
+                "spread_power_ratio_cv",
+            ):
+                print("  %s: %s" % (key, value))
                 continue
             print(
                 "  %s: count=%d min=%s max=%s mean=%s median=%s"
@@ -113,6 +131,24 @@ def build_parser() -> argparse.ArgumentParser:
             "small=0.85,medium=1.0,large=1.2,utility=0.75"
         ),
     )
+    parser.add_argument(
+        "--turn-budget",
+        type=float,
+        default=None,
+        help=(
+            "Optional per-turn power budget reference used for items. "
+            "When set, item reports include over-budget counts."
+        ),
+    )
+    parser.add_argument(
+        "--module-budget-share",
+        type=float,
+        default=1.0,
+        help=(
+            "Share of turn budget available to a single activation. "
+            "Example: 0.8 means base + one module should fit in 80%% of budget."
+        ),
+    )
     return parser
 
 
@@ -151,6 +187,8 @@ def main() -> int:
                 selected_kind,
                 args.entity_glob,
                 slot_factors,
+                args.turn_budget,
+                args.module_budget_share,
             )
             reports_for_merge.setdefault(selected_kind, []).append(report)
             results.append({"file": str(file_path), "report": report})

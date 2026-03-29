@@ -24,15 +24,31 @@ func get_effect_type_label() -> String:
 
 func get_module_defensive_score(_target) -> float:
 	if not _target or not _target.combatant:
-		return 0
+		return 0.0
 
 	var current: int = BaseEffect.get_actor_stat(_target.combatant, stat)
 	var maximum: int = BaseEffect.get_actor_stat(_target.combatant, _get_max_stat())
-	if current < maximum * 0.4:
-		return 16
-	if current < maximum * 0.7:
-		return 8
-	return 0
+
+	# Return 0 if repair would have no effect (already at max).
+	if current >= maximum:
+		return 0.0
+
+	# Normalize effectiveness based on deficit.
+	var deficit: float = float(maximum - current)
+	var repair_potential: float = float(amount)
+
+	# If repair amount is negligible, return low score.
+	if repair_potential <= 0:
+		return 0.0
+
+	# Return how much of the deficit this repair covers, clamped to [0, 1].
+	var effectiveness: float = clampf(repair_potential / (deficit + 1.0), 0.0, 1.0)
+
+	# Scale by urgency (more urgent when damage is severe).
+	var urgency_factor: float = clampf(deficit / float(maximum), 0.0, 1.0)
+	var combined_score: float = clampf(effectiveness * 0.5 + urgency_factor * 0.5, 0.0, 1.0)
+
+	return combined_score
 
 
 func from_dict(data: Dictionary) -> void:

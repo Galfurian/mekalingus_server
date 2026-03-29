@@ -233,7 +233,7 @@ func _execute_turn() -> void:
 	_erase_destroyed_units()
 
 	# Compute the next-turn snapshot only after this turn is fully resolved.
-	await game_map.ai_controller.precompute_next_turn_snapshot()
+	await game_map.ai_controller.compute_next_turn_plans()
 
 	# Emit the turn ended signal.
 	on_turn_ended.emit(_current_turn)

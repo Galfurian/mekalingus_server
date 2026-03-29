@@ -70,7 +70,7 @@ func _init(
 	ai_controller = AIController.new(self)
 	turn_manager = TurnManager.new(self)
 
-	ai_controller.precompute_next_turn_snapshot()
+	ai_controller.compute_next_turn_plans()
 
 
 func generate_map() -> void:

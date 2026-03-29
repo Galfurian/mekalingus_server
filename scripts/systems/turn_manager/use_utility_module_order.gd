@@ -10,16 +10,6 @@ func _init(p_source, p_target, p_equipped_module: EquippedModule) -> void:
 	super(p_source, p_target, p_equipped_module)
 
 
-func _add_utility_log(game_map, message: String) -> void:
-	if is_instance_valid(game_map):
-		game_map.combat_logger.add_log(Enums.LogType.SUPPORT, message)
-		return
-
-
-func _format_pos_tag(pos: Vector2i) -> String:
-	return MetaTag.pos_tag(pos)
-
-
 # =============================================================================
 # OVERRIDE FUNCTIONS
 # =============================================================================
@@ -28,97 +18,27 @@ func _format_pos_tag(pos: Vector2i) -> String:
 func execute(game_map) -> bool:
 	var source_actor: CombatEntity = source.combatant
 	var target_actor: CombatEntity = target.combatant
-	if source_actor.is_dead() or target_actor.is_dead():
+	if not _are_order_actors_alive(source_actor, target_actor):
 		return false
-	if not _is_target_in_module_range(game_map):
-		var air_distance: float = source.position.distance_to(target.position)
-		_add_utility_log(
-			game_map,
-			(
-				"%s cannot use %s on %s (range: %d, distance: %.1f)"
-				% [
-					source_actor.get_chat_tag(),
-					equipped_module.get_chat_tag(),
-					target_actor.get_chat_tag(),
-					_get_effective_module_range(),
-					air_distance,
-				]
-			),
-		)
+	if not _check_target_range_or_log(game_map, source_actor, target_actor, Enums.LogType.SUPPORT):
 		return false
-	var has_offensive_effect: bool = equipped_module.module.effects.any(
-		func(effect: BaseEffect): return effect.is_offensive()
+	if not _passes_offensive_accuracy_gate(game_map, source_actor, target_actor):
+		return false
+	if not _try_spend_power_and_start_cooldown(source_actor):
+		return false
+
+	_add_log(
+		game_map,
+		Enums.LogType.SUPPORT,
+		"%s used %s" % [source_actor.get_chat_tag(), equipped_module.get_chat_tag()],
 	)
-	if has_offensive_effect and game_map.is_enemy_of(source, target):
-		var base_accuracy: int = 90 + source_actor.accuracy_modifier
-		var move_penalty: int = -min(source_actor.tiles_moved_last_turn * 5, 30)
-		var dodge_bonus: int = -min(target_actor.tiles_moved_last_turn * 3, 15)
-		var source_height: int = game_map.get_tile_height(source.position)
-		var target_height: int = game_map.get_tile_height(target.position)
-		var height_diff: int = source_height - target_height
-		var height_bonus: int = clamp(height_diff * 2, -10, 10)
-		var final_accuracy: int = min(base_accuracy + move_penalty + dodge_bonus + height_bonus, 90)
-		var roll: int = randi() % 100
-		if roll >= final_accuracy:
-			_add_utility_log(
-				game_map,
-				(
-					"%s used %s on %s and missed (accuracy=%d%%, roll=%d)"
-					% [
-						source_actor.get_chat_tag(),
-						equipped_module.get_chat_tag(),
-						target_actor.get_chat_tag(),
-						final_accuracy,
-						roll,
-					]
-				),
-			)
-			return false
-	# Check if the Mek has enough power.
-	if source_actor.power < equipped_module.module.power_on_use:
-		return false
-	# Deduct power.
-	source_actor.power -= equipped_module.module.power_on_use
-	# Start cooldown if necessary.
-	source_actor.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
-	_add_utility_log(
-		game_map, "%s used %s" % [source_actor.get_chat_tag(), equipped_module.get_chat_tag()]
-	)
+
 	for effect in equipped_module.module.effects:
-		var effect_chance: int = clamp(effect.chance, 0, 100)
-		if effect_chance < 100:
-			var effect_roll: int = randi() % 100
-			if effect_roll >= effect_chance:
-				_add_utility_log(
-					game_map,
-					(
-						"%s effect %s failed (%d%%, roll=%d)"
-						% [
-							equipped_module.get_chat_tag(),
-							effect.get_effect_type_label(),
-							effect_chance,
-							effect_roll,
-						]
-					),
-				)
-				continue
-		if effect.is_damage():
-			_apply_damage_effect(game_map, effect)
-		elif effect.is_repair():
-			_apply_repair_effect(game_map, effect)
-		elif effect.is_dot():
-			_apply_modifier_effect(game_map, effect)
-		elif effect.is_regen():
-			_apply_modifier_effect(game_map, effect)
-		elif effect.is_damage_reduction():
-			_apply_modifier_effect(game_map, effect)
-		elif effect.is_modifier():
-			_apply_modifier_effect(game_map, effect)
-		else:
-			_add_utility_log(
-				game_map, "Effect %s not yet implemented" % effect.get_effect_type_label()
-			)
-		if source_actor.is_dead() or target_actor.is_dead():
+		if not _should_apply_effect(game_map, effect, Enums.LogType.SUPPORT):
+			continue
+
+		_apply_module_effect(game_map, effect, Enums.LogType.SUPPORT)
+		if not _are_order_actors_alive(source_actor, target_actor):
 			break
 	return true
 
@@ -131,3 +51,55 @@ func _to_string() -> String:
 	if source == target:
 		return "%s is supporting itself with %s" % [source_name, module_name]
 	return "%s is supporting %s with %s" % [source_name, target_name, module_name]
+
+
+func _passes_offensive_accuracy_gate(
+	game_map,
+	source_actor: CombatEntity,
+	target_actor: CombatEntity,
+) -> bool:
+	if not _should_use_offensive_accuracy_gate(game_map):
+		return true
+
+	var final_accuracy: int = _calculate_accuracy(source_actor, target_actor, game_map)
+	var roll: int = randi() % 100
+	if roll < final_accuracy:
+		return true
+
+	_add_log(
+		game_map,
+		Enums.LogType.SUPPORT,
+		(
+			"%s used %s on %s and missed (accuracy=%d%%, roll=%d)"
+			% [
+				source_actor.get_chat_tag(),
+				equipped_module.get_chat_tag(),
+				target_actor.get_chat_tag(),
+				final_accuracy,
+				roll,
+			]
+		),
+	)
+	return false
+
+
+func _should_use_offensive_accuracy_gate(game_map) -> bool:
+	var has_offensive_effect: bool = equipped_module.module.effects.any(
+		func(effect: BaseEffect): return effect.is_offensive()
+	)
+	return has_offensive_effect and game_map.is_enemy_of(source, target)
+
+
+func _calculate_accuracy(
+	source_actor: CombatEntity,
+	target_actor: CombatEntity,
+	game_map,
+) -> int:
+	var base_accuracy: int = 90 + source_actor.accuracy_modifier
+	var move_penalty: int = -min(source_actor.tiles_moved_last_turn * 5, 30)
+	var dodge_bonus: int = -min(target_actor.tiles_moved_last_turn * 3, 15)
+	var source_height: int = game_map.get_tile_height(source.position)
+	var target_height: int = game_map.get_tile_height(target.position)
+	var height_diff: int = source_height - target_height
+	var height_bonus: int = clamp(height_diff * 2, -10, 10)
+	return min(base_accuracy + move_penalty + dodge_bonus + height_bonus, 90)

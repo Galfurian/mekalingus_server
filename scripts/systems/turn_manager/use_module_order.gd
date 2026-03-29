@@ -72,6 +72,125 @@ func _is_target_in_module_range(_game_map) -> bool:
 	return distance <= float(effective_range)
 
 
+func _are_order_actors_alive(source_actor: CombatEntity, target_actor: CombatEntity) -> bool:
+	return not source_actor.is_dead() and not target_actor.is_dead()
+
+
+func _check_target_range_or_log(
+	game_map,
+	source_actor: CombatEntity,
+	target_actor: CombatEntity,
+	log_type: Enums.LogType,
+) -> bool:
+	if _is_target_in_module_range(game_map):
+		return true
+
+	var air_distance: float = source.position.distance_to(target.position)
+	_add_log(
+		game_map,
+		log_type,
+		(
+			"%s cannot use %s on %s (range: %d, distance: %.1f)"
+			% [
+				source_actor.get_chat_tag(),
+				equipped_module.get_chat_tag(),
+				target_actor.get_chat_tag(),
+				_get_effective_module_range(),
+				air_distance,
+			]
+		),
+	)
+	return false
+
+
+func _try_spend_power_and_start_cooldown(source_actor: CombatEntity) -> bool:
+	if source_actor.power < equipped_module.module.power_on_use:
+		return false
+
+	source_actor.power -= equipped_module.module.power_on_use
+	source_actor.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
+	return true
+
+
+func _should_apply_effect(
+	game_map,
+	effect: BaseEffect,
+	log_type: Enums.LogType,
+	log_prefix: String = "",
+) -> bool:
+	var effect_chance: int = clamp(effect.chance, 0, 100)
+	if effect_chance >= 100:
+		return true
+
+	var effect_roll: int = randi() % 100
+	if effect_roll < effect_chance:
+		return true
+
+	if log_prefix.is_empty():
+		_add_log(
+			game_map,
+			log_type,
+			(
+				"%s effect %s failed (%d%%, roll=%d)"
+				% [
+					equipped_module.get_chat_tag(),
+					effect.get_effect_type_label(),
+					effect_chance,
+					effect_roll,
+				]
+			),
+		)
+	else:
+		_add_log(
+			game_map,
+			log_type,
+			(
+				"%s %s effect %s failed (%d%%, roll=%d)"
+				% [
+					log_prefix,
+					equipped_module.get_chat_tag(),
+					effect.get_effect_type_label(),
+					effect_chance,
+					effect_roll,
+				]
+			),
+		)
+
+	return false
+
+
+func _apply_module_effect(
+	game_map,
+	effect: BaseEffect,
+	unsupported_log_type: Enums.LogType,
+	unsupported_log_prefix: String = "",
+) -> void:
+	if effect.is_damage():
+		_apply_damage_effect(game_map, effect)
+	elif effect.is_repair():
+		_apply_repair_effect(game_map, effect)
+	elif (
+		effect.is_dot() or effect.is_regen() or effect.is_damage_reduction() or effect.is_modifier()
+	):
+		_apply_modifier_effect(game_map, effect)
+	else:
+		if unsupported_log_prefix.is_empty():
+			_add_log(
+				game_map,
+				unsupported_log_type,
+				"Effect %s not yet implemented" % effect.get_effect_type_label(),
+			)
+		else:
+			_add_log(
+				game_map,
+				unsupported_log_type,
+				(
+					"%s Effect %s not yet implemented"
+					% [unsupported_log_prefix, effect.get_effect_type_label()]
+				),
+			)
+
+
 # =============================================================================
 # PRIVATE FUNCTIONS
 # =============================================================================
@@ -80,9 +199,10 @@ func _is_target_in_module_range(_game_map) -> bool:
 func _apply_damage_effect(game_map, effect: BaseEffect) -> void:
 	var source_actor: CombatEntity = source.combatant
 	var target_actor: CombatEntity = target.combatant
-	if source_actor.is_dead() or target_actor.is_dead():
+	if not _are_order_actors_alive(source_actor, target_actor):
 		return
-	# Handle SELF damage.
+
+	# SELF target branch.
 	if effect.target == Enums.TargetType.SELF:
 		var result = source_actor.take_damage_from_effect(effect)
 		_add_log(
@@ -101,7 +221,7 @@ func _apply_damage_effect(game_map, effect: BaseEffect) -> void:
 				]
 			)
 		)
-	# Handle AREA damage.
+	# AREA target branch.
 	elif effect.target == Enums.TargetType.AREA:
 		var center = target if effect.center_on_target else source
 		var affected = AIUnitQueries.get_units_in_range(
@@ -129,7 +249,7 @@ func _apply_damage_effect(game_map, effect: BaseEffect) -> void:
 					]
 				)
 			)
-	# Handle regular ENEMY / ALLY targeting.
+	# DIRECT target branch.
 	else:
 		var result = target_actor.take_damage_from_effect(effect)
 		_add_log(
@@ -154,9 +274,10 @@ func _apply_damage_effect(game_map, effect: BaseEffect) -> void:
 func _apply_repair_effect(game_map, effect: BaseEffect) -> void:
 	var source_actor: CombatEntity = source.combatant
 	var target_actor: CombatEntity = target.combatant
-	if source_actor.is_dead() or target_actor.is_dead():
+	if not _are_order_actors_alive(source_actor, target_actor):
 		return
-	# Handle SELF repair.
+
+	# SELF target branch.
 	if effect.target == Enums.TargetType.SELF:
 		var result = source_actor.repair_from_effect(effect)
 		_add_log(
@@ -172,7 +293,7 @@ func _apply_repair_effect(game_map, effect: BaseEffect) -> void:
 				]
 			)
 		)
-	# Handle AREA repair.
+	# AREA target branch.
 	elif effect.target == Enums.TargetType.AREA:
 		var center = target if effect.center_on_target else source
 		var include_allies = (
@@ -201,7 +322,7 @@ func _apply_repair_effect(game_map, effect: BaseEffect) -> void:
 					]
 				)
 			)
-	# Handle ENEMY / ALLY repair.
+	# DIRECT target branch.
 	else:
 		if target_actor.is_dead():
 			return
@@ -225,9 +346,10 @@ func _apply_repair_effect(game_map, effect: BaseEffect) -> void:
 func _apply_modifier_effect(game_map, effect: BaseEffect) -> void:
 	var source_actor: CombatEntity = source.combatant
 	var target_actor: CombatEntity = target.combatant
-	if source_actor.is_dead() or target_actor.is_dead():
+	if not _are_order_actors_alive(source_actor, target_actor):
 		return
-	# Handle SELF-targeted effects.
+
+	# SELF target branch.
 	if effect.target == Enums.TargetType.SELF:
 		source_actor.add_effect(equipped_module.module, effect, source)
 		_add_log(
@@ -244,7 +366,7 @@ func _apply_modifier_effect(game_map, effect: BaseEffect) -> void:
 				]
 			)
 		)
-	# Handle AREA-based effects.
+	# AREA target branch.
 	elif effect.target == Enums.TargetType.AREA:
 		var center = target if effect.center_on_target else source
 		var include_allies = (
@@ -280,7 +402,7 @@ func _apply_modifier_effect(game_map, effect: BaseEffect) -> void:
 					]
 				)
 			)
-	# Handle direct ENEMY / ALLY targeting.
+	# DIRECT target branch.
 	else:
 		target_actor.add_effect(equipped_module.module, effect, source)
 		_add_log(

@@ -10,16 +10,6 @@ func _init(p_source, p_target, p_equipped_module: EquippedModule) -> void:
 	super(p_source, p_target, p_equipped_module)
 
 
-func _add_combat_log(game_map, message: String) -> void:
-	if is_instance_valid(game_map):
-		game_map.combat_logger.add_log(Enums.LogType.ATTACK, message)
-		return
-
-
-func _format_pos_tag(pos: Vector2i) -> String:
-	return MetaTag.pos_tag(pos)
-
-
 # =============================================================================
 # OVERRIDE FUNCTIONS
 # =============================================================================
@@ -28,124 +18,15 @@ func _format_pos_tag(pos: Vector2i) -> String:
 func execute(game_map) -> bool:
 	var source_actor: CombatEntity = source.combatant
 	var target_actor: CombatEntity = target.combatant
-	if source_actor.is_dead() or target_actor.is_dead():
+	if not _are_order_actors_alive(source_actor, target_actor):
 		return false
-	if not _is_target_in_module_range(game_map):
-		var air_distance: float = source.position.distance_to(target.position)
-		_add_combat_log(
-			game_map,
-			(
-				"%s cannot use %s on %s (range: %d, distance: %.1f)"
-				% [
-					source_actor.get_chat_tag(),
-					equipped_module.get_chat_tag(),
-					target_actor.get_chat_tag(),
-					_get_effective_module_range(),
-					air_distance,
-				]
-			),
-		)
+	if not _check_target_range_or_log(game_map, source_actor, target_actor, Enums.LogType.ATTACK):
 		return false
-	# Check if the Mek has enough power.
-	if source_actor.power < equipped_module.module.power_on_use:
+	if not _try_spend_power_and_start_cooldown(source_actor):
 		return false
-	# Deduct power.
-	source_actor.power -= equipped_module.module.power_on_use
-	# Start cooldown if necessary
-	source_actor.cooldown_manager.start_cooldown(equipped_module.item, equipped_module.module)
-	var repeats: int = max(1, equipped_module.repeats)
-	var hit_count := 0
 
-	# Accuracy factors are computed once because they are stable for this order execution.
-	var base_accuracy := 90
-	var modifier := source_actor.accuracy_modifier
-	var move_penalty: int = -min(source_actor.tiles_moved_last_turn * 5, 30)
-	var dodge_bonus: int = -min(target_actor.tiles_moved_last_turn * 3, 15)
-	var source_height = game_map.get_tile_height(source.position)
-	var target_height = game_map.get_tile_height(target.position)
-	var height_diff = source_height - target_height
-	var height_bonus = clamp(height_diff * 2, -10, 10)
-	var final_accuracy = min(
-		base_accuracy + modifier + move_penalty + dodge_bonus + height_bonus, 90
-	)
-
-	for repeat_index in range(repeats):
-		if source_actor.is_dead() or target_actor.is_dead():
-			break
-
-		var roll = randi() % 100
-		var hit_success = roll < final_accuracy
-		var shot_label := "[shot %d/%d]" % [repeat_index + 1, repeats]
-
-		var log_text := (
-			"%s %s attacking %s with %s:"
-			% [
-				shot_label,
-				source_actor.get_chat_tag(),
-				target_actor.get_chat_tag(),
-				equipped_module.get_chat_tag(),
-			]
-		)
-		log_text += (
-			" base=%d, modifier=%d, move=%d, dodge=%d, height=%d"
-			% [base_accuracy, modifier, move_penalty, dodge_bonus, height_bonus]
-		)
-		log_text += (
-			" -> accuracy=%d%% (roll=%d): %s"
-			% [final_accuracy, roll, "HIT" if hit_success else "MISS"]
-		)
-		if repeat_index == 0:
-			if equipped_module.cooldown:
-				log_text += " (cooldown: %d)" % equipped_module.cooldown
-			else:
-				log_text += " (instant use)"
-		_add_combat_log(game_map, log_text)
-
-		if not hit_success:
-			continue
-
-		hit_count += 1
-		for effect in equipped_module.module.effects:
-			var effect_chance: int = clamp(effect.chance, 0, 100)
-			if effect_chance < 100:
-				var effect_roll: int = randi() % 100
-				if effect_roll >= effect_chance:
-					_add_combat_log(
-						game_map,
-						(
-							"%s %s effect %s failed (%d%%, roll=%d)"
-							% [
-								shot_label,
-								equipped_module.get_chat_tag(),
-								effect.get_effect_type_label(),
-								effect_chance,
-								effect_roll,
-							]
-						),
-					)
-					continue
-			if effect.is_damage():
-				_apply_damage_effect(game_map, effect)
-			elif effect.is_repair():
-				_apply_repair_effect(game_map, effect)
-			elif effect.is_dot():
-				_apply_modifier_effect(game_map, effect)
-			elif effect.is_regen():
-				_apply_modifier_effect(game_map, effect)
-			elif effect.is_damage_reduction():
-				_apply_modifier_effect(game_map, effect)
-			elif effect.is_modifier():
-				_apply_modifier_effect(game_map, effect)
-			else:
-				_add_combat_log(
-					game_map,
-					"%s Effect %s not yet implemented"
-					% [shot_label, effect.get_effect_type_label()],
-				)
-			if source_actor.is_dead() or target_actor.is_dead():
-				break
-
-	return hit_count > 0
+	var accuracy_data: Dictionary = _build_accuracy_data(source_actor, target_actor, game_map)
+	return _execute_repeated_attacks(game_map, source_actor, target_actor, accuracy_data)
 
 
 func _to_string() -> String:
@@ -155,3 +36,139 @@ func _to_string() -> String:
 	if source == target:
 		return "%s is attacking itself with %s" % [source_name, module_name]
 	return "%s is attacking %s with %s" % [source_name, target_name, module_name]
+
+
+func _build_accuracy_data(
+	source_actor: CombatEntity,
+	target_actor: CombatEntity,
+	game_map,
+) -> Dictionary:
+	var base_accuracy := 90
+	var modifier := source_actor.accuracy_modifier
+	var move_penalty: int = -min(source_actor.tiles_moved_last_turn * 5, 30)
+	var dodge_bonus: int = -min(target_actor.tiles_moved_last_turn * 3, 15)
+	var source_height = game_map.get_tile_height(source.position)
+	var target_height = game_map.get_tile_height(target.position)
+	var height_diff = source_height - target_height
+	var height_bonus = clamp(height_diff * 2, -10, 10)
+	var final_accuracy = min(
+		base_accuracy + modifier + move_penalty + dodge_bonus + height_bonus,
+		90,
+	)
+
+	return {
+		"base_accuracy": base_accuracy,
+		"modifier": modifier,
+		"move_penalty": move_penalty,
+		"dodge_bonus": dodge_bonus,
+		"height_bonus": height_bonus,
+		"final_accuracy": final_accuracy,
+	}
+
+
+func _execute_repeated_attacks(
+	game_map,
+	source_actor: CombatEntity,
+	target_actor: CombatEntity,
+	accuracy_data: Dictionary,
+) -> bool:
+	var repeats: int = max(1, equipped_module.repeats)
+	var hit_count := 0
+
+	for repeat_index in range(repeats):
+		if not _are_order_actors_alive(source_actor, target_actor):
+			break
+
+		var shot_label := "[shot %d/%d]" % [repeat_index + 1, repeats]
+		var shot_result: Dictionary = _perform_single_shot(
+			game_map,
+			source_actor,
+			target_actor,
+			accuracy_data,
+			repeat_index,
+			shot_label,
+		)
+		if shot_result.hit:
+			hit_count += 1
+
+	return hit_count > 0
+
+
+func _perform_single_shot(
+	game_map,
+	source_actor: CombatEntity,
+	target_actor: CombatEntity,
+	accuracy_data: Dictionary,
+	repeat_index: int,
+	shot_label: String,
+) -> Dictionary:
+	var roll: int = randi() % 100
+	var final_accuracy: int = int(accuracy_data.final_accuracy)
+	var hit_success: bool = roll < final_accuracy
+
+	_add_log(
+		game_map,
+		Enums.LogType.ATTACK,
+		_build_shot_log(
+			source_actor,
+			target_actor,
+			accuracy_data,
+			roll,
+			hit_success,
+			repeat_index,
+			shot_label,
+		),
+	)
+
+	if not hit_success:
+		return {"hit": false}
+
+	for effect in equipped_module.module.effects:
+		if not _should_apply_effect(game_map, effect, Enums.LogType.ATTACK, shot_label):
+			continue
+
+		_apply_module_effect(game_map, effect, Enums.LogType.ATTACK, shot_label)
+		if not _are_order_actors_alive(source_actor, target_actor):
+			break
+
+	return {"hit": true}
+
+
+func _build_shot_log(
+	source_actor: CombatEntity,
+	target_actor: CombatEntity,
+	accuracy_data: Dictionary,
+	roll: int,
+	hit_success: bool,
+	repeat_index: int,
+	shot_label: String,
+) -> String:
+	var log_text := (
+		"%s %s attacking %s with %s:"
+		% [
+			shot_label,
+			source_actor.get_chat_tag(),
+			target_actor.get_chat_tag(),
+			equipped_module.get_chat_tag(),
+		]
+	)
+	log_text += (
+		" base=%d, modifier=%d, move=%d, dodge=%d, height=%d"
+		% [
+			accuracy_data.base_accuracy,
+			accuracy_data.modifier,
+			accuracy_data.move_penalty,
+			accuracy_data.dodge_bonus,
+			accuracy_data.height_bonus,
+		]
+	)
+	log_text += (
+		" -> accuracy=%d%% (roll=%d): %s"
+		% [accuracy_data.final_accuracy, roll, "HIT" if hit_success else "MISS"]
+	)
+	if repeat_index == 0:
+		if equipped_module.cooldown:
+			log_text += " (cooldown: %d)" % equipped_module.cooldown
+		else:
+			log_text += " (instant use)"
+	return log_text

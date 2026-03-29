@@ -21,6 +21,130 @@ from core import (
 )
 
 
+def _base_kind(kind: str) -> str:
+    return kind.split(":", 1)[0]
+
+
+def metric_explanations_for_kind(kind: str) -> Dict[str, Dict[str, str]]:
+    base = _base_kind(kind)
+
+    combat: Dict[str, Dict[str, str]] = {
+        "health_generation_to_health_ratio": {
+            "meaning": "Fraction of max health regenerated per turn.",
+            "expected": "Typical stable range is ~0.00 to 0.03. Values near 0.10 are very high sustain.",
+        },
+        "armor_generation_to_armor_ratio": {
+            "meaning": "Fraction of max armor regenerated per turn.",
+            "expected": "Typical range is ~0.00 to 0.05. Values above ~0.08 can make armor too sticky.",
+        },
+        "shield_generation_to_shield_ratio": {
+            "meaning": "Fraction of max shield regenerated per turn.",
+            "expected": "Typical range is ~0.08 to 0.20. Lower values feel brittle; high values feel very resilient.",
+        },
+        "power_generation_to_power_ratio": {
+            "meaning": "Fraction of max power restored each turn.",
+            "expected": "Typical range is ~0.18 to 0.30 depending on role. Higher means faster ability cycling.",
+        },
+        "slot_weight": {
+            "meaning": "Weighted average slot profile after applying slot factors.",
+            "expected": "Around 1.0 is neutral. Above 1.0 indicates heavier slot load; below 1.0 lighter load.",
+        },
+        "power_per_slot_weight": {
+            "meaning": "Power normalized by slot-weight profile to compare entities with different slot mixes.",
+            "expected": "Should scale by class tier; compare medians inside each tier, then across tiers.",
+        },
+        "power_generation_per_slot_weight": {
+            "meaning": "Power generation normalized by slot-weight profile.",
+            "expected": "Should track power_per_slot_weight shape. Large divergence signals pacing imbalance.",
+        },
+        "spread_power_cv": {
+            "meaning": "Coefficient of variation for power ($\\sigma / \\mu$).",
+            "expected": "Higher means more archetype spread. Near 0 means flattening.",
+        },
+        "spread_power_generation_cv": {
+            "meaning": "Coefficient of variation for power generation ($\\sigma / \\mu$).",
+            "expected": "Should remain meaningfully above 0 to preserve class differentiation.",
+        },
+        "spread_power_ratio_cv": {
+            "meaning": "Coefficient of variation for power_generation_to_power_ratio.",
+            "expected": "Low-but-nonzero is normal. Near 0 indicates overly normalized regen behavior.",
+        },
+    }
+
+    items: Dict[str, Dict[str, str]] = {
+        "base_power_usage_per_slot_factor": {
+            "meaning": "Base upkeep normalized by slot factor.",
+            "expected": "Use for cross-slot comparison. Large-slot items can be higher in raw terms but similar normalized terms.",
+        },
+        "module_power_on_use_per_slot_factor": {
+            "meaning": "Activation cost normalized by slot factor.",
+            "expected": "Useful to compare burst cost parity across slot sizes.",
+        },
+        "module_effective_power": {
+            "meaning": "Activation cost multiplied by repeats.",
+            "expected": "Can be intentionally high for heavy repeat weapons. Evaluate alongside cooldown and role.",
+        },
+        "module_effective_power_per_slot_factor": {
+            "meaning": "Repeated activation burden normalized by slot factor.",
+            "expected": "High values are acceptable for mega items, but should align with tier fantasy and cooldown.",
+        },
+        "single_module_turn_cost_peak": {
+            "meaning": "Worst-case one-turn draw: base_power_usage + most expensive module.",
+            "expected": "Primary check for one-module-per-turn economy viability.",
+        },
+        "single_module_turn_cost_mean": {
+            "meaning": "Average one-turn draw: base_power_usage + average module cost.",
+            "expected": "Lower than peak; indicates typical rather than spike burden.",
+        },
+        "single_module_turn_cost_peak_per_slot_factor": {
+            "meaning": "Peak one-turn draw normalized by slot factor.",
+            "expected": "Best field for cross-slot outlier detection.",
+        },
+        "single_module_turn_cost_mean_per_slot_factor": {
+            "meaning": "Mean one-turn draw normalized by slot factor.",
+            "expected": "Useful for overall pacing fairness across slot classes.",
+        },
+        "over_budget_peak_count": {
+            "meaning": "Count of items whose peak one-turn draw exceeds configured turn budget.",
+            "expected": "Lower is safer. Nonzero can be intentional for high-risk high-reward items.",
+        },
+        "over_budget_mean_count": {
+            "meaning": "Count of items whose mean one-turn draw exceeds configured turn budget.",
+            "expected": "Usually very low. High values imply broad economy pressure.",
+        },
+    }
+
+    if base == "items":
+        return items
+    if base in ("meks", "structures"):
+        return combat
+    return {}
+
+
+def print_metric_explanations(results: List[Dict[str, Any]]) -> None:
+    printed: set[str] = set()
+    print("\nMetric explanations")
+    print("  Derived fields only (non-obvious).")
+
+    for entry in results:
+        kind = str(entry.get("report", {}).get("kind", "unknown"))
+        base = _base_kind(kind)
+        if base in printed:
+            continue
+
+        explanations = metric_explanations_for_kind(kind)
+        if not explanations:
+            continue
+
+        print("\n  Kind: %s" % base)
+        for metric, details in explanations.items():
+            print("  - %s" % metric)
+            print("    meaning: %s" % details["meaning"])
+            print("    expected: %s" % details["expected"])
+
+        printed.add(base)
+
+
 def audit_one_file(
     file_path: Path,
     kind: str,
@@ -149,6 +273,11 @@ def build_parser() -> argparse.ArgumentParser:
             "Example: 0.8 means base + one module should fit in 80%% of budget."
         ),
     )
+    parser.add_argument(
+        "--print-explanation",
+        action="store_true",
+        help="Print explanations for derived audit fields and expected value bands.",
+    )
     return parser
 
 
@@ -199,6 +328,9 @@ def main() -> int:
         for merge_kind, reports in reports_for_merge.items():
             merged = merge_audits(reports, merge_kind)
             results.append({"file": "<merged:%s>" % merge_kind, "report": merged})
+
+    if args.print_explanation:
+        print_metric_explanations(results)
 
     # Remove internal raw values before final output.
     for entry in results:

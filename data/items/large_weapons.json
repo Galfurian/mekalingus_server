@@ -84,7 +84,7 @@
 			{
 				"name": "Nova Charge",
 				"passive": false,
-				"power_on_use": 64.0,
+				"power_on_use": 61,
 				"module_range": 6.0,
 				"cooldown": 3.0,
 				"effects": [
@@ -208,7 +208,7 @@
 			{
 				"name": "Devastator Blast",
 				"passive": false,
-				"power_on_use": 83.0,
+				"power_on_use": 77,
 				"module_range": 6.0,
 				"cooldown": 4.0,
 				"effects": [
@@ -232,7 +232,7 @@
 			{
 				"name": "Burning Stream",
 				"passive": false,
-				"power_on_use": 74.0,
+				"power_on_use": 48,
 				"module_range": 5.0,
 				"cooldown": 3.0,
 				"effects": [

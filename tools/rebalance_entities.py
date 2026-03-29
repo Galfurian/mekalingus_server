@@ -6,157 +6,18 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from core import (
-    apply_rounding,
-    clamp_optional,
     detect_entity_kind,
     filter_entity_ids,
     load_json_file,
+    parse_slot_factor_map,
+    rebalance_item_entity,
+    rebalance_mek_or_structure_entity,
     resolve_json_targets,
     write_json_file,
 )
-
-
-def _transform_value(
-    old_value: float,
-    scale: float,
-    offset: float,
-    min_value: Optional[float],
-    max_value: Optional[float],
-    rounding: str,
-) -> float:
-    updated = (old_value * scale) + offset
-    updated = clamp_optional(updated, min_value, max_value)
-    updated = apply_rounding(updated, rounding)
-    return updated
-
-
-def _diff_value(old_value: Any, new_value: Any) -> bool:
-    return old_value != new_value
-
-
-def rebalance_mek_or_structure_entity(
-    entity: Dict[str, Any],
-    power_scale: float,
-    power_offset: float,
-    power_gen_scale: float,
-    power_gen_offset: float,
-    power_gen_ratio: Optional[float],
-    power_min: Optional[float],
-    power_max: Optional[float],
-    power_gen_min: Optional[float],
-    power_gen_max: Optional[float],
-    rounding: str,
-) -> Dict[str, Dict[str, Any]]:
-    changes: Dict[str, Dict[str, Any]] = {}
-
-    old_power = float(entity.get("power", 0))
-    new_power = _transform_value(
-        old_power,
-        power_scale,
-        power_offset,
-        power_min,
-        power_max,
-        rounding,
-    )
-
-    if _diff_value(old_power, new_power):
-        changes["power"] = {"old": old_power, "new": new_power}
-        entity["power"] = int(new_power) if float(new_power).is_integer() else new_power
-
-    old_power_generation = float(entity.get("power_generation", 0))
-    if power_gen_ratio is not None:
-        derived_generation = clamp_optional(
-            float(entity["power"]) * power_gen_ratio,
-            power_gen_min,
-            power_gen_max,
-        )
-        new_power_generation = apply_rounding(derived_generation, rounding)
-    else:
-        new_power_generation = _transform_value(
-            old_power_generation,
-            power_gen_scale,
-            power_gen_offset,
-            power_gen_min,
-            power_gen_max,
-            rounding,
-        )
-
-    if _diff_value(old_power_generation, new_power_generation):
-        changes["power_generation"] = {
-            "old": old_power_generation,
-            "new": new_power_generation,
-        }
-        entity["power_generation"] = (
-            int(new_power_generation)
-            if float(new_power_generation).is_integer()
-            else new_power_generation
-        )
-
-    return changes
-
-
-def rebalance_item_entity(
-    entity: Dict[str, Any],
-    base_power_scale: float,
-    base_power_offset: float,
-    base_power_min: Optional[float],
-    base_power_max: Optional[float],
-    module_power_scale: float,
-    module_power_offset: float,
-    module_power_min: Optional[float],
-    module_power_max: Optional[float],
-    module_glob: str,
-    rounding: str,
-) -> Dict[str, Dict[str, Any]]:
-    import fnmatch
-
-    changes: Dict[str, Dict[str, Any]] = {}
-
-    old_base = float(entity.get("base_power_usage", 0))
-    new_base = _transform_value(
-        old_base,
-        base_power_scale,
-        base_power_offset,
-        base_power_min,
-        base_power_max,
-        rounding,
-    )
-    if _diff_value(old_base, new_base):
-        changes["base_power_usage"] = {"old": old_base, "new": new_base}
-        entity["base_power_usage"] = int(new_base) if float(new_base).is_integer() else new_base
-
-    modules = entity.get("modules", [])
-    for index, module in enumerate(modules):
-        module_name = str(module.get("name", "module_%d" % index))
-        if not fnmatch.fnmatch(module_name, module_glob):
-            continue
-
-        old_module_power = float(module.get("power_on_use", 0))
-        new_module_power = _transform_value(
-            old_module_power,
-            module_power_scale,
-            module_power_offset,
-            module_power_min,
-            module_power_max,
-            rounding,
-        )
-        if _diff_value(old_module_power, new_module_power):
-            changes["modules.%d.power_on_use" % index] = {
-                "module": module_name,
-                "old": old_module_power,
-                "new": new_module_power,
-            }
-            module["power_on_use"] = (
-                int(new_module_power)
-                if float(new_module_power).is_integer()
-                else new_module_power
-            )
-
-    return changes
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -215,6 +76,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--module-power-offset", type=float, default=0.0)
     parser.add_argument("--module-power-min", type=float, default=None)
     parser.add_argument("--module-power-max", type=float, default=None)
+    parser.add_argument(
+        "--slot-factors",
+        default="",
+        help=(
+            "Slot weighting map as CSV, e.g. "
+            "small=0.85,medium=1.0,large=1.2,utility=0.75"
+        ),
+    )
 
     parser.add_argument(
         "--rounding",
@@ -244,6 +113,12 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
+
+    try:
+        slot_factors = parse_slot_factor_map(args.slot_factors)
+    except ValueError as exc:
+        print("Invalid --slot-factors: %s" % exc, file=sys.stderr)
+        return 2
 
     targets = resolve_json_targets(args.targets, recursive=args.recursive)
     if not targets:
@@ -282,6 +157,7 @@ def main() -> int:
                         args.power_gen_min,
                         args.power_gen_max,
                         args.rounding,
+                        slot_factors,
                     )
                 elif selected_kind == "items":
                     entity_changes = rebalance_item_entity(
@@ -296,6 +172,7 @@ def main() -> int:
                         args.module_power_max,
                         args.module_glob,
                         args.rounding,
+                        slot_factors,
                     )
 
                 if entity_changes:

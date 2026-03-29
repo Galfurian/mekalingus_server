@@ -40,7 +40,7 @@ func _get_offensive_module_total_power(
 		if not _can_effect_apply_to_target(effect, source, target):
 			continue
 
-		var effect_score: float = effect.get_module_offensive_score(target)
+		var effect_score: float = effect.get_module_offensive_score(target, module)
 		effect_score = clampf(effect_score, 0.0, 1.0)
 		total_score += effect_score
 		count += 1

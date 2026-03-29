@@ -21,7 +21,7 @@ func get_threat_score() -> float:
 	return clampf(float(amount * duration) / 100.0, 0.0, 1.0)
 
 
-func get_module_offensive_score(_target) -> float:
+func get_module_offensive_score(_target, _module: ItemModule = null) -> float:
 	# require target combat entity
 	if not _target or not _target.combatant:
 		return 0.0

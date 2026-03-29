@@ -99,7 +99,7 @@ func evaluate_effect_power(repeats: int) -> float:
 	)
 
 
-func get_module_offensive_score(_target) -> float:
+func get_module_offensive_score(_target, _module: ItemModule = null) -> float:
 	return 0.0
 
 

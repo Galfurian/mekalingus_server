@@ -22,7 +22,7 @@ func remove(actor) -> void:
 	BaseEffect.add_to_actor_stat(actor, stat, -amount)
 
 
-func get_module_offensive_score(_target) -> float:
+func get_module_offensive_score(_target, _module: ItemModule = null) -> float:
 	# Only negative regen (debuff) is offensive in this context.
 	if amount >= 0:
 		return 0.0

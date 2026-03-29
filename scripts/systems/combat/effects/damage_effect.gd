@@ -21,7 +21,7 @@ func get_threat_score() -> float:
 	return clampf(float(amount) / 100.0, 0.0, 1.0)
 
 
-func get_module_offensive_score(_target) -> float:
+func get_module_offensive_score(_target, _module: ItemModule = null) -> float:
 	if not _target or not _target.combatant:
 		return 0.0
 
@@ -32,6 +32,10 @@ func get_module_offensive_score(_target) -> float:
 		true,
 	)
 	var estimated_damage: float = float(damage_dict.total)
+	var repeats := 1
+	if _module != null:
+		repeats = max(1, _module.repeats)
+	estimated_damage *= float(repeats)
 
 	# Use target total durability as normalizer so result is 0..1.
 	var total_defense: float = (

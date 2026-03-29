@@ -45,12 +45,12 @@ func _get_utility_module_total_power(
 
 		var effect_priority: float = 0.0
 		if effect.is_offensive():
-			effect_priority = effect.get_module_offensive_score(target)
+			effect_priority = effect.get_module_offensive_score(target, module)
 		elif effect.is_defensive():
 			effect_priority = effect.get_module_defensive_score(target)
 		else:
 			effect_priority = max(
-				effect.get_module_offensive_score(target),
+				effect.get_module_offensive_score(target, module),
 				effect.get_module_defensive_score(target),
 			)
 

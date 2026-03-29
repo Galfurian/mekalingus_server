@@ -22,7 +22,7 @@ func remove(actor) -> void:
 	BaseEffect.add_to_actor_stat(actor, stat, -amount)
 
 
-func get_module_offensive_score(_target) -> float:
+func get_module_offensive_score(_target, _module: ItemModule = null) -> float:
 	# Return a normalized 0..1 measure of how impactful this effect is when used offensively.
 	# Positive amount means defensive buff, not offensive, so score is 0.
 	if amount >= 0:

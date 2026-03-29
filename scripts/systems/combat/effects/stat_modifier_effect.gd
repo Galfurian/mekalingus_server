@@ -22,7 +22,7 @@ func remove(actor) -> void:
 	BaseEffect.add_to_actor_stat(actor, stat, -amount)
 
 
-func get_module_offensive_score(_target) -> float:
+func get_module_offensive_score(_target, _module: ItemModule = null) -> float:
 	# This score now returns 0..1, based on target state and effect magnitude.
 	# Only negative modifiers are offensive (debuffs).
 	if amount >= 0 or not _target or not _target.combatant:

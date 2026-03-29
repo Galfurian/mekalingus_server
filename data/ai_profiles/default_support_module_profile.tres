@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="AIActionProfile" format=3]
+
+[ext_resource type="Script" uid="uid://c80gicrr8jpkr" path="res://scripts/systems/ai/tuning/ai_action_profile.gd" id="AIActionProfile"]
+[ext_resource type="Script" uid="uid://cqn8crmyre1vw" path="res://scripts/systems/ai/tuning/ai_consideration.gd" id="AIConsideration"]
+[ext_resource type="Script" uid="uid://0woqabhewt1b" path="res://scripts/systems/ai/considerations/utility_module_effectiveness_consideration.gd" id="S1"]
+
+[sub_resource type="Resource" id="SR1"]
+script = ExtResource("S1")
+consideration_name = "utility_module_effectiveness"
+weight = 16.0
+allowed_phases = null
+required_keys = null
+
+[resource]
+script = ExtResource("AIActionProfile")
+profile_name = "default_support_module_profile"
+activation_threshold = 0.1
+considerations = Array[ExtResource("AIConsideration")]([SubResource("SR1")])

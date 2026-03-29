@@ -7,7 +7,12 @@ extends AIConsideration
 
 func _init() -> void:
 	consideration_name = "utility_module_effectiveness"
-	allowed_phases = PackedInt32Array([AIEvaluationContext.Phase.TARGET])
+	allowed_phases = PackedInt32Array(
+		[
+			AIEvaluationContext.Phase.TARGET,
+			AIEvaluationContext.Phase.MODULE,
+		]
+	)
 	required_keys = PackedStringArray(["item", "module", "source", "target"])
 
 
@@ -50,8 +55,6 @@ func _get_utility_module_total_power(
 			)
 
 		effect_priority = clampf(effect_priority, 0.0, 1.0)
-		if effect_priority <= 0.0:
-			effect_priority = 0.05
 
 		total_score += effect_priority
 		effect_count += 1

@@ -64,6 +64,27 @@ static func for_tile(
 	return context
 
 
+static func for_module(
+	p_source: MapCombatEntity,
+	p_target: MapCombatEntity,
+	p_module: ItemModule,
+	p_item: Item,
+	p_planning_context: AIPlanningContext,
+	p_tile: Vector2i,
+	p_max_distance: float,
+) -> AIEvaluationContext:
+	var context := AIEvaluationContext.new()
+	context.phase = Phase.MODULE
+	context.source = p_source
+	context.target = p_target
+	context.module = p_module
+	context.item = p_item
+	context.planning_context = p_planning_context
+	context.tile = p_tile
+	context.max_distance = p_max_distance
+	return context
+
+
 func to_dict() -> Dictionary:
 	return {
 		"source": source,

@@ -133,6 +133,24 @@ func _validate_profile(profile: AIProfile, profile_id: String) -> bool:
 	):
 		errors.append("has invalid considerations in support.target_phase")
 
+	if support_intent and support_intent.get("destination_phase"):
+		if not _validate_phase_profile(
+			support_intent.get("destination_phase"),
+			AIEvaluationContext.Phase.TILE,
+			"support.destination_phase",
+			profile_id,
+		):
+			errors.append("has invalid considerations in support.destination_phase")
+
+	if support_intent and support_intent.get("module_phase"):
+		if not _validate_phase_profile(
+			support_intent.get("module_phase"),
+			AIEvaluationContext.Phase.MODULE,
+			"support.module_phase",
+			profile_id,
+		):
+			errors.append("has invalid considerations in support.module_phase")
+
 	if not retreat_intent:
 		errors.append("missing retreat intent profile")
 	else:

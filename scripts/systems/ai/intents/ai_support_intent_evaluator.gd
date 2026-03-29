@@ -36,8 +36,10 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 		_log(source, "intent unavailable: missing profile or support target phase")
 		return null
 
-	# Get the support target phase profile for this unit.
-	var profile: AIActionProfile = ai_profile.support.target_phase
+	# Resolve support phases for this unit.
+	var target_phase: AIActionProfile = ai_profile.support.target_phase
+	var destination_phase: AIActionProfile = ai_profile.support.get("destination_phase")
+	var module_phase: AIActionProfile = ai_profile.support.get("module_phase")
 	var intent_bias_value = ai_profile.support.get("intent_bias")
 	var intent_bias: float = 1.0 if intent_bias_value == null else float(intent_bias_value)
 	var activation_phase: AIActionProfile = ai_profile.support.get("activation_phase")
@@ -65,6 +67,7 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 
 	var utility_modules: Array[EquippedModule] = planning_context.get_unit_utility_modules()
 	if utility_modules.is_empty():
+		_log(source, "intent unavailable: no utility modules available")
 		return null
 
 	var allies_with_self: Array[MapCombatEntity] = planning_context.get_allies(true)
@@ -77,6 +80,9 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	var best_destination: Vector2i = source.position
 	var evaluated_options: int = 0
 	var rejected_unreachable: int = 0
+	var rejected_target_phase: int = 0
+	var rejected_destination_phase: int = 0
+	var rejected_module_phase: int = 0
 
 	for target: MapCombatEntity in allies_with_self:
 		if target.combatant.is_dead():
@@ -111,16 +117,89 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 					continue
 				destination = move_data["destination"]
 
-			var score_context: AIEvaluationContext = AIEvaluationContext.for_target(
-				source,
-				target,
-				equipped_module.module,
-				equipped_module.item,
-				planning_context,
-				destination,
-				float(max_candidate_distance),
+			var score_context: AIEvaluationContext = (
+				AIEvaluationContext
+				. for_target(
+					source,
+					target,
+					equipped_module.module,
+					equipped_module.item,
+					planning_context,
+					destination,
+					float(max_candidate_distance),
+				)
 			)
-			var score: float = profile.evaluate(score_context)
+
+			if destination_phase:
+				var destination_context: AIEvaluationContext = (
+					AIEvaluationContext
+					. for_tile(
+						source,
+						planning_context,
+						destination,
+					)
+				)
+				var destination_max: float = destination_phase.get_max_score()
+				if destination_max > 0.0:
+					var destination_raw: float = destination_phase.evaluate(destination_context)
+					var destination_normalized: float = clampf(
+						destination_raw / destination_max,
+						0.0,
+						1.0,
+					)
+					if destination_normalized < destination_phase.activation_threshold:
+						rejected_destination_phase += 1
+						_log(
+							source,
+							(
+								"option rejected: target=%s module=%s reason=destination_phase %.2f below threshold %.2f"
+								% [
+									target.combatant.get_chat_tag(),
+									equipped_module.get_chat_tag(),
+									destination_normalized,
+									destination_phase.activation_threshold
+								]
+							),
+						)
+						continue
+
+			if module_phase:
+				var module_context: AIEvaluationContext = (
+					AIEvaluationContext
+					. for_module(
+						source,
+						target,
+						equipped_module.module,
+						equipped_module.item,
+						planning_context,
+						destination,
+						float(max_candidate_distance),
+					)
+				)
+				var module_max: float = module_phase.get_max_score()
+				if module_max > 0.0:
+					var module_raw: float = module_phase.evaluate(module_context)
+					var module_normalized: float = clampf(module_raw / module_max, 0.0, 1.0)
+					if module_normalized < module_phase.activation_threshold:
+						rejected_module_phase += 1
+						_log(
+							source,
+							(
+								"option rejected: target=%s module=%s reason=module_phase %.2f below threshold %.2f"
+								% [
+									target.combatant.get_chat_tag(),
+									equipped_module.get_chat_tag(),
+									module_normalized,
+									module_phase.activation_threshold,
+								]
+							),
+						)
+						continue
+
+			var score: float = target_phase.evaluate(score_context)
+			if score <= 0.0:
+				rejected_target_phase += 1
+				continue
 
 			if score > best_score:
 				best_score = score
@@ -140,20 +219,24 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 				)
 
 	if not best_target:
-		_log(source, "intent produced no valid target")
+		_log(source, "intent unavailable: no positive-value support candidate")
 		return null
 
 	_log(source, "scored %.2f" % best_score)
 	var option_quality: float = 0.0
-	var option_max: float = profile.get_max_score()
+	var option_max: float = target_phase.get_max_score()
 	if option_max > 0.0:
 		option_quality = clampf(best_score / option_max, 0.0, 1.0)
 
 	var final_utility: float = clampf(
 		(
-			activation_normalized * ACTIVATION_UTILITY_WEIGHT
-			+ option_quality * OPTION_UTILITY_WEIGHT
-		) * 100.0 * intent_bias,
+			(
+				activation_normalized * ACTIVATION_UTILITY_WEIGHT
+				+ option_quality * OPTION_UTILITY_WEIGHT
+			)
+			* 100.0
+			* intent_bias
+		),
 		0.0,
 		100.0,
 	)
@@ -170,6 +253,9 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	plan.debug_details = {
 		"evaluated_options": evaluated_options,
 		"rejected_unreachable": rejected_unreachable,
+		"rejected_target_phase": rejected_target_phase,
+		"rejected_destination_phase": rejected_destination_phase,
+		"rejected_module_phase": rejected_module_phase,
 		"activation_normalized": activation_normalized,
 		"activation_threshold": activation_threshold,
 		"option_quality": option_quality,

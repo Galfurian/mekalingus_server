@@ -47,10 +47,6 @@ var astar: AStar2D = AStar2D.new()
 var ai_controller
 # The turn manager.
 var turn_manager
-# The directive planner.
-var directive_planner
-# Per-owner squad directives.
-var owner_directives: Dictionary = {}
 
 # =============================================================================
 # GENERIC FUNCTIONS
@@ -71,7 +67,6 @@ func _init(
 	combat_rules.set_game_mode(p_game_mode)
 	combat_logger.set_combat_preset()
 	chat_logger.set_chat_preset()
-	directive_planner = DirectivePlanner.new(self)
 	ai_controller = AIController.new(self)
 	turn_manager = TurnManager.new(self)
 
@@ -105,7 +100,6 @@ func clear() -> void:
 	# Clear AI and turn systems.
 	ai_controller.clear()
 	turn_manager.clear()
-	owner_directives.clear()
 
 
 # =============================================================================
@@ -638,12 +632,6 @@ static func from_dict(data: Dictionary) -> GameMap:
 	map.combat_logger = MapLogger.from_dict(data.get("combat_logger", {}))
 	map.chat_logger = MapLogger.from_dict(data.get("chat_logger", {}))
 
-	# Load squad directives.
-	map.owner_directives.clear()
-	for owner_key in data.get("owner_directives", {}):
-		var directive_data: Dictionary = data["owner_directives"][owner_key]
-		map.owner_directives[owner_key] = NpcDirectiveState.from_dict(directive_data)
-
 	# Update the AStar graph.
 	map.update_astar()
 
@@ -652,12 +640,6 @@ static func from_dict(data: Dictionary) -> GameMap:
 
 func to_dict() -> Dictionary:
 	"""Converts the map data into a dictionary for saving."""
-	var serialized_directives: Dictionary = {}
-	for owner_key in owner_directives.keys():
-		var state: RefCounted = owner_directives[owner_key]
-		if state:
-			serialized_directives[owner_key] = state.to_dict()
-
 	return {
 		"map_uuid": map_uuid,
 		"map_width": map_width,
@@ -670,5 +652,4 @@ func to_dict() -> Dictionary:
 		"pickups": Utils.serialize_dict_of_objects(pickups),
 		"combat_logger": combat_logger.to_dict(),
 		"chat_logger": chat_logger.to_dict(),
-		"owner_directives": serialized_directives,
 	}

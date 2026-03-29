@@ -116,13 +116,6 @@ enum MekRole {
 	SUPPORT,
 }
 
-# Global behavior directives used by AI squads.
-enum NpcDirective {
-	HOLD_PERIMETER,
-	PATROL,
-}
-
-
 static func get_stat_types() -> Array[int]:
 	var stat_types: Array[int] = []
 	for value in StatType.values():

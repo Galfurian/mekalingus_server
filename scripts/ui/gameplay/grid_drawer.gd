@@ -15,8 +15,6 @@ const AI_ATTACK_ARC_COLOR = Color(1.0, 0.4, 0.25, 0.9)
 const AI_ATTACK_TARGET_DOT_COLOR = Color(1.0, 0.25, 0.25, 0.95)
 const AI_FRIENDLY_ARC_COLOR = Color(0.3, 1.0, 0.3, 0.9)
 const AI_FRIENDLY_TARGET_DOT_COLOR = Color(0.5, 1.0, 0.5, 0.95)
-const PATROL_PATH_COLOR = Color(0.9, 0.3, 1.0, 0.7)
-const PATROL_WAYPOINT_DOT_COLOR = Color(0.95, 0.5, 1.0, 0.9)
 const AI_LINE_WIDTH = 3.0
 const AI_SCORE_LABEL_COLOR = Color(1.0, 1.0, 1.0, 0.92)
 const AI_SCORE_LABEL_FONT_SIZE = 12
@@ -135,12 +133,6 @@ func _draw_ai_overlay() -> void:
 	if not game_map or not game_map.ai_controller:
 		return
 
-	# Draw patrol paths for all directives
-	for owner_key: String in game_map.owner_directives.keys():
-		var directive: NpcDirectiveState = game_map.owner_directives[owner_key]
-		if directive.directive == NpcDirectiveState.Directive.PATROL:
-			_draw_patrol_path(directive)
-
 	for unit: MapCombatEntity in game_map.npc_units.values():
 		if not unit or not unit.active or unit.combatant.is_dead():
 			continue
@@ -163,7 +155,7 @@ func _draw_ai_plan_for_entity(entity: MapCombatEntity) -> void:
 	if selected_entity and selected_entity == entity:
 		_draw_selected_trace_labels(source_center, plan)
 
-	if plan.intent == AIPlan.Intent.REPOSITION or plan.intent == AIPlan.Intent.RETREAT:
+	if plan.intent == AIPlan.Intent.RETREAT:
 		if plan.destination == Vector2i.ZERO or plan.destination == entity.position:
 			return
 		var destination_center: Vector2 = _tile_center(plan.destination)
@@ -285,38 +277,6 @@ func _draw_attack_arc(start: Vector2, end: Vector2, color: Color) -> void:
 func _tile_center(tile: Vector2i) -> Vector2:
 	var origin: Vector2 = to_grid_position(tile)
 	return origin + Vector2(grid_size * 0.5, grid_size * 0.5)
-
-
-func _draw_patrol_path(directive: NpcDirectiveState) -> void:
-	if directive.patrol_waypoints.is_empty():
-		return
-
-	# Draw lines connecting waypoints in sequence
-	var waypoints: Array[Vector2i] = directive.patrol_waypoints
-	var anchor: Vector2i = directive.anchor_position
-
-	# Draw from anchor to first waypoint
-	if not waypoints.is_empty():
-		var anchor_center: Vector2 = _tile_center(anchor)
-		var first_center: Vector2 = _tile_center(waypoints[0])
-		draw_line(anchor_center, first_center, PATROL_PATH_COLOR, AI_LINE_WIDTH)
-
-	# Draw between consecutive waypoints
-	for i in range(waypoints.size() - 1):
-		var current_center: Vector2 = _tile_center(waypoints[i])
-		var next_center: Vector2 = _tile_center(waypoints[i + 1])
-		draw_line(current_center, next_center, PATROL_PATH_COLOR, AI_LINE_WIDTH)
-
-	# Draw from last waypoint back to anchor to show the cycle
-	if not waypoints.is_empty():
-		var last_center: Vector2 = _tile_center(waypoints[-1])
-		var anchor_center: Vector2 = _tile_center(anchor)
-		draw_line(last_center, anchor_center, PATROL_PATH_COLOR, AI_LINE_WIDTH)
-
-	# Draw waypoint markers
-	for waypoint in waypoints:
-		var waypoint_center: Vector2 = _tile_center(waypoint)
-		draw_circle(waypoint_center, maxf(2.5, grid_size * 0.12), PATROL_WAYPOINT_DOT_COLOR)
 
 
 func _draw_plan_score_label(source_center: Vector2, plan: AIPlan) -> void:

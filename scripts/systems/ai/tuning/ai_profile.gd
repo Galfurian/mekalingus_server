@@ -5,4 +5,3 @@ extends Resource
 @export var attack: Resource
 @export var support: Resource
 @export var retreat: Resource
-@export var reposition: Resource

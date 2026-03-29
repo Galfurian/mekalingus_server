@@ -397,11 +397,11 @@ func precompute_next_turn_snapshot() -> void:
 	"""
 	Computes and queues one order per AI-controlled entity for the next turn.
 	"""
+	_current_plans.clear()
 	_reserved_move_tiles.clear()
 	_use_offensive_module_orders.clear()
 	_use_utility_module_orders.clear()
 	_move_orders.clear()
-	game_map.directive_planner.advance_patrol_directives()
 	var units: Array[MapCombatEntity] = _iter_ai_controlled_entities()
 	units.sort_custom(
 		func(a: MapCombatEntity, b: MapCombatEntity):

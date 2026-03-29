@@ -1,15 +1,6 @@
 class_name AITuning
 extends RefCounted
 
-const REPOSITION_HOLD_SCORE: float = 3.0
-const REPOSITION_PATROL_SCORE: float = 4.0
-
-const HOLD_THREAT_WEIGHT: float = 1.6
-const HOLD_OBJECTIVE_WEIGHT: float = 1.1
-const PATROL_THREAT_WEIGHT: float = 0.5
-const PATROL_OBJECTIVE_WEIGHT: float = 1.6
-const COHESION_WEIGHT: float = 1.3
-
 const ATTACK_RANGE_WEIGHT: float = 14.0
 const ATTACK_MOVE_COST_WEIGHT: float = 1.2
 const ATTACK_HEIGHT_WEIGHT: float = 3.0

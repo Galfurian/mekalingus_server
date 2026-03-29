@@ -1,7 +1,6 @@
 extends Node
 
 signal map_state_changed(game_map: GameMap)
-signal map_cell_clicked(cell_position: Vector2i)
 signal selected_entity_changed(entity: MapEntity)
 
 # The size of sectors.
@@ -20,7 +19,6 @@ var grid_size: int
 # The currently selected entity.
 var selected_entity: MapEntity
 var _context_cell: Vector2i = Vector2i(-1, -1)
-var _anchor_pick_mode_enabled: bool = false
 
 @onready var action_menu = $ActionMenu
 @onready var main_split = $RootSplit/MainSplit
@@ -193,10 +191,6 @@ func set_ai_overlay_enabled(enabled: bool) -> void:
 func refresh_ai_overlay() -> void:
 	if grid_drawer:
 		grid_drawer.queue_redraw()
-
-
-func set_anchor_pick_mode_enabled(enabled: bool) -> void:
-	_anchor_pick_mode_enabled = enabled
 
 
 func _get_map_padding_tiles() -> int:
@@ -414,10 +408,6 @@ func _entity_has_item_uuid(map_entity: MapEntity, item_uuid: String) -> bool:
 
 func _on_cell_selected(cell_position: Vector2i):
 	"""Handles cell selection and updates the UnitInfoPanel."""
-	if _anchor_pick_mode_enabled:
-		map_cell_clicked.emit(cell_position)
-		return
-
 	# Get the entity at the given position.
 	var entity = game_map.get_entity_at(cell_position)
 	if entity:
@@ -427,8 +417,6 @@ func _on_cell_selected(cell_position: Vector2i):
 		entity_list_panel.select_entity(entity)
 		grid_drawer.set_selected_entity(entity)
 		selected_entity_changed.emit(selected_entity)
-
-	map_cell_clicked.emit(cell_position)
 
 
 func _on_entity_list_entity_selected(entity: MapEntity) -> void:

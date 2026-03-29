@@ -106,7 +106,6 @@ func _validate_profile(profile: AIProfile, profile_id: String) -> bool:
 	var attack_intent = profile.get("attack")
 	var support_intent = profile.get("support")
 	var retreat_intent = profile.get("retreat")
-	var reposition_intent = profile.get("reposition")
 
 	var errors: Array[String] = []
 
@@ -155,9 +154,6 @@ func _validate_profile(profile: AIProfile, profile_id: String) -> bool:
 			profile_id,
 		):
 			errors.append("has invalid considerations in retreat.destination_phase")
-
-	if not reposition_intent:
-		errors.append("missing reposition intent profile")
 
 	if errors.is_empty():
 		return true

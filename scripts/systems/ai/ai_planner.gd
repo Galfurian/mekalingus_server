@@ -41,9 +41,6 @@ func _get_intent_registry() -> Array[Dictionary]:
 		{
 			"evaluator": AIRetreatIntentEvaluator.new(),
 		},
-		{
-			"evaluator": AIRepositionIntentEvaluator.new(),
-		},
 	]
 
 

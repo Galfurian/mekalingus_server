@@ -191,6 +191,12 @@ func _validate_phase_profile(
 	if not phase_profile:
 		return false
 
+	if phase_profile.considerations == null:
+		push_error(
+			"AI profile '%s' %s has null considerations array." % [profile_id, phase_label]
+		)
+		return false
+
 	var available_keys: PackedStringArray = _get_context_keys_for_phase(required_phase)
 
 	for consideration: AIConsideration in phase_profile.considerations:

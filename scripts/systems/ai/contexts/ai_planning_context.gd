@@ -36,6 +36,20 @@ func get_game_map() -> GameMap:
 	return turn_context.game_map
 
 
+func get_turn_manager() -> TurnManager:
+	"""
+	Returns the TurnManager instance for the current game map, if available.
+	"""
+	return turn_context.get_turn_manager()
+
+
+func get_current_turn() -> int:
+	"""
+	Returns the current turn number, or -1 if no turn manager is available.
+	"""
+	return turn_context.get_current_turn()
+
+
 func get_allies(
 	include_self: bool = false,
 	unit: MapCombatEntity = null,

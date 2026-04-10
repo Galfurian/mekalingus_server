@@ -4,6 +4,8 @@ extends Node
 signal ai_thought_logged(entry: String)
 
 const AI_THOUGHT_LOG_LIMIT: int = 5_000
+const ENEMY_CENTROID_MEMORY_LIMIT: int = 4
+const ENEMY_CENTROID_MEMORY_MAX_AGE: int = 2
 
 # =============================================================================
 # IDENTITY / EQUIPMENT
@@ -11,7 +13,7 @@ const AI_THOUGHT_LOG_LIMIT: int = 5_000
 
 var uuid: String = ""
 var alias: String = ""
-var last_enemy_centroid: Vector2 = Vector2.ZERO
+var enemy_centroid_memory: Array[Dictionary] = []
 var items: Array[Item] = []
 var slots: Array[int] = []
 var ai_thought_log: Array[String] = []
@@ -240,6 +242,17 @@ func regenerate() -> void:
 	adjust_power(power_generation)
 
 
+func advance_turn_state(current_turn: int) -> Dictionary:
+	var dot_result: Dictionary = take_dot_damage()
+	apply_regen_effects()
+	if active_effect_manager:
+		active_effect_manager.decrement_durations()
+	if cooldown_manager:
+		cooldown_manager.decrement_cooldowns()
+	_prune_enemy_centroid_memory(current_turn)
+	return dot_result
+
+
 func get_total_current_durability() -> float:
 	return health + armor + shield
 
@@ -345,6 +358,66 @@ func apply_regen_effects() -> void:
 				effect.effect.amount,
 			)
 		)
+
+
+func remember_enemy_centroid(centroid: Vector2, current_turn: int) -> void:
+	if current_turn < 0:
+		return
+
+	var entry: Dictionary = {
+		"centroid": centroid,
+		"turn": current_turn,
+	}
+
+	if enemy_centroid_memory.is_empty():
+		enemy_centroid_memory.append(entry)
+		return
+
+	var last_index: int = enemy_centroid_memory.size() - 1
+	var last_turn: int = int(enemy_centroid_memory[last_index].get("turn", -1))
+	if last_turn == current_turn:
+		enemy_centroid_memory[last_index] = entry
+	else:
+		enemy_centroid_memory.append(entry)
+
+	_prune_enemy_centroid_memory(current_turn)
+
+
+func has_known_enemy_centroid(current_turn: int) -> bool:
+	_prune_enemy_centroid_memory(current_turn)
+	return not enemy_centroid_memory.is_empty()
+
+
+func get_known_enemy_centroid(current_turn: int) -> Vector2:
+	_prune_enemy_centroid_memory(current_turn)
+	if enemy_centroid_memory.is_empty():
+		return Vector2.ZERO
+	return Vector2(enemy_centroid_memory[enemy_centroid_memory.size() - 1].get("centroid", Vector2.ZERO))
+
+
+func clear_enemy_centroid_memory() -> void:
+	enemy_centroid_memory.clear()
+
+
+func _prune_enemy_centroid_memory(current_turn: int) -> void:
+	if enemy_centroid_memory.is_empty():
+		return
+
+	var pruned_memory: Array[Dictionary] = []
+	for entry: Dictionary in enemy_centroid_memory:
+		var entry_turn: int = int(entry.get("turn", -1))
+		if entry_turn < 0:
+			continue
+		if current_turn - entry_turn <= ENEMY_CENTROID_MEMORY_MAX_AGE:
+			pruned_memory.append(entry)
+
+	if pruned_memory.size() > ENEMY_CENTROID_MEMORY_LIMIT:
+		pruned_memory = pruned_memory.slice(
+			pruned_memory.size() - ENEMY_CENTROID_MEMORY_LIMIT,
+			pruned_memory.size(),
+		)
+
+	enemy_centroid_memory = pruned_memory
 
 
 # =============================================================================

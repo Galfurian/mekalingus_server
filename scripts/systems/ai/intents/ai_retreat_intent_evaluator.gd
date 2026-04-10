@@ -80,8 +80,9 @@ static func evaluate(planning_context: AIPlanningContext) -> AIPlan:
 	)
 
 	# Find safest reachable retreat tile.
+	var visible_enemies: Array[MapCombatEntity] = planning_context.get_enemies()
 	var enemy_centroid: Vector2 = _get_known_enemy_centroid(source, planning_context)
-	if enemy_centroid == Vector2.ZERO:
+	if visible_enemies.is_empty() and not _has_known_enemy_centroid(source, planning_context):
 		_log(source, "no enemy centroid available (visible or remembered)")
 		return null
 
@@ -276,17 +277,33 @@ static func _get_known_enemy_centroid(
 	source: MapCombatEntity,
 	planning_context: AIPlanningContext,
 ) -> Vector2:
+	var combatant: CombatEntity = source.combatant if source else null
+	if not combatant:
+		return Vector2.ZERO
+
+	var current_turn: int = planning_context.get_current_turn() if planning_context else -1
 	var visible_enemies: Array[MapCombatEntity] = planning_context.get_enemies()
 	if not visible_enemies.is_empty():
 		var centroid: Vector2 = _compute_enemy_centroid(visible_enemies)
-		if source.combatant:
-			source.combatant.last_enemy_centroid = centroid
+		combatant.remember_enemy_centroid(centroid, current_turn)
 		return centroid
 
-	if source.combatant:
-		return source.combatant.last_enemy_centroid
+	if combatant.has_known_enemy_centroid(current_turn):
+		return combatant.get_known_enemy_centroid(current_turn)
 
 	return Vector2.ZERO
+
+
+static func _has_known_enemy_centroid(
+	source: MapCombatEntity,
+	planning_context: AIPlanningContext,
+) -> bool:
+	var combatant: CombatEntity = source.combatant if source else null
+	if not combatant:
+		return false
+
+	var current_turn: int = planning_context.get_current_turn() if planning_context else -1
+	return combatant.has_known_enemy_centroid(current_turn)
 
 
 ## Find the safest reachable tile to retreat to using profile-based scoring.

@@ -52,6 +52,25 @@ func _init(p_game_map: GameMap) -> void:
 	game_map = p_game_map
 
 
+func get_turn_manager() -> TurnManager:
+	"""
+	Returns the turn manager associated with the current game map, if available.
+	"""
+	if not game_map:
+		return null
+	return game_map.turn_manager
+
+
+func get_current_turn() -> int:
+	"""
+	Returns the current turn number, or -1 if no turn manager is available.
+	"""
+	var turn_manager: TurnManager = get_turn_manager()
+	if not turn_manager:
+		return -1
+	return turn_manager.get_current_turn()
+
+
 ## Resets any cached data in the context. Should be called at the start of each new unit's planning
 ## to ensure fresh data.
 func reset_context():

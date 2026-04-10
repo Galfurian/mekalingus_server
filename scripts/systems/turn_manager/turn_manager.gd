@@ -291,10 +291,10 @@ func _update_time_based_effects() -> void:
 	"""
 	Updates time-based effects for all units.
 	"""
-	# Then, tick active effects, cooldowns, and durations.
+	# Then, tick active effects, cooldowns, durations, and combat memory.
 	for unit in game_map.player_units.values() + game_map.npc_units.values():
-		# Process time-based effects like DOT, HOT, buffs.
-		var dot_result: Dictionary = unit.combatant.take_dot_damage()
+		# Process time-based effects and entity-local turn maintenance.
+		var dot_result: Dictionary = unit.combatant.advance_turn_state(_current_turn)
 		if dot_result.total > 0:
 			game_map.combat_logger.add_log(
 				Enums.LogType.ATTACK,
@@ -308,6 +308,3 @@ func _update_time_based_effects() -> void:
 					]
 				)
 			)
-		unit.combatant.apply_regen_effects()
-		unit.combatant.active_effect_manager.decrement_durations()
-		unit.combatant.cooldown_manager.decrement_cooldowns()

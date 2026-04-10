@@ -54,19 +54,33 @@ func _get_known_enemy_centroid(
 	source: MapCombatEntity,
 	planning_context: AIPlanningContext,
 ) -> Vector2:
+	assert(source, "Requires a valid source MapCombatEntity.")
+	assert(planning_context, "Requires a valid AIPlanningContext.")
+	assert(source.combatant, "Requires the source MapCombatEntity to have a valid CombatEntity.")
+
+	var combatant: CombatEntity = source.combatant
+	var current_turn: int = planning_context.get_current_turn()
 	var enemies: Array[MapCombatEntity] = planning_context.get_enemies()
 
 	if enemies.is_empty():
-		# Fall back to last known centroid
-		return source.combatant.last_enemy_centroid
+		return combatant.get_known_enemy_centroid(current_turn)
 
 	# Compute centroid of visible enemies
-	var centroid: Vector2i = Vector2i.ZERO
+	var centroid: Vector2 = Vector2.ZERO
+	var enemy_count: int = 0
 	for enemy: MapCombatEntity in enemies:
-		centroid += enemy.position
-	centroid /= enemies.size()
+		if not enemy or enemy.combatant.is_dead():
+			continue
+		centroid += Vector2(enemy.position)
+		enemy_count += 1
 
-	# Update persistent memory
-	source.combatant.last_enemy_centroid = centroid
+	if enemy_count == 0:
+		return combatant.get_known_enemy_centroid(current_turn)
+
+	centroid /= float(enemy_count)
+	combatant.remember_enemy_centroid(centroid, current_turn)
+
+	if combatant.has_known_enemy_centroid(current_turn):
+		return combatant.get_known_enemy_centroid(current_turn)
 
 	return centroid

@@ -16,6 +16,8 @@ var _current_plans: Dictionary[String, AIPlan] = {}
 var _use_offensive_module_orders: Dictionary[String, UseOffensiveModuleOrder] = {}
 # The orders for utility modules.
 var _use_utility_module_orders: Dictionary[String, UseUtilityModuleOrder] = {}
+# The orders for deploy/undeploy actions.
+var _deploy_orders: Dictionary[String, DeployOrder] = {}
 # The orders for movement.
 var _move_orders: Dictionary[String, MoveOrder] = {}
 # Tiles reserved by queued movement to reduce allied collisions.
@@ -49,6 +51,7 @@ func clear() -> void:
 	_current_plans.clear()
 	_use_offensive_module_orders.clear()
 	_use_utility_module_orders.clear()
+	_deploy_orders.clear()
 	_move_orders.clear()
 	_reserved_move_tiles.clear()
 
@@ -132,6 +135,8 @@ func remove_orders_of_dead_units() -> void:
 		_use_offensive_module_orders.erase(key)
 	for key in Utils.filter(_use_utility_module_orders, _filter_order_with_dead_mek):
 		_use_utility_module_orders.erase(key)
+	for key in Utils.filter(_deploy_orders, _filter_order_with_dead_mek):
+		_deploy_orders.erase(key)
 	for key in Utils.filter(_move_orders, _filter_order_with_dead_mek):
 		_move_orders.erase(key)
 	for unit_uuid in game_map.player_units:
@@ -160,6 +165,15 @@ func queue_utility_module_order(order: UseUtilityModuleOrder) -> void:
 	"""
 	if order:
 		_use_utility_module_orders[order.source.combatant.uuid] = order
+		_add_thought(order.source, "Queued: %s" % str(order))
+
+
+func queue_deploy_order(order: DeployOrder) -> void:
+	"""
+	Queues a deploy/undeploy order, replacing any existing one for the unit.
+	"""
+	if order:
+		_deploy_orders[order.source.combatant.uuid] = order
 		_add_thought(order.source, "Queued: %s" % str(order))
 
 
@@ -219,6 +233,26 @@ func execute_offensive_module_orders() -> void:
 			continue
 		_process_precomputed_module_order(order, UseOffensiveModuleOrder)
 	_use_offensive_module_orders.clear()
+
+
+func execute_deploy_orders() -> void:
+	"""
+	Executes all queued deploy/undeploy orders.
+	"""
+	for source_uuid: String in _deploy_orders.keys():
+		var order: DeployOrder = _deploy_orders[source_uuid]
+		if not order:
+			continue
+		if not order.validate():
+			_cancel_precomputed_order(order.source, "deploy order validation failed", order)
+			continue
+
+		var executed: bool = order.execute(game_map)
+		if executed:
+			_add_thought(order.source, "Executed: %s" % str(order))
+		else:
+			_add_thought(order.source, "Failed: %s" % str(order))
+	_deploy_orders.clear()
 
 
 func _process_precomputed_move_order(order: MoveOrder) -> void:
@@ -371,6 +405,9 @@ func _queue_generated_order(order: Order) -> void:
 	elif is_instance_of(order, UseUtilityModuleOrder):
 		# If the order is a utility module order, queue it.
 		queue_utility_module_order(order)
+	elif is_instance_of(order, DeployOrder):
+		# If the order is a deploy/undeploy order, queue it.
+		queue_deploy_order(order)
 	elif is_instance_of(order, MoveOrder):
 		# If the order is a movement order, queue it.
 		queue_move_order(order)
@@ -401,6 +438,7 @@ func compute_next_turn_plans() -> void:
 	_reserved_move_tiles.clear()
 	_use_offensive_module_orders.clear()
 	_use_utility_module_orders.clear()
+	_deploy_orders.clear()
 	_move_orders.clear()
 
 	# Reset turn context caches to ensure fresh enemy visibility and LOS queries each turn.
@@ -424,6 +462,8 @@ func _filter_order_with_dead_mek(_key: String, order) -> bool:
 	"""
 	if is_instance_of(order, UseModuleOrder):
 		return order.source.combatant.is_dead() or order.target.combatant.is_dead()
+	if is_instance_of(order, DeployOrder):
+		return order.source.combatant.is_dead()
 	if is_instance_of(order, MoveOrder):
 		return order.source.combatant.is_dead()
 	return false

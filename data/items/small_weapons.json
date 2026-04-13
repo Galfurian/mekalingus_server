@@ -618,7 +618,7 @@
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 30.0
+						"amount": 31.0
 					}
 				]
 			},
@@ -634,32 +634,9 @@
 						"effect_class": "DamageEffect",
 						"target": "ENEMY",
 						"damage_type": "KINETIC",
-						"amount": 46.0
+						"amount": 72.0
 					}
 				]
-			},
-			{
-				"name": "Deploy Main-Gun",
-				"passive": false,
-				"power_on_use": 8.0,
-				"cooldown": 2.0,
-				"blocked_states": ["DEPLOYED"],
-				"grants_states": ["DEPLOYED"],
-				"state_stat_modifiers": {
-					"range_modifier": 2,
-					"speed": -6,
-					"armor": 8
-				},
-				"effects": []
-			},
-			{
-				"name": "Undeploy Main-Gun",
-				"passive": false,
-				"power_on_use": 6.0,
-				"cooldown": 2.0,
-				"required_states": ["DEPLOYED"],
-				"clears_states": ["DEPLOYED"],
-				"effects": []
 			}
 		]
 	}

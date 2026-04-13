@@ -215,6 +215,8 @@ func _execute_turn() -> void:
 	# Emit the turn started signal.
 	on_turn_started.emit(_current_turn)
 
+	# 3.0) Process deploy/undeploy actions.
+	await game_map.ai_controller.execute_deploy_orders()
 	# 3.1) Process use of offensive module activations.
 	await game_map.ai_controller.execute_offensive_module_orders()
 	# 3.2) Process use of utility module activations.

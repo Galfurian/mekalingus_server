@@ -198,11 +198,11 @@ func is_tile_blocked_for_pathfinding(position: Vector2i) -> bool:
 		return true
 
 	for structure in structures.values():
-		if structure and structure.active and structure.blocking and structure.position == position:
+		if structure and structure.active and not structure.passable and structure.position == position:
 			return true
 
 	for pickup in pickups.values():
-		if pickup and pickup.active and pickup.blocking and pickup.position == position:
+		if pickup and pickup.active and not pickup.passable and pickup.position == position:
 			return true
 
 	return false
@@ -291,11 +291,11 @@ func get_blocking_entity_at(position: Vector2i) -> MapEntity:
 			return entity
 
 	for entity in structures.values():
-		if entity and entity.active and entity.blocking and position == entity.position:
+		if entity and entity.active and not entity.passable and position == entity.position:
 			return entity
 
 	for entity in pickups.values():
-		if entity and entity.active and entity.blocking and position == entity.position:
+		if entity and entity.active and not entity.passable and position == entity.position:
 			return entity
 
 	return null

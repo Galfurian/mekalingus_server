@@ -396,7 +396,9 @@ func get_known_enemy_centroid(current_turn: int) -> Vector2:
 	_prune_enemy_centroid_memory(current_turn)
 	if enemy_centroid_memory.is_empty():
 		return Vector2.ZERO
-	return Vector2(enemy_centroid_memory[enemy_centroid_memory.size() - 1].get("centroid", Vector2.ZERO))
+	return Vector2(
+		enemy_centroid_memory[enemy_centroid_memory.size() - 1].get("centroid", Vector2.ZERO)
+	)
 
 
 func has_runtime_state(runtime_state: Variant) -> bool:

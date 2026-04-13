@@ -83,6 +83,8 @@ func is_valid() -> bool:
 		return false
 
 	return not is_complete()
+
+
 func is_complete() -> bool:
 	# A plan is considered complete once it has generated an order
 	# (for combat plans) or the unit has arrived (movement plans).
@@ -126,6 +128,20 @@ func generate_order(reserved_tiles: Dictionary = {}) -> Order:
 func _generate_combat_order(reserved_tiles: Dictionary) -> Order:
 	if not target or not equipped_module:
 		return null
+
+	var needs_deployed: bool = Enums.RuntimeState.DEPLOYED in equipped_module.module.required_states
+	var blocked_when_deployed: bool = (
+		Enums.RuntimeState.DEPLOYED in equipped_module.module.blocked_states
+	)
+	var is_deployed: bool = source.combatant.has_runtime_state(Enums.RuntimeState.DEPLOYED)
+
+	if needs_deployed and not is_deployed:
+		set_status(Status.ORDER_QUEUED)
+		return DeployOrder.new(source, true)
+
+	if blocked_when_deployed and is_deployed:
+		set_status(Status.ORDER_QUEUED)
+		return DeployOrder.new(source, false)
 
 	var movement_speed: int = source.combatant.speed
 	var range_modifier: int = source.combatant.range_modifier

@@ -15,6 +15,7 @@ func can_module_be_used_now(combatant: CombatEntity, equipped_module: EquippedMo
 		and has_item_equipped(combatant, equipped_module.item)
 		and has_item_module(equipped_module.item, equipped_module.module)
 		and not equipped_module.module.passive
+		and _passes_module_state_requirements(combatant, equipped_module.module)
 		and combatant.cooldown_manager
 		and not combatant.cooldown_manager.is_on_cooldown(equipped_module.item, equipped_module.module)
 		and combatant.power >= equipped_module.power_on_use
@@ -113,6 +114,24 @@ func find_matching_modules(
 			# Always skip if not enough power.
 			if combatant.power < equipped_module.power_on_use:
 				continue
+			# Skip modules blocked by or missing runtime states.
+			if not _passes_module_state_requirements(combatant, equipped_module.module):
+				continue
 			# Add the module if all checks passed.
 			matching_modules.append(equipped_module)
 	return matching_modules
+
+
+func _passes_module_state_requirements(combatant: CombatEntity, module: ItemModule) -> bool:
+	if not combatant or not module:
+		return false
+
+	for required_state: int in module.required_states:
+		if not combatant.has_runtime_state(required_state):
+			return false
+
+	for blocked_state: int in module.blocked_states:
+		if combatant.has_runtime_state(blocked_state):
+			return false
+
+	return true

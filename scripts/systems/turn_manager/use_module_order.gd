@@ -112,6 +112,45 @@ func _try_spend_power_and_start_cooldown(source_actor: CombatEntity) -> bool:
 	return true
 
 
+func _check_module_state_or_log(
+	game_map,
+	source_actor: CombatEntity,
+	log_type: Enums.LogType,
+) -> bool:
+	var validation_error: String = _get_module_state_validation_error(source_actor)
+	if validation_error.is_empty():
+		return true
+
+	_add_log(
+		game_map,
+		log_type,
+		(
+			"%s cannot use %s (%s)"
+			% [source_actor.get_chat_tag(), equipped_module.get_chat_tag(), validation_error]
+		),
+	)
+	return false
+
+
+func _apply_module_state_transitions(source_actor: CombatEntity) -> void:
+	for runtime_state in equipped_module.module.grants_states:
+		source_actor.add_runtime_state(runtime_state, equipped_module.module.state_stat_modifiers)
+	for runtime_state in equipped_module.module.clears_states:
+		source_actor.remove_runtime_state(runtime_state)
+
+
+func _get_module_state_validation_error(source_actor: CombatEntity) -> String:
+	for required_state: int in equipped_module.module.required_states:
+		if not source_actor.has_runtime_state(required_state):
+			return "missing state '%s'" % Enums.get_runtime_state_key(required_state)
+
+	for blocked_state: int in equipped_module.module.blocked_states:
+		if source_actor.has_runtime_state(blocked_state):
+			return "blocked by state '%s'" % Enums.get_runtime_state_key(blocked_state)
+
+	return ""
+
+
 func _should_apply_effect(
 	game_map,
 	effect: BaseEffect,

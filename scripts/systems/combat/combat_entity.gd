@@ -17,6 +17,8 @@ var enemy_centroid_memory: Array[Dictionary] = []
 var items: Array[Item] = []
 var slots: Array[int] = []
 var ai_thought_log: Array[String] = []
+var runtime_state_stacks: Dictionary = {}
+var runtime_state_modifiers: Dictionary = {}
 
 # =============================================================================
 # MANAGERS
@@ -263,6 +265,8 @@ func get_total_max_durability() -> float:
 
 func reset_combat_state(stats_payload: Dictionary, p_slots: Array[int] = []) -> void:
 	base_stats.clear()
+	runtime_state_stacks.clear()
+	runtime_state_modifiers.clear()
 	for stat_key in stats_payload.keys():
 		var stat: int = Enums.get_stat_from_key(stat_key)
 		if stat in Enums.get_stat_types():
@@ -393,6 +397,58 @@ func get_known_enemy_centroid(current_turn: int) -> Vector2:
 	if enemy_centroid_memory.is_empty():
 		return Vector2.ZERO
 	return Vector2(enemy_centroid_memory[enemy_centroid_memory.size() - 1].get("centroid", Vector2.ZERO))
+
+
+func has_runtime_state(runtime_state: Variant) -> bool:
+	var normalized: int = _normalize_runtime_state(runtime_state)
+	if normalized < 0:
+		return false
+	return int(runtime_state_stacks.get(normalized, 0)) > 0
+
+
+func add_runtime_state(runtime_state: Variant, stat_modifiers: Dictionary = {}) -> void:
+	var normalized: int = _normalize_runtime_state(runtime_state)
+	if normalized < 0:
+		return
+
+	var stack_count: int = int(runtime_state_stacks.get(normalized, 0))
+	runtime_state_stacks[normalized] = stack_count + 1
+	if stack_count > 0:
+		return
+
+	var normalized_modifiers: Dictionary = _normalize_runtime_state_modifiers(stat_modifiers)
+	runtime_state_modifiers[normalized] = normalized_modifiers
+	for stat in normalized_modifiers.keys():
+		modify_stat(int(stat), int(normalized_modifiers[stat]))
+
+
+func remove_runtime_state(runtime_state: Variant) -> void:
+	var normalized: int = _normalize_runtime_state(runtime_state)
+	if normalized < 0:
+		return
+
+	var stack_count: int = int(runtime_state_stacks.get(normalized, 0))
+	if stack_count <= 0:
+		return
+
+	if stack_count > 1:
+		runtime_state_stacks[normalized] = stack_count - 1
+		return
+
+	runtime_state_stacks.erase(normalized)
+	var state_modifiers: Dictionary = runtime_state_modifiers.get(normalized, {})
+	for stat in state_modifiers.keys():
+		modify_stat(int(stat), -int(state_modifiers[stat]))
+	runtime_state_modifiers.erase(normalized)
+
+
+func get_runtime_states() -> Array[String]:
+	var states: Array[String] = []
+	for raw_state in runtime_state_stacks.keys():
+		if int(runtime_state_stacks[raw_state]) > 0:
+			states.append(Enums.get_runtime_state_key(int(raw_state)))
+	states.sort()
+	return states
 
 
 func clear_enemy_centroid_memory() -> void:
@@ -604,6 +660,28 @@ func _get_raw_stat(storage: Dictionary, stat: int) -> int:
 	return int(storage.get(stat, 0))
 
 
+func _normalize_runtime_state(runtime_state: Variant) -> int:
+	if typeof(runtime_state) == TYPE_INT:
+		return int(runtime_state)
+	if typeof(runtime_state) == TYPE_STRING:
+		return Enums.get_runtime_state_from_key(str(runtime_state).strip_edges())
+	return -1
+
+
+func _normalize_runtime_state_modifiers(raw_modifiers: Dictionary) -> Dictionary:
+	var normalized: Dictionary = {}
+	for raw_key in raw_modifiers.keys():
+		var stat: int = -1
+		if typeof(raw_key) == TYPE_INT:
+			stat = int(raw_key)
+		else:
+			stat = Enums.get_stat_from_key(str(raw_key))
+		if stat < 0:
+			continue
+		normalized[stat] = int(raw_modifiers[raw_key])
+	return normalized
+
+
 # =============================================================================
 # SERIALIZATION
 # =============================================================================
@@ -615,6 +693,7 @@ func to_dict() -> Dictionary:
 		"alias": alias,
 		"slots": slots,
 		"items": Utils.convert_objects_to_dict(items),
+		"runtime_states": get_runtime_states(),
 		"ai_thought_log": ai_thought_log,
 	}
 	return data

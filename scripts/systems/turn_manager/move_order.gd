@@ -40,6 +40,15 @@ func execute(game_map) -> bool:
 	var mek: CombatEntity = source.combatant
 	if mek.is_dead():
 		return false
+	if mek.has_runtime_state(Enums.RuntimeState.DEPLOYED):
+		_add_log(
+			game_map,
+			(
+				"%s cannot move while deployed"
+				% mek.get_chat_tag()
+			),
+		)
+		return false
 	var start_pos: Vector2i = source.position
 	var path: Array[Vector2i] = AIPathfinder.get_shortest_path(game_map, start_pos, destination)
 	if not _has_valid_path(path):

@@ -22,6 +22,16 @@ var module_range: int
 var repeats: int
 # List of effects this module applies.
 var effects: Array[BaseEffect]
+# Runtime states required to activate this module.
+var required_states: Array[int] = []
+# Runtime states that prevent this module from activating.
+var blocked_states: Array[int] = []
+# Runtime states granted by this module when used.
+var grants_states: Array[int] = []
+# Runtime states removed by this module when used.
+var clears_states: Array[int] = []
+# Optional stat modifiers applied while a granted state is active.
+var state_stat_modifiers: Dictionary = {}
 
 # =============================================================================
 # GENERAL
@@ -82,6 +92,11 @@ func from_dict(data: Dictionary):
 	cooldown = int(data.get("cooldown", 0))
 	module_range = int(data.get("module_range", 0))
 	repeats = int(data.get("repeats", 1))
+	required_states = _to_state_array(data.get("required_states", []))
+	blocked_states = _to_state_array(data.get("blocked_states", []))
+	grants_states = _to_state_array(data.get("grants_states", []))
+	clears_states = _to_state_array(data.get("clears_states", []))
+	state_stat_modifiers = _parse_state_stat_modifiers(data.get("state_stat_modifiers", {}))
 	effects.clear()
 	for effect_data in data["effects"]:
 		var effect := EffectFactory.create_from_dict(effect_data)
@@ -121,5 +136,63 @@ func to_dict() -> Dictionary:
 		"cooldown": cooldown,
 		"module_range": module_range,
 		"repeats": repeats,
+		"required_states": _serialize_states(required_states),
+		"blocked_states": _serialize_states(blocked_states),
+		"grants_states": _serialize_states(grants_states),
+		"clears_states": _serialize_states(clears_states),
+		"state_stat_modifiers": _serialize_state_stat_modifiers(),
 		"effects": Utils.convert_objects_to_dict(effects)
 	}
+
+
+func _to_state_array(raw_states: Variant) -> Array[int]:
+	var output: Array[int] = []
+	if typeof(raw_states) != TYPE_ARRAY:
+		return output
+	for raw_state in raw_states:
+		var state_value: int = -1
+		if typeof(raw_state) == TYPE_INT:
+			state_value = int(raw_state)
+		else:
+			state_value = Enums.get_runtime_state_from_key(str(raw_state).strip_edges())
+		if state_value < 0:
+			push_error(
+				"Invalid runtime state '%s' in module '%s'" % [str(raw_state), module_name]
+			)
+			continue
+		if state_value in output:
+			continue
+		output.append(state_value)
+	return output
+
+
+func _serialize_states(states: Array[int]) -> Array[String]:
+	var serialized: Array[String] = []
+	for state_value in states:
+		serialized.append(Enums.get_runtime_state_key(int(state_value)))
+	return serialized
+
+
+func _parse_state_stat_modifiers(raw_modifiers: Variant) -> Dictionary:
+	var output: Dictionary = {}
+	if typeof(raw_modifiers) != TYPE_DICTIONARY:
+		return output
+
+	for raw_stat_key in raw_modifiers.keys():
+		var stat: int = Enums.get_stat_from_key(str(raw_stat_key))
+		if stat < 0:
+			push_error(
+				"Invalid state_stat_modifiers stat key '%s' in module '%s'"
+				% [str(raw_stat_key), module_name]
+			)
+			continue
+		output[stat] = int(raw_modifiers[raw_stat_key])
+
+	return output
+
+
+func _serialize_state_stat_modifiers() -> Dictionary:
+	var output: Dictionary = {}
+	for stat in state_stat_modifiers.keys():
+		output[Enums.get_stat_key(int(stat))] = int(state_stat_modifiers[stat])
+	return output

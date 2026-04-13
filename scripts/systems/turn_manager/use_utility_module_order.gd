@@ -22,8 +22,11 @@ func execute(game_map) -> bool:
 		return false
 	if not _check_target_range_or_log(game_map, source_actor, target_actor, Enums.LogType.SUPPORT):
 		return false
+	if not _check_module_state_or_log(game_map, source_actor, Enums.LogType.SUPPORT):
+		return false
 	if not _try_spend_power_and_start_cooldown(source_actor):
 		return false
+	_apply_module_state_transitions(source_actor)
 	if not _passes_offensive_accuracy_gate(game_map, source_actor, target_actor):
 		return false
 

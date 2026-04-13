@@ -116,6 +116,14 @@ enum MekRole {
 	SUPPORT,
 }
 
+# Runtime combat states used by module modes and conditional ability logic.
+enum RuntimeState {
+	DEPLOYED,
+	OVERHEATED,
+	ENTRENCHED,
+	JAMMED,
+}
+
 static func get_stat_types() -> Array[int]:
 	var stat_types: Array[int] = []
 	for value in StatType.values():
@@ -179,4 +187,19 @@ static func get_stat_from_key(stat_key: String) -> int:
 	for key in StatType.keys():
 		if stat_key.to_upper() == key:
 			return StatType[key]
+	return -1
+
+
+static func get_runtime_state_key(runtime_state: int) -> String:
+	if runtime_state < 0:
+		return "unknown"
+	if runtime_state >= RuntimeState.keys().size():
+		return "unknown"
+	return RuntimeState.keys()[runtime_state].to_upper()
+
+
+static func get_runtime_state_from_key(state_key: String) -> int:
+	for key in RuntimeState.keys():
+		if state_key.to_upper() == key:
+			return RuntimeState[key]
 	return -1

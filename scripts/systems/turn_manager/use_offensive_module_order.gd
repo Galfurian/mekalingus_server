@@ -22,8 +22,11 @@ func execute(game_map) -> bool:
 		return false
 	if not _check_target_range_or_log(game_map, source_actor, target_actor, Enums.LogType.ATTACK):
 		return false
+	if not _check_module_state_or_log(game_map, source_actor, Enums.LogType.ATTACK):
+		return false
 	if not _try_spend_power_and_start_cooldown(source_actor):
 		return false
+	_apply_module_state_transitions(source_actor)
 
 	var accuracy_data: Dictionary = _build_accuracy_data(source_actor, target_actor, game_map)
 	return _execute_repeated_attacks(game_map, source_actor, target_actor, accuracy_data)

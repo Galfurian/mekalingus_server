@@ -698,4 +698,7 @@ func to_dict() -> Dictionary:
 		"runtime_states": get_runtime_states(),
 		"ai_thought_log": ai_thought_log,
 	}
+	var stats_payload: Dictionary = _serialize_stats_payload()
+	for stat_key in stats_payload.keys():
+		data[stat_key] = stats_payload[stat_key]
 	return data

@@ -54,6 +54,21 @@ func send_generic_failure(peer_id: int, reason: String):
 	log_message("[" + str(peer_id) + "] " + reason)
 
 
+func _build_server_capabilities_payload() -> Dictionary:
+	return {
+		"accepts_login_payload_v2": true,
+		"accepts_registration_payload_v2": true,
+		"accepts_client_capabilities_push": true,
+		"supports_asset_pack_streaming": false,
+		"accepts_asset_manifest_request": true,
+		"accepts_asset_chunk_request": true,
+	}
+
+
+func send_server_capabilities_to_peer(peer_id: int) -> void:
+	server_capabilities.rpc_id(peer_id, _build_server_capabilities_payload())
+
+
 # =============================================================================
 # RPC: LOGIN
 # =============================================================================
@@ -73,10 +88,23 @@ func login_player(player_name: String):
 	log_message("Login peer " + str(peer_id) + " as player " + player_name + ".")
 	# Update the (peer_id <-> player_uuid) association.
 	associate_peer_with_player(peer_id, player.player_uuid)
+	# Push capabilities once association is established.
+	send_server_capabilities_to_peer(peer_id)
 	# Send the updated player.
 	receive_player.rpc_id(peer_id, player.to_dict())
 	# Notify that the login was successful.
 	login_successful.rpc_id(peer_id, player.player_uuid)
+
+
+@rpc("any_peer", "call_remote", "reliable", 0)
+func login_player_v2(payload: Dictionary):
+	var player_name := str(payload.get("player_name", ""))
+	if player_name.is_empty():
+		var peer_id := multiplayer.get_remote_sender_id()
+		send_generic_failure(peer_id, "Missing player_name in login payload.")
+		return
+
+	login_player(player_name)
 
 
 # =============================================================================
@@ -110,10 +138,65 @@ func register_player(player_name: String):
 	log_message("Registered peer " + str(peer_id) + " as player " + player_name + ".")
 	# Update the (peer_id <-> player_uuid) association.
 	associate_peer_with_player(peer_id, player.player_uuid)
+	# Push capabilities once association is established.
+	send_server_capabilities_to_peer(peer_id)
 	# Send the updated player.
 	receive_player.rpc_id(peer_id, player.to_dict())
 	# Notify that the registration was successful.
 	registration_successful.rpc_id(peer_id, player.player_uuid)
+
+
+@rpc("any_peer", "call_remote", "reliable", 0)
+func register_player_v2(payload: Dictionary):
+	var player_name := str(payload.get("player_name", ""))
+	if player_name.is_empty():
+		var peer_id := multiplayer.get_remote_sender_id()
+		send_generic_failure(peer_id, "Missing player_name in registration payload.")
+		return
+
+	register_player(player_name)
+
+
+@rpc("any_peer", "call_remote", "reliable", 0)
+func server_capabilities(_payload: Dictionary):
+	pass
+
+
+@rpc("any_peer", "call_remote", "reliable", 0)
+func client_capabilities(_payload: Dictionary):
+	pass
+
+
+# =============================================================================
+# RPC: ASSET SYNC
+# =============================================================================
+
+@rpc("any_peer", "call_remote", "reliable", 0)
+func receive_asset_manifest(_payload: Dictionary):
+	pass
+
+
+@rpc("any_peer", "call_remote", "reliable", 0)
+func receive_asset_chunk(_payload: Dictionary):
+	pass
+
+
+@rpc("any_peer", "call_remote", "reliable", 0)
+func request_asset_manifest():
+	var peer_id := multiplayer.get_remote_sender_id()
+	var payload := AssetSyncService.build_manifest_payload()
+	receive_asset_manifest.rpc_id(peer_id, payload)
+
+
+@rpc("any_peer", "call_remote", "reliable", 0)
+func request_asset_chunk(path: String, offset: int, chunk_size: int):
+	var peer_id := multiplayer.get_remote_sender_id()
+	var payload := AssetSyncService.build_chunk_payload(path, offset, chunk_size)
+	if payload.is_empty():
+		send_generic_failure(peer_id, "Failed to build asset chunk payload for path: " + path)
+		return
+
+	receive_asset_chunk.rpc_id(peer_id, payload)
 
 
 # =============================================================================

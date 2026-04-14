@@ -125,6 +125,7 @@ func restart_server():
 
 func _on_peer_connected(peer_id):
 	log_message("Client connected: " + str(peer_id))
+	RPCHandler.send_server_capabilities_to_peer(peer_id)
 
 
 func _on_peer_disconnected(peer_id):

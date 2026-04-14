@@ -22,6 +22,7 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 
 GameServer="*res://scripts/core/game_server.gd"
 RPCHandler="*res://scripts/core/rpc_handler.gd"
+AssetSyncService="*res://scripts/core/asset_sync_service.gd"
 TemplateManager="*res://scripts/core/template_manager.gd"
 DataManager="*res://scripts/core/data_manager.gd"
 UIColor="*res://scripts/utils/ui_color.gd"

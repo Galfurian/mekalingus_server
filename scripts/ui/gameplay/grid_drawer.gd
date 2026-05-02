@@ -32,6 +32,12 @@ var padding_tiles: int
 var selected_entity: MapEntity
 var ai_overlay_enabled: bool = false
 
+# Map texture and shader for posterization effect.
+var tile_resolution: int = 6
+var map_texture: ImageTexture
+var posterization_shader: Shader = preload("res://shaders/posterization.gdshader")
+var map_material: ShaderMaterial = ShaderMaterial.new()
+
 # =============================================================================
 # INITIALIZATION and CLEANUP
 # =============================================================================
@@ -44,6 +50,7 @@ func setup(p_game_map: GameMap, p_grid_size: int, p_sector_size: int, p_padding_
 	padding_tiles = p_padding_tiles
 	if not game_map.turn_manager.on_turn_ended.is_connected(_on_turn_ended):
 		game_map.turn_manager.on_turn_ended.connect(_on_turn_ended)
+	generate_map_texture()
 	queue_redraw()
 
 
@@ -87,31 +94,58 @@ func to_grid_position(map_position: Vector2) -> Vector2:
 	return Vector2(map_position.x * grid_size, map_position.y * grid_size) + get_draw_offset()
 
 
+func generate_map_texture():
+	var img_width: int = game_map.map_width * tile_resolution
+	var img_height: int = game_map.map_height * tile_resolution
+	var map_image: Image = Image.create(img_width, img_height, false, Image.FORMAT_RGBA8)
+
+	for y in range(game_map.map_height):
+		for x in range(game_map.map_width):
+			var tile_color: Color = game_map.get_tile_color(x, y)
+			var tile_rect: Rect2i = Rect2i(
+				x * tile_resolution,
+				y * tile_resolution,
+				tile_resolution,
+				tile_resolution,
+			)
+			map_image.fill_rect(tile_rect, tile_color)
+
+	map_texture = ImageTexture.create_from_image(map_image)
+	queue_redraw()
+
+
 func _on_turn_ended(_turn_number: int):
 	# Called when the turn ends
 	queue_redraw()
 
 
+func _ready():
+	# Forza il rendering a non sfumare i pixel quando scala
+	# texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+	# 1. Force linear filtering so the texture gets blurred when scaled
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+
+	# 2. Setup and apply the shader material to this node
+	map_material.shader = posterization_shader
+	self.material = map_material
+
+
 func _draw():
 	if not game_map:
 		return
-	var offset = get_draw_offset()
-	# Draw actual map tiles (with offset applied).
-	for y in range(game_map.map_height):
-		for x in range(game_map.map_width):
-			# Compute the position with the offset
-			var x_pos = x * grid_size + offset.x
-			var y_pos = y * grid_size + offset.y
-			draw_rect(
-				Rect2(
-					x_pos + BORDER_WIDTH,
-					y_pos + BORDER_WIDTH,
-					grid_size - BORDER_WIDTH,
-					grid_size - BORDER_WIDTH
-				),
-				game_map.get_tile_color(x, y),
-				true
-			)
+	# Calculate the offset for drawing the map texture, accounting for padding.
+	var offset: Vector2 = get_draw_offset()
+	# Calculate the destination rectangle for drawing the map texture, accounting for padding.
+	var dest_rect: Rect2 = Rect2(
+		offset.x,
+		offset.y,
+		game_map.map_width * grid_size,
+		game_map.map_height * grid_size,
+	)
+	# Draw the texture; the ShaderMaterial applied to this node
+	# will automatically process whatever is drawn here.
+	draw_texture_rect(map_texture, dest_rect, false)
 	assert(game_map.map_width == game_map.map_height, "Map is not square!")
 	# Draw grid overlay (including extended grid lines).
 	for i in range(game_map.map_width + padding_tiles + padding_tiles):
@@ -237,6 +271,7 @@ func _draw_selected_trace_labels(source_center: Vector2, plan: AIPlan) -> void:
 			AI_TRACE_LABEL_COLOR,
 		)
 		y_offset += float(AI_TRACE_LABEL_FONT_SIZE + 2)
+
 
 func _plan_target_in_range(plan: AIPlan) -> bool:
 	if not plan.target or not plan.equipped_module:

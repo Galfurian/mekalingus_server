@@ -44,9 +44,9 @@ var chat_logger: MapLogger = MapLogger.new()
 # AStar2D graph.
 var astar: AStar2D = AStar2D.new()
 # The AI controller for managing enemy actions.
-var ai_controller
+var ai_controller: AIController
 # The turn manager.
-var turn_manager
+var turn_manager: TurnManager
 
 # =============================================================================
 # GENERIC FUNCTIONS
@@ -198,7 +198,12 @@ func is_tile_blocked_for_pathfinding(position: Vector2i) -> bool:
 		return true
 
 	for structure in structures.values():
-		if structure and structure.active and not structure.passable and structure.position == position:
+		if (
+			structure
+			and structure.active
+			and not structure.passable
+			and structure.position == position
+		):
 			return true
 
 	for pickup in pickups.values():

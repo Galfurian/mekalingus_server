@@ -1,12 +1,13 @@
-[gd_scene format=3 ]
+[gd_scene format=3 uid="uid://c2nxng4mubpfh"]
 
-[ext_resource type="Script"  path="res://scripts/ui/gameplay/grid_container.gd" id="2_05c1y"]
-[ext_resource type="Script"  path="res://scripts/ui/gameplay/scroll_view.gd" id="2_74cwi"]
-[ext_resource type="Script"  path="res://scripts/ui/gameplay/grid_drawer.gd" id="4_168ta"]
-[ext_resource type="Script"  path="res://scripts/ui/gameplay/icon_drawer.gd" id="5_74cwi"]
-[ext_resource type="Material"  path="res://shaders/time_of_day_shader_material.tres" id="5_e0tmq"]
-[ext_resource type="Script"  path="res://scripts/ui/gameplay/time_of_day_overlay.gd" id="6_e0tmq"]
-[ext_resource type="LabelSettings"  path="res://shaders/label_title.tres" id="7_168ta"]
+[ext_resource type="Script" uid="uid://ds22a201ii2ji" path="res://scripts/ui/gameplay/grid_container.gd" id="2_05c1y"]
+[ext_resource type="Script" uid="uid://ctykbrko0rcjp" path="res://scripts/ui/gameplay/scroll_view.gd" id="2_74cwi"]
+[ext_resource type="Script" uid="uid://bt3tclrrln6yj" path="res://scripts/ui/gameplay/grid_drawer.gd" id="4_168ta"]
+[ext_resource type="Script" uid="uid://t7ogodt6t41e" path="res://scripts/ui/gameplay/icon_drawer.gd" id="5_74cwi"]
+[ext_resource type="Script" uid="uid://csqsr3fu1w6od" path="res://scripts/ui/gameplay/grid_overlay.gd" id="5_brevr"]
+[ext_resource type="Material" path="res://shaders/time_of_day_shader_material.tres" id="5_e0tmq"]
+[ext_resource type="Script" uid="uid://rm6otoyb2sd5" path="res://scripts/ui/gameplay/time_of_day_overlay.gd" id="6_e0tmq"]
+[ext_resource type="LabelSettings" path="res://shaders/label_title.tres" id="7_168ta"]
 
 [node name="GridMap" type="PanelContainer" unique_id=2129581890]
 anchors_preset = 15
@@ -29,6 +30,9 @@ script = ExtResource("4_168ta")
 
 [node name="IconDrawer" type="Node2D" parent="ScrollView/GridContainer" unique_id=1734626104]
 script = ExtResource("5_74cwi")
+
+[node name="GridOverlay" type="Node2D" parent="ScrollView/GridContainer" unique_id=1460925511]
+script = ExtResource("5_brevr")
 
 [node name="TimeOfDayOverlay" type="Node2D" parent="ScrollView/GridContainer" unique_id=1117881031]
 material = ExtResource("5_e0tmq")

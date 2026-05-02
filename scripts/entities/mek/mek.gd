@@ -106,14 +106,14 @@ static func from_dict(data: Dictionary = {}) -> Mek:
 	mek.alias = str(data.get("alias", ""))
 	# Reconstruct items.
 	mek.items.clear()
-	for item_data: Dictionary in data.get("items", []):
+	for item_data in data.get("items", []):
 		mek.items.append(Item.new(item_data))
 	mek.items.sort_custom(Item.compare_items)
 	# Get the slots.
 	mek.slots = Utils.to_array_int(data.get("slots", []))
 	# Load the AI thought log.
 	mek.ai_thought_log.clear()
-	for thought_data: Dictionary in data.get("ai_thought_log", []):
+	for thought_data in data.get("ai_thought_log", []):
 		mek.ai_thought_log.append(thought_data)
 	# Rebuild combat state based on template values and items.
 	mek.rebuild_combat_state()

@@ -24,18 +24,16 @@ var _context_cell: Vector2i = Vector2i(-1, -1)
 @onready var main_split = $RootSplit/MainSplit
 @onready var scroll_view = $RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView
 @onready var grid_container = $RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView/GridContainer
-@onready var grid_drawer = (
-	$RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView/GridContainer/GridDrawer
-)
-@onready var icon_drawer = (
-	$RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView/GridContainer/IconDrawer
-)
-@onready var time_of_day_overlay = (
-	$RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView/GridContainer/TimeOfDayOverlay
-)
-@onready var combat_log = (
-	$RootSplit/MainSplit/MapLogSplit/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
-)
+@onready
+var grid_drawer = $RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView/GridContainer/GridDrawer
+@onready
+var icon_drawer = $RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView/GridContainer/IconDrawer
+@onready
+var time_of_day_overlay = $RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView/GridContainer/TimeOfDayOverlay
+@onready
+var grid_overlay = $RootSplit/MainSplit/MapLogSplit/GridMap/ScrollView/GridContainer/GridOverlay
+@onready
+var combat_log = $RootSplit/MainSplit/MapLogSplit/LogPanel/TabContainer/CombatLog/ScrollContainer/CombatLog
 @onready var info_panel = $RootSplit/MainSplit/LeftSidePanel/InfoPanel
 @onready var entity_list_panel = $RootSplit/MainSplit/LeftSidePanel/EntityListPanel
 @onready var log_panel = $RootSplit/MainSplit/MapLogSplit/LogPanel
@@ -78,6 +76,7 @@ func setup(p_game_map: GameMap, p_grid_size: int = 50):
 	var padding_tiles := _get_map_padding_tiles()
 	# Initialize all components with the chosen grid size
 	time_of_day_overlay.setup(p_game_map, grid_size, padding_tiles)
+	grid_overlay.setup(p_game_map, grid_size, padding_tiles)
 	grid_container.setup(p_game_map, grid_size, padding_tiles)
 	grid_drawer.setup(p_game_map, grid_size, SECTOR_SIZE, padding_tiles)
 	icon_drawer.setup(p_game_map, grid_size, padding_tiles)
@@ -102,6 +101,7 @@ func clear():
 	selected_entity_changed.emit(selected_entity)
 	# Clear the sub-components.
 	time_of_day_overlay.clear()
+	grid_overlay.clear()
 	grid_container.clear()
 	grid_drawer.clear()
 	icon_drawer.clear()
@@ -181,6 +181,7 @@ func redraw(p_grid_size: int):
 	grid_container.setup(game_map, grid_size, padding_tiles)
 	grid_drawer.setup(game_map, grid_size, SECTOR_SIZE, padding_tiles)
 	icon_drawer.setup(game_map, grid_size, padding_tiles)
+	grid_overlay.setup(game_map, grid_size, padding_tiles)
 
 
 func set_ai_overlay_enabled(enabled: bool) -> void:
@@ -243,7 +244,9 @@ func _get_scroll_content_size() -> Vector2:
 		return grid_container.size
 
 	if game_map:
-		return Vector2(float(game_map.map_width * grid_size), float(game_map.map_height * grid_size))
+		return Vector2(
+			float(game_map.map_width * grid_size), float(game_map.map_height * grid_size)
+		)
 	return Vector2.ZERO
 
 
@@ -274,30 +277,22 @@ func _clamp_horizontal_focus_to_map() -> void:
 	var map_right_px: float = map_left_px + float(game_map.map_width * grid_size)
 	var half_view_w: float = visible_size.x / 2.0
 	var min_focus_scroll_h: int = clampi(
-		int(floor(map_left_px - half_view_w)),
-		0,
-		content_max_scroll_h
+		int(floor(map_left_px - half_view_w)), 0, content_max_scroll_h
 	)
 	var max_focus_scroll_h: int = clampi(
-		int(ceil(map_right_px - half_view_w)),
-		0,
-		content_max_scroll_h
+		int(ceil(map_right_px - half_view_w)), 0, content_max_scroll_h
 	)
 
 	if min_focus_scroll_h > max_focus_scroll_h:
 		# View is wider than map body: keep body centered.
 		var centered_map_scroll_h: int = clampi(
-			int(round((map_left_px + map_right_px) / 2.0 - half_view_w)),
-			0,
-			content_max_scroll_h
+			int(round((map_left_px + map_right_px) / 2.0 - half_view_w)), 0, content_max_scroll_h
 		)
 		scroll_view.scroll_horizontal = centered_map_scroll_h
 		return
 
 	scroll_view.scroll_horizontal = clampi(
-		scroll_view.scroll_horizontal,
-		min_focus_scroll_h,
-		max_focus_scroll_h
+		scroll_view.scroll_horizontal, min_focus_scroll_h, max_focus_scroll_h
 	)
 
 
@@ -547,8 +542,8 @@ func _on_map_scrolled(scroll_up: bool, mouse_pos: Vector2):
 	var old_scroll_v = scroll_view.scroll_vertical
 	# Keep the same tile-space anchor under cursor after zoom.
 	var anchor_tile_pos: Vector2 = (
-		Vector2(old_scroll_h, old_scroll_v) + mouse_before_zoom
-	) / float(old_grid_size)
+		(Vector2(old_scroll_h, old_scroll_v) + mouse_before_zoom) / float(old_grid_size)
+	)
 	grid_size = new_grid_size
 	# Apply the new zoom level to the map.
 	redraw(grid_size)
